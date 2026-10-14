@@ -1,0 +1,10 @@
+WARNING: The directory '/home/oai/.cache/pip' or its parent directory is not owned or is not writable by the current user. The cache has been disabled. Check the permissions and owner of that directory. If executing pip with sudo, you should use sudo's -H flag.
+Processing /mnt/data/lean-proofreader
+  Preparing metadata (pyproject.toml): started
+  Preparing metadata (pyproject.toml): finished with status 'done'
+Building wheels for collected packages: lean-proofreader
+  Building wheel for lean-proofreader (pyproject.toml): started
+  Building wheel for lean-proofreader (pyproject.toml): finished with status 'done'
+  Created wheel for lean-proofreader: filename=lean_proofreader-0.1.0-py3-none-any.whl size=74943 sha256=d6ca2c19434af4086713e43fc9c2293a59b73d88f660fe9e23b2e14acb2fc96b
+  Stored in directory: /tmp/pip-ephem-wheel-cache-bh5gljpr/wheels/f7/7c/46/b7ba418e2917bc2ad4cbb452b90f87cca451c7848fbaaf17f7
+Successfully built lean-proofreader

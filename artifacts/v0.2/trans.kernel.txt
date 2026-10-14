@@ -1,0 +1,21 @@
+PRSmoke.trans
+
+∀ P : Prop, ∀ Q : Prop, ∀ R : Prop, ((P → Q) → ((Q → R) → (P → R)))
+
+Proof.
+
+Let P be a proposition.
+
+Let Q be a proposition.
+
+Let R be a proposition.
+
+Assume (P → Q); denote this assumption by a.
+
+Assume (Q → R); denote this assumption by b.
+
+Assume P; denote this assumption by h.
+
+Using a and the established fact P, conclude Q.
+
+Using b and the established fact Q, conclude R.

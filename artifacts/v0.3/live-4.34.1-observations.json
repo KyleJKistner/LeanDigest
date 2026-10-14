@@ -1,0 +1,42 @@
+{
+  "schema": "proofreader.live-narrative-observations/v1",
+  "environment": "lean-4.34.1",
+  "method": "AXLE through Wolfram; HTTP JSON, ignore_imports=false, theorems_only=false",
+  "valid": {
+    "okay": true,
+    "errors": [],
+    "failed_declarations": [],
+    "source_sha256": "b7d4fa6cbc3c9aac0160bdfa31556d2fd5e0ad1adcc693d55e7a7670583ff066",
+    "record_sha256": "dad8ef23a231904f37b73979f8284ea3662ffe8f8cd30c79066856f2095b4dd7",
+    "request_id": "fae2dc6e-9adf-4b54-b88e-612babf2b095",
+    "completion_markers": [
+      "PR_NARRATIVE_REPEAT_OK",
+      "PR_NARRATIVE_MUTATION_REJECTED"
+    ],
+    "source_preserved": true,
+    "execution_time_ms": 12773
+  },
+  "wrong_path": {
+    "okay": false,
+    "source_sha256": "116e4213b292dc64a594360399691ee461b4c3a8dc889e6d65d757f62dd62147",
+    "request_id": "2bdcc3f2-8f49-45ed-abd6-c0aa7bcc6291",
+    "errors": [
+      "Original source linkage mismatch at frame 40"
+    ]
+  },
+  "wrong_claim": {
+    "okay": false,
+    "source_sha256": "47d4a7254b16b43eb6f41946c7d9615df04f9220ca29948d72c134f0e161785e",
+    "request_id": "fc74586b-c20a-4600-b7d8-2f75a47d956f",
+    "errors": [
+      "Kernel declaration type mismatch: the original judgement proves a*r+d*s=1, not False, in its actual local context."
+    ],
+    "error_text_is_summary": true
+  },
+  "executor_commit": "a1c7cfcab0a878791ac3fbae13ec37d0bc73c4e2",
+  "executor_artifact_sha256": "4602ef53ada50e13c0b1197e10f7c126bc0f61f48edaa34d817cb5d2aaeb40c6",
+  "receipt_authenticated": false,
+  "record_recovery": "The retained 4.34.0 snapshot with only lean_version changed to 4.34.1 matches the SHA-256 of the complete newly exported JSON exactly; no other field was inferred or altered.",
+  "exact_openai_project_replayed": false,
+  "imports": "Original theorem body unchanged; minimal Mathlib imports replace the project Model import. Exact Mathlib revision and full project closure not verified."
+}

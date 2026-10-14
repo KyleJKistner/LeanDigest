@@ -1,0 +1,21 @@
+{
+  "schema": "proofreader.adapted-experiment/v1",
+  "qualified_name": "OAI.ComplexCancellation.BezoutFrame.exists_frame",
+  "repository": "openai/math",
+  "commit": "1581d4cbdd69a0faf34b2089614fe2a814316a6a",
+  "original_source_sha256": "a1a833b430e88820faa3db0e6f559a24773b3ba0f86cfdc7e10ac51e0b412b17",
+  "environment": "lean-4.34.0",
+  "required_upstream_lean": "4.34.1",
+  "request_id": "bbdbb9b0-4c44-4272-97fe-74d2479ced90",
+  "compiled_and_exported": true,
+  "theorem_body_changed": false,
+  "imports_adapted": true,
+  "expression_nodes": 7008,
+  "typed_steps": 1511,
+  "explicitly_truncated_steps": 11,
+  "full_record_transferred_to_local_runtime": false,
+  "intermediate_claims_replayed": false,
+  "english_document_generated": false,
+  "counts_toward_pinned_corpus_passes": false,
+  "note": "Complete record exceeded connector text output; only measured counts were retained. Reproduce via extract-kernel with source context and minimal mathlib imports."
+}

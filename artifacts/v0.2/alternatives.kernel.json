@@ -1,0 +1,670 @@
+{
+  "axioms": [],
+  "exprs": [
+    {
+      "level": {
+        "tag": "zero"
+      },
+      "tag": "sort"
+    },
+    {
+      "levels": [],
+      "name": {
+        "prefix": {
+          "tag": "anonymous"
+        },
+        "tag": "str",
+        "value": "Or"
+      },
+      "tag": "const"
+    },
+    {
+      "index": 2,
+      "tag": "bvar"
+    },
+    {
+      "arg": 2,
+      "fn": 1,
+      "tag": "app"
+    },
+    {
+      "index": 1,
+      "tag": "bvar"
+    },
+    {
+      "arg": 4,
+      "fn": 3,
+      "tag": "app"
+    },
+    {
+      "index": 3,
+      "tag": "bvar"
+    },
+    {
+      "binder": "explicit",
+      "body": 2,
+      "domain": 6,
+      "name": {
+        "prefix": {
+          "prefix": {
+            "prefix": {
+              "prefix": {
+                "prefix": {
+                  "tag": "anonymous"
+                },
+                "tag": "str",
+                "value": "a"
+              },
+              "tag": "str",
+              "value": "_@"
+            },
+            "tag": "str",
+            "value": "_internal"
+          },
+          "tag": "str",
+          "value": "_hyg"
+        },
+        "tag": "num",
+        "value": "0"
+      },
+      "tag": "forall"
+    },
+    {
+      "binder": "explicit",
+      "body": 6,
+      "domain": 6,
+      "name": {
+        "prefix": {
+          "prefix": {
+            "prefix": {
+              "prefix": {
+                "prefix": {
+                  "tag": "anonymous"
+                },
+                "tag": "str",
+                "value": "a"
+              },
+              "tag": "str",
+              "value": "_@"
+            },
+            "tag": "str",
+            "value": "_internal"
+          },
+          "tag": "str",
+          "value": "_hyg"
+        },
+        "tag": "num",
+        "value": "0"
+      },
+      "tag": "forall"
+    },
+    {
+      "binder": "explicit",
+      "body": 6,
+      "domain": 8,
+      "name": {
+        "prefix": {
+          "tag": "anonymous"
+        },
+        "tag": "str",
+        "value": "hq"
+      },
+      "tag": "forall"
+    },
+    {
+      "binder": "explicit",
+      "body": 9,
+      "domain": 7,
+      "name": {
+        "prefix": {
+          "tag": "anonymous"
+        },
+        "tag": "str",
+        "value": "hp"
+      },
+      "tag": "forall"
+    },
+    {
+      "binder": "explicit",
+      "body": 10,
+      "domain": 5,
+      "name": {
+        "prefix": {
+          "tag": "anonymous"
+        },
+        "tag": "str",
+        "value": "h"
+      },
+      "tag": "forall"
+    },
+    {
+      "binder": "explicit",
+      "body": 11,
+      "domain": 0,
+      "name": {
+        "prefix": {
+          "tag": "anonymous"
+        },
+        "tag": "str",
+        "value": "R"
+      },
+      "tag": "forall"
+    },
+    {
+      "binder": "explicit",
+      "body": 12,
+      "domain": 0,
+      "name": {
+        "prefix": {
+          "tag": "anonymous"
+        },
+        "tag": "str",
+        "value": "Q"
+      },
+      "tag": "forall"
+    },
+    {
+      "binder": "explicit",
+      "body": 13,
+      "domain": 0,
+      "name": {
+        "prefix": {
+          "tag": "anonymous"
+        },
+        "tag": "str",
+        "value": "P"
+      },
+      "tag": "forall"
+    },
+    {
+      "levels": [],
+      "name": {
+        "prefix": {
+          "prefix": {
+            "tag": "anonymous"
+          },
+          "tag": "str",
+          "value": "Or"
+        },
+        "tag": "str",
+        "value": "elim"
+      },
+      "tag": "const"
+    },
+    {
+      "index": 5,
+      "tag": "bvar"
+    },
+    {
+      "arg": 16,
+      "fn": 15,
+      "tag": "app"
+    },
+    {
+      "index": 4,
+      "tag": "bvar"
+    },
+    {
+      "arg": 18,
+      "fn": 17,
+      "tag": "app"
+    },
+    {
+      "arg": 6,
+      "fn": 19,
+      "tag": "app"
+    },
+    {
+      "arg": 2,
+      "fn": 20,
+      "tag": "app"
+    },
+    {
+      "arg": 4,
+      "fn": 21,
+      "tag": "app"
+    },
+    {
+      "index": 0,
+      "tag": "bvar"
+    },
+    {
+      "arg": 23,
+      "fn": 22,
+      "tag": "app"
+    },
+    {
+      "binder": "explicit",
+      "body": 24,
+      "domain": 8,
+      "name": {
+        "prefix": {
+          "tag": "anonymous"
+        },
+        "tag": "str",
+        "value": "hq"
+      },
+      "tag": "lam"
+    },
+    {
+      "binder": "explicit",
+      "body": 25,
+      "domain": 7,
+      "name": {
+        "prefix": {
+          "tag": "anonymous"
+        },
+        "tag": "str",
+        "value": "hp"
+      },
+      "tag": "lam"
+    },
+    {
+      "binder": "explicit",
+      "body": 26,
+      "domain": 5,
+      "name": {
+        "prefix": {
+          "tag": "anonymous"
+        },
+        "tag": "str",
+        "value": "h"
+      },
+      "tag": "lam"
+    },
+    {
+      "binder": "explicit",
+      "body": 27,
+      "domain": 0,
+      "name": {
+        "prefix": {
+          "tag": "anonymous"
+        },
+        "tag": "str",
+        "value": "R"
+      },
+      "tag": "lam"
+    },
+    {
+      "binder": "explicit",
+      "body": 28,
+      "domain": 0,
+      "name": {
+        "prefix": {
+          "tag": "anonymous"
+        },
+        "tag": "str",
+        "value": "Q"
+      },
+      "tag": "lam"
+    },
+    {
+      "binder": "explicit",
+      "body": 29,
+      "domain": 0,
+      "name": {
+        "prefix": {
+          "tag": "anonymous"
+        },
+        "tag": "str",
+        "value": "P"
+      },
+      "tag": "lam"
+    },
+    {
+      "arg": 16,
+      "fn": 1,
+      "tag": "app"
+    },
+    {
+      "arg": 18,
+      "fn": 31,
+      "tag": "app"
+    },
+    {
+      "binder": "explicit",
+      "body": 18,
+      "domain": 16,
+      "name": {
+        "prefix": {
+          "prefix": {
+            "prefix": {
+              "prefix": {
+                "prefix": {
+                  "tag": "anonymous"
+                },
+                "tag": "str",
+                "value": "a"
+              },
+              "tag": "str",
+              "value": "_@"
+            },
+            "tag": "str",
+            "value": "_internal"
+          },
+          "tag": "str",
+          "value": "_hyg"
+        },
+        "tag": "num",
+        "value": "0"
+      },
+      "tag": "forall"
+    },
+    {
+      "binder": "explicit",
+      "body": 18,
+      "domain": 18,
+      "name": {
+        "prefix": {
+          "prefix": {
+            "prefix": {
+              "prefix": {
+                "prefix": {
+                  "tag": "anonymous"
+                },
+                "tag": "str",
+                "value": "a"
+              },
+              "tag": "str",
+              "value": "_@"
+            },
+            "tag": "str",
+            "value": "_internal"
+          },
+          "tag": "str",
+          "value": "_hyg"
+        },
+        "tag": "num",
+        "value": "0"
+      },
+      "tag": "forall"
+    }
+  ],
+  "lean_version": "4.34.0",
+  "levels": [],
+  "name": {
+    "prefix": {
+      "prefix": {
+        "tag": "anonymous"
+      },
+      "tag": "str",
+      "value": "PRShowcase"
+    },
+    "tag": "str",
+    "value": "alternatives"
+  },
+  "schema": "proofreader.kernel-export/v2",
+  "steps": [
+    {
+      "arguments": [],
+      "children": [
+        1
+      ],
+      "domain_is_prop": false,
+      "is_proof": true,
+      "path": [],
+      "term": 30,
+      "truncated": false,
+      "type": 14
+    },
+    {
+      "arguments": [],
+      "children": [
+        2
+      ],
+      "domain_is_prop": false,
+      "is_proof": true,
+      "path": [
+        1
+      ],
+      "term": 29,
+      "truncated": false,
+      "type": 13
+    },
+    {
+      "arguments": [],
+      "children": [
+        3
+      ],
+      "domain_is_prop": false,
+      "is_proof": true,
+      "path": [
+        1,
+        1
+      ],
+      "term": 28,
+      "truncated": false,
+      "type": 12
+    },
+    {
+      "arguments": [],
+      "children": [
+        4
+      ],
+      "domain_is_prop": true,
+      "is_proof": true,
+      "path": [
+        1,
+        1,
+        1
+      ],
+      "term": 27,
+      "truncated": false,
+      "type": 11
+    },
+    {
+      "arguments": [],
+      "children": [
+        5
+      ],
+      "domain_is_prop": true,
+      "is_proof": true,
+      "path": [
+        1,
+        1,
+        1,
+        1
+      ],
+      "term": 26,
+      "truncated": false,
+      "type": 10
+    },
+    {
+      "arguments": [],
+      "children": [
+        6
+      ],
+      "domain_is_prop": true,
+      "is_proof": true,
+      "path": [
+        1,
+        1,
+        1,
+        1,
+        1
+      ],
+      "term": 25,
+      "truncated": false,
+      "type": 9
+    },
+    {
+      "arguments": [
+        {
+          "is_proof": false,
+          "path": [
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            0,
+            0,
+            0,
+            0,
+            0,
+            1
+          ],
+          "term": 16,
+          "type": 0
+        },
+        {
+          "is_proof": false,
+          "path": [
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            0,
+            0,
+            0,
+            0,
+            1
+          ],
+          "term": 18,
+          "type": 0
+        },
+        {
+          "is_proof": false,
+          "path": [
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            0,
+            0,
+            0,
+            1
+          ],
+          "term": 6,
+          "type": 0
+        },
+        {
+          "is_proof": true,
+          "path": [
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            0,
+            0,
+            1
+          ],
+          "step": 7,
+          "term": 2,
+          "type": 32
+        },
+        {
+          "is_proof": true,
+          "path": [
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            0,
+            1
+          ],
+          "step": 8,
+          "term": 4,
+          "type": 33
+        },
+        {
+          "is_proof": true,
+          "path": [
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1
+          ],
+          "step": 9,
+          "term": 23,
+          "type": 34
+        }
+      ],
+      "children": [
+        7,
+        8,
+        9
+      ],
+      "is_proof": true,
+      "path": [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1
+      ],
+      "term": 24,
+      "truncated": false,
+      "type": 6
+    },
+    {
+      "arguments": [],
+      "children": [],
+      "is_proof": true,
+      "path": [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        0,
+        0,
+        1
+      ],
+      "term": 2,
+      "truncated": false,
+      "type": 32
+    },
+    {
+      "arguments": [],
+      "children": [],
+      "is_proof": true,
+      "path": [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        0,
+        1
+      ],
+      "term": 4,
+      "truncated": false,
+      "type": 33
+    },
+    {
+      "arguments": [],
+      "children": [],
+      "is_proof": true,
+      "path": [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1
+      ],
+      "term": 23,
+      "truncated": false,
+      "type": 34
+    }
+  ],
+  "term": 30,
+  "type": 14
+}

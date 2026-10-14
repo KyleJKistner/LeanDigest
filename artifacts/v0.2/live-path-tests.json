@@ -1,0 +1,58 @@
+{
+  "record_type": "transcribed observed AXLE tool results; not cryptographic attestations",
+  "environment": "lean-4.34.0",
+  "executor_commit": "4e4d05b692e56b4d928ac95c4f783f411eadabba",
+  "cases": {
+    "valid": {
+      "okay": true,
+      "errors": [],
+      "emitted_markers": [
+        "PROOFREADER_REPLAY_OK",
+        "PROOFREADER_PATHS_OK",
+        "PROOFREADER_JUDGEMENTS_OK:921aea7e2ab844d073360876f507d01aa5500d0de5b319dc12aa7104f8406e91:18"
+      ],
+      "request_id": "6b3986d5-cbf9-4a51-988f-50bf037d8004",
+      "source_sha256": "04616eb7b1576b7599180492b29ffac16c516530ab166640aa9ffa57440a8c9a",
+      "source_preserved": true,
+      "failed_declarations": []
+    },
+    "wrong_path": {
+      "okay": false,
+      "errors": [
+        "Source linkage mismatch: step_4"
+      ],
+      "emitted_markers": [
+        "PROOFREADER_REPLAY_OK"
+      ],
+      "request_id": "03389ca1-c235-4550-89c9-7b5f19dbcb44",
+      "source_sha256": "cee5ea9e8ed7d056881e0bbd930e43dd0791d3e1a64ed601393cac6ccd1b9c80",
+      "source_preserved": true,
+      "failed_declarations": []
+    },
+    "wrong_version": {
+      "okay": false,
+      "errors": [
+        "Toolchain version mismatch"
+      ],
+      "emitted_markers": [],
+      "request_id": "b13bc434-44d7-421e-b9db-43eca8275fff",
+      "source_sha256": "f39f4f3e3e99b9a31f49a34b17ef092c47cc40b6e329d4e300e201244d98c35e",
+      "source_preserved": true,
+      "failed_declarations": []
+    },
+    "wrong_claim": {
+      "okay": false,
+      "errors": [
+        "(kernel) declaration type mismatch, 'ProofReaderJudgements.h921aea7e2ab844d07336.step_4' has type ∀ (P Q : Prop), P ∧ Q → Q but is expected to have type ∀ (P Q : Prop), P ∧ Q → P"
+      ],
+      "emitted_markers": [
+        "PROOFREADER_REPLAY_OK",
+        "PROOFREADER_PATHS_OK"
+      ],
+      "request_id": "993388b9-a809-4280-b614-a656797b12db",
+      "source_sha256": "ef3c1c8335b663eb9d49a5cb1a966e36dff1b23a5497133d3479870be92145cf",
+      "source_preserved": true,
+      "failed_declarations": []
+    }
+  }
+}

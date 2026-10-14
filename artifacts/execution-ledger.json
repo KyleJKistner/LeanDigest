@@ -1,0 +1,74 @@
+{
+  "actual_lean_proofs_replayed": 0,
+  "agent_roles_prepared": [
+    "extractor",
+    "reader",
+    "corpus",
+    "audit"
+  ],
+  "artifact_sha256": {
+    "artifacts/openai-sample/coverage.json": "65f564fd673b53c2acadc28e04b713654de8591bc12ad69dda4fc8ffc4e3d208",
+    "lean/ProofReader.lean": "19be6863944f8c4b3740d7710d978acacfe990003d7c449c7b938c0baf1489cf",
+    "proofreader/data/ProofReader.lean": "19be6863944f8c4b3740d7710d978acacfe990003d7c449c7b938c0baf1489cf",
+    "proofreader/data/demo.json": "37dc08510350a0efe2e86afd733d49a85bac0d504df15289f0b8c508ee9771d5"
+  },
+  "browser_localhost_navigation": "blocked by environment administrator policy; not counted as passed",
+  "browser_tests": "passed using real Chromium page.set_content; no external navigation",
+  "checked_english_proofs": 0,
+  "ci_workflow_included": true,
+  "ci_workflow_run": false,
+  "date": "2026-10-13",
+  "hosted_deployment": false,
+  "independent_coding_agents_launched": 0,
+  "lean_environment": {
+    "can_extract": false,
+    "lake_available": false,
+    "lean_available": false,
+    "lean_version": null,
+    "toolchain": "leanprover/lean4:v4.34.1"
+  },
+  "lean_exporter_compiled_here": false,
+  "local_server_http_tests": "passed independently; source text only, no Lean execution endpoint",
+  "local_tests": {
+    "failed": 0,
+    "junit": "artifacts/test-results.xml",
+    "log": "artifacts/test-output.txt",
+    "passed": 103,
+    "skipped": 1,
+    "skipped_reason": "Real Lean integration unavailable; no Lean/Lake installed"
+  },
+  "openai_sample": {
+    "commit": "1581d4cbdd69a0faf34b2089614fe2a814316a6a",
+    "declaration_candidates": 9,
+    "files": 6,
+    "git_blob_hashes_verified": 6,
+    "semantic_explanation_coverage_measured": false,
+    "source_step_nodes": 203,
+    "template_classified_nodes": 179,
+    "unexpanded_nodes": 24
+  },
+  "python_version": "3.13.5",
+  "readability_human_evaluated": false,
+  "release": "0.1.0 development preview",
+  "remote_files_modified": false,
+  "remote_repository_created": false,
+  "runtime_model_calls": 0,
+  "sample_gates": {
+    "english": {
+      "passed": false,
+      "reason": "Selected samples are not a complete corpus inventory"
+    },
+    "inventory": {
+      "passed": false,
+      "reason": "Selected samples are not a complete corpus inventory"
+    },
+    "replay": {
+      "passed": false,
+      "reason": "Selected samples are not a complete corpus inventory"
+    }
+  },
+  "schema": "proofreader.release-execution/v1",
+  "wheel_build": "passed offline; installed and demo generated outside source checkout",
+  "whole_openai_corpus_acquired": false,
+  "whole_openai_corpus_executed": false
+}

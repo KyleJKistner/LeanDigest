@@ -1,0 +1,128 @@
+{
+  "schema": "proofreader.agent-tasks/v1",
+  "tasks": [
+    {
+      "id": "extractor",
+      "goal": "Run mandatory native integration and the exact OpenAI dependency pin; extend the source-bound narrative engine from one named theorem to honest module inventories. Preserve independent source paths and all selected judgement checking.",
+      "context": [
+        "docs/TRUST.md",
+        "docs/KERNEL_IR.md",
+        "HANDOFF.md",
+        "lean/KernelExport.lean",
+        "proofreader/kernel.py",
+        "proofreader/kernel_pipeline.py",
+        "tests/test_kernel_integration.py",
+        "docs/NARRATIVE.md",
+        "lean/Narrative.lean",
+        "proofreader/narrative_io.py",
+        "docs/VALIDATION_V0_3.md"
+      ],
+      "allowed_paths": [
+        "lean/",
+        "proofreader/kernel.py",
+        "proofreader/kernel_io.py",
+        "proofreader/kernel_pipeline.py",
+        "proofreader/data/KernelExport.lean",
+        "tests/test_kernel.py",
+        "tests/test_kernel_io.py",
+        "tests/test_kernel_pipeline.py",
+        "tests/test_kernel_integration.py",
+        "proofreader/narrative_io.py",
+        "proofreader/data/Narrative.lean",
+        "tests/test_narrative_io.py",
+        "tests/test_narrative_integration.py"
+      ],
+      "acceptance": [
+        "PROOFREADER_REQUIRE_LEAN=1 python -m pytest tests/test_kernel_integration.py tests/test_narrative_integration.py -q",
+        "python -m pytest tests/test_kernel.py tests/test_kernel_io.py tests/test_kernel_pipeline.py -q",
+        "Retain exact pinned-project source/export/replay evidence; no adapted-import pass substitution"
+      ],
+      "blocker": "Remote 4.34.1 substantial proof succeeded. Native integration and full pinned Mathlib/project build remain unexecuted. One-theorem narrative extraction is not a whole-corpus engine."
+    },
+    {
+      "id": "reader",
+      "goal": "Turn complete typed proofs into mathematics that a mathematician can follow. Add recursor/case/induction and named-lemma statement expansion, preserving scope and checked source paths. Unknown references and capped branches must not become explanation passes.",
+      "context": [
+        "docs/TRUST.md",
+        "docs/KERNEL_IR.md",
+        "docs/ACCEPTANCE.md",
+        "proofreader/english.py",
+        "proofreader/normalization.py",
+        "proofreader/model.py",
+        "tests/test_browser.py",
+        "proofreader/narrative.py",
+        "proofreader/polynomial.py",
+        "docs/NARRATIVE.md"
+      ],
+      "allowed_paths": [
+        "proofreader/english.py",
+        "proofreader/normalization.py",
+        "proofreader/render.py",
+        "proofreader/web/",
+        "tests/test_normalization.py",
+        "tests/test_browser.py",
+        "tests/test_render_cli.py",
+        "tests/reader/",
+        "proofreader/narrative.py",
+        "proofreader/polynomial.py",
+        "tests/test_narrative.py"
+      ],
+      "acceptance": [
+        "python -m pytest tests/test_kernel.py tests/test_normalization.py tests/test_browser.py tests/test_render_cli.py -q",
+        "Reproduce counterexamples for any changed scope, hypothesis or normalization rule",
+        "Report explanation gaps separately from term/type validity"
+      ],
+      "blocker": "One retained substantial proof now reads through 86 frames and 16 polynomial certificates. Generalize to independently selected unseen domains and measure readability; do not overfit this example."
+    },
+    {
+      "id": "corpus",
+      "goal": "Acquire and run the complete pinned OpenAI corpus through the kernel engine in bounded shards. Reconcile expected files and actual theorem inventories, preserving every failure and unknown denominator. Extend resumability and scale without weakening gates.",
+      "context": [
+        "docs/OPENAI_BENCHMARK.md",
+        "docs/TRUST.md",
+        "proofreader/corpus.py",
+        "tests/test_corpus.py",
+        "artifacts/v0.2/openai-inventory-observation.json"
+      ],
+      "allowed_paths": [
+        "proofreader/corpus.py",
+        "tests/test_corpus.py",
+        "benchmarks/",
+        "docs/OPENAI_BENCHMARK.md"
+      ],
+      "acceptance": [
+        "python -m pytest tests/test_corpus.py -q",
+        "Publish exact inventory/shard reconciliation including every missing or failed module",
+        "Do not count file inventory or import-adapted experiments as full theorem checking"
+      ],
+      "blocker": "Complete metadata counts 122458 Lean files (1.57 GB); their contents and dependencies have not all been acquired or compiled. The theorem denominator remains unknown while modules are unenumerated."
+    },
+    {
+      "id": "audit",
+      "goal": "Independently attack source-path binding, judgement closures, display normalization, grammar assumptions, forged receipts, transport and corpus denominators. Produce executable falsifiers and a trust-boundary report without patching runtime code.",
+      "context": [
+        "README.md",
+        "docs/TRUST.md",
+        "docs/KERNEL_IR.md",
+        "docs/ACCEPTANCE.md",
+        "proofreader/kernel.py",
+        "proofreader/english.py",
+        "proofreader/kernel_io.py",
+        "docs/NARRATIVE.md",
+        "proofreader/narrative.py",
+        "proofreader/polynomial.py",
+        "proofreader/narrative_io.py",
+        "artifacts/v0.3/live-4.34.1-observations.json"
+      ],
+      "allowed_paths": [
+        "tests/audit/",
+        "docs/AUDIT.md"
+      ],
+      "acceptance": [
+        "Produce reproducible negative examples with commands, expected/actual behavior and artifact hashes",
+        "Separate kernel type validity from English interpretation and source-context correspondence"
+      ],
+      "blocker": "No independent auditor or reader study ran. Live substantial-proof mutations are rejected, but pretty-printer and English semantics are not formally verified. Attack the new certificate and snapshot route."
+    }
+  ]
+}

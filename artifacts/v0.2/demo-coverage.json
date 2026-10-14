@@ -1,0 +1,36 @@
+{
+  "schema": "proofreader.coverage/v1",
+  "files_indexed": 8,
+  "declaration_candidates": 14,
+  "declaration_discovery": "mixed-source-and-exported",
+  "display_steps": 223,
+  "typed_display_steps": 20,
+  "typed_display_steps_unexpanded": 0,
+  "source_steps": 203,
+  "source_steps_classified": 179,
+  "source_steps_unclassified": 24,
+  "source_character_classification": null,
+  "source_character_classification_note": "Not measured: nested source spans overlap.",
+  "source_only_declarations": 9,
+  "typed_export_declarations": 5,
+  "source_bound_snapshot_declarations": 0,
+  "source_bound_snapshot_frames": 0,
+  "source_bound_polynomial_certificates": 0,
+  "source_bound_unexpanded_steps": 0,
+  "successful_local_lean_receipts": 0,
+  "receipt_trust_note": "Imported receipts are not authenticated. Attached observations are reported separately.",
+  "attached_passed_receipt_records": 1,
+  "unique_display_step_ids": 223,
+  "path_bound_kernel_declarations": 5,
+  "checked_english_proofs": 0,
+  "readability_human_evaluated": false,
+  "unclassified_rules": [
+    "tactic-combinator",
+    "unclassified"
+  ],
+  "limitations": [
+    "Source classification is not semantic explanation coverage.",
+    "A build receipt does not establish fidelity of English or paper-to-Lean correspondence.",
+    "Source discovery is heuristic; custom command-generated declarations need the Lean exporter."
+  ]
+}

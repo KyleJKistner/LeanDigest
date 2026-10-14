@@ -1,0 +1,392 @@
+{
+  "axioms": [],
+  "exprs": [
+    {
+      "levels": [],
+      "name": {
+        "prefix": {
+          "tag": "anonymous"
+        },
+        "tag": "str",
+        "value": "Nat"
+      },
+      "tag": "const"
+    },
+    {
+      "level": {
+        "tag": "zero"
+      },
+      "tag": "sort"
+    },
+    {
+      "binder": "explicit",
+      "body": 1,
+      "domain": 0,
+      "name": {
+        "prefix": {
+          "prefix": {
+            "prefix": {
+              "prefix": {
+                "prefix": {
+                  "tag": "anonymous"
+                },
+                "tag": "str",
+                "value": "a"
+              },
+              "tag": "str",
+              "value": "_@"
+            },
+            "tag": "str",
+            "value": "_internal"
+          },
+          "tag": "str",
+          "value": "_hyg"
+        },
+        "tag": "num",
+        "value": "0"
+      },
+      "tag": "forall"
+    },
+    {
+      "index": 1,
+      "tag": "bvar"
+    },
+    {
+      "index": 0,
+      "tag": "bvar"
+    },
+    {
+      "arg": 4,
+      "fn": 3,
+      "tag": "app"
+    },
+    {
+      "levels": [
+        {
+          "of": {
+            "tag": "zero"
+          },
+          "tag": "succ"
+        }
+      ],
+      "name": {
+        "prefix": {
+          "tag": "anonymous"
+        },
+        "tag": "str",
+        "value": "Exists"
+      },
+      "tag": "const"
+    },
+    {
+      "arg": 0,
+      "fn": 6,
+      "tag": "app"
+    },
+    {
+      "index": 3,
+      "tag": "bvar"
+    },
+    {
+      "arg": 4,
+      "fn": 8,
+      "tag": "app"
+    },
+    {
+      "binder": "explicit",
+      "body": 9,
+      "domain": 0,
+      "name": {
+        "prefix": {
+          "tag": "anonymous"
+        },
+        "tag": "str",
+        "value": "k"
+      },
+      "tag": "lam"
+    },
+    {
+      "arg": 10,
+      "fn": 7,
+      "tag": "app"
+    },
+    {
+      "binder": "explicit",
+      "body": 11,
+      "domain": 5,
+      "name": {
+        "prefix": {
+          "tag": "anonymous"
+        },
+        "tag": "str",
+        "value": "h"
+      },
+      "tag": "forall"
+    },
+    {
+      "binder": "explicit",
+      "body": 12,
+      "domain": 0,
+      "name": {
+        "prefix": {
+          "tag": "anonymous"
+        },
+        "tag": "str",
+        "value": "n"
+      },
+      "tag": "forall"
+    },
+    {
+      "binder": "explicit",
+      "body": 13,
+      "domain": 2,
+      "name": {
+        "prefix": {
+          "tag": "anonymous"
+        },
+        "tag": "str",
+        "value": "P"
+      },
+      "tag": "forall"
+    },
+    {
+      "levels": [
+        {
+          "of": {
+            "tag": "zero"
+          },
+          "tag": "succ"
+        }
+      ],
+      "name": {
+        "prefix": {
+          "prefix": {
+            "tag": "anonymous"
+          },
+          "tag": "str",
+          "value": "Exists"
+        },
+        "tag": "str",
+        "value": "intro"
+      },
+      "tag": "const"
+    },
+    {
+      "arg": 0,
+      "fn": 15,
+      "tag": "app"
+    },
+    {
+      "arg": 10,
+      "fn": 16,
+      "tag": "app"
+    },
+    {
+      "arg": 3,
+      "fn": 17,
+      "tag": "app"
+    },
+    {
+      "arg": 4,
+      "fn": 18,
+      "tag": "app"
+    },
+    {
+      "binder": "explicit",
+      "body": 19,
+      "domain": 5,
+      "name": {
+        "prefix": {
+          "tag": "anonymous"
+        },
+        "tag": "str",
+        "value": "h"
+      },
+      "tag": "lam"
+    },
+    {
+      "binder": "explicit",
+      "body": 20,
+      "domain": 0,
+      "name": {
+        "prefix": {
+          "tag": "anonymous"
+        },
+        "tag": "str",
+        "value": "n"
+      },
+      "tag": "lam"
+    },
+    {
+      "binder": "explicit",
+      "body": 21,
+      "domain": 2,
+      "name": {
+        "prefix": {
+          "tag": "anonymous"
+        },
+        "tag": "str",
+        "value": "P"
+      },
+      "tag": "lam"
+    },
+    {
+      "level": {
+        "of": {
+          "tag": "zero"
+        },
+        "tag": "succ"
+      },
+      "tag": "sort"
+    },
+    {
+      "index": 2,
+      "tag": "bvar"
+    },
+    {
+      "arg": 3,
+      "fn": 24,
+      "tag": "app"
+    }
+  ],
+  "lean_version": "4.34.0",
+  "levels": [],
+  "name": {
+    "prefix": {
+      "prefix": {
+        "tag": "anonymous"
+      },
+      "tag": "str",
+      "value": "PRShowcase"
+    },
+    "tag": "str",
+    "value": "witnessed"
+  },
+  "schema": "proofreader.kernel-export/v2",
+  "steps": [
+    {
+      "arguments": [],
+      "children": [
+        1
+      ],
+      "domain_is_prop": false,
+      "is_proof": true,
+      "path": [],
+      "term": 22,
+      "truncated": false,
+      "type": 14
+    },
+    {
+      "arguments": [],
+      "children": [
+        2
+      ],
+      "domain_is_prop": false,
+      "is_proof": true,
+      "path": [
+        1
+      ],
+      "term": 21,
+      "truncated": false,
+      "type": 13
+    },
+    {
+      "arguments": [],
+      "children": [
+        3
+      ],
+      "domain_is_prop": true,
+      "is_proof": true,
+      "path": [
+        1,
+        1
+      ],
+      "term": 20,
+      "truncated": false,
+      "type": 12
+    },
+    {
+      "arguments": [
+        {
+          "is_proof": false,
+          "path": [
+            1,
+            1,
+            1,
+            0,
+            0,
+            0,
+            1
+          ],
+          "term": 0,
+          "type": 23
+        },
+        {
+          "is_proof": false,
+          "path": [
+            1,
+            1,
+            1,
+            0,
+            0,
+            1
+          ],
+          "term": 10,
+          "type": 2
+        },
+        {
+          "is_proof": false,
+          "path": [
+            1,
+            1,
+            1,
+            0,
+            1
+          ],
+          "term": 3,
+          "type": 0
+        },
+        {
+          "is_proof": true,
+          "path": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "step": 4,
+          "term": 4,
+          "type": 25
+        }
+      ],
+      "children": [
+        4
+      ],
+      "is_proof": true,
+      "path": [
+        1,
+        1,
+        1
+      ],
+      "term": 19,
+      "truncated": false,
+      "type": 11
+    },
+    {
+      "arguments": [],
+      "children": [],
+      "is_proof": true,
+      "path": [
+        1,
+        1,
+        1,
+        1
+      ],
+      "term": 4,
+      "truncated": false,
+      "type": 25
+    }
+  ],
+  "term": 22,
+  "type": 14
+}

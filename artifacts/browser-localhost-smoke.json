@@ -1,0 +1,7 @@
+{
+  "browser_dom_interactions": "passed in pytest with page.set_content",
+  "browser_localhost_navigation": "blocked by environment Chromium administrator policy",
+  "browser_localhost_upload": "not run after navigation policy block",
+  "local_server_http_tests": "passed independently in pytest",
+  "screenshot": "real Chromium rendering via page.set_content; not a served/public deployment"
+}

@@ -1,0 +1,14 @@
+{
+  "inventory": {
+    "passed": false,
+    "reason": "Selected samples are not a complete corpus inventory"
+  },
+  "replay": {
+    "passed": false,
+    "reason": "Selected samples are not a complete corpus inventory"
+  },
+  "english": {
+    "passed": false,
+    "reason": "Selected samples are not a complete corpus inventory"
+  }
+}
