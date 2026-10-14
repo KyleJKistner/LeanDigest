@@ -1,0 +1,94 @@
+name: Recover interrupted v0.3.0 upload
+on:
+  push:
+    branches: ['import/recover-v0.3.0']
+    paths: ['.github/workflows/recover-snapshot.yml']
+permissions:
+  contents: write
+jobs:
+  recover:
+    if: github.repository == 'KyleJKistner/LeanDigest'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: import/recover-v0.3.0
+          fetch-depth: 1
+      - name: Recover verified complete files, without changing main
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          python3 - <<'PY'
+          import base64, hashlib, io, json, lzma, os, pathlib, subprocess, tarfile, urllib.request
+          shas = '''816a7ef104b3af3a270aaa1bb777fae926ff4c61
+          b7866c106426482b67160b9dee0f76a9230c85c8
+          cb168686bbff34c01bc0a96905dfdb9dfdbaff14
+          240f319cd1b5899eac82361c7b9976b815f3fbdb
+          1ce13562f847a3fb53528c3832c81e2b9b4b5ecc
+          0d1a5a8537a8d2bbc96bc3cd0b3db726f2331bf8
+          9bfb2478362500b11fac65861d238ab41602e3c5
+          0cfe251a77c1ca87a26229b1d6e9996960635701
+          12326ca287466259d7a6761d4e3e2ac36649558a
+          578899eed724b10e1b1e4352ff49e9fe3b421de0
+          b275addd48c22920f4e6da1d1cbbc1c3b365ea1d
+          099e2eeba876d4924d7671460f7342204d8748ed
+          f01ca52779d978f49c80eece4d98347467227e70
+          06e9d0799f0702cc6e42cb015d76f71fae307654
+          df591efc54f45c7cd2cd10fc471b1aba65ca38bb
+          478991d92eadb50817924682a7dda8c41d22108f
+          a1e1451737f45544d58fef90495657fd31cb62f4
+          2d9530fe94b4e80b365d354ab60e2dea5b30f52b'''.split()
+          parts = []
+          for sha in shas:
+              req = urllib.request.Request('https://api.github.com/repos/KyleJKistner/LeanDigest/git/blobs/' + sha,
+                  headers={'Authorization': 'Bearer ' + os.environ['GH_TOKEN'], 'Accept': 'application/vnd.github+json'})
+              with urllib.request.urlopen(req, timeout=30) as response:
+                  item = json.load(response)
+              data = base64.b64decode(item['content'])
+              actual = hashlib.sha1(b'blob ' + str(len(data)).encode() + b'\0' + data).hexdigest()
+              assert actual == sha, (sha, actual)
+              parts.append(''.join(data.decode('ascii').split()))
+              print('RECOVERED_PART', sha, len(data))
+          wire = ''.join(parts)
+          wire = wire[:len(wire) // 4 * 4]
+          decoder = lzma.LZMADecompressor(memlimit=256*1024*1024)
+          raw = decoder.decompress(base64.b64decode(wire, validate=True), max_length=8*1024*1024)
+          print('DECOMPRESSED_PREFIX', len(raw), 'COMPLETE', decoder.eof)
+          root = pathlib.Path.cwd()
+          recovered = []
+          with tarfile.open(fileobj=io.BytesIO(raw), mode='r:') as archive:
+              while True:
+                  try:
+                      member = archive.next()
+                  except tarfile.ReadError:
+                      break
+                  if member is None or member.offset_data + member.size > len(raw):
+                      break
+                  rel = pathlib.PurePosixPath(member.name)
+                  assert member.isfile() and not rel.is_absolute()
+                  assert '..' not in rel.parts and '.git' not in rel.parts and rel.parts[0] != '.snapshot-import'
+                  assert member.mode in (0o644, 0o755)
+                  if rel.parts[0] == '.github':
+                      continue
+                  target = root.joinpath(*rel.parts)
+                  assert root in target.resolve().parents and not target.is_symlink()
+                  data = archive.extractfile(member).read()
+                  assert len(data) == member.size
+                  data.decode('utf-8')
+                  target.parent.mkdir(parents=True, exist_ok=True)
+                  target.write_bytes(data)
+                  target.chmod(member.mode)
+                  blob = hashlib.sha1(b'blob ' + str(len(data)).encode() + b'\0' + data).hexdigest()
+                  recovered.append({'path': str(rel), 'sha': blob, 'size':len(data), 'mode':oct(member.mode)})
+                  print('FILE', blob, str(rel))
+          assert len(recovered) > 100, len(recovered)
+          pathlib.Path('.snapshot-import').mkdir(exist_ok=True)
+          pathlib.Path('.snapshot-import/recovery.json').write_text(json.dumps({'partial_recovery': True, 'files': recovered}, indent=2) + '\n')
+          subprocess.run(['git','config','user.name','github-actions[bot]'],check=True)
+          subprocess.run(['git','config','user.email','41898282+github-actions[bot]@users.noreply.github.com'],check=True)
+          subprocess.run(['git','add','--force','--',*[x['path'] for x in recovered],'.snapshot-import/recovery.json'],check=True)
+          subprocess.run(['git','commit','-m','Recover complete files from interrupted upload; import branch only'],check=True)
+          subprocess.run(['git','push','origin','HEAD:refs/heads/import/recover-v0.3.0'],check=True)
+          print('RECOVERY_COMMIT',subprocess.check_output(['git','rev-parse','HEAD'],text=True).strip())
+          PY
