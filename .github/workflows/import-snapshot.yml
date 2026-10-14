@@ -1,0 +1,68 @@
+name: Import v0.3.0 source snapshot
+on:
+  push:
+    branches: [main]
+    paths: ['.snapshot-import/READY']
+permissions:
+  contents: write
+jobs:
+  import:
+    if: github.repository == 'KyleJKistner/LeanDigest'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+      - name: Verify and unpack the authorized source snapshot
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          import base64, hashlib, io, lzma, os, pathlib, subprocess, tarfile
+          expected = 'eb3ce786e6b9943aafd685bb4cfd87b605299ef5510332020c3e9b6f95a3e4b2'
+          root = pathlib.Path.cwd()
+          staging = root / '.snapshot-import'
+          assert (staging / 'READY').read_text().strip() == expected
+          parts = sorted(staging.glob('part-*.b64'))
+          assert [p.name for p in parts] == [f'part-{i:03}.b64' for i in range(20)]
+          wire = ''.join(''.join(p.read_text().split()) for p in parts)
+          packed = base64.b64decode(wire, validate=True)
+          assert len(packed) == 172384
+          assert hashlib.sha256(packed).hexdigest() == expected
+          raw = lzma.decompress(packed)
+          assert len(raw) == 3655680
+          paths = []
+          with tarfile.open(fileobj=io.BytesIO(raw), mode='r:') as archive:
+              members = archive.getmembers()
+              assert len(members) == 209
+              assert len({m.name for m in members}) == len(members)
+              for member in members:
+                  rel = pathlib.PurePosixPath(member.name)
+                  assert member.isfile() and not rel.is_absolute()
+                  assert '..' not in rel.parts and '.git' not in rel.parts
+                  assert rel.parts[0] != '.snapshot-import'
+                  assert member.mode in (0o644, 0o755)
+                  # Workflow files are installed separately by the GitHub connector.
+                  if rel.parts[0] == '.github':
+                      assert str(rel) == '.github/workflows/ci.yml'
+                      continue
+                  target = root.joinpath(*rel.parts)
+                  assert root in target.resolve().parents
+                  assert not target.is_symlink()
+                  data = archive.extractfile(member).read()
+                  assert len(data) == member.size
+                  data.decode('utf-8')
+                  target.parent.mkdir(parents=True, exist_ok=True)
+                  target.write_bytes(data)
+                  target.chmod(member.mode)
+                  paths.append(str(rel))
+          subprocess.run(['git', 'config', 'user.name', 'github-actions[bot]'], check=True)
+          subprocess.run(['git', 'config', 'user.email', '41898282+github-actions[bot]@users.noreply.github.com'], check=True)
+          subprocess.run(['git', 'add', '--force', '--', *paths], check=True)
+          subprocess.run(['git', 'commit', '-m', 'Import Lean ProofReader v0.3.0 source, tests, demos and validation'], check=True)
+          subprocess.run(['git', 'push', 'origin', 'HEAD:main'], check=True)
+          commit = subprocess.check_output(['git', 'rev-parse', 'HEAD'], text=True).strip()
+          print(f'IMPORTED_FILES={len(paths)} COMMIT={commit}')
+          with open(os.environ['GITHUB_STEP_SUMMARY'], 'a') as f:
+              f.write(f'Imported {len(paths)} source and evidence files. Commit: `{commit}`.\n')
+          PY
