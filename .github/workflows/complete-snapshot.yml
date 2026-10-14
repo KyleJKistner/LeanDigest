@@ -1,0 +1,119 @@
+name: Complete verified v0.3.0 source import
+on:
+  push:
+    branches: ['import/recover-v0.3.0']
+    paths: ['.github/workflows/complete-snapshot.yml']
+permissions:
+  contents: write
+jobs:
+  complete:
+    if: github.repository == 'KyleJKistner/LeanDigest'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: import/recover-v0.3.0
+          fetch-depth: 1
+      - name: Verify complete transport, file contents, and source tree
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          python3 - <<'PY'
+          import base64, hashlib, io, json, lzma, os, pathlib, subprocess, tarfile, tempfile, urllib.request
+          prefix = '''816a7ef104b3af3a270aaa1bb777fae926ff4c61
+          b7866c106426482b67160b9dee0f76a9230c85c8
+          cb168686bbff34c01bc0a96905dfdb9dfdbaff14
+          240f319cd1b5899eac82361c7b9976b815f3fbdb
+          1ce13562f847a3fb53528c3832c81e2b9b4b5ecc
+          0d1a5a8537a8d2bbc96bc3cd0b3db726f2331bf8
+          9bfb2478362500b11fac65861d238ab41602e3c5
+          0cfe251a77c1ca87a26229b1d6e9996960635701
+          12326ca287466259d7a6761d4e3e2ac36649558a
+          578899eed724b10e1b1e4352ff49e9fe3b421de0
+          b275addd48c22920f4e6da1d1cbbc1c3b365ea1d
+          099e2eeba876d4924d7671460f7342204d8748ed
+          f01ca52779d978f49c80eece4d98347467227e70
+          06e9d0799f0702cc6e42cb015d76f71fae307654
+          df591efc54f45c7cd2cd10fc471b1aba65ca38bb'''.split()
+          tail = '''db24f58d88a8b275ea2336c641e0e804ee9d0adc
+          1d2fc483f5bec4d77cfc581005dcac4420fb4286
+          1d2e5a75cb9ad99cdf6727073997db280de0aa82
+          407e1727e292d672660d126459e4d6accfb8cae3
+          03719a96fd43b4a98481ba86ddb8f7ae998fc508
+          71be408f596d32de81e380955c6462f61be6935c
+          1010608173756c66ec765a79ff3189575385059a
+          159d55113c82c32eafa3b14b72fd42afd815fdf2
+          e8d41399313d0c3127c69d3444538ab1f6e1c5d1
+          34ebfc2dce47af40eab0b406fb9074c88b2a4739
+          d7b4b4b8f03a47b818eeb9a7b24ba4d95e5eb06f
+          4175b17c31acb6bc5ed2fccdc5934cbeacf6ba06
+          7928796a64332d700dd4dcfea1bc9f4ece4c07ae'''.split()
+          def blob_hash(b):
+              return hashlib.sha1(b'blob '+str(len(b)).encode()+b'\0'+b).hexdigest()
+          chunks = []
+          for i, sha in enumerate(prefix + tail):
+              req = urllib.request.Request('https://api.github.com/repos/KyleJKistner/LeanDigest/git/blobs/'+sha,
+                  headers={'Authorization':'Bearer '+os.environ['GH_TOKEN'], 'Accept':'application/vnd.github+json'})
+              with urllib.request.urlopen(req, timeout=30) as response:
+                  item = json.load(response)
+              b = base64.b64decode(item['content'])
+              assert blob_hash(b) == sha
+              wire = ''.join(b.decode('ascii').split())
+              assert len(wire) == (12000 if i<15 else 4000 if i<27 else 1852)
+              chunks.append(wire)
+          patch = 'x0rF5SmymHlJXx6p7pHyhtfRblmQmUa1w2qEJc8KnzoKk2uqbjZu46W2PYLLzyZ4hmXdFP6wsQquOC6d1/7Lk7JKwRgAsdJ6Yov6'
+          assert len(patch)==100
+          chunks[13] = chunks[13][:7800] + patch + chunks[13][7900:]
+          assert blob_hash((chunks[13]+'\n').encode()) == 'c0009c95da17e92745146ccd29d75bd88c76c660'
+          packed = base64.b64decode(''.join(chunks), validate=True)
+          assert len(packed)==172388
+          assert hashlib.sha256(packed).hexdigest()=='d4ee7f539156bf55068ed473b5a875188a61b3ee2f955561e5592e3e5d57d8af'
+          raw = lzma.decompress(packed, memlimit=256*1024*1024)
+          assert len(raw)==3655680
+          root = pathlib.Path.cwd()
+          files, entries = [], []
+          with tarfile.open(fileobj=io.BytesIO(raw), mode='r:') as archive:
+              members = archive.getmembers()
+              assert len(members)==209 and len({m.name for m in members})==209
+              for m in members:
+                  p = pathlib.PurePosixPath(m.name)
+                  assert m.isfile() and not p.is_absolute()
+                  assert not {'..','.git','.snapshot-import'} & set(p.parts)
+                  assert m.mode in (0o644,0o755)
+                  b = archive.extractfile(m).read()
+                  assert len(b)==m.size
+                  b.decode('utf-8')
+                  sha = subprocess.check_output(['git','hash-object','-w','--stdin'], input=b).decode().strip()
+                  assert sha==blob_hash(b)
+                  entries.append(f'{100755 if m.mode==0o755 else 100644} {sha}\t{p}\n')
+                  if p.parts[0]=='.github':
+                      assert str(p)=='.github/workflows/ci.yml'
+                      print('CI_BLOB_FOR_CONNECTOR',sha)
+                      continue
+                  target=root.joinpath(*p.parts)
+                  assert root in target.resolve().parents and not target.is_symlink()
+                  target.parent.mkdir(parents=True,exist_ok=True)
+                  target.write_bytes(b)
+                  target.chmod(m.mode)
+                  files.append(str(p))
+          with tempfile.TemporaryDirectory() as temp:
+              env=dict(os.environ,GIT_INDEX_FILE=str(pathlib.Path(temp)/'index'))
+              subprocess.run(['git','read-tree','--empty'],env=env,check=True)
+              subprocess.run(['git','update-index','--index-info'],input=''.join(entries).encode(),env=env,check=True)
+              tree=subprocess.check_output(['git','write-tree'],env=env,text=True).strip()
+          assert tree=='5b4a6dfd81b6fd9126e3708c35c3d65c9091c597',tree
+          print('VERIFIED_COMPLETE_SOURCE_TREE',tree,'FILES',len(entries))
+          for k,v in [('user.name','github-actions[bot]'),('user.email','41898282+github-actions[bot]@users.noreply.github.com')]:
+              subprocess.run(['git','config',k,v],check=True)
+          subprocess.run(['git','add','--force','--',*files],check=True)
+          subprocess.run(['git','commit','-m','Restore all v0.3.0 source and evidence files after full checksum verification'],check=True)
+          subprocess.run(['git','push','origin','HEAD:refs/heads/import/recover-v0.3.0'],check=True)
+          print('RECOVERY_COMMIT',subprocess.check_output(['git','rev-parse','HEAD'],text=True).strip())
+          with open(os.environ['GITHUB_STEP_SUMMARY'],'a') as out:
+              out.write(f'Complete 209-file source snapshot verified. Tree: `{tree}`. Main remains unchanged.\n')
+          PY
+      - name: Run Python tests without claiming browser or native Lean coverage
+        run: |
+          python3 -m pip install '.[dev]'
+          python3 -m pytest -q --ignore=tests/test_browser.py --ignore=tests/test_lean_integration.py --ignore=tests/test_kernel_integration.py --ignore=tests/test_narrative_integration.py
