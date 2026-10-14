@@ -1,0 +1,7 @@
+........................................................................ [ 37%]
+..........s........................................s.................... [ 75%]
+................................................                         [100%]
+=========================== short test summary info ============================
+SKIPPED [1] tests/test_kernel_integration.py:10: Native v2 pipeline requires Lean/Lake; remote observations are recorded separately
+SKIPPED [1] tests/test_lean_integration.py:12: Lean/Lake is not installed; real compile/export/replay integration remains unvalidated
+190 passed, 2 skipped in 9.57s

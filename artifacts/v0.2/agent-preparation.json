@@ -1,0 +1,23 @@
+{
+  "schema": "proofreader.team-run/v1",
+  "mode": "prepare",
+  "independent_agents_started": 0,
+  "tasks": [
+    {
+      "id": "extractor",
+      "prompt": "/mnt/data/proofreader-v02-agent-packets/extractor.md"
+    },
+    {
+      "id": "reader",
+      "prompt": "/mnt/data/proofreader-v02-agent-packets/reader.md"
+    },
+    {
+      "id": "corpus",
+      "prompt": "/mnt/data/proofreader-v02-agent-packets/corpus.md"
+    },
+    {
+      "id": "audit",
+      "prompt": "/mnt/data/proofreader-v02-agent-packets/audit.md"
+    }
+  ]
+}

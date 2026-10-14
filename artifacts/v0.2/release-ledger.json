@@ -1,0 +1,101 @@
+{
+  "schema": "proofreader.release-validation/v1",
+  "release": "0.2.0",
+  "runtime": {
+    "python": "3.13.5",
+    "platform": "Linux",
+    "native_lean": false,
+    "native_lake": false
+  },
+  "test_results": {
+    "tests": 192,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 2,
+    "passed": 190,
+    "junit_file": "local-tests.xml"
+  },
+  "typed_examples": [
+    {
+      "name": "PRSmoke.and_swap",
+      "typed_steps": 8,
+      "typed_judgements": 18,
+      "shared_expression_nodes": 29,
+      "truncated_steps": 0,
+      "path_binding_validated": true,
+      "english_formally_verified": false,
+      "source_file_sha256": "411a420182b895622d3ea35c6b42b2f92bfa35f74c70d2355e7cb2684eb8e6e4"
+    },
+    {
+      "name": "PRSmoke.trans",
+      "typed_steps": 9,
+      "typed_judgements": 11,
+      "shared_expression_nodes": 22,
+      "truncated_steps": 0,
+      "path_binding_validated": true,
+      "english_formally_verified": false,
+      "source_file_sha256": "991a814a206e5c18b24aad9ae5ce8293612d8ba6884cc8753e7f05ce1e965f61"
+    },
+    {
+      "name": "PRShowcase.injective_comp",
+      "typed_steps": 13,
+      "typed_judgements": 19,
+      "shared_expression_nodes": 80,
+      "truncated_steps": 0,
+      "path_binding_validated": true,
+      "english_formally_verified": false,
+      "source_file_sha256": "65bee2239652a14cf152d5b9d28cedbc1775858fb53c6f7c4ddebb6c5a741652"
+    },
+    {
+      "name": "PRShowcase.witnessed",
+      "typed_steps": 5,
+      "typed_judgements": 9,
+      "shared_expression_nodes": 26,
+      "truncated_steps": 0,
+      "path_binding_validated": true,
+      "english_formally_verified": false,
+      "source_file_sha256": "f6e9e5f505264dccd81ad07be8f83a9ce4881f9565b88cce50972ae155dd4e9c"
+    },
+    {
+      "name": "PRShowcase.alternatives",
+      "typed_steps": 10,
+      "typed_judgements": 16,
+      "shared_expression_nodes": 35,
+      "truncated_steps": 0,
+      "path_binding_validated": true,
+      "english_formally_verified": false,
+      "source_file_sha256": "a650ce8f5e006edfd943b17d225a9b2cb01bedad6afb79ec85059c1b871ee859"
+    }
+  ],
+  "retained_examples_with_observed_all_path_and_judgement_checks": 1,
+  "browser_interaction_tests": "passed via direct document loading in Chromium",
+  "browser_localhost_end_to_end_navigation": "not claimed",
+  "package_validation": {
+    "installed_location": "/mnt/data/proofreader-v02-installed/proofreader/__init__.py",
+    "installed_version": "0.2.0",
+    "outside_checkout": true,
+    "default_declarations": 14,
+    "typed_exports": 5,
+    "packaged_exporter_matches": true,
+    "kernel_demo": true,
+    "kernel_bundle": true,
+    "regeneration_check": true,
+    "lean_execution_performed": false
+  },
+  "openai_metadata_observation": {
+    "commit": "1581d4cbdd69a0faf34b2089614fe2a814316a6a",
+    "scope": "lean/OAI/**/*.lean",
+    "lean_files": 122458,
+    "lean_bytes": 1571301358,
+    "all_subtrees_complete": true
+  },
+  "adapted_openai_body_export_observation": "bezout-adapted-observation.json",
+  "native_integrated_module_pipeline": "unrun; mandatory CI provided",
+  "ci_executed": false,
+  "whole_corpus_translation": false,
+  "formal_english_certificates": 0,
+  "human_comprehension_study": false,
+  "independent_agents_started": 0,
+  "github_repository_created": false,
+  "evidence": "Remote observations are recorded with source hashes; they are not signatures or independently authenticated attestations."
+}

@@ -1,0 +1,23 @@
+{
+  "schema": "proofreader.team-run/v1",
+  "mode": "prepare",
+  "independent_agents_started": 0,
+  "tasks": [
+    {
+      "id": "extractor",
+      "prompt": "/mnt/data/work/lean-proofreader/artifacts/v0.3/team-packs/extractor.md"
+    },
+    {
+      "id": "reader",
+      "prompt": "/mnt/data/work/lean-proofreader/artifacts/v0.3/team-packs/reader.md"
+    },
+    {
+      "id": "corpus",
+      "prompt": "/mnt/data/work/lean-proofreader/artifacts/v0.3/team-packs/corpus.md"
+    },
+    {
+      "id": "audit",
+      "prompt": "/mnt/data/work/lean-proofreader/artifacts/v0.3/team-packs/audit.md"
+    }
+  ]
+}

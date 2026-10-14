@@ -1,0 +1,715 @@
+{
+  "partial_recovery": true,
+  "files": [
+    {
+      "path": ".gitignore",
+      "sha": "18f8b2fd4d919bac73f5a18db756cf1e91ddaa67",
+      "size": 166
+    },
+    {
+      "path": "AGENTS.md",
+      "sha": "6a74ea1aae30e2c879f2a506d180e28fadf53f74",
+      "size": 2895
+    },
+    {
+      "path": "HANDOFF.md",
+      "sha": "c35221deb54a7f354f77f25a0c08959d8531a7d5",
+      "size": 3925
+    },
+    {
+      "path": "LICENSE",
+      "sha": "c523cb185703f5752c9d754c2997097cbc3647ab",
+      "size": 1189
+    },
+    {
+      "path": "README.md",
+      "sha": "81377f137b85460b22be7c62c3bdcdfe071308e8",
+      "size": 9617
+    },
+    {
+      "path": "THIRD_PARTY_NOTICES.md",
+      "sha": "da48473ea50a1f452ecd4e7ed98c6f274f30c825",
+      "size": 1468
+    },
+    {
+      "path": "agents/prepared-v0.2/README.md",
+      "sha": "c2856bde132bf3e5411738967189dd7f66035921",
+      "size": 268
+    },
+    {
+      "path": "agents/prepared-v0.2/audit.md",
+      "sha": "3fbf02c6f0b9b9b3ed05f7512b3dac01350d1506",
+      "size": 75618
+    },
+    {
+      "path": "agents/prepared-v0.2/corpus.md",
+      "sha": "4daf2ffb26b13143fb235401c80a1af99ac086c9",
+      "size": 45922
+    },
+    {
+      "path": "agents/prepared-v0.2/extractor.md",
+      "sha": "8c462bb7b63deb4d873b5eb60a3d1b3fe63870cb",
+      "size": 56172
+    },
+    {
+      "path": "agents/prepared-v0.2/reader.md",
+      "sha": "6b3ade7909d01127bd61baeb2c8e3b6973e194ab",
+      "size": 46263
+    },
+    {
+      "path": "agents/tasks.json",
+      "sha": "585e05e59d39e97b9480dd73d0e5ca0d374ef4b0",
+      "size": 5896
+    },
+    {
+      "path": "artifacts/baseline-this-session.xml",
+      "sha": "dfd092086a3fe3dba521e605f4197860544198dd",
+      "size": 20869
+    },
+    {
+      "path": "artifacts/browser-localhost-smoke.json",
+      "sha": "d5da5455669e3ede6721c09080b9b94a2b51d541",
+      "size": 395
+    },
+    {
+      "path": "artifacts/execution-ledger.json",
+      "sha": "959609b543f9f7bd14957a6ec736a5b9b9197e9a",
+      "size": 2650
+    },
+    {
+      "path": "artifacts/openai-sample/coverage.json",
+      "sha": "892b916f5a2536d6f309efc5ac1b46c7e846fdb6",
+      "size": 3668
+    },
+    {
+      "path": "artifacts/openai-sample/document.json",
+      "sha": "45c33d8d8a89d27dd6f50a2fda04ca7314dfe157",
+      "size": 123664
+    },
+    {
+      "path": "artifacts/openai-sample/index.html",
+      "sha": "4a1a1c45b8fed9947381d519aa18503638f8f639",
+      "size": 160627
+    },
+    {
+      "path": "artifacts/sample-gates.json",
+      "sha": "3d6ebf77afc6ec76fa1877d18b338f9acfa03825",
+      "size": 334
+    },
+    {
+      "path": "artifacts/test-output.txt",
+      "sha": "a1c5d86a0a2903e24563996a6d3df59c0e3f68c6",
+      "size": 406
+    },
+    {
+      "path": "artifacts/test-results.xml",
+      "sha": "c3193d1a57469e70ee7547bfc7024a0b2e849bec",
+      "size": 11267
+    },
+    {
+      "path": "artifacts/v0.2/PROGRESS.md",
+      "sha": "f8e37b376555c62c0ac5c76319932963325b285f",
+      "size": 614
+    },
+    {
+      "path": "artifacts/v0.2/agent-preparation.json",
+      "sha": "6fd9c77c226f6700c96acc9b243886a4c00bea17",
+      "size": 531
+    },
+    {
+      "path": "artifacts/v0.2/alternatives.kernel.json",
+      "sha": "c231e4cace1082011b06e5c6ffcfcc085df6d380",
+      "size": 11199
+    },
+    {
+      "path": "artifacts/v0.2/alternatives.proof.txt",
+      "sha": "d7da013640a7bf543b80134a76be37209f2a96f3",
+      "size": 374
+    },
+    {
+      "path": "artifacts/v0.2/and-swap-check.lean",
+      "sha": "f4d50fc6c238eeb4fa2a8cd57c4c259bdcb2cfdb",
+      "size": 6486
+    },
+    {
+      "path": "artifacts/v0.2/and_swap.kernel.json",
+      "sha": "ec8516899cb5d32f40482a64557cbfdc11dc9254",
+      "size": 8353
+    },
+    {
+      "path": "artifacts/v0.2/and_swap.kernel.replay.lean",
+      "sha": "d0a6207ac0ab719290736d3e1e9d522cabbaffc6",
+      "size": 7730
+    },
+    {
+      "path": "artifacts/v0.2/and_swap.kernel.txt",
+      "sha": "67c0d3467e982a173cb6927171e3f4cecfb65a41",
+      "size": 317
+    },
+    {
+      "path": "artifacts/v0.2/and_swap.proof.txt",
+      "sha": "2f64ee4da3f7e358432823efe02d6faf7724aaaf",
+      "size": 285
+    },
+    {
+      "path": "artifacts/v0.2/and_swap.receipt.json",
+      "sha": "070892466ea606d6945b1251472a1892344b13bb",
+      "size": 1401
+    },
+    {
+      "path": "artifacts/v0.2/bezout-adapted-observation.json",
+      "sha": "e2b72166e94a7dc9618d67aa01b06db95603ee7b",
+      "size": 968
+    },
+    {
+      "path": "artifacts/v0.2/check-v2-paths.lean",
+      "sha": "be751038e178e7a3a1a63adbdd83c879ac46b8cc",
+      "size": 9009
+    },
+    {
+      "path": "artifacts/v0.2/demo-coverage.json",
+      "sha": "8c2fc1c940faed6d66f82f5dee9f108358a92f8e",
+      "size": 1395
+    },
+    {
+      "path": "artifacts/v0.2/export-smoke-response.json",
+      "sha": "dda1119367775fb8bde2a144fdc916ca52f86cd6",
+      "size": 9418
+    },
+    {
+      "path": "artifacts/v0.2/export-smoke.lean",
+      "sha": "5a6bc26e4ddba890515932122d15c369b8968c87",
+      "size": 6900
+    },
+    {
+      "path": "artifacts/v0.2/full-extractor-source.lean",
+      "sha": "ec92fcca2ccb7c0086f8e580dd392912455bda6f",
+      "size": 8957
+    },
+    {
+      "path": "artifacts/v0.2/injective_comp.kernel.json",
+      "sha": "df94a18a2b7f071d3fbeef2171d781a820fd8dc8",
+      "size": 17033
+    },
+    {
+      "path": "artifacts/v0.2/injective_comp.proof.txt",
+      "sha": "f9f519fc60368064661034816995bcbb2bf872bc",
+      "size": 544
+    },
+    {
+      "path": "artifacts/v0.2/installed-checks.log",
+      "sha": "1c8491622acb19aea4102e94c6dc6c14f7feb46c",
+      "size": 6869
+    },
+    {
+      "path": "artifacts/v0.2/installed-demo.log",
+      "sha": "95e12aac9348abc7b72bec61b41e1540665871c4",
+      "size": 22
+    },
+    {
+      "path": "artifacts/v0.2/inventory-driver-observation.json",
+      "sha": "007d0dc1475da8ffe1abafbf6365e00e31a65b2c",
+      "size": 615
+    },
+    {
+      "path": "artifacts/v0.2/judgement-valid.lean",
+      "sha": "f4d50fc6c238eeb4fa2a8cd57c4c259bdcb2cfdb",
+      "size": 6486
+    },
+    {
+      "path": "artifacts/v0.2/judgement-wrong_axiom_inventory.lean",
+      "sha": "6d96af4bc080299085e6b15d5975830bdc1c1297",
+      "size": 6500
+    },
+    {
+      "path": "artifacts/v0.2/judgement-wrong_binder_classification.lean",
+      "sha": "0211c82c0d4547ab4e43a4e02b15703545c71641",
+      "size": 6487
+    },
+    {
+      "path": "artifacts/v0.2/judgement-wrong_intermediate_claim.lean",
+      "sha": "cfc232c11c8381ab3ba48cde6732f9d2f71bb013",
+      "size": 6486
+    },
+    {
+      "path": "artifacts/v0.2/kernel-tests.txt",
+      "sha": "785182c35495b1cd2b10ccb1e192dae24293da78",
+      "size": 99
+    },
+    {
+      "path": "artifacts/v0.2/live-judgement-tests.json",
+      "sha": "9aefc053207fd7144981a5db69a4b1df6f0fec6d",
+      "size": 2461
+    },
+    {
+      "path": "artifacts/v0.2/live-path-tests.json",
+      "sha": "9c4ce44cda45fe97622fdfa995c10e01019c0f0f",
+      "size": 2041
+    },
+    {
+      "path": "artifacts/v0.2/local-tests.txt",
+      "sha": "96db6b6bd67a765ee3af835bdba3e2b2997676e1",
+      "size": 618
+    },
+    {
+      "path": "artifacts/v0.2/local-tests.xml",
+      "sha": "427f09d061403ded0b76740836e48da3f176891c",
+      "size": 20868
+    },
+    {
+      "path": "artifacts/v0.2/openai-inventory-observation.json",
+      "sha": "99caf831cb6308fc13da8df721f971bdc50e0783",
+      "size": 4684
+    },
+    {
+      "path": "artifacts/v0.2/packaging-validation.json",
+      "sha": "404f77f4b5b0a210d3bd1e74f1eed30f05600428",
+      "size": 354
+    },
+    {
+      "path": "artifacts/v0.2/path-check-valid.lean",
+      "sha": "be751038e178e7a3a1a63adbdd83c879ac46b8cc",
+      "size": 9009
+    },
+    {
+      "path": "artifacts/v0.2/path-check-wrong_claim.lean",
+      "sha": "0f9798894d3269425972ffa17b3cb644a0ffd6f1",
+      "size": 9009
+    },
+    {
+      "path": "artifacts/v0.2/path-check-wrong_path.lean",
+      "sha": "468d4d71c2cf85440e799bebe9a5418535e6817d",
+      "size": 9006
+    },
+    {
+      "path": "artifacts/v0.2/path-check-wrong_version.lean",
+      "sha": "03a7a97d5284a0802451a18d29a37026359fd402",
+      "size": 9009
+    },
+    {
+      "path": "artifacts/v0.2/reader.html",
+      "sha": "60216c30fcca61df502655d615a67d40c21ccc49",
+      "size": 185758
+    },
+    {
+      "path": "artifacts/v0.2/release-ledger.json",
+      "sha": "abfac4fdf9588b662a933dfb2457d476bcc094ed",
+      "size": 3427
+    },
+    {
+      "path": "artifacts/v0.2/showcase-export-response.json",
+      "sha": "5a510712298286592fdd9be4c97f640b71138b47",
+      "size": 44153
+    },
+    {
+      "path": "artifacts/v0.2/source-demo-rebuild.log",
+      "sha": "fe9540c93fae0dc62aa48aad85b04805b6597b92",
+      "size": 80
+    },
+    {
+      "path": "artifacts/v0.2/trans.kernel.json",
+      "sha": "bf4b97ee2638804e36a5e0289b2ab27b351650f7",
+      "size": 7324
+    },
+    {
+      "path": "artifacts/v0.2/trans.kernel.replay.lean",
+      "sha": "02cacd6ca34a56bcca2a399a0189a88c4cebaa93",
+      "size": 8510
+    },
+    {
+      "path": "artifacts/v0.2/trans.kernel.txt",
+      "sha": "986619f3bf9e5c677ef3f4a4dcca1b26090de783",
+      "size": 416
+    },
+    {
+      "path": "artifacts/v0.2/trans.proof.txt",
+      "sha": "14241038446cc5baa2e995be81cc83b3167e949d",
+      "size": 346
+    },
+    {
+      "path": "artifacts/v0.2/wheel-build.log",
+      "sha": "0e742dee5faadb0bf86c3f560b04b213c1ede2ba",
+      "size": 957
+    },
+    {
+      "path": "artifacts/v0.2/wheel-install.log",
+      "sha": "e2156e95dc6e93bd2caf73d0daa4a6ffbc8ace95",
+      "size": 439
+    },
+    {
+      "path": "artifacts/v0.2/witnessed.kernel.json",
+      "sha": "642fb01f0bde94b34a050abfedfa950a9bbea1b2",
+      "size": 6362
+    },
+    {
+      "path": "artifacts/v0.2/witnessed.proof.txt",
+      "sha": "8b762ec2cd86ed0efe547d2decae3f540ae66566",
+      "size": 243
+    },
+    {
+      "path": "artifacts/v0.3/bezout-4.34.0.narrative.json",
+      "sha": "e80977603198d639215f9fa300d5d9f9394575a0",
+      "size": 69840
+    },
+    {
+      "path": "artifacts/v0.3/bezout-4.34.1-valid.lean",
+      "sha": "f3ebd83813e94fce72a3c294d5bfb89d413d81bd",
+      "size": 10282
+    },
+    {
+      "path": "artifacts/v0.3/bezout-4.34.1-wrong_claim.lean",
+      "sha": "cb9505f552d67f7cdfeeef6debf01d55ba9b8eb5",
+      "size": 10321
+    },
+    {
+      "path": "artifacts/v0.3/bezout-4.34.1-wrong_path.lean",
+      "sha": "abf58ec3adc56b1f7382b750eb1dd1b2d874f757",
+      "size": 10308
+    },
+    {
+      "path": "artifacts/v0.3/bezout-context.lean",
+      "sha": "68b0fdd8cfab20fff6d74c1a1a8767370a10648b",
+      "size": 7458
+    },
+    {
+      "path": "artifacts/v0.3/bezout-frontier-run.lean",
+      "sha": "bbed562d70b6eb1228204c74b31c403373e74caf",
+      "size": 16434
+    },
+    {
+      "path": "artifacts/v0.3/bezout-minimal-context.lean",
+      "sha": "2d8694aa6cfc64a0a8aef2bcf9c370bc4719609c",
+      "size": 1889
+    },
+    {
+      "path": "artifacts/v0.3/bezout-narrative-live.lean",
+      "sha": "7a7186b66e555273a223aa77c2e2137bab2413fc",
+      "size": 7520
+    },
+    {
+      "path": "artifacts/v0.3/bezout-narrative-run.lean",
+      "sha": "ad91e69a01ce5389a88ca2b9c4d3377ccbde1de2",
+      "size": 7844
+    },
+    {
+      "path": "artifacts/v0.3/bezout-reader/coverage.json",
+      "sha": "04d611aa824995b55ddce71b594d7cc9bb30aa1d",
+      "size": 2153
+    },
+    {
+      "path": "artifacts/v0.3/bezout-reader/polynomial-certificates.json",
+      "sha": "0914d715d22528bd8bd7d38b5ffe1bdf38229d80",
+      "size": 7978
+    },
+    {
+      "path": "artifacts/v0.3/bezout-reader/proof.txt",
+      "sha": "1e622de55331d1aa86547837317c6c70d1be0fd0",
+      "size": 4670
+    },
+    {
+      "path": "artifacts/v0.3/bezout-reader/reader.html",
+      "sha": "cf03cdb7223a9b2a8f6ec580518931d1e997198b",
+      "size": 101604
+    },
+    {
+      "path": "artifacts/v0.3/bezout-reader/reading.json",
+      "sha": "a1d2e23c4984fd51f0fbd90f4fc390192c11c606",
+      "size": 66827
+    },
+    {
+      "path": "artifacts/v0.3/bezout-reader/receipt.json",
+      "sha": "1f0bb63e62a00b61349758925bdfcd7f903b51e0",
+      "size": 1142
+    },
+    {
+      "path": "artifacts/v0.3/bezout-reader/snapshot.json",
+      "sha": "8eeff535b325f242daff808509da51bf02faa89c",
+      "size": 149872
+    },
+    {
+      "path": "artifacts/v0.3/bezout.narrative.json",
+      "sha": "b9b59081fa1c6328dab8f14d346a6612b6ae94d3",
+      "size": 69840
+    },
+    {
+      "path": "artifacts/v0.3/bezout.receipt.json",
+      "sha": "1f0bb63e62a00b61349758925bdfcd7f903b51e0",
+      "size": 1142
+    },
+    {
+      "path": "artifacts/v0.3/experiments/FormulaRoundtrip.lean",
+      "sha": "e6c89f399098b121939625fe2c3698bdc969f9e7",
+      "size": 1566
+    },
+    {
+      "path": "artifacts/v0.3/experiments/NarrativePaths.lean",
+      "sha": "8c1845c2a0ef6df83bce4e2d89d44801c78daf1b",
+      "size": 7501
+    },
+    {
+      "path": "artifacts/v0.3/experiments/README.md",
+      "sha": "2bdd92bad40d42e280232d172178c621d6ebe4de",
+      "size": 755
+    },
+    {
+      "path": "artifacts/v0.3/live-4.34.1-observations.json",
+      "sha": "dfe5199c1d0755cc2d1501a0e69fcb0a605aa610",
+      "size": 1912
+    },
+    {
+      "path": "artifacts/v0.3/live-integrated-observation.json",
+      "sha": "910f5e521822ca4f4a3e4ee718225d8cd5486f6b",
+      "size": 489
+    },
+    {
+      "path": "artifacts/v0.3/local-tests.xml",
+      "sha": "34e5bd4ebba155c37a4bcf46b7011195868ce956",
+      "size": 34041
+    },
+    {
+      "path": "artifacts/v0.3/narrative-proof.txt",
+      "sha": "1e622de55331d1aa86547837317c6c70d1be0fd0",
+      "size": 4670
+    },
+    {
+      "path": "artifacts/v0.3/narrative-reading.json",
+      "sha": "a1d2e23c4984fd51f0fbd90f4fc390192c11c606",
+      "size": 66827
+    },
+    {
+      "path": "artifacts/v0.3/narrative-test-valid.lean",
+      "sha": "bd79f4933067270a18a2ea4bb7846c7b9c8e573d",
+      "size": 10290
+    },
+    {
+      "path": "artifacts/v0.3/narrative-test-wrong_claim.lean",
+      "sha": "ac8649e55778dd6f44d836b9955e50fe1c0ff556",
+      "size": 10328
+    },
+    {
+      "path": "artifacts/v0.3/narrative-test-wrong_path.lean",
+      "sha": "1767b229a77360ffead9c46a1c558a36afecdca4",
+      "size": 10316
+    },
+    {
+      "path": "artifacts/v0.3/narrative-validation-run.lean",
+      "sha": "bd79f4933067270a18a2ea4bb7846c7b9c8e573d",
+      "size": 10290
+    },
+    {
+      "path": "artifacts/v0.3/packaging-observation.json",
+      "sha": "b6e2bdcbd15518817a333cbf061a6539c6fbbce1",
+      "size": 350
+    },
+    {
+      "path": "artifacts/v0.3/polynomial-certificates.json",
+      "sha": "0914d715d22528bd8bd7d38b5ffe1bdf38229d80",
+      "size": 7978
+    },
+    {
+      "path": "artifacts/v0.3/reader-library.html",
+      "sha": "09d7d05d471a0a5f355741472dc30eb5514f3e8a",
+      "size": 228825
+    },
+    {
+      "path": "artifacts/v0.3/roundtrip-probe.lean",
+      "sha": "4d66c7d2543479c4f442557ebc285f73d3395c5b",
+      "size": 1866
+    },
+    {
+      "path": "artifacts/v0.3/source-provenance.json",
+      "sha": "01bb064f9b4254024b0369e1760274783e9a4fca",
+      "size": 407
+    },
+    {
+      "path": "artifacts/v0.3/team-packs/audit.md",
+      "sha": "36ec75e8c983c428a7a3fb30fe836da116d594cf",
+      "size": 135658
+    },
+    {
+      "path": "artifacts/v0.3/team-packs/corpus.md",
+      "sha": "dbb634c7bf420f33c6e75b1119daaac09ea91896",
+      "size": 46331
+    },
+    {
+      "path": "artifacts/v0.3/team-packs/extractor.md",
+      "sha": "55d556b2343677525096996df44f793ef271d802",
+      "size": 88472
+    },
+    {
+      "path": "artifacts/v0.3/team-packs/reader.md",
+      "sha": "f296fbf821b5ff40aa5237f97016a538fe17280d",
+      "size": 95467
+    },
+    {
+      "path": "artifacts/v0.3/team-packs/team-results.json",
+      "sha": "48ac6cd324d51355ffe27f9b18a0b7627b6bf407",
+      "size": 603
+    },
+    {
+      "path": "artifacts/v0.3/test-output.txt",
+      "sha": "9bec7b4acd4100f4e8105dbcd88bf1959ba914bd",
+      "size": 924
+    },
+    {
+      "path": "artifacts/v0.3/transport-fix.md",
+      "sha": "fa27ff3d0130699401e64cd307a92a384abd302a",
+      "size": 337
+    },
+    {
+      "path": "artifacts/v0.3/wheel-build.log",
+      "sha": "e7d77ccf280c87354e9c16528f720b656b38b7cf",
+      "size": 957
+    },
+    {
+      "path": "artifacts/v0.3/wheel-install.log",
+      "sha": "7074bc3a5e221adee896d5e9c2a24974864d8fd2",
+      "size": 432
+    },
+    {
+      "path": "artifacts/v0.3/wirepack.wl",
+      "sha": "7fb1539e1489d9b19afb538bc7967c399c7bdfe2",
+      "size": 1642
+    },
+    {
+      "path": "artifacts/wheel-build.log",
+      "sha": "7b648e386823f8206d5d8fd2295b0cf8fa21dfc7",
+      "size": 951
+    },
+    {
+      "path": "artifacts/wheel-install.log",
+      "sha": "518e1a897c4b12cd0f4447ebe24670ad95a68f10",
+      "size": 436
+    },
+    {
+      "path": "docs/ACCEPTANCE.md",
+      "sha": "639a0ea75cf65c1338ae81a1e2cc7493f15e0b9c",
+      "size": 4120
+    },
+    {
+      "path": "docs/ARCHITECTURE.md",
+      "sha": "2cb330d9fc46be1f1f552379573d1addbd9cf370",
+      "size": 4958
+    },
+    {
+      "path": "docs/IMPORT_V0_3.md",
+      "sha": "7b507fc82c1b0cc7083b6e2c6644ab6d83cfd893",
+      "size": 1003
+    },
+    {
+      "path": "docs/KERNEL_IR.md",
+      "sha": "faa7685b9713af8d4c6b68048b81ffdf7bb7f789",
+      "size": 2634
+    },
+    {
+      "path": "docs/NARRATIVE.md",
+      "sha": "a7b89535e5130e79772a5b2f354b1c1d8cfdc3c5",
+      "size": 5538
+    },
+    {
+      "path": "docs/OPENAI_BENCHMARK.md",
+      "sha": "85a273ba566a393d305df0ae99e2b59d909f7d7e",
+      "size": 3085
+    },
+    {
+      "path": "docs/PRIOR_ART.md",
+      "sha": "f5e2c2d79caa5f5fb1d4cc210a268786e9ea57af",
+      "size": 1238
+    },
+    {
+      "path": "docs/RELEASES.md",
+      "sha": "13bf077fff01709bc0e22fc6ee28987f5b5d06c4",
+      "size": 582
+    },
+    {
+      "path": "docs/TRUST.md",
+      "sha": "309b8a17149e299291ce5f2487501626c10638fd",
+      "size": 4840
+    },
+    {
+      "path": "docs/VALIDATION_V0_2.md",
+      "sha": "d9e2aa2653acabbaa07f0897613bfcd2d73f0f0c",
+      "size": 7538
+    },
+    {
+      "path": "docs/VALIDATION_V0_3.md",
+      "sha": "5d65d133b696233caec0febcaf8d678df2eb8f92",
+      "size": 7404
+    },
+    {
+      "path": "examples/kernel/Showcase.lean",
+      "sha": "3bf6dc00270cb38d5ac4aeb6ac40444f5d8ddd61",
+      "size": 474
+    },
+    {
+      "path": "examples/kernel/Smoke.lean",
+      "sha": "8b4207de588765bb24181a34253b535801aecdda",
+      "size": 239
+    },
+    {
+      "path": "examples/openai/LICENSE",
+      "sha": "d645695673349e3947e8e5ae42332d0ac3164cd7",
+      "size": 11358
+    },
+    {
+      "path": "examples/openai/lean/OAI/Algebra/AffineCancellation/BezoutFrame.lean",
+      "sha": "3e50ca65f9638fd532b6fff5054726b29bd17974",
+      "size": 1818
+    },
+    {
+      "path": "examples/openai/lean/OAI/Algebra/AffineCancellation/GradedCommutation.lean",
+      "sha": "0e7be1dd4f22b1659523906da5d5b2ecb16e44e6",
+      "size": 1315
+    },
+    {
+      "path": "examples/openai/lean/OAI/Algebra/AffineCancellation/Main.lean",
+      "sha": "67e12506920cec027e64ff7118c513e3ac8455e0",
+      "size": 1598
+    },
+    {
+      "path": "examples/openai/lean/OAI/Analysis/Cotype/GrowthTheorem.lean",
+      "sha": "72f320abff7e2756cbcb410212746ebf9a2296f0",
+      "size": 2275
+    },
+    {
+      "path": "examples/openai/lean/OAI/Analysis/Mahler/MainTheorem.lean",
+      "sha": "d5c55dee7e95a66312217de1f875ea8cb7508e62",
+      "size": 882
+    },
+    {
+      "path": "examples/openai/lean/OAI/Combinatorics/CliqueFree/Main.lean",
+      "sha": "8f1a47dcf0c0ca1f0087f813640ab3b47f3f2848",
+      "size": 3445
+    },
+    {
+      "path": "examples/openai/proofreader-corpus.json",
+      "sha": "f12ef3c1043c17dc800125158256dce6bb771712",
+      "size": 2321
+    },
+    {
+      "path": "lean/FrontierExport.lean",
+      "sha": "59c104dfa3abe16285943e99d56ee6375ea7524f",
+      "size": 6969
+    },
+    {
+      "path": "lean/JsonReplay.lean",
+      "sha": "4ce59b67af5d00d72cd4249ba108896d2bed533b",
+      "size": 7193
+    },
+    {
+      "path": "lean/KernelExport.lean",
+      "sha": "9d3137535435831848c6ab13749f3cb8babb46c3",
+      "size": 8737
+    },
+    {
+      "path": "lean/Narrative.lean",
+      "sha": "8c1845c2a0ef6df83bce4e2d89d44801c78daf1b",
+      "size": 7501
+    },
+    {
+      "path": "lean/ProofReader/Smoke.lean",
+      "sha": "7ece2c3959086d56271402e1c681f4104bcc4cda",
+      "size": 503
+    }
+  ]
+}
