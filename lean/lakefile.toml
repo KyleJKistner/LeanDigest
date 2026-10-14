@@ -1,0 +1,12 @@
+name = "proofreader"
+version = "0.3.0"
+defaultTargets = ["ProofReader", "KernelExport", "Narrative"]
+
+[[lean_lib]]
+name = "ProofReader"
+
+[[lean_lib]]
+name = "KernelExport"
+
+[[lean_lib]]
+name = "Narrative"
