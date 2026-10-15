@@ -1,0 +1,130 @@
+name: Integrated batch acceptance
+on:
+  push:
+    branches: [work/batch-integration]
+    paths: ['.github/workflows/final-batch.yml']
+permissions:
+  contents: write
+jobs:
+  integrate-and-test:
+    if: github.repository == 'KyleJKistner/LeanDigest'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: work/batch-integration
+      - name: Apply checked input guards and native syntax correction
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          python3 - <<'PY'
+          import base64,hashlib,json,os,pathlib,subprocess,urllib.request
+          sha='7d800d2eacef8f6569699994ecadd89e1855cfde'
+          req=urllib.request.Request('https://api.github.com/repos/KyleJKistner/LeanDigest/git/blobs/'+sha,headers={'Authorization':'Bearer '+os.environ['GH_TOKEN']})
+          with urllib.request.urlopen(req,timeout=30) as r:patch=base64.b64decode(json.load(r)['content'])
+          assert hashlib.sha1(b'blob '+str(len(patch)).encode()+b'\0'+patch).hexdigest()==sha
+          subprocess.run(['git','apply','--check','-'],input=patch,check=True)
+          subprocess.run(['git','apply','-'],input=patch,check=True)
+          for path in ('lean/Narrative.lean','proofreader/data/Narrative.lean'):
+              p=pathlib.Path(path);s=p.read_text()
+              for old,new in [('let prefix :=','let headProof :='),('inferType prefix\n','inferType headProof\n'),('visit prefix xs','visit headProof xs')]:
+                  assert s.count(old)==1,(path,old)
+                  s=s.replace(old,new)
+              p.write_text(s)
+          expected={'lean/Narrative.lean':'ddfad40b53ba9194e8d07463ca8894e3b4e62701','proofreader/data/Narrative.lean':'ddfad40b53ba9194e8d07463ca8894e3b4e62701','proofreader/narrative_batch.py':'c4a567582069bfadf0cb7ad4383be5cab8d68461','proofreader/cli.py':'650b28e9f4d72f20475965e2577b71e491adfdc7','proofreader/openai_acceptance.py':'96ae07d4889666f6cc513eade23d1f3e441e0cff'}
+          for name,sha in expected.items():
+              data=pathlib.Path(name).read_bytes()
+              assert hashlib.sha1(b'blob '+str(len(data)).encode()+b'\0'+data).hexdigest()==sha,name
+          subprocess.run(['git','config','user.name','github-actions[bot]'],check=True)
+          subprocess.run(['git','config','user.email','41898282+github-actions[bot]@users.noreply.github.com'],check=True)
+          subprocess.run(['git','add','--',*expected],check=True)
+          subprocess.run(['git','commit','-m','Integrate pinned-source acceptance and hardened batch input with native specialization'],check=True)
+          subprocess.run(['git','push','origin','HEAD:refs/heads/work/batch-integration'],check=True)
+          PY
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python -m pip install '.[dev,webtest]'
+      - run: python -m playwright install --with-deps chromium
+      - uses: leanprover/lean-action@v1
+        with:
+          lake-package-directory: lean
+          auto-config: false
+          build: true
+          build-args: 'ProofReader ProofReader.Smoke KernelExport Narrative NarrativeBatch'
+          test: false
+          lint: false
+          use-mathlib-cache: false
+          use-github-cache: false
+      - name: Require all native, browser, and negative tests without skips
+        env:
+          PROOFREADER_REQUIRE_LEAN: '1'
+          PROOFREADER_REQUIRE_BROWSER: '1'
+          LEANGLISH_BATCH_ARTIFACTS: artifacts/ci-narrative-batch
+        run: |
+          python scripts/build_demo.py
+          python scripts/build_typed_demo.py
+          python scripts/build_narrative_demo.py
+          python -m pytest -q --junitxml=artifacts/batch-integration-tests.xml
+          git diff --exit-code -- proofreader/data artifacts/openai-sample
+      - name: Inspect retained OpenAI reading gaps without rewriting historical evidence
+        if: always()
+        run: |
+          python3 - <<'PY'
+          from collections import Counter
+          import json,pathlib
+          root=pathlib.Path('artifacts/pinned-openai-slice/38767243074/batch')
+          report=json.loads((root/'batch.json').read_text())
+          results=[];heads=Counter();rules=Counter()
+          def walk(steps):
+              for s in steps:
+                  yield s
+                  yield from walk(s['children'])
+          for module in report['modules']:
+              for row in module['rows']:
+                  if not row.get('reader'):continue
+                  folder=(root/row['reader']).parent
+                  reading=json.loads((folder/'reading.json').read_text())
+                  snapshot=json.loads((folder/'snapshot.json').read_text())
+                  dec=reading['declarations'][0]
+                  gaps=[s for s in walk(dec['steps']) if s['fallback']]
+                  assert len(gaps)==row['unexpanded_steps']
+                  by_step={}
+                  for frame,owner in dec['axes']['frame_owners'].items():
+                      by_step.setdefault(owner,[]).append(snapshot['frames'][int(frame)])
+                  local=Counter()
+                  for s in gaps:
+                      rules[s['rule']]+=1
+                      for f in by_step.get(s['id'],[]):
+                          key=f['head'] or '<local/computed head>'
+                          heads[key]+=1;local[key]+=1
+                  results.append({'name':row['name'],'gaps':len(gaps),'heads':local.most_common(20)})
+          audit={'schema':'leanglish.gap-audit/v1','scope':'retained historical selected-slice readings; no new Lean execution','summary':report['summary'],'gap_rules':rules.most_common(),'gap_heads':heads.most_common(40),'declarations':results}
+          out=pathlib.Path('artifacts/batch-integration-acceptance');out.mkdir(parents=True,exist_ok=True)
+          (out/'openai-gap-audit.json').write_text(json.dumps(audit,indent=2)+'\n')
+          print('OPENAI_GAP_HEADS',heads.most_common(20))
+          PY
+      - name: Retain the native observations and exact test outcome
+        if: always()
+        env:
+          OBSERVATION_RUN: ${{ github.run_id }}
+        run: |
+          python3 - <<'PY'
+          import json,os,pathlib,shutil,subprocess
+          root=pathlib.Path('artifacts/batch-integration-acceptance');root.mkdir(parents=True,exist_ok=True)
+          source=pathlib.Path('artifacts/ci-narrative-batch')
+          if source.exists():shutil.copytree(source,root/'native',dirs_exist_ok=True)
+          test=pathlib.Path('artifacts/batch-integration-tests.xml')
+          if test.exists():shutil.copyfile(test,root/'tests.xml')
+          commit=subprocess.check_output(['git','rev-parse','HEAD'],text=True).strip()
+          (root/'provenance.json').write_text(json.dumps({'run':os.environ['OBSERVATION_RUN'],'source_commit':commit,'formal_english_certification':False},indent=2)+'\n')
+          subprocess.run(['git','add','--force','--',str(root)],check=True)
+          subprocess.run(['git','commit','-m','Retain integrated native test observations and real corpus gap diagnosis'],check=True)
+          subprocess.run(['git','push','origin','HEAD:refs/heads/work/batch-integration'],check=True)
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: batch-integration-acceptance
+          path: artifacts/batch-integration-acceptance/

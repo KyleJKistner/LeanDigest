@@ -1,0 +1,1222 @@
+{
+  "axioms": [
+    "propext",
+    "Classical.choice",
+    "Quot.sound"
+  ],
+  "formula_backend": "Lean pretty-printer",
+  "frames": [
+    {
+      "binder": "δ",
+      "budget_cut": false,
+      "children": [
+        1
+      ],
+      "context": [],
+      "domain": "ℕ",
+      "head": "",
+      "id": 0,
+      "objects": [],
+      "path": [],
+      "premises": [],
+      "role": "introduce",
+      "statement": "∀ (δ : ℕ), 0 < δ → ∃ d, d ^ 2 < 2 * δ ∧ 2 * δ < (d + 1) * (d + 2)"
+    },
+    {
+      "binder": "hδ",
+      "budget_cut": false,
+      "children": [
+        2
+      ],
+      "context": [
+        {
+          "name": "δ",
+          "type": "ℕ"
+        }
+      ],
+      "domain": "0 < δ",
+      "head": "",
+      "id": 1,
+      "objects": [],
+      "path": [
+        1
+      ],
+      "premises": [],
+      "role": "assume",
+      "statement": "0 < δ → ∃ d, d ^ 2 < 2 * δ ∧ 2 * δ < (d + 1) * (d + 2)"
+    },
+    {
+      "binder": "d",
+      "budget_cut": false,
+      "children": [
+        3
+      ],
+      "context": [
+        {
+          "name": "δ",
+          "type": "ℕ"
+        },
+        {
+          "name": "hδ",
+          "type": "0 < δ"
+        }
+      ],
+      "domain": "ℕ",
+      "head": "",
+      "id": 2,
+      "objects": [],
+      "path": [
+        1,
+        1
+      ],
+      "premises": [],
+      "role": "define",
+      "statement": "∃ d, d ^ 2 < 2 * δ ∧ 2 * δ < (d + 1) * (d + 2)",
+      "value": "(2 * δ - 1).sqrt"
+    },
+    {
+      "binder": "hs",
+      "budget_cut": false,
+      "children": [
+        4,
+        5
+      ],
+      "context": [
+        {
+          "name": "δ",
+          "type": "ℕ"
+        },
+        {
+          "name": "hδ",
+          "type": "0 < δ"
+        },
+        {
+          "name": "d",
+          "type": "ℕ"
+        }
+      ],
+      "domain": "d ^ 2 ≤ 2 * δ - 1",
+      "head": "",
+      "id": 3,
+      "objects": [],
+      "path": [
+        1,
+        1,
+        2
+      ],
+      "premises": [],
+      "role": "have",
+      "statement": "∃ d, d ^ 2 < 2 * δ ∧ 2 * δ < (d + 1) * (d + 2)"
+    },
+    {
+      "budget_cut": false,
+      "children": [],
+      "context": [
+        {
+          "name": "δ",
+          "type": "ℕ"
+        },
+        {
+          "name": "hδ",
+          "type": "0 < δ"
+        },
+        {
+          "name": "d",
+          "type": "ℕ"
+        }
+      ],
+      "head": "Nat.sqrt_le'",
+      "id": 4,
+      "objects": [
+        "2 * δ - 1"
+      ],
+      "path": [
+        1,
+        1,
+        2,
+        1
+      ],
+      "premises": [],
+      "role": "application",
+      "statement": "(2 * δ - 1).sqrt ^ 2 ≤ 2 * δ - 1"
+    },
+    {
+      "binder": "ht",
+      "budget_cut": false,
+      "children": [
+        6,
+        7
+      ],
+      "context": [
+        {
+          "name": "δ",
+          "type": "ℕ"
+        },
+        {
+          "name": "hδ",
+          "type": "0 < δ"
+        },
+        {
+          "name": "d",
+          "type": "ℕ"
+        },
+        {
+          "name": "hs",
+          "type": "d ^ 2 ≤ 2 * δ - 1"
+        }
+      ],
+      "domain": "2 * δ - 1 < (d + 1) * (d + 1)",
+      "head": "",
+      "id": 5,
+      "objects": [],
+      "path": [
+        1,
+        1,
+        2,
+        2
+      ],
+      "premises": [],
+      "role": "have",
+      "statement": "∃ d, d ^ 2 < 2 * δ ∧ 2 * δ < (d + 1) * (d + 2)"
+    },
+    {
+      "budget_cut": false,
+      "children": [],
+      "context": [
+        {
+          "name": "δ",
+          "type": "ℕ"
+        },
+        {
+          "name": "hδ",
+          "type": "0 < δ"
+        },
+        {
+          "name": "d",
+          "type": "ℕ"
+        },
+        {
+          "name": "hs",
+          "type": "d ^ 2 ≤ 2 * δ - 1"
+        }
+      ],
+      "head": "Nat.lt_succ_sqrt",
+      "id": 6,
+      "objects": [
+        "2 * δ - 1"
+      ],
+      "path": [
+        1,
+        1,
+        2,
+        2,
+        1
+      ],
+      "premises": [],
+      "role": "application",
+      "statement": "2 * δ - 1 < (2 * δ - 1).sqrt.succ * (2 * δ - 1).sqrt.succ"
+    },
+    {
+      "binder": "hpred",
+      "budget_cut": false,
+      "children": [
+        8,
+        13
+      ],
+      "context": [
+        {
+          "name": "δ",
+          "type": "ℕ"
+        },
+        {
+          "name": "hδ",
+          "type": "0 < δ"
+        },
+        {
+          "name": "d",
+          "type": "ℕ"
+        },
+        {
+          "name": "hs",
+          "type": "d ^ 2 ≤ 2 * δ - 1"
+        },
+        {
+          "name": "ht",
+          "type": "2 * δ - 1 < (d + 1) * (d + 1)"
+        }
+      ],
+      "domain": "2 * δ - 1 + 1 = 2 * δ",
+      "head": "",
+      "id": 7,
+      "objects": [],
+      "path": [
+        1,
+        1,
+        2,
+        2,
+        2
+      ],
+      "premises": [],
+      "role": "have",
+      "statement": "∃ d, d ^ 2 < 2 * δ ∧ 2 * δ < (d + 1) * (d + 2)"
+    },
+    {
+      "budget_cut": false,
+      "children": [
+        9
+      ],
+      "context": [
+        {
+          "name": "δ",
+          "type": "ℕ"
+        },
+        {
+          "name": "hδ",
+          "type": "0 < δ"
+        },
+        {
+          "name": "d",
+          "type": "ℕ"
+        },
+        {
+          "name": "hs",
+          "type": "d ^ 2 ≤ 2 * δ - 1"
+        },
+        {
+          "name": "ht",
+          "type": "2 * δ - 1 < (d + 1) * (d + 1)"
+        }
+      ],
+      "head": "Decidable.byContradiction",
+      "id": 8,
+      "objects": [
+        "2 * δ - 1 + 1 = 2 * δ",
+        "instDecidableEqNat (2 * δ - 1 + 1) (2 * δ)"
+      ],
+      "path": [
+        1,
+        1,
+        2,
+        2,
+        2,
+        1
+      ],
+      "premises": [
+        {
+          "argument": 2,
+          "frame": 9,
+          "statement": "¬2 * δ - 1 + 1 = 2 * δ → False"
+        }
+      ],
+      "role": "application",
+      "statement": "2 * δ - 1 + 1 = 2 * δ"
+    },
+    {
+      "binder": "a._@._internal.0.OAI.Combinatorics.BalancedRyser.Incidence.SmallProjectiveArithmetic.1229784010._hygCtx._hyg.160",
+      "budget_cut": false,
+      "children": [
+        10
+      ],
+      "context": [
+        {
+          "name": "δ",
+          "type": "ℕ"
+        },
+        {
+          "name": "hδ",
+          "type": "0 < δ"
+        },
+        {
+          "name": "d",
+          "type": "ℕ"
+        },
+        {
+          "name": "hs",
+          "type": "d ^ 2 ≤ 2 * δ - 1"
+        },
+        {
+          "name": "ht",
+          "type": "2 * δ - 1 < (d + 1) * (d + 1)"
+        }
+      ],
+      "domain": "¬2 * δ - 1 + 1 = 2 * δ",
+      "head": "",
+      "id": 9,
+      "objects": [],
+      "path": [
+        1,
+        1,
+        2,
+        2,
+        2,
+        1,
+        1
+      ],
+      "premises": [],
+      "role": "assume",
+      "statement": "¬2 * δ - 1 + 1 = 2 * δ → False"
+    },
+    {
+      "budget_cut": false,
+      "children": [
+        11,
+        12
+      ],
+      "context": [
+        {
+          "name": "δ",
+          "type": "ℕ"
+        },
+        {
+          "name": "hδ",
+          "type": "0 < δ"
+        },
+        {
+          "name": "d",
+          "type": "ℕ"
+        },
+        {
+          "name": "hs",
+          "type": "d ^ 2 ≤ 2 * δ - 1"
+        },
+        {
+          "name": "ht",
+          "type": "2 * δ - 1 < (d + 1) * (d + 1)"
+        },
+        {
+          "name": "a._@._internal.0.OAI.Combinatorics.BalancedRyser.Incidence.SmallProjectiveArithmetic.1229784010._hygCtx._hyg.160",
+          "type": "¬2 * δ - 1 + 1 = 2 * δ"
+        }
+      ],
+      "head": "OAI.Balanced.SmallProjectiveArithmetic.exists_interpolation_degree._proof_1_1",
+      "id": 10,
+      "objects": [
+        "δ"
+      ],
+      "path": [
+        1,
+        1,
+        2,
+        2,
+        2,
+        1,
+        1,
+        1
+      ],
+      "premises": [
+        {
+          "argument": 1,
+          "frame": 11,
+          "statement": "0 < δ"
+        },
+        {
+          "argument": 2,
+          "frame": 12,
+          "statement": "¬2 * δ - 1 + 1 = 2 * δ"
+        }
+      ],
+      "role": "application",
+      "statement": "False"
+    },
+    {
+      "binder": "hδ",
+      "budget_cut": false,
+      "children": [],
+      "context": [
+        {
+          "name": "δ",
+          "type": "ℕ"
+        },
+        {
+          "name": "hδ",
+          "type": "0 < δ"
+        },
+        {
+          "name": "d",
+          "type": "ℕ"
+        },
+        {
+          "name": "hs",
+          "type": "d ^ 2 ≤ 2 * δ - 1"
+        },
+        {
+          "name": "ht",
+          "type": "2 * δ - 1 < (d + 1) * (d + 1)"
+        },
+        {
+          "name": "a._@._internal.0.OAI.Combinatorics.BalancedRyser.Incidence.SmallProjectiveArithmetic.1229784010._hygCtx._hyg.160",
+          "type": "¬2 * δ - 1 + 1 = 2 * δ"
+        }
+      ],
+      "head": "",
+      "id": 11,
+      "objects": [],
+      "path": [
+        1,
+        1,
+        2,
+        2,
+        2,
+        1,
+        1,
+        1,
+        0,
+        1
+      ],
+      "premises": [],
+      "role": "given",
+      "statement": "0 < δ"
+    },
+    {
+      "binder": "a._@._internal.0.OAI.Combinatorics.BalancedRyser.Incidence.SmallProjectiveArithmetic.1229784010._hygCtx._hyg.160",
+      "budget_cut": false,
+      "children": [],
+      "context": [
+        {
+          "name": "δ",
+          "type": "ℕ"
+        },
+        {
+          "name": "hδ",
+          "type": "0 < δ"
+        },
+        {
+          "name": "d",
+          "type": "ℕ"
+        },
+        {
+          "name": "hs",
+          "type": "d ^ 2 ≤ 2 * δ - 1"
+        },
+        {
+          "name": "ht",
+          "type": "2 * δ - 1 < (d + 1) * (d + 1)"
+        },
+        {
+          "name": "a._@._internal.0.OAI.Combinatorics.BalancedRyser.Incidence.SmallProjectiveArithmetic.1229784010._hygCtx._hyg.160",
+          "type": "¬2 * δ - 1 + 1 = 2 * δ"
+        }
+      ],
+      "head": "",
+      "id": 12,
+      "objects": [],
+      "path": [
+        1,
+        1,
+        2,
+        2,
+        2,
+        1,
+        1,
+        1,
+        1
+      ],
+      "premises": [],
+      "role": "given",
+      "statement": "¬2 * δ - 1 + 1 = 2 * δ"
+    },
+    {
+      "budget_cut": false,
+      "children": [
+        14
+      ],
+      "context": [
+        {
+          "name": "δ",
+          "type": "ℕ"
+        },
+        {
+          "name": "hδ",
+          "type": "0 < δ"
+        },
+        {
+          "name": "d",
+          "type": "ℕ"
+        },
+        {
+          "name": "hs",
+          "type": "d ^ 2 ≤ 2 * δ - 1"
+        },
+        {
+          "name": "ht",
+          "type": "2 * δ - 1 < (d + 1) * (d + 1)"
+        },
+        {
+          "name": "hpred",
+          "type": "2 * δ - 1 + 1 = 2 * δ"
+        }
+      ],
+      "head": "Exists.intro",
+      "id": 13,
+      "objects": [
+        "ℕ",
+        "fun d => d ^ 2 < 2 * δ ∧ 2 * δ < (d + 1) * (d + 2)",
+        "d"
+      ],
+      "path": [
+        1,
+        1,
+        2,
+        2,
+        2,
+        2
+      ],
+      "premises": [
+        {
+          "argument": 3,
+          "frame": 14,
+          "statement": "d ^ 2 < 2 * δ ∧ 2 * δ < (d + 1) * (d + 2)"
+        }
+      ],
+      "role": "witness",
+      "statement": "∃ d, d ^ 2 < 2 * δ ∧ 2 * δ < (d + 1) * (d + 2)"
+    },
+    {
+      "budget_cut": false,
+      "children": [
+        15,
+        21
+      ],
+      "context": [
+        {
+          "name": "δ",
+          "type": "ℕ"
+        },
+        {
+          "name": "hδ",
+          "type": "0 < δ"
+        },
+        {
+          "name": "d",
+          "type": "ℕ"
+        },
+        {
+          "name": "hs",
+          "type": "d ^ 2 ≤ 2 * δ - 1"
+        },
+        {
+          "name": "ht",
+          "type": "2 * δ - 1 < (d + 1) * (d + 1)"
+        },
+        {
+          "name": "hpred",
+          "type": "2 * δ - 1 + 1 = 2 * δ"
+        }
+      ],
+      "head": "And.intro",
+      "id": 14,
+      "objects": [
+        "d ^ 2 < 2 * δ",
+        "2 * δ < (d + 1) * (d + 2)"
+      ],
+      "path": [
+        1,
+        1,
+        2,
+        2,
+        2,
+        2,
+        1
+      ],
+      "premises": [
+        {
+          "argument": 2,
+          "frame": 15,
+          "statement": "d ^ 2 < 2 * δ"
+        },
+        {
+          "argument": 3,
+          "frame": 21,
+          "statement": "2 * δ < (d + 1) * (d + 2)"
+        }
+      ],
+      "role": "combine",
+      "statement": "d ^ 2 < 2 * δ ∧ 2 * δ < (d + 1) * (d + 2)"
+    },
+    {
+      "budget_cut": false,
+      "children": [
+        16
+      ],
+      "context": [
+        {
+          "name": "δ",
+          "type": "ℕ"
+        },
+        {
+          "name": "hδ",
+          "type": "0 < δ"
+        },
+        {
+          "name": "d",
+          "type": "ℕ"
+        },
+        {
+          "name": "hs",
+          "type": "d ^ 2 ≤ 2 * δ - 1"
+        },
+        {
+          "name": "ht",
+          "type": "2 * δ - 1 < (d + 1) * (d + 1)"
+        },
+        {
+          "name": "hpred",
+          "type": "2 * δ - 1 + 1 = 2 * δ"
+        }
+      ],
+      "head": "Decidable.byContradiction",
+      "id": 15,
+      "objects": [
+        "d ^ 2 < 2 * δ",
+        "(d ^ 2).decLt (2 * δ)"
+      ],
+      "path": [
+        1,
+        1,
+        2,
+        2,
+        2,
+        2,
+        1,
+        0,
+        1
+      ],
+      "premises": [
+        {
+          "argument": 2,
+          "frame": 16,
+          "statement": "¬d ^ 2 < 2 * δ → False"
+        }
+      ],
+      "role": "application",
+      "statement": "d ^ 2 < 2 * δ"
+    },
+    {
+      "binder": "a._@._internal.0.OAI.Combinatorics.BalancedRyser.Incidence.SmallProjectiveArithmetic.1229784010._hygCtx._hyg.172",
+      "budget_cut": false,
+      "children": [
+        17
+      ],
+      "context": [
+        {
+          "name": "δ",
+          "type": "ℕ"
+        },
+        {
+          "name": "hδ",
+          "type": "0 < δ"
+        },
+        {
+          "name": "d",
+          "type": "ℕ"
+        },
+        {
+          "name": "hs",
+          "type": "d ^ 2 ≤ 2 * δ - 1"
+        },
+        {
+          "name": "ht",
+          "type": "2 * δ - 1 < (d + 1) * (d + 1)"
+        },
+        {
+          "name": "hpred",
+          "type": "2 * δ - 1 + 1 = 2 * δ"
+        }
+      ],
+      "domain": "¬d ^ 2 < 2 * δ",
+      "head": "",
+      "id": 16,
+      "objects": [],
+      "path": [
+        1,
+        1,
+        2,
+        2,
+        2,
+        2,
+        1,
+        0,
+        1,
+        1
+      ],
+      "premises": [],
+      "role": "assume",
+      "statement": "¬d ^ 2 < 2 * δ → False"
+    },
+    {
+      "budget_cut": false,
+      "children": [
+        18,
+        19,
+        20
+      ],
+      "context": [
+        {
+          "name": "δ",
+          "type": "ℕ"
+        },
+        {
+          "name": "hδ",
+          "type": "0 < δ"
+        },
+        {
+          "name": "d",
+          "type": "ℕ"
+        },
+        {
+          "name": "hs",
+          "type": "d ^ 2 ≤ 2 * δ - 1"
+        },
+        {
+          "name": "ht",
+          "type": "2 * δ - 1 < (d + 1) * (d + 1)"
+        },
+        {
+          "name": "hpred",
+          "type": "2 * δ - 1 + 1 = 2 * δ"
+        },
+        {
+          "name": "a._@._internal.0.OAI.Combinatorics.BalancedRyser.Incidence.SmallProjectiveArithmetic.1229784010._hygCtx._hyg.172",
+          "type": "¬d ^ 2 < 2 * δ"
+        }
+      ],
+      "head": "OAI.Balanced.SmallProjectiveArithmetic.exists_interpolation_degree._proof_1_2",
+      "id": 17,
+      "objects": [
+        "δ"
+      ],
+      "path": [
+        1,
+        1,
+        2,
+        2,
+        2,
+        2,
+        1,
+        0,
+        1,
+        1,
+        1
+      ],
+      "premises": [
+        {
+          "argument": 1,
+          "frame": 18,
+          "statement": "d ^ 2 ≤ 2 * δ - 1"
+        },
+        {
+          "argument": 2,
+          "frame": 19,
+          "statement": "2 * δ - 1 + 1 = 2 * δ"
+        },
+        {
+          "argument": 3,
+          "frame": 20,
+          "statement": "¬d ^ 2 < 2 * δ"
+        }
+      ],
+      "role": "application",
+      "statement": "False"
+    },
+    {
+      "binder": "hs",
+      "budget_cut": false,
+      "children": [],
+      "context": [
+        {
+          "name": "δ",
+          "type": "ℕ"
+        },
+        {
+          "name": "hδ",
+          "type": "0 < δ"
+        },
+        {
+          "name": "d",
+          "type": "ℕ"
+        },
+        {
+          "name": "hs",
+          "type": "d ^ 2 ≤ 2 * δ - 1"
+        },
+        {
+          "name": "ht",
+          "type": "2 * δ - 1 < (d + 1) * (d + 1)"
+        },
+        {
+          "name": "hpred",
+          "type": "2 * δ - 1 + 1 = 2 * δ"
+        },
+        {
+          "name": "a._@._internal.0.OAI.Combinatorics.BalancedRyser.Incidence.SmallProjectiveArithmetic.1229784010._hygCtx._hyg.172",
+          "type": "¬d ^ 2 < 2 * δ"
+        }
+      ],
+      "head": "",
+      "id": 18,
+      "objects": [],
+      "path": [
+        1,
+        1,
+        2,
+        2,
+        2,
+        2,
+        1,
+        0,
+        1,
+        1,
+        1,
+        0,
+        0,
+        1
+      ],
+      "premises": [],
+      "role": "given",
+      "statement": "d ^ 2 ≤ 2 * δ - 1"
+    },
+    {
+      "binder": "hpred",
+      "budget_cut": false,
+      "children": [],
+      "context": [
+        {
+          "name": "δ",
+          "type": "ℕ"
+        },
+        {
+          "name": "hδ",
+          "type": "0 < δ"
+        },
+        {
+          "name": "d",
+          "type": "ℕ"
+        },
+        {
+          "name": "hs",
+          "type": "d ^ 2 ≤ 2 * δ - 1"
+        },
+        {
+          "name": "ht",
+          "type": "2 * δ - 1 < (d + 1) * (d + 1)"
+        },
+        {
+          "name": "hpred",
+          "type": "2 * δ - 1 + 1 = 2 * δ"
+        },
+        {
+          "name": "a._@._internal.0.OAI.Combinatorics.BalancedRyser.Incidence.SmallProjectiveArithmetic.1229784010._hygCtx._hyg.172",
+          "type": "¬d ^ 2 < 2 * δ"
+        }
+      ],
+      "head": "",
+      "id": 19,
+      "objects": [],
+      "path": [
+        1,
+        1,
+        2,
+        2,
+        2,
+        2,
+        1,
+        0,
+        1,
+        1,
+        1,
+        0,
+        1
+      ],
+      "premises": [],
+      "role": "given",
+      "statement": "2 * δ - 1 + 1 = 2 * δ"
+    },
+    {
+      "binder": "a._@._internal.0.OAI.Combinatorics.BalancedRyser.Incidence.SmallProjectiveArithmetic.1229784010._hygCtx._hyg.172",
+      "budget_cut": false,
+      "children": [],
+      "context": [
+        {
+          "name": "δ",
+          "type": "ℕ"
+        },
+        {
+          "name": "hδ",
+          "type": "0 < δ"
+        },
+        {
+          "name": "d",
+          "type": "ℕ"
+        },
+        {
+          "name": "hs",
+          "type": "d ^ 2 ≤ 2 * δ - 1"
+        },
+        {
+          "name": "ht",
+          "type": "2 * δ - 1 < (d + 1) * (d + 1)"
+        },
+        {
+          "name": "hpred",
+          "type": "2 * δ - 1 + 1 = 2 * δ"
+        },
+        {
+          "name": "a._@._internal.0.OAI.Combinatorics.BalancedRyser.Incidence.SmallProjectiveArithmetic.1229784010._hygCtx._hyg.172",
+          "type": "¬d ^ 2 < 2 * δ"
+        }
+      ],
+      "head": "",
+      "id": 20,
+      "objects": [],
+      "path": [
+        1,
+        1,
+        2,
+        2,
+        2,
+        2,
+        1,
+        0,
+        1,
+        1,
+        1,
+        1
+      ],
+      "premises": [],
+      "role": "given",
+      "statement": "¬d ^ 2 < 2 * δ"
+    },
+    {
+      "budget_cut": false,
+      "children": [
+        22
+      ],
+      "context": [
+        {
+          "name": "δ",
+          "type": "ℕ"
+        },
+        {
+          "name": "hδ",
+          "type": "0 < δ"
+        },
+        {
+          "name": "d",
+          "type": "ℕ"
+        },
+        {
+          "name": "hs",
+          "type": "d ^ 2 ≤ 2 * δ - 1"
+        },
+        {
+          "name": "ht",
+          "type": "2 * δ - 1 < (d + 1) * (d + 1)"
+        },
+        {
+          "name": "hpred",
+          "type": "2 * δ - 1 + 1 = 2 * δ"
+        }
+      ],
+      "head": "lt_of_not_ge",
+      "id": 21,
+      "objects": [
+        "ℕ",
+        "Nat.instLinearOrder",
+        "2 * δ",
+        "(d + 1) * (d + 2)"
+      ],
+      "path": [
+        1,
+        1,
+        2,
+        2,
+        2,
+        2,
+        1,
+        1
+      ],
+      "premises": [
+        {
+          "argument": 4,
+          "frame": 22,
+          "statement": "(d + 1) * (d + 2) ≤ 2 * δ → False"
+        }
+      ],
+      "role": "application",
+      "statement": "2 * δ < (d + 1) * (d + 2)"
+    },
+    {
+      "binder": "a._@._internal._hyg.0",
+      "budget_cut": false,
+      "children": [
+        23
+      ],
+      "context": [
+        {
+          "name": "δ",
+          "type": "ℕ"
+        },
+        {
+          "name": "hδ",
+          "type": "0 < δ"
+        },
+        {
+          "name": "d",
+          "type": "ℕ"
+        },
+        {
+          "name": "hs",
+          "type": "d ^ 2 ≤ 2 * δ - 1"
+        },
+        {
+          "name": "ht",
+          "type": "2 * δ - 1 < (d + 1) * (d + 1)"
+        },
+        {
+          "name": "hpred",
+          "type": "2 * δ - 1 + 1 = 2 * δ"
+        }
+      ],
+      "domain": "(d + 1) * (d + 2) ≤ 2 * δ",
+      "head": "",
+      "id": 22,
+      "objects": [],
+      "path": [
+        1,
+        1,
+        2,
+        2,
+        2,
+        2,
+        1,
+        1,
+        1
+      ],
+      "premises": [],
+      "role": "assume",
+      "statement": "(d + 1) * (d + 2) ≤ 2 * δ → False"
+    },
+    {
+      "budget_cut": false,
+      "children": [
+        24
+      ],
+      "context": [
+        {
+          "name": "δ",
+          "type": "ℕ"
+        },
+        {
+          "name": "hδ",
+          "type": "0 < δ"
+        },
+        {
+          "name": "d",
+          "type": "ℕ"
+        },
+        {
+          "name": "hs",
+          "type": "d ^ 2 ≤ 2 * δ - 1"
+        },
+        {
+          "name": "ht",
+          "type": "2 * δ - 1 < (d + 1) * (d + 1)"
+        },
+        {
+          "name": "hpred",
+          "type": "2 * δ - 1 + 1 = 2 * δ"
+        },
+        {
+          "name": "a._@._internal._hyg.0",
+          "type": "(d + 1) * (d + 2) ≤ 2 * δ"
+        }
+      ],
+      "head": "Mathlib.Tactic.Linarith.lt_irrefl",
+      "id": 23,
+      "objects": [
+        "ℤ",
+        "Int.instPreorder",
+        "0"
+      ],
+      "path": [
+        1,
+        1,
+        2,
+        2,
+        2,
+        2,
+        1,
+        1,
+        1,
+        1
+      ],
+      "premises": [
+        {
+          "argument": 3,
+          "frame": 24,
+          "statement": "0 < 0"
+        }
+      ],
+      "role": "application",
+      "statement": "False"
+    },
+    {
+      "budget_cut": false,
+      "children": [],
+      "context": [
+        {
+          "name": "δ",
+          "type": "ℕ"
+        },
+        {
+          "name": "hδ",
+          "type": "0 < δ"
+        },
+        {
+          "name": "d",
+          "type": "ℕ"
+        },
+        {
+          "name": "hs",
+          "type": "d ^ 2 ≤ 2 * δ - 1"
+        },
+        {
+          "name": "ht",
+          "type": "2 * δ - 1 < (d + 1) * (d + 1)"
+        },
+        {
+          "name": "hpred",
+          "type": "2 * δ - 1 + 1 = 2 * δ"
+        },
+        {
+          "name": "a._@._internal._hyg.0",
+          "type": "(d + 1) * (d + 2) ≤ 2 * δ"
+        }
+      ],
+      "head": "Eq.mp",
+      "id": 24,
+      "objects": [],
+      "path": [
+        1,
+        1,
+        2,
+        2,
+        2,
+        2,
+        1,
+        1,
+        1,
+        1,
+        1
+      ],
+      "premises": [],
+      "role": "rewrite",
+      "statement": "0 < 0"
+    }
+  ],
+  "judgements_checked": 25,
+  "lean_version": "4.34.1",
+  "schema": "proofreader.narrative/v1",
+  "statement": "∀ (δ : ℕ), 0 < δ → ∃ d, d ^ 2 < 2 * δ ∧ 2 * δ < (d + 1) * (d + 2)",
+  "theorem": "OAI.Balanced.SmallProjectiveArithmetic.exists_interpolation_degree"
+}

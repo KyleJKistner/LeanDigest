@@ -1,0 +1,16 @@
+{
+  "schema": "proofreader.narrative-receipt/v1",
+  "status": "passed",
+  "theorem": "OAI.ComplexCancellation.BezoutFrame.exists_frame",
+  "lean_version": "4.34.1",
+  "backend": "native",
+  "snapshot_sha256": "4641b876409984cb869a40c107adf7f3937e44f7e822ea6eb24ca1015ee65d52",
+  "source_sha256": "294a4c451c224003b4df7dc38076848337c0c03107c04c976804276fde436608",
+  "selected_judgements": 86,
+  "all_selected_judgements_kernel_checked": true,
+  "path_linkage_checked_in_lean": true,
+  "receipt_authenticated": false,
+  "english_formally_verified": false,
+  "exact_openai_project_replayed": false,
+  "module": "OAI.Algebra.AffineCancellation.BezoutFrame"
+}

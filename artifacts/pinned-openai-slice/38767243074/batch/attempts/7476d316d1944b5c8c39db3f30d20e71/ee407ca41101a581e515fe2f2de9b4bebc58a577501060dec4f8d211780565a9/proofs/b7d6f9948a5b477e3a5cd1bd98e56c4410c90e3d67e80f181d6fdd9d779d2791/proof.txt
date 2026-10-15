@@ -1,0 +1,1028 @@
+Leanglish · OAI.Balanced.SmallProjectiveArithmetic.half_line_skew_refinement._proof_1_1
+
+Let q, on, off, missing, δ be elements of ℕ.
+Assume on + missing = q + 1.
+Assume off + on ≤ q.
+Assume ¬on ≤ q − off.
+Then False.
+
+Proof.
+Reason by cases from off ≤ q ∧ ↑(q − off) = ↑q − ↑off ∨ q < off ∧ ↑(q − off) = 0.
+  Apply Lean.Omega.Int.ofNat_sub_dichotomy to the supplied arguments.
+    off ≤ q ∧ ↑(q − off) = ↑q − ↑off ∨ q < off ∧ ↑(q − off) = 0
+  Case off ≤ q ∧ ↑(q − off) = ↑q − ↑off.
+    Apply Lean.Omega.Constraint.not_sat'_of_isImpossible to the supplied arguments.
+      False
+      Apply of_decide_eq_true to the supplied arguments.
+        { lowerBound := some 1, upperBound := some 0 }.isImpossible = true
+        Apply id to the supplied arguments.
+          decide ({ lowerBound := some 1, upperBound := some 0 }.isImpossible = true) = true
+          By reflexivity, true = true.
+      Apply Lean.Omega.tidy_sat to the supplied arguments.
+        (Omega.tidyConstraint { lowerBound := some 1, upperBound := none } [0, 0, 0, 0, 0, 0, 0]).sat'
+    (Omega.tidyCoeffs { lowerBound := some 1, upperBound := none } [0, 0, 0, 0, 0, 0, 0])
+    (Omega.Coeffs.ofList [↑on, ↑missing, ↑q, ↑off, ↑δ, ↑missing · ↑(q − off), ↑(q − off)]) =
+  true
+        Apply Lean.Omega.combo_sat' to the supplied arguments.
+          (Omega.Constraint.combo 1 { lowerBound := some 1, upperBound := none } (-1)
+        { lowerBound := none, upperBound := some 0 }).sat'
+    (Omega.Coeffs.combo 1 [0, 1, 0, -1] (-1) [0, 1, 0, -1, 0, 0, 0])
+    (Omega.Coeffs.ofList [↑on, ↑missing, ↑q, ↑off, ↑δ, ↑missing · ↑(q − off), ↑(q − off)]) =
+  true
+          Apply Lean.Omega.combo_sat' to the supplied arguments.
+            (Omega.Constraint.combo 1 { lowerBound := some 1, upperBound := some 1 } 1
+        { lowerBound := some 0, upperBound := none }).sat'
+    (Omega.Coeffs.combo 1 [1, 1, -1] 1 [-1, 0, 1, -1])
+    (Omega.Coeffs.ofList [↑on, ↑missing, ↑q, ↑off, ↑δ, ↑missing · ↑(q − off), ↑(q − off)]) =
+  true
+            Apply Lean.Omega.Constraint.addEquality_sat to the supplied arguments.
+              { lowerBound := some (- -1), upperBound := some (- -1) }.sat' [1, 1, -1]
+    (Omega.Coeffs.ofList [↑on, ↑missing, ↑q, ↑off, ↑δ, ↑missing · ↑(q − off), ↑(q − off)]) =
+  true
+              The following calculation gives ({ coeffs := [1, 1] } − { const := 1, coeffs := [0, 0, 1] }).eval
+    (Omega.Coeffs.ofList [↑on, ↑missing, ↑q, ↑off, ↑δ, ↑missing · ↑(q − off), ↑(q − off)]) =
+  0.
+                Reverse the supplied equality.
+                  ({ coeffs := [1, 1] } − { const := 1, coeffs := [0, 0, 1] }).eval
+    (Omega.Coeffs.ofList [↑on, ↑missing, ↑q, ↑off, ↑δ, ↑missing · ↑(q − off), ↑(q − off)]) =
+  ↑(on + missing) − ↑(q + 1)
+                  The following calculation gives ↑(on + missing) − ↑(q + 1) =
+  ({ coeffs := [1, 1] } − { const := 1, coeffs := [0, 0, 1] }).eval
+    (Omega.Coeffs.ofList [↑on, ↑missing, ↑q, ↑off, ↑δ, ↑missing · ↑(q − off), ↑(q − off)]).
+                    Apply Lean.Omega.Int.sub_congr to the supplied arguments.
+                      ↑(on + missing) − ↑(q + 1) =
+  ({ coeffs := [1] } + { coeffs := [0, 1] }).eval
+      (Omega.Coeffs.ofList [↑on, ↑missing, ↑q, ↑off, ↑δ, ↑missing · ↑(q − off), ↑(q − off)]) -
+    ({ coeffs := [0, 0, 1] } + { const := 1 }).eval
+      (Omega.Coeffs.ofList [↑on, ↑missing, ↑q, ↑off, ↑δ, ↑missing · ↑(q − off), ↑(q − off)])
+                      The following calculation gives ↑(on + missing) =
+  ({ coeffs := [1] } + { coeffs := [0, 1] }).eval
+    (Omega.Coeffs.ofList [↑on, ↑missing, ↑q, ↑off, ↑δ, ↑missing · ↑(q − off), ↑(q − off)]).
+                        Apply Int.natCast_add to the supplied arguments.
+                          ↑(on + missing) = ↑on + ↑missing
+                        Apply Lean.Omega.Int.add_congr to the supplied arguments.
+                          ↑on + ↑missing =
+  (Omega.LinearCombo.coordinate 0).eval
+      (Omega.Coeffs.ofList [↑on, ↑missing, ↑q, ↑off, ↑δ, ↑missing · ↑(q − off), ↑(q − off)]) +
+    (Omega.LinearCombo.coordinate 1).eval
+      (Omega.Coeffs.ofList [↑on, ↑missing, ↑q, ↑off, ↑δ, ↑missing · ↑(q − off), ↑(q − off)])
+                          Reverse the supplied equality.
+                            ↑on =
+  (Omega.LinearCombo.coordinate 0).eval
+    (Omega.Coeffs.ofList [↑on, ↑missing, ↑q, ↑off, ↑δ, ↑missing · ↑(q − off), ↑(q − off)])
+                            Apply Lean.Omega.LinearCombo.coordinate_eval_0 to the supplied arguments.
+                              (Omega.LinearCombo.coordinate 0).eval
+    (Omega.Coeffs.ofList [↑on, ↑missing, ↑q, ↑off, ↑δ, ↑missing · ↑(q − off), ↑(q − off)]) =
+  ↑on
+                          Reverse the supplied equality.
+                            ↑missing =
+  (Omega.LinearCombo.coordinate 1).eval
+    (Omega.Coeffs.ofList [↑on, ↑missing, ↑q, ↑off, ↑δ, ↑missing · ↑(q − off), ↑(q − off)])
+                            Apply Lean.Omega.LinearCombo.coordinate_eval_1 to the supplied arguments.
+                              (Omega.LinearCombo.coordinate 1).eval
+    (Omega.Coeffs.ofList [↑on, ↑missing, ↑q, ↑off, ↑δ, ↑missing · ↑(q − off), ↑(q − off)]) =
+  ↑missing
+                        Reverse the supplied equality.
+                          { coeffs := [1] }.eval (Omega.Coeffs.ofList [↑on, ↑missing, ↑q, ↑off, ↑δ, ↑missing · ↑(q − off), ↑(q − off)]) +
+    { coeffs := [0, 1] }.eval (Omega.Coeffs.ofList [↑on, ↑missing, ↑q, ↑off, ↑δ, ↑missing · ↑(q − off), ↑(q − off)]) =
+  ({ coeffs := [1] } + { coeffs := [0, 1] }).eval
+    (Omega.Coeffs.ofList [↑on, ↑missing, ↑q, ↑off, ↑δ, ↑missing · ↑(q − off), ↑(q − off)])
+                          Apply Lean.Omega.LinearCombo.add_eval to the supplied arguments.
+                            ({ coeffs := [1] } + { coeffs := [0, 1] }).eval
+    (Omega.Coeffs.ofList [↑on, ↑missing, ↑q, ↑off, ↑δ, ↑missing · ↑(q − off), ↑(q − off)]) =
+  { coeffs := [1] }.eval (Omega.Coeffs.ofList [↑on, ↑missing, ↑q, ↑off, ↑δ, ↑missing · ↑(q − off), ↑(q − off)]) +
+    { coeffs := [0, 1] }.eval (Omega.Coeffs.ofList [↑on, ↑missing, ↑q, ↑off, ↑δ, ↑missing · ↑(q − off), ↑(q − off)])
+                      The following calculation gives ↑(q + 1) =
+  ({ coeffs := [0, 0, 1] } + { const := 1 }).eval
+    (Omega.Coeffs.ofList [↑on, ↑missing, ↑q, ↑off, ↑δ, ↑missing · ↑(q − off), ↑(q − off)]).
+                        Apply Int.natCast_add to the supplied arguments.
+                          ↑(q + 1) = ↑q + ↑1
+                        Apply Lean.Omega.Int.add_congr to the supplied arguments.
+                          ↑q + ↑1 =
+  (Omega.LinearCombo.coordinate 2).eval
+      (Omega.Coeffs.ofList [↑on, ↑missing, ↑q, ↑off, ↑δ, ↑missing · ↑(q − off), ↑(q − off)]) +
+    { const := 1 }.eval (Omega.Coeffs.ofList [↑on, ↑missing, ↑q, ↑off, ↑δ, ↑missing · ↑(q − off), ↑(q − off)])
+                          Reverse the supplied equality.
+                            ↑q =
+  (Omega.LinearCombo.coordinate 2).eval
+    (Omega.Coeffs.ofList [↑on, ↑missing, ↑q, ↑off, ↑δ, ↑missing · ↑(q − off), ↑(q − off)])
+                            Apply Lean.Omega.LinearCombo.coordinate_eval_2 to the supplied arguments.
+                              (Omega.LinearCombo.coordinate 2).eval
+    (Omega.Coeffs.ofList [↑on, ↑missing, ↑q, ↑off, ↑δ, ↑missing · ↑(q − off), ↑(q − off)]) =
+  ↑q
+                          Apply id to the supplied arguments.
+                            ↑1 = { const := 1 }.eval (Omega.Coeffs.ofList [↑on, ↑missing, ↑q, ↑off, ↑δ, ↑missing · ↑(q − off), ↑(q − off)])
+                            By reflexivity, ↑1 = ↑1.
+                        Reverse the supplied equality.
+                          { coeffs := [0, 0, 1] }.eval (Omega.Coeffs.ofList [↑on, ↑missing, ↑q, ↑off, ↑δ, ↑missing · ↑(q − off), ↑(q − off)]) +
+    { const := 1 }.eval (Omega.Coeffs.ofList [↑on, ↑missing, ↑q, ↑off, ↑δ, ↑missing · ↑(q − off), ↑(q − off)]) =
+  ({ coeffs := [0, 0, 1] } + { const := 1 }).eval
+    (Omega.Coeffs.ofList [↑on, ↑missing, ↑q, ↑off, ↑δ, ↑missing · ↑(q − off), ↑(q − off)])
+                          Apply Lean.Omega.LinearCombo.add_eval to the supplied arguments.
+                            ({ coeffs := [0, 0, 1] } + { const := 1 }).eval
+    (Omega.Coeffs.ofList [↑on, ↑missing, ↑q, ↑off, ↑δ, ↑missing · ↑(q − off), ↑(q − off)]) =
+  { coeffs := [0, 0, 1] }.eval (Omega.Coeffs.ofList [↑on, ↑missing, ↑q, ↑off, ↑δ, ↑missing · ↑(q − off), ↑(q − off)]) +
+    { const := 1 }.eval (Omega.Coeffs.ofList [↑on, ↑missing, ↑q, ↑off, ↑δ, ↑missing · ↑(q − off), ↑(q − off)])
+                    Reverse the supplied equality.
+                      { coeffs := [1, 1] }.eval (Omega.Coeffs.ofList [↑on, ↑missing, ↑q, ↑off, ↑δ, ↑missing · ↑(q − off), ↑(q − off)]) -
+    { const := 1, coeffs := [0, 0, 1] }.eval
+      (Omega.Coeffs.ofList [↑on, ↑missing, ↑q, ↑off, ↑δ, ↑missing · ↑(q − off), ↑(q − off)]) =
+  ({ coeffs := [1, 1] } − { const := 1, coeffs := [0, 0, 1] }).eval
+    (Omega.Coeffs.ofList [↑on, ↑missing, ↑q, ↑off, ↑δ, ↑missing · ↑(q − off), ↑(q − off)])
+                      Apply Lean.Omega.LinearCombo.sub_eval to the supplied arguments.
+                        ({ coeffs := [1, 1] } − { const := 1, coeffs := [0, 0, 1] }).eval
+    (Omega.Coeffs.ofList [↑on, ↑missing, ↑q, ↑off, ↑δ, ↑missing · ↑(q − off), ↑(q − off)]) =
+  { coeffs := [1, 1] }.eval (Omega.Coeffs.ofList [↑on, ↑missing, ↑q, ↑off, ↑δ, ↑missing · ↑(q − off), ↑(q − off)]) -
+    { const := 1, coeffs := [0, 0, 1] }.eval
+      (Omega.Coeffs.ofList [↑on, ↑missing, ↑q, ↑off, ↑δ, ↑missing · ↑(q − off), ↑(q − off)])
+                Apply Int.sub_eq_zero_of_eq to the supplied arguments.
+                  ↑(on + missing) − ↑(q + 1) = 0
+                  Apply Lean.Omega.Int.ofNat_congr to the supplied arguments.
+                    ↑(on + missing) = ↑(q + 1)
+                    Use the hypothesis hline: on + missing = q + 1.
+            Apply Lean.Omega.Constraint.addInequality_sat to the supplied arguments.
+              { lowerBound := some (-0), upperBound := none }.sat' [-1, 0, 1, -1]
+    (Omega.Coeffs.ofList [↑on, ↑missing, ↑q, ↑off, ↑δ, ↑missing · ↑(q − off), ↑(q − off)]) =
+  true
+              Apply le_of_le_of_eq to the supplied arguments.
+                0 ≤
+  ({ coeffs := [0, 0, 1] } − { coeffs := [1, 0, 0, 1] }).eval
+    (Omega.Coeffs.ofList [↑on, ↑missing, ↑q, ↑off, ↑δ, ↑missing · ↑(q − off), ↑(q − off)])
+                Apply Int.sub_nonneg_of_le to the supplied arguments.
+                  0 ≤ ↑q − ↑(off + on)
+                  Apply Lean.Omega.Int.ofNat_le_of_le to the supplied arguments.
+                    ↑(off + on) ≤ ↑q
+                    Use the hypothesis hsize: off + on ≤ q.
+                The following calculation gives ↑q − ↑(off + on) =
+  ({ coeffs := [0, 0, 1] } − { coeffs := [1, 0, 0, 1] }).eval
+    (Omega.Coeffs.ofList [↑on, ↑missing, ↑q, ↑off, ↑δ, ↑missing · ↑(q − off), ↑(q − off)]).
+                  Apply Lean.Omega.Int.sub_congr to the supplied arguments.
+                    ↑q − ↑(off + on) =
+  (Omega.LinearCombo.coordinate 2).eval
+      (Omega.Coeffs.ofList [↑on, ↑missing, ↑q, ↑off, ↑δ, ↑missing · ↑(q − off), ↑(q − off)]) -
+    ({ coeffs := [0, 0, 0, 1] } + { coeffs := [1] }).eval
+      (Omega.Coeffs.ofList [↑on, ↑missing, ↑q, ↑off, ↑δ, ↑missing · ↑(q − off), ↑(q − off)])
+                    Reverse the supplied equality.
+                      ↑q =
+  (Omega.LinearCombo.coordinate 2).eval
+    (Omega.Coeffs.ofList [↑on, ↑missing, ↑q, ↑off, ↑δ, ↑missing · ↑(q − off), ↑(q − off)])
+                      Apply Lean.Omega.LinearCombo.coordinate_eval_2 to the supplied arguments.
+                        (Omega.LinearCombo.coordinate 2).eval
+    (Omega.Coeffs.ofList [↑on, ↑missing, ↑q, ↑off, ↑δ, ↑missing · ↑(q − off), ↑(q − off)]) =
+  ↑q
+                    The following calculation gives ↑(off + on) =
+  ({ coeffs := [0, 0, 0, 1] } + { coeffs := [1] }).eval
+    (Omega.Coeffs.ofList [↑on, ↑missing, ↑q, ↑off, ↑δ, ↑missing · ↑(q − off), ↑(q − off)]).
+                      Apply Int.natCast_add to the supplied arguments.
+                        ↑(off + on) = ↑off + ↑on
+                      Apply Lean.Omega.Int.add_congr to the supplied arguments.
+                        ↑off + ↑on =
+  (Omega.LinearCombo.coordinate 3).eval
+      (Omega.Coeffs.ofList [↑on, ↑missing, ↑q, ↑off, ↑δ, ↑missing · ↑(q − off), ↑(q − off)]) +
+    (Omega.LinearCombo.coordinate 0).eval
+      (Omega.Coeffs.ofList [↑on, ↑missing, ↑q, ↑off, ↑δ, ↑missing · ↑(q − off), ↑(q − off)])
+                        Reverse the supplied equality.
+                          ↑off =
+  (Omega.LinearCombo.coordinate 3).eval
+    (Omega.Coeffs.ofList [↑on, ↑missing, ↑q, ↑off, ↑δ, ↑missing · ↑(q − off), ↑(q − off)])
+                          Apply Lean.Omega.LinearCombo.coordinate_eval_3 to the supplied arguments.
+                            (Omega.LinearCombo.coordinate 3).eval
+    (Omega.Coeffs.ofList [↑on, ↑missing, ↑q, ↑off, ↑δ, ↑missing · ↑(q − off), ↑(q − off)]) =
+  ↑off
+                        Reverse the supplied equality.
+                          ↑on =
+  (Omega.LinearCombo.coordinate 0).eval
+    (Omega.Coeffs.ofList [↑on, ↑missing, ↑q, ↑off, ↑δ, ↑missing · ↑(q − off), ↑(q − off)])
+                          Apply Lean.Omega.LinearCombo.coordinate_eval_0 to the supplied arguments.
+                            (Omega.LinearCombo.coordinate 0).eval
+    (Omega.Coeffs.ofList [↑on, ↑missing, ↑q, ↑off, ↑δ, ↑missing · ↑(q − off), ↑(q − off)]) =
+  ↑on
+                      Reverse the supplied equality.
+                        { coeffs := [0, 0, 0, 1] }.eval (Omega.Coeffs.ofList [↑on, ↑missing, ↑q, ↑off, ↑δ, ↑missing · ↑(q − off), ↑(q − off)]) +
+    { coeffs := [1] }.eval (Omega.Coeffs.ofList [↑on, ↑missing, ↑q, ↑off, ↑δ, ↑missing · ↑(q − off), ↑(q − off)]) =
+  ({ coeffs := [0, 0, 0, 1] } + { coeffs := [1] }).eval
+    (Omega.Coeffs.ofList [↑on, ↑missing, ↑q, ↑off, ↑δ, ↑missing · ↑(q − off), ↑(q − off)])
+                        Apply Lean.Omega.LinearCombo.add_eval to the supplied arguments.
+                          ({ coeffs := [0, 0, 0, 1] } + { coeffs := [1] }).eval
+    (Omega.Coeffs.ofList [↑on, ↑missing, ↑q, ↑off, ↑δ, ↑missing · ↑(q − off), ↑(q − off)]) =
+  { coeffs := [0, 0, 0, 1] }.eval
+      (Omega.Coeffs.ofList [↑on, ↑missing, ↑q, ↑off, ↑δ, ↑missing · ↑(q − off), ↑(q − off)]) +
+    { coeffs := [1] }.eval (Omega.Coeffs.ofList [↑on, ↑missing, ↑q, ↑off, ↑δ, ↑missing · ↑(q − off), ↑(q − off)])
+                  Reverse the supplied equality.
+                    { coeffs := [0, 0, 1] }.eval (Omega.Coeffs.ofList [↑on, ↑missing, ↑q, ↑off, ↑δ, ↑missing · ↑(q − off), ↑(q − off)]) -
+    { coeffs := [1, 0, 0, 1] }.eval
+      (Omega.Coeffs.ofList [↑on, ↑missing, ↑q, ↑off, ↑δ, ↑missing · ↑(q − off), ↑(q − off)]) =
+  ({ coeffs := [0, 0, 1] } − { coeffs := [1, 0, 0, 1] }).eval
+    (Omega.Coeffs.ofList [↑on, ↑missing, ↑q, ↑off, ↑δ, ↑missing · ↑(q − off), ↑(q − off)])
+                    Apply Lean.Omega.LinearCombo.sub_eval to the supplied arguments.
+                      ({ coeffs := [0, 0, 1] } − { coeffs := [1, 0, 0, 1] }).eval
+    (Omega.Coeffs.ofList [↑on, ↑missing, ↑q, ↑off, ↑δ, ↑missing · ↑(q − off), ↑(q − off)]) =
+  { coeffs := [0, 0, 1] }.eval (Omega.Coeffs.ofList [↑on, ↑missing, ↑q, ↑off, ↑δ, ↑missing · ↑(q − off), ↑(q − off)]) -
+    { coeffs := [1, 0, 0, 1] }.eval
+      (Omega.Coeffs.ofList [↑on, ↑missing, ↑q, ↑off, ↑δ, ↑missing · ↑(q − off), ↑(q − off)])
+          Apply Lean.Omega.combo_sat' to the supplied arguments.
+            (Omega.Constraint.combo 1 { lowerBound := some 0, upperBound := some 0 } 1
+        { lowerBound := none, upperBound := some 0 }).sat'
+    (Omega.Coeffs.combo 1 [0, 0, 1, -1, 0, 0, -1] 1 [0, 1, -1, 0, 0, 0, 1])
+    (Omega.Coeffs.ofList [↑on, ↑missing, ↑q, ↑off, ↑δ, ↑missing · ↑(q − off), ↑(q − off)]) =
+  true
+            Apply Lean.Omega.tidy_sat to the supplied arguments.
+              (Omega.tidyConstraint { lowerBound := some 0, upperBound := some 0 } [0, 0, -1, 1, 0, 0, 1]).sat'
+    (Omega.tidyCoeffs { lowerBound := some 0, upperBound := some 0 } [0, 0, -1, 1, 0, 0, 1])
+    (Omega.Coeffs.ofList [↑on, ↑missing, ↑q, ↑off, ↑δ, ↑missing · ↑(q − off), ↑(q − off)]) =
+  true
+              Apply Lean.Omega.Constraint.addEquality_sat to the supplied arguments.
+                { lowerBound := some (-0), upperBound := some (-0) }.sat' [0, 0, -1, 1, 0, 0, 1]
+    (Omega.Coeffs.ofList [↑on, ↑missing, ↑q, ↑off, ↑δ, ↑missing · ↑(q − off), ↑(q − off)]) =
+  true
+                The following calculation gives ({ coeffs := [0, 0, 0, 0, 0, 0, 1] } − { coeffs := [0, 0, 1, -1] }).eval
+    (Omega.Coeffs.ofList [↑on, ↑missing, ↑q, ↑off, ↑δ, ↑missing · ↑(q − off), ↑(q − off)]) =
+  0.
+                  Reverse the supplied equality.
+                    ({ coeffs := [0, 0, 0, 0, 0, 0, 1] } − { coeffs := [0, 0, 1, -1] }).eval
+    (Omega.Coeffs.ofList [↑on, ↑missing, ↑q, ↑off, ↑δ, ↑missing · ↑(q − off), ↑(q − off)]) =
+  ↑(q − off) − (↑q − ↑off)
+                    The following calculation gives ↑(q − off) − (↑q − ↑off) =
+  ({ coeffs := [0, 0, 0, 0, 0, 0, 1] } − { coeffs := [0, 0, 1, -1] }).eval
+    (Omega.Coeffs.ofList [↑on, ↑missing, ↑q, ↑off, ↑δ, ↑missing · ↑(q − off), ↑(q − off)]).
+                      Apply Lean.Omega.Int.sub_congr to the supplied arguments.
+                        ↑(q − off) − (↑q − ↑off) =
+  (Omega.LinearCombo.coordinate 6).eval
+      (Omega.Coeffs.ofList [↑on, ↑missing, ↑q, ↑off, ↑δ, ↑missing · ↑(q − off), ↑(q − off)]) -
+    ({ coeffs := [0, 0, 1] } − { coeffs := [0, 0, 0, 1] }).eval
+      (Omega.Coeffs.ofList [↑on, ↑missing, ↑q, ↑off, ↑δ, ↑missing · ↑(q − off), ↑(q − off)])
+                        Reverse the supplied equality.
+                          ↑(q − off) =
+  (Omega.LinearCombo.coordinate 6).eval
+    (Omega.Coeffs.ofList [↑on, ↑missing, ↑q, ↑off, ↑δ, ↑missing · ↑(q − off), ↑(q − off)])
+                          Apply Lean.Omega.LinearCombo.coordinate_eval_6 to the supplied arguments.
+                            (Omega.LinearCombo.coordinate 6).eval
+    (Omega.Coeffs.ofList [↑on, ↑missing, ↑q, ↑off, ↑δ, ↑missing · ↑(q − off), ↑(q − off)]) =
+  ↑(q − off)
+                        The following calculation gives ↑q − ↑off =
+  ({ coeffs := [0, 0, 1] } − { coeffs := [0, 0, 0, 1] }).eval
+    (Omega.Coeffs.ofList [↑on, ↑missing, ↑q, ↑off, ↑δ, ↑missing · ↑(q − off), ↑(q − off)]).
+                          Apply Lean.Omega.Int.sub_congr to the supplied arguments.
+                            ↑q − ↑off =
+  (Omega.LinearCombo.coordinate 2).eval
+      (Omega.Coeffs.ofList [↑on, ↑missing, ↑q, ↑off, ↑δ, ↑missing · ↑(q − off), ↑(q − off)]) -
+    (Omega.LinearCombo.coordinate 3).eval
+      (Omega.Coeffs.ofList [↑on, ↑missing, ↑q, ↑off, ↑δ, ↑missing · ↑(q − off), ↑(q − off)])
+                            Reverse the supplied equality.
+                              ↑q =
+  (Omega.LinearCombo.coordinate 2).eval
+    (Omega.Coeffs.ofList [↑on, ↑missing, ↑q, ↑off, ↑δ, ↑missing · ↑(q − off), ↑(q − off)])
+                              Apply Lean.Omega.LinearCombo.coordinate_eval_2 to the supplied arguments.
+                                (Omega.LinearCombo.coordinate 2).eval
+    (Omega.Coeffs.ofList [↑on, ↑missing, ↑q, ↑off, ↑δ, ↑missing · ↑(q − off), ↑(q − off)]) =
+  ↑q
+                            Reverse the supplied equality.
+                              ↑off =
+  (Omega.LinearCombo.coordinate 3).eval
+    (Omega.Coeffs.ofList [↑on, ↑missing, ↑q, ↑off, ↑δ, ↑missing · ↑(q − off), ↑(q − off)])
+                              Apply Lean.Omega.LinearCombo.coordinate_eval_3 to the supplied arguments.
+                                (Omega.LinearCombo.coordinate 3).eval
+    (Omega.Coeffs.ofList [↑on, ↑missing, ↑q, ↑off, ↑δ, ↑missing · ↑(q − off), ↑(q − off)]) =
+  ↑off
+                          Reverse the supplied equality.
+                            { coeffs := [0, 0, 1] }.eval (Omega.Coeffs.ofList [↑on, ↑missing, ↑q, ↑off, ↑δ, ↑missing · ↑(q − off), ↑(q − off)]) -
+    { coeffs := [0, 0, 0, 1] }.eval
+      (Omega.Coeffs.ofList [↑on, ↑missing, ↑q, ↑off, ↑δ, ↑missing · ↑(q − off), ↑(q − off)]) =
+  ({ coeffs := [0, 0, 1] } − { coeffs := [0, 0, 0, 1] }).eval
+    (Omega.Coeffs.ofList [↑on, ↑missing, ↑q, ↑off, ↑δ, ↑missing · ↑(q − off), ↑(q − off)])
+                            Apply Lean.Omega.LinearCombo.sub_eval to the supplied arguments.
+                              ({ coeffs := [0, 0, 1] } − { coeffs := [0, 0, 0, 1] }).eval
+    (Omega.Coeffs.ofList [↑on, ↑missing, ↑q, ↑off, ↑δ, ↑missing · ↑(q − off), ↑(q − off)]) =
+  { coeffs := [0, 0, 1] }.eval (Omega.Coeffs.ofList [↑on, ↑missing, ↑q, ↑off, ↑δ, ↑missing · ↑(q − off), ↑(q − off)]) -
+    { coeffs := [0, 0, 0, 1] }.eval
+      (Omega.Coeffs.ofList [↑on, ↑missing, ↑q, ↑off, ↑δ, ↑missing · ↑(q − off), ↑(q − off)])
+                      Reverse the supplied equality.
+                        { coeffs := [0, 0, 0, 0, 0, 0, 1] }.eval
+      (Omega.Coeffs.ofList [↑on, ↑missing, ↑q, ↑off, ↑δ, ↑missing · ↑(q − off), ↑(q − off)]) -
+    { coeffs := [0, 0, 1, -1] }.eval
+      (Omega.Coeffs.ofList [↑on, ↑missing, ↑q, ↑off, ↑δ, ↑missing · ↑(q − off), ↑(q − off)]) =
+  ({ coeffs := [0, 0, 0, 0, 0, 0, 1] } − { coeffs := [0, 0, 1, -1] }).eval
+    (Omega.Coeffs.ofList [↑on, ↑missing, ↑q, ↑off, ↑δ, ↑missing · ↑(q − off), ↑(q − off)])
+                        Apply Lean.Omega.LinearCombo.sub_eval to the supplied arguments.
+                          ({ coeffs := [0, 0, 0, 0, 0, 0, 1] } − { coeffs := [0, 0, 1, -1] }).eval
+    (Omega.Coeffs.ofList [↑on, ↑missing, ↑q, ↑off, ↑δ, ↑missing · ↑(q − off), ↑(q − off)]) =
+  { coeffs := [0, 0, 0, 0, 0, 0, 1] }.eval
+      (Omega.Coeffs.ofList [↑on, ↑missing, ↑q, ↑off, ↑δ, ↑missing · ↑(q − off), ↑(q − off)]) -
+    { coeffs := [0, 0, 1, -1] }.eval
+      (Omega.Coeffs.ofList [↑on, ↑missing, ↑q, ↑off, ↑δ, ↑missing · ↑(q − off), ↑(q − off)])
+                  Apply Int.sub_eq_zero_of_eq to the supplied arguments.
+                    ↑(q − off) − (↑q − ↑off) = 0
+                    Take the second conjunct.
+                      ↑(q − off) = ↑q − ↑off
+                      Use the hypothesis h₁: off ≤ q ∧ ↑(q − off) = ↑q − ↑off.
+            Apply Lean.Omega.tidy_sat to the supplied arguments.
+              (Omega.tidyConstraint { lowerBound := some 0, upperBound := none } [0, -1, 1, 0, 0, 0, -1]).sat'
+    (Omega.tidyCoeffs { lowerBound := some 0, upperBound := none } [0, -1, 1, 0, 0, 0, -1])
+    (Omega.Coeffs.ofList [↑on, ↑missing, ↑q, ↑off, ↑δ, ↑missing · ↑(q − off), ↑(q − off)]) =
+  true
+              Apply Lean.Omega.combo_sat' to the supplied arguments.
+                (Omega.Constraint.combo (-1) { lowerBound := some 1, upperBound := some 1 } 1
+        { lowerBound := some 1, upperBound := none }).sat'
+    (Omega.Coeffs.combo (-1) [1, 1, -1] 1 [1, 0, 0, 0, 0, 0, -1])
+    (Omega.Coeffs.ofList [↑on, ↑missing, ↑q, ↑off, ↑δ, ↑missing · ↑(q − off), ↑(q − off)]) =
+  true
+                Apply Lean.Omega.Constraint.addEquality_sat to the supplied arguments.
+                  { lowerBound := some (- -1), upperBound := some (- -1) }.sat' [1, 1, -1]
+    (Omega.Coeffs.ofList [↑on, ↑missing, ↑q, ↑off, ↑δ, ↑missing · ↑(q − off), ↑(q − off)]) =
+  true
+                  The following calculation gives ({ coeffs := [1, 1] } − { const := 1, coeffs := [0, 0, 1] }).eval
+    (Omega.Coeffs.ofList [↑on, ↑missing, ↑q, ↑off, ↑δ, ↑missing · ↑(q − off), ↑(q − off)]) =
+  0.
+                    Reverse the supplied equality.
+                      ({ coeffs := [1, 1] } − { const := 1, coeffs := [0, 0, 1] }).eval
+    (Omega.Coeffs.ofList [↑on, ↑missing, ↑q, ↑off, ↑δ, ↑missing · ↑(q − off), ↑(q − off)]) =
+  ↑(on + missing) − ↑(q + 1)
+                      The following calculation gives ↑(on + missing) − ↑(q + 1) =
+  ({ coeffs := [1, 1] } − { const := 1, coeffs := [0, 0, 1] }).eval
+    (Omega.Coeffs.ofList [↑on, ↑missing, ↑q, ↑off, ↑δ, ↑missing · ↑(q − off), ↑(q − off)]).
+                        Apply Lean.Omega.Int.sub_congr to the supplied arguments.
+                          ↑(on + missing) − ↑(q + 1) =
+  ({ coeffs := [1] } + { coeffs := [0, 1] }).eval
+      (Omega.Coeffs.ofList [↑on, ↑missing, ↑q, ↑off, ↑δ, ↑missing · ↑(q − off), ↑(q − off)]) -
+    ({ coeffs := [0, 0, 1] } + { const := 1 }).eval
+      (Omega.Coeffs.ofList [↑on, ↑missing, ↑q, ↑off, ↑δ, ↑missing · ↑(q − off), ↑(q − off)])
+                          The following calculation gives ↑(on + missing) =
+  ({ coeffs := [1] } + { coeffs := [0, 1] }).eval
+    (Omega.Coeffs.ofList [↑on, ↑missing, ↑q, ↑off, ↑δ, ↑missing · ↑(q − off), ↑(q − off)]).
+                            Apply Int.natCast_add to the supplied arguments.
+                              ↑(on + missing) = ↑on + ↑missing
+                            Apply Lean.Omega.Int.add_congr to the supplied arguments.
+                              ↑on + ↑missing =
+  (Omega.LinearCombo.coordinate 0).eval
+      (Omega.Coeffs.ofList [↑on, ↑missing, ↑q, ↑off, ↑δ, ↑missing · ↑(q − off), ↑(q − off)]) +
+    (Omega.LinearCombo.coordinate 1).eval
+      (Omega.Coeffs.ofList [↑on, ↑missing, ↑q, ↑off, ↑δ, ↑missing · ↑(q − off), ↑(q − off)])
+                              Reverse the supplied equality.
+                                ↑on =
+  (Omega.LinearCombo.coordinate 0).eval
+    (Omega.Coeffs.ofList [↑on, ↑missing, ↑q, ↑off, ↑δ, ↑missing · ↑(q − off), ↑(q − off)])
+                                Apply Lean.Omega.LinearCombo.coordinate_eval_0 to the supplied arguments.
+                                  (Omega.LinearCombo.coordinate 0).eval
+    (Omega.Coeffs.ofList [↑on, ↑missing, ↑q, ↑off, ↑δ, ↑missing · ↑(q − off), ↑(q − off)]) =
+  ↑on
+                              Reverse the supplied equality.
+                                ↑missing =
+  (Omega.LinearCombo.coordinate 1).eval
+    (Omega.Coeffs.ofList [↑on, ↑missing, ↑q, ↑off, ↑δ, ↑missing · ↑(q − off), ↑(q − off)])
+                                Apply Lean.Omega.LinearCombo.coordinate_eval_1 to the supplied arguments.
+                                  (Omega.LinearCombo.coordinate 1).eval
+    (Omega.Coeffs.ofList [↑on, ↑missing, ↑q, ↑off, ↑δ, ↑missing · ↑(q − off), ↑(q − off)]) =
+  ↑missing
+                            Reverse the supplied equality.
+                              { coeffs := [1] }.eval (Omega.Coeffs.ofList [↑on, ↑missing, ↑q, ↑off, ↑δ, ↑missing · ↑(q − off), ↑(q − off)]) +
+    { coeffs := [0, 1] }.eval (Omega.Coeffs.ofList [↑on, ↑missing, ↑q, ↑off, ↑δ, ↑missing · ↑(q − off), ↑(q − off)]) =
+  ({ coeffs := [1] } + { coeffs := [0, 1] }).eval
+    (Omega.Coeffs.ofList [↑on, ↑missing, ↑q, ↑off, ↑δ, ↑missing · ↑(q − off), ↑(q − off)])
+                              Apply Lean.Omega.LinearCombo.add_eval to the supplied arguments.
+                                ({ coeffs := [1] } + { coeffs := [0, 1] }).eval
+    (Omega.Coeffs.ofList [↑on, ↑missing, ↑q, ↑off, ↑δ, ↑missing · ↑(q − off), ↑(q − off)]) =
+  { coeffs := [1] }.eval (Omega.Coeffs.ofList [↑on, ↑missing, ↑q, ↑off, ↑δ, ↑missing · ↑(q − off), ↑(q − off)]) +
+    { coeffs := [0, 1] }.eval (Omega.Coeffs.ofList [↑on, ↑missing, ↑q, ↑off, ↑δ, ↑missing · ↑(q − off), ↑(q − off)])
+                          The following calculation gives ↑(q + 1) =
+  ({ coeffs := [0, 0, 1] } + { const := 1 }).eval
+    (Omega.Coeffs.ofList [↑on, ↑missing, ↑q, ↑off, ↑δ, ↑missing · ↑(q − off), ↑(q − off)]).
+                            Apply Int.natCast_add to the supplied arguments.
+                              ↑(q + 1) = ↑q + ↑1
+                            Apply Lean.Omega.Int.add_congr to the supplied arguments.
+                              ↑q + ↑1 =
+  (Omega.LinearCombo.coordinate 2).eval
+      (Omega.Coeffs.ofList [↑on, ↑missing, ↑q, ↑off, ↑δ, ↑missing · ↑(q − off), ↑(q − off)]) +
+    { const := 1 }.eval (Omega.Coeffs.ofList [↑on, ↑missing, ↑q, ↑off, ↑δ, ↑missing · ↑(q − off), ↑(q − off)])
+                              Reverse the supplied equality.
+                                ↑q =
+  (Omega.LinearCombo.coordinate 2).eval
+    (Omega.Coeffs.ofList [↑on, ↑missing, ↑q, ↑off, ↑δ, ↑missing · ↑(q − off), ↑(q − off)])
+                                Apply Lean.Omega.LinearCombo.coordinate_eval_2 to the supplied arguments.
+                                  (Omega.LinearCombo.coordinate 2).eval
+    (Omega.Coeffs.ofList [↑on, ↑missing, ↑q, ↑off, ↑δ, ↑missing · ↑(q − off), ↑(q − off)]) =
+  ↑q
+                              Apply id to the supplied arguments.
+                                ↑1 = { const := 1 }.eval (Omega.Coeffs.ofList [↑on, ↑missing, ↑q, ↑off, ↑δ, ↑missing · ↑(q − off), ↑(q − off)])
+                                By reflexivity, ↑1 = ↑1.
+                            Reverse the supplied equality.
+                              { coeffs := [0, 0, 1] }.eval (Omega.Coeffs.ofList [↑on, ↑missing, ↑q, ↑off, ↑δ, ↑missing · ↑(q − off), ↑(q − off)]) +
+    { const := 1 }.eval (Omega.Coeffs.ofList [↑on, ↑missing, ↑q, ↑off, ↑δ, ↑missing · ↑(q − off), ↑(q − off)]) =
+  ({ coeffs := [0, 0, 1] } + { const := 1 }).eval
+    (Omega.Coeffs.ofList [↑on, ↑missing, ↑q, ↑off, ↑δ, ↑missing · ↑(q − off), ↑(q − off)])
+                              Apply Lean.Omega.LinearCombo.add_eval to the supplied arguments.
+                                ({ coeffs := [0, 0, 1] } + { const := 1 }).eval
+    (Omega.Coeffs.ofList [↑on, ↑missing, ↑q, ↑off, ↑δ, ↑missing · ↑(q − off), ↑(q − off)]) =
+  { coeffs := [0, 0, 1] }.eval (Omega.Coeffs.ofList [↑on, ↑missing, ↑q, ↑off, ↑δ, ↑missing · ↑(q − off), ↑(q − off)]) +
+    { const := 1 }.eval (Omega.Coeffs.ofList [↑on, ↑missing, ↑q, ↑off, ↑δ, ↑missing · ↑(q − off), ↑(q − off)])
+                        Reverse the supplied equality.
+                          { coeffs := [1, 1] }.eval (Omega.Coeffs.ofList [↑on, ↑missing, ↑q, ↑off, ↑δ, ↑missing · ↑(q − off), ↑(q − off)]) -
+    { const := 1, coeffs := [0, 0, 1] }.eval
+      (Omega.Coeffs.ofList [↑on, ↑missing, ↑q, ↑off, ↑δ, ↑missing · ↑(q − off), ↑(q − off)]) =
+  ({ coeffs := [1, 1] } − { const := 1, coeffs := [0, 0, 1] }).eval
+    (Omega.Coeffs.ofList [↑on, ↑missing, ↑q, ↑off, ↑δ, ↑missing · ↑(q − off), ↑(q − off)])
+                          Apply Lean.Omega.LinearCombo.sub_eval to the supplied arguments.
+                            ({ coeffs := [1, 1] } − { const := 1, coeffs := [0, 0, 1] }).eval
+    (Omega.Coeffs.ofList [↑on, ↑missing, ↑q, ↑off, ↑δ, ↑missing · ↑(q − off), ↑(q − off)]) =
+  { coeffs := [1, 1] }.eval (Omega.Coeffs.ofList [↑on, ↑missing, ↑q, ↑off, ↑δ, ↑missing · ↑(q − off), ↑(q − off)]) -
+    { const := 1, coeffs := [0, 0, 1] }.eval
+      (Omega.Coeffs.ofList [↑on, ↑missing, ↑q, ↑off, ↑δ, ↑missing · ↑(q − off), ↑(q − off)])
+                    Apply Int.sub_eq_zero_of_eq to the supplied arguments.
+                      ↑(on + missing) − ↑(q + 1) = 0
+                      Apply Lean.Omega.Int.ofNat_congr to the supplied arguments.
+                        ↑(on + missing) = ↑(q + 1)
+                        Use the hypothesis hline: on + missing = q + 1.
+                Apply Lean.Omega.Constraint.addInequality_sat to the supplied arguments.
+                  { lowerBound := some (- -1), upperBound := none }.sat' [1, 0, 0, 0, 0, 0, -1]
+    (Omega.Coeffs.ofList [↑on, ↑missing, ↑q, ↑off, ↑δ, ↑missing · ↑(q − off), ↑(q − off)]) =
+  true
+                  Apply le_of_le_of_eq to the supplied arguments.
+                    0 ≤
+  ({ coeffs := [1] } − { const := 1, coeffs := [0, 0, 0, 0, 0, 0, 1] }).eval
+    (Omega.Coeffs.ofList [↑on, ↑missing, ↑q, ↑off, ↑δ, ↑missing · ↑(q − off), ↑(q − off)])
+                    Apply Int.sub_nonneg_of_le to the supplied arguments.
+                      0 ≤ ↑on − (↑(q − off) + 1)
+                      Apply Int.add_one_le_of_lt to the supplied arguments.
+                        ↑(q − off) + 1 ≤ ↑on
+                        Apply Lean.Omega.Int.ofNat_lt_of_lt to the supplied arguments.
+                          ↑(q − off) < ↑on
+                          Apply Nat.lt_of_not_le to the supplied arguments.
+                            q − off < on
+                            Use the hypothesis a: ¬on ≤ q − off.
+                    The following calculation gives ↑on − (↑(q − off) + 1) =
+  ({ coeffs := [1] } − { const := 1, coeffs := [0, 0, 0, 0, 0, 0, 1] }).eval
+    (Omega.Coeffs.ofList [↑on, ↑missing, ↑q, ↑off, ↑δ, ↑missing · ↑(q − off), ↑(q − off)]).
+                      Apply Lean.Omega.Int.sub_congr to the supplied arguments.
+                        ↑on − (↑(q − off) + 1) =
+  (Omega.LinearCombo.coordinate 0).eval
+      (Omega.Coeffs.ofList [↑on, ↑missing, ↑q, ↑off, ↑δ, ↑missing · ↑(q − off), ↑(q − off)]) -
+    ({ coeffs := [0, 0, 0, 0, 0, 0, 1] } + { const := 1 }).eval
+      (Omega.Coeffs.ofList [↑on, ↑missing, ↑q, ↑off, ↑δ, ↑missing · ↑(q − off), ↑(q − off)])
+                        Reverse the supplied equality.
+                          ↑on =
+  (Omega.LinearCombo.coordinate 0).eval
+    (Omega.Coeffs.ofList [↑on, ↑missing, ↑q, ↑off, ↑δ, ↑missing · ↑(q − off), ↑(q − off)])
+                          Apply Lean.Omega.LinearCombo.coordinate_eval_0 to the supplied arguments.
+                            (Omega.LinearCombo.coordinate 0).eval
+    (Omega.Coeffs.ofList [↑on, ↑missing, ↑q, ↑off, ↑δ, ↑missing · ↑(q − off), ↑(q − off)]) =
+  ↑on
+                        The following calculation gives ↑(q − off) + 1 =
+  ({ coeffs := [0, 0, 0, 0, 0, 0, 1] } + { const := 1 }).eval
+    (Omega.Coeffs.ofList [↑on, ↑missing, ↑q, ↑off, ↑δ, ↑missing · ↑(q − off), ↑(q − off)]).
+                          Apply Lean.Omega.Int.add_congr to the supplied arguments.
+                            ↑(q − off) + 1 =
+  (Omega.LinearCombo.coordinate 6).eval
+      (Omega.Coeffs.ofList [↑on, ↑missing, ↑q, ↑off, ↑δ, ↑missing · ↑(q − off), ↑(q − off)]) +
+    { const := 1 }.eval (Omega.Coeffs.ofList [↑on, ↑missing, ↑q, ↑off, ↑δ, ↑missing · ↑(q − off), ↑(q − off)])
+                            Reverse the supplied equality.
+                              ↑(q − off) =
+  (Omega.LinearCombo.coordinate 6).eval
+    (Omega.Coeffs.ofList [↑on, ↑missing, ↑q, ↑off, ↑δ, ↑missing · ↑(q − off), ↑(q − off)])
+                              Apply Lean.Omega.LinearCombo.coordinate_eval_6 to the supplied arguments.
+                                (Omega.LinearCombo.coordinate 6).eval
+    (Omega.Coeffs.ofList [↑on, ↑missing, ↑q, ↑off, ↑δ, ↑missing · ↑(q − off), ↑(q − off)]) =
+  ↑(q − off)
+                            Apply id to the supplied arguments.
+                              1 = { const := 1 }.eval (Omega.Coeffs.ofList [↑on, ↑missing, ↑q, ↑off, ↑δ, ↑missing · ↑(q − off), ↑(q − off)])
+                              By reflexivity, 1 = 1.
+                          Reverse the supplied equality.
+                            { coeffs := [0, 0, 0, 0, 0, 0, 1] }.eval
+      (Omega.Coeffs.ofList [↑on, ↑missing, ↑q, ↑off, ↑δ, ↑missing · ↑(q − off), ↑(q − off)]) +
+    { const := 1 }.eval (Omega.Coeffs.ofList [↑on, ↑missing, ↑q, ↑off, ↑δ, ↑missing · ↑(q − off), ↑(q − off)]) =
+  ({ coeffs := [0, 0, 0, 0, 0, 0, 1] } + { const := 1 }).eval
+    (Omega.Coeffs.ofList [↑on, ↑missing, ↑q, ↑off, ↑δ, ↑missing · ↑(q − off), ↑(q − off)])
+                            Apply Lean.Omega.LinearCombo.add_eval to the supplied arguments.
+                              ({ coeffs := [0, 0, 0, 0, 0, 0, 1] } + { const := 1 }).eval
+    (Omega.Coeffs.ofList [↑on, ↑missing, ↑q, ↑off, ↑δ, ↑missing · ↑(q − off), ↑(q − off)]) =
+  { coeffs := [0, 0, 0, 0, 0, 0, 1] }.eval
+      (Omega.Coeffs.ofList [↑on, ↑missing, ↑q, ↑off, ↑δ, ↑missing · ↑(q − off), ↑(q − off)]) +
+    { const := 1 }.eval (Omega.Coeffs.ofList [↑on, ↑missing, ↑q, ↑off, ↑δ, ↑missing · ↑(q − off), ↑(q − off)])
+                      Reverse the supplied equality.
+                        { coeffs := [1] }.eval (Omega.Coeffs.ofList [↑on, ↑missing, ↑q, ↑off, ↑δ, ↑missing · ↑(q − off), ↑(q − off)]) -
+    { const := 1, coeffs := [0, 0, 0, 0, 0, 0, 1] }.eval
+      (Omega.Coeffs.ofList [↑on, ↑missing, ↑q, ↑off, ↑δ, ↑missing · ↑(q − off), ↑(q − off)]) =
+  ({ coeffs := [1] } − { const := 1, coeffs := [0, 0, 0, 0, 0, 0, 1] }).eval
+    (Omega.Coeffs.ofList [↑on, ↑missing, ↑q, ↑off, ↑δ, ↑missing · ↑(q − off), ↑(q − off)])
+                        Apply Lean.Omega.LinearCombo.sub_eval to the supplied arguments.
+                          ({ coeffs := [1] } − { const := 1, coeffs := [0, 0, 0, 0, 0, 0, 1] }).eval
+    (Omega.Coeffs.ofList [↑on, ↑missing, ↑q, ↑off, ↑δ, ↑missing · ↑(q − off), ↑(q − off)]) =
+  { coeffs := [1] }.eval (Omega.Coeffs.ofList [↑on, ↑missing, ↑q, ↑off, ↑δ, ↑missing · ↑(q − off), ↑(q − off)]) -
+    { const := 1, coeffs := [0, 0, 0, 0, 0, 0, 1] }.eval
+      (Omega.Coeffs.ofList [↑on, ↑missing, ↑q, ↑off, ↑δ, ↑missing · ↑(q − off), ↑(q − off)])
+  Case q < off ∧ ↑(q − off) = 0.
+    Apply Lean.Omega.Constraint.not_sat'_of_isImpossible to the supplied arguments.
+      False
+      Apply of_decide_eq_true to the supplied arguments.
+        { lowerBound := some 1, upperBound := some 0 }.isImpossible = true
+        Apply id to the supplied arguments.
+          decide ({ lowerBound := some 1, upperBound := some 0 }.isImpossible = true) = true
+          By reflexivity, true = true.
+      Apply Lean.Omega.tidy_sat to the supplied arguments.
+        (Omega.tidyConstraint { lowerBound := some 2, upperBound := none } [0, 0, 0, 0, 0, 0, 0]).sat'
+    (Omega.tidyCoeffs { lowerBound := some 2, upperBound := none } [0, 0, 0, 0, 0, 0, 0])
+    (Omega.Coeffs.ofList [↑on, ↑missing, ↑q, ↑off, ↑δ, ↑missing · ↑(q − off), ↑(q − off)]) =
+  true
+        Apply Lean.Omega.combo_sat' to the supplied arguments.
+          (Omega.Constraint.combo (-1) { lowerBound := none, upperBound := some 0 } 1
+        { lowerBound := some 2, upperBound := none }).sat'
+    (Omega.Coeffs.combo (-1) [0, 1, -1, 0, 0, 0, 0] 1 [0, 1, -1, 0])
+    (Omega.Coeffs.ofList [↑on, ↑missing, ↑q, ↑off, ↑δ, ↑missing · ↑(q − off), ↑(q − off)]) =
+  true
+          Apply Lean.Omega.combo_sat' to the supplied arguments.
+            (Omega.Constraint.combo (-1) { lowerBound := some 0, upperBound := some 0 } 1
+        { lowerBound := none, upperBound := some 0 }).sat'
+    (Omega.Coeffs.combo (-1) [0, 0, 0, 0, 0, 0, 1] 1 [0, 1, -1, 0, 0, 0, 1])
+    (Omega.Coeffs.ofList [↑on, ↑missing, ↑q, ↑off, ↑δ, ↑missing · ↑(q − off), ↑(q − off)]) =
+  true
+            Apply Lean.Omega.Constraint.addEquality_sat to the supplied arguments.
+              { lowerBound := some (-0), upperBound := some (-0) }.sat' [0, 0, 0, 0, 0, 0, 1]
+    (Omega.Coeffs.ofList [↑on, ↑missing, ↑q, ↑off, ↑δ, ↑missing · ↑(q − off), ↑(q − off)]) =
+  true
+              The following calculation gives (Omega.LinearCombo.coordinate 6).eval
+    (Omega.Coeffs.ofList [↑on, ↑missing, ↑q, ↑off, ↑δ, ↑missing · ↑(q − off), ↑(q − off)]) =
+  0.
+                Reverse the supplied equality.
+                  (Omega.LinearCombo.coordinate 6).eval
+    (Omega.Coeffs.ofList [↑on, ↑missing, ↑q, ↑off, ↑δ, ↑missing · ↑(q − off), ↑(q − off)]) =
+  ↑(q − off)
+                  Reverse the supplied equality.
+                    ↑(q − off) =
+  (Omega.LinearCombo.coordinate 6).eval
+    (Omega.Coeffs.ofList [↑on, ↑missing, ↑q, ↑off, ↑δ, ↑missing · ↑(q − off), ↑(q − off)])
+                    Apply Lean.Omega.LinearCombo.coordinate_eval_6 to the supplied arguments.
+                      (Omega.LinearCombo.coordinate 6).eval
+    (Omega.Coeffs.ofList [↑on, ↑missing, ↑q, ↑off, ↑δ, ↑missing · ↑(q − off), ↑(q − off)]) =
+  ↑(q − off)
+                Take the second conjunct.
+                  ↑(q − off) = 0
+                  Use the hypothesis h₂: q < off ∧ ↑(q − off) = 0.
+            Apply Lean.Omega.tidy_sat to the supplied arguments.
+              (Omega.tidyConstraint { lowerBound := some 0, upperBound := none } [0, -1, 1, 0, 0, 0, -1]).sat'
+    (Omega.tidyCoeffs { lowerBound := some 0, upperBound := none } [0, -1, 1, 0, 0, 0, -1])
+    (Omega.Coeffs.ofList [↑on, ↑missing, ↑q, ↑off, ↑δ, ↑missing · ↑(q − off), ↑(q − off)]) =
+  true
+              Apply Lean.Omega.combo_sat' to the supplied arguments.
+                (Omega.Constraint.combo (-1) { lowerBound := some 1, upperBound := some 1 } 1
+        { lowerBound := some 1, upperBound := none }).sat'
+    (Omega.Coeffs.combo (-1) [1, 1, -1] 1 [1, 0, 0, 0, 0, 0, -1])
+    (Omega.Coeffs.ofList [↑on, ↑missing, ↑q, ↑off, ↑δ, ↑missing · ↑(q − off), ↑(q − off)]) =
+  true
+                Apply Lean.Omega.Constraint.addEquality_sat to the supplied arguments.
+                  { lowerBound := some (- -1), upperBound := some (- -1) }.sat' [1, 1, -1]
+    (Omega.Coeffs.ofList [↑on, ↑missing, ↑q, ↑off, ↑δ, ↑missing · ↑(q − off), ↑(q − off)]) =
+  true
+                  The following calculation gives ({ coeffs := [1, 1] } − { const := 1, coeffs := [0, 0, 1] }).eval
+    (Omega.Coeffs.ofList [↑on, ↑missing, ↑q, ↑off, ↑δ, ↑missing · ↑(q − off), ↑(q − off)]) =
+  0.
+                    Reverse the supplied equality.
+                      ({ coeffs := [1, 1] } − { const := 1, coeffs := [0, 0, 1] }).eval
+    (Omega.Coeffs.ofList [↑on, ↑missing, ↑q, ↑off, ↑δ, ↑missing · ↑(q − off), ↑(q − off)]) =
+  ↑(on + missing) − ↑(q + 1)
+                      The following calculation gives ↑(on + missing) − ↑(q + 1) =
+  ({ coeffs := [1, 1] } − { const := 1, coeffs := [0, 0, 1] }).eval
+    (Omega.Coeffs.ofList [↑on, ↑missing, ↑q, ↑off, ↑δ, ↑missing · ↑(q − off), ↑(q − off)]).
+                        Apply Lean.Omega.Int.sub_congr to the supplied arguments.
+                          ↑(on + missing) − ↑(q + 1) =
+  ({ coeffs := [1] } + { coeffs := [0, 1] }).eval
+      (Omega.Coeffs.ofList [↑on, ↑missing, ↑q, ↑off, ↑δ, ↑missing · ↑(q − off), ↑(q − off)]) -
+    ({ coeffs := [0, 0, 1] } + { const := 1 }).eval
+      (Omega.Coeffs.ofList [↑on, ↑missing, ↑q, ↑off, ↑δ, ↑missing · ↑(q − off), ↑(q − off)])
+                          The following calculation gives ↑(on + missing) =
+  ({ coeffs := [1] } + { coeffs := [0, 1] }).eval
+    (Omega.Coeffs.ofList [↑on, ↑missing, ↑q, ↑off, ↑δ, ↑missing · ↑(q − off), ↑(q − off)]).
+                            Apply Int.natCast_add to the supplied arguments.
+                              ↑(on + missing) = ↑on + ↑missing
+                            Apply Lean.Omega.Int.add_congr to the supplied arguments.
+                              ↑on + ↑missing =
+  (Omega.LinearCombo.coordinate 0).eval
+      (Omega.Coeffs.ofList [↑on, ↑missing, ↑q, ↑off, ↑δ, ↑missing · ↑(q − off), ↑(q − off)]) +
+    (Omega.LinearCombo.coordinate 1).eval
+      (Omega.Coeffs.ofList [↑on, ↑missing, ↑q, ↑off, ↑δ, ↑missing · ↑(q − off), ↑(q − off)])
+                              Reverse the supplied equality.
+                                ↑on =
+  (Omega.LinearCombo.coordinate 0).eval
+    (Omega.Coeffs.ofList [↑on, ↑missing, ↑q, ↑off, ↑δ, ↑missing · ↑(q − off), ↑(q − off)])
+                                Apply Lean.Omega.LinearCombo.coordinate_eval_0 to the supplied arguments.
+                                  (Omega.LinearCombo.coordinate 0).eval
+    (Omega.Coeffs.ofList [↑on, ↑missing, ↑q, ↑off, ↑δ, ↑missing · ↑(q − off), ↑(q − off)]) =
+  ↑on
+                              Reverse the supplied equality.
+                                ↑missing =
+  (Omega.LinearCombo.coordinate 1).eval
+    (Omega.Coeffs.ofList [↑on, ↑missing, ↑q, ↑off, ↑δ, ↑missing · ↑(q − off), ↑(q − off)])
+                                Apply Lean.Omega.LinearCombo.coordinate_eval_1 to the supplied arguments.
+                                  (Omega.LinearCombo.coordinate 1).eval
+    (Omega.Coeffs.ofList [↑on, ↑missing, ↑q, ↑off, ↑δ, ↑missing · ↑(q − off), ↑(q − off)]) =
+  ↑missing
+                            Reverse the supplied equality.
+                              { coeffs := [1] }.eval (Omega.Coeffs.ofList [↑on, ↑missing, ↑q, ↑off, ↑δ, ↑missing · ↑(q − off), ↑(q − off)]) +
+    { coeffs := [0, 1] }.eval (Omega.Coeffs.ofList [↑on, ↑missing, ↑q, ↑off, ↑δ, ↑missing · ↑(q − off), ↑(q − off)]) =
+  ({ coeffs := [1] } + { coeffs := [0, 1] }).eval
+    (Omega.Coeffs.ofList [↑on, ↑missing, ↑q, ↑off, ↑δ, ↑missing · ↑(q − off), ↑(q − off)])
+                              Apply Lean.Omega.LinearCombo.add_eval to the supplied arguments.
+                                ({ coeffs := [1] } + { coeffs := [0, 1] }).eval
+    (Omega.Coeffs.ofList [↑on, ↑missing, ↑q, ↑off, ↑δ, ↑missing · ↑(q − off), ↑(q − off)]) =
+  { coeffs := [1] }.eval (Omega.Coeffs.ofList [↑on, ↑missing, ↑q, ↑off, ↑δ, ↑missing · ↑(q − off), ↑(q − off)]) +
+    { coeffs := [0, 1] }.eval (Omega.Coeffs.ofList [↑on, ↑missing, ↑q, ↑off, ↑δ, ↑missing · ↑(q − off), ↑(q − off)])
+                          The following calculation gives ↑(q + 1) =
+  ({ coeffs := [0, 0, 1] } + { const := 1 }).eval
+    (Omega.Coeffs.ofList [↑on, ↑missing, ↑q, ↑off, ↑δ, ↑missing · ↑(q − off), ↑(q − off)]).
+                            Apply Int.natCast_add to the supplied arguments.
+                              ↑(q + 1) = ↑q + ↑1
+                            Apply Lean.Omega.Int.add_congr to the supplied arguments.
+                              ↑q + ↑1 =
+  (Omega.LinearCombo.coordinate 2).eval
+      (Omega.Coeffs.ofList [↑on, ↑missing, ↑q, ↑off, ↑δ, ↑missing · ↑(q − off), ↑(q − off)]) +
+    { const := 1 }.eval (Omega.Coeffs.ofList [↑on, ↑missing, ↑q, ↑off, ↑δ, ↑missing · ↑(q − off), ↑(q − off)])
+                              Reverse the supplied equality.
+                                ↑q =
+  (Omega.LinearCombo.coordinate 2).eval
+    (Omega.Coeffs.ofList [↑on, ↑missing, ↑q, ↑off, ↑δ, ↑missing · ↑(q − off), ↑(q − off)])
+                                Apply Lean.Omega.LinearCombo.coordinate_eval_2 to the supplied arguments.
+                                  (Omega.LinearCombo.coordinate 2).eval
+    (Omega.Coeffs.ofList [↑on, ↑missing, ↑q, ↑off, ↑δ, ↑missing · ↑(q − off), ↑(q − off)]) =
+  ↑q
+                              Apply id to the supplied arguments.
+                                ↑1 = { const := 1 }.eval (Omega.Coeffs.ofList [↑on, ↑missing, ↑q, ↑off, ↑δ, ↑missing · ↑(q − off), ↑(q − off)])
+                                By reflexivity, ↑1 = ↑1.
+                            Reverse the supplied equality.
+                              { coeffs := [0, 0, 1] }.eval (Omega.Coeffs.ofList [↑on, ↑missing, ↑q, ↑off, ↑δ, ↑missing · ↑(q − off), ↑(q − off)]) +
+    { const := 1 }.eval (Omega.Coeffs.ofList [↑on, ↑missing, ↑q, ↑off, ↑δ, ↑missing · ↑(q − off), ↑(q − off)]) =
+  ({ coeffs := [0, 0, 1] } + { const := 1 }).eval
+    (Omega.Coeffs.ofList [↑on, ↑missing, ↑q, ↑off, ↑δ, ↑missing · ↑(q − off), ↑(q − off)])
+                              Apply Lean.Omega.LinearCombo.add_eval to the supplied arguments.
+                                ({ coeffs := [0, 0, 1] } + { const := 1 }).eval
+    (Omega.Coeffs.ofList [↑on, ↑missing, ↑q, ↑off, ↑δ, ↑missing · ↑(q − off), ↑(q − off)]) =
+  { coeffs := [0, 0, 1] }.eval (Omega.Coeffs.ofList [↑on, ↑missing, ↑q, ↑off, ↑δ, ↑missing · ↑(q − off), ↑(q − off)]) +
+    { const := 1 }.eval (Omega.Coeffs.ofList [↑on, ↑missing, ↑q, ↑off, ↑δ, ↑missing · ↑(q − off), ↑(q − off)])
+                        Reverse the supplied equality.
+                          { coeffs := [1, 1] }.eval (Omega.Coeffs.ofList [↑on, ↑missing, ↑q, ↑off, ↑δ, ↑missing · ↑(q − off), ↑(q − off)]) -
+    { const := 1, coeffs := [0, 0, 1] }.eval
+      (Omega.Coeffs.ofList [↑on, ↑missing, ↑q, ↑off, ↑δ, ↑missing · ↑(q − off), ↑(q − off)]) =
+  ({ coeffs := [1, 1] } − { const := 1, coeffs := [0, 0, 1] }).eval
+    (Omega.Coeffs.ofList [↑on, ↑missing, ↑q, ↑off, ↑δ, ↑missing · ↑(q − off), ↑(q − off)])
+                          Apply Lean.Omega.LinearCombo.sub_eval to the supplied arguments.
+                            ({ coeffs := [1, 1] } − { const := 1, coeffs := [0, 0, 1] }).eval
+    (Omega.Coeffs.ofList [↑on, ↑missing, ↑q, ↑off, ↑δ, ↑missing · ↑(q − off), ↑(q − off)]) =
+  { coeffs := [1, 1] }.eval (Omega.Coeffs.ofList [↑on, ↑missing, ↑q, ↑off, ↑δ, ↑missing · ↑(q − off), ↑(q − off)]) -
+    { const := 1, coeffs := [0, 0, 1] }.eval
+      (Omega.Coeffs.ofList [↑on, ↑missing, ↑q, ↑off, ↑δ, ↑missing · ↑(q − off), ↑(q − off)])
+                    Apply Int.sub_eq_zero_of_eq to the supplied arguments.
+                      ↑(on + missing) − ↑(q + 1) = 0
+                      Apply Lean.Omega.Int.ofNat_congr to the supplied arguments.
+                        ↑(on + missing) = ↑(q + 1)
+                        Use the hypothesis hline: on + missing = q + 1.
+                Apply Lean.Omega.Constraint.addInequality_sat to the supplied arguments.
+                  { lowerBound := some (- -1), upperBound := none }.sat' [1, 0, 0, 0, 0, 0, -1]
+    (Omega.Coeffs.ofList [↑on, ↑missing, ↑q, ↑off, ↑δ, ↑missing · ↑(q − off), ↑(q − off)]) =
+  true
+                  Apply le_of_le_of_eq to the supplied arguments.
+                    0 ≤
+  ({ coeffs := [1] } − { const := 1, coeffs := [0, 0, 0, 0, 0, 0, 1] }).eval
+    (Omega.Coeffs.ofList [↑on, ↑missing, ↑q, ↑off, ↑δ, ↑missing · ↑(q − off), ↑(q − off)])
+                    Apply Int.sub_nonneg_of_le to the supplied arguments.
+                      0 ≤ ↑on − (↑(q − off) + 1)
+                      Apply Int.add_one_le_of_lt to the supplied arguments.
+                        ↑(q − off) + 1 ≤ ↑on
+                        Apply Lean.Omega.Int.ofNat_lt_of_lt to the supplied arguments.
+                          ↑(q − off) < ↑on
+                          Apply Nat.lt_of_not_le to the supplied arguments.
+                            q − off < on
+                            Use the hypothesis a: ¬on ≤ q − off.
+                    The following calculation gives ↑on − (↑(q − off) + 1) =
+  ({ coeffs := [1] } − { const := 1, coeffs := [0, 0, 0, 0, 0, 0, 1] }).eval
+    (Omega.Coeffs.ofList [↑on, ↑missing, ↑q, ↑off, ↑δ, ↑missing · ↑(q − off), ↑(q − off)]).
+                      Apply Lean.Omega.Int.sub_congr to the supplied arguments.
+                        ↑on − (↑(q − off) + 1) =
+  (Omega.LinearCombo.coordinate 0).eval
+      (Omega.Coeffs.ofList [↑on, ↑missing, ↑q, ↑off, ↑δ, ↑missing · ↑(q − off), ↑(q − off)]) -
+    ({ coeffs := [0, 0, 0, 0, 0, 0, 1] } + { const := 1 }).eval
+      (Omega.Coeffs.ofList [↑on, ↑missing, ↑q, ↑off, ↑δ, ↑missing · ↑(q − off), ↑(q − off)])
+                        Reverse the supplied equality.
+                          ↑on =
+  (Omega.LinearCombo.coordinate 0).eval
+    (Omega.Coeffs.ofList [↑on, ↑missing, ↑q, ↑off, ↑δ, ↑missing · ↑(q − off), ↑(q − off)])
+                          Apply Lean.Omega.LinearCombo.coordinate_eval_0 to the supplied arguments.
+                            (Omega.LinearCombo.coordinate 0).eval
+    (Omega.Coeffs.ofList [↑on, ↑missing, ↑q, ↑off, ↑δ, ↑missing · ↑(q − off), ↑(q − off)]) =
+  ↑on
+                        The following calculation gives ↑(q − off) + 1 =
+  ({ coeffs := [0, 0, 0, 0, 0, 0, 1] } + { const := 1 }).eval
+    (Omega.Coeffs.ofList [↑on, ↑missing, ↑q, ↑off, ↑δ, ↑missing · ↑(q − off), ↑(q − off)]).
+                          Apply Lean.Omega.Int.add_congr to the supplied arguments.
+                            ↑(q − off) + 1 =
+  (Omega.LinearCombo.coordinate 6).eval
+      (Omega.Coeffs.ofList [↑on, ↑missing, ↑q, ↑off, ↑δ, ↑missing · ↑(q − off), ↑(q − off)]) +
+    { const := 1 }.eval (Omega.Coeffs.ofList [↑on, ↑missing, ↑q, ↑off, ↑δ, ↑missing · ↑(q − off), ↑(q − off)])
+                            Reverse the supplied equality.
+                              ↑(q − off) =
+  (Omega.LinearCombo.coordinate 6).eval
+    (Omega.Coeffs.ofList [↑on, ↑missing, ↑q, ↑off, ↑δ, ↑missing · ↑(q − off), ↑(q − off)])
+                              Apply Lean.Omega.LinearCombo.coordinate_eval_6 to the supplied arguments.
+                                (Omega.LinearCombo.coordinate 6).eval
+    (Omega.Coeffs.ofList [↑on, ↑missing, ↑q, ↑off, ↑δ, ↑missing · ↑(q − off), ↑(q − off)]) =
+  ↑(q − off)
+                            Apply id to the supplied arguments.
+                              1 = { const := 1 }.eval (Omega.Coeffs.ofList [↑on, ↑missing, ↑q, ↑off, ↑δ, ↑missing · ↑(q − off), ↑(q − off)])
+                              By reflexivity, 1 = 1.
+                          Reverse the supplied equality.
+                            { coeffs := [0, 0, 0, 0, 0, 0, 1] }.eval
+      (Omega.Coeffs.ofList [↑on, ↑missing, ↑q, ↑off, ↑δ, ↑missing · ↑(q − off), ↑(q − off)]) +
+    { const := 1 }.eval (Omega.Coeffs.ofList [↑on, ↑missing, ↑q, ↑off, ↑δ, ↑missing · ↑(q − off), ↑(q − off)]) =
+  ({ coeffs := [0, 0, 0, 0, 0, 0, 1] } + { const := 1 }).eval
+    (Omega.Coeffs.ofList [↑on, ↑missing, ↑q, ↑off, ↑δ, ↑missing · ↑(q − off), ↑(q − off)])
+                            Apply Lean.Omega.LinearCombo.add_eval to the supplied arguments.
+                              ({ coeffs := [0, 0, 0, 0, 0, 0, 1] } + { const := 1 }).eval
+    (Omega.Coeffs.ofList [↑on, ↑missing, ↑q, ↑off, ↑δ, ↑missing · ↑(q − off), ↑(q − off)]) =
+  { coeffs := [0, 0, 0, 0, 0, 0, 1] }.eval
+      (Omega.Coeffs.ofList [↑on, ↑missing, ↑q, ↑off, ↑δ, ↑missing · ↑(q − off), ↑(q − off)]) +
+    { const := 1 }.eval (Omega.Coeffs.ofList [↑on, ↑missing, ↑q, ↑off, ↑δ, ↑missing · ↑(q − off), ↑(q − off)])
+                      Reverse the supplied equality.
+                        { coeffs := [1] }.eval (Omega.Coeffs.ofList [↑on, ↑missing, ↑q, ↑off, ↑δ, ↑missing · ↑(q − off), ↑(q − off)]) -
+    { const := 1, coeffs := [0, 0, 0, 0, 0, 0, 1] }.eval
+      (Omega.Coeffs.ofList [↑on, ↑missing, ↑q, ↑off, ↑δ, ↑missing · ↑(q − off), ↑(q − off)]) =
+  ({ coeffs := [1] } − { const := 1, coeffs := [0, 0, 0, 0, 0, 0, 1] }).eval
+    (Omega.Coeffs.ofList [↑on, ↑missing, ↑q, ↑off, ↑δ, ↑missing · ↑(q − off), ↑(q − off)])
+                        Apply Lean.Omega.LinearCombo.sub_eval to the supplied arguments.
+                          ({ coeffs := [1] } − { const := 1, coeffs := [0, 0, 0, 0, 0, 0, 1] }).eval
+    (Omega.Coeffs.ofList [↑on, ↑missing, ↑q, ↑off, ↑δ, ↑missing · ↑(q − off), ↑(q − off)]) =
+  { coeffs := [1] }.eval (Omega.Coeffs.ofList [↑on, ↑missing, ↑q, ↑off, ↑δ, ↑missing · ↑(q − off), ↑(q − off)]) -
+    { const := 1, coeffs := [0, 0, 0, 0, 0, 0, 1] }.eval
+      (Omega.Coeffs.ofList [↑on, ↑missing, ↑q, ↑off, ↑δ, ↑missing · ↑(q − off), ↑(q − off)])
+          Apply Lean.Omega.combo_sat' to the supplied arguments.
+            (Omega.Constraint.combo (-1) { lowerBound := none, upperBound := some (-1) } 1
+        { lowerBound := some 1, upperBound := none }).sat'
+    (Omega.Coeffs.combo (-1) [0, 0, 1, -1] 1 [0, 1, 0, -1])
+    (Omega.Coeffs.ofList [↑on, ↑missing, ↑q, ↑off, ↑δ, ↑missing · ↑(q − off), ↑(q − off)]) =
+  true
+            Apply Lean.Omega.tidy_sat to the supplied arguments.
+              (Omega.tidyConstraint { lowerBound := some 1, upperBound := none } [0, 0, -1, 1]).sat'
+    (Omega.tidyCoeffs { lowerBound := some 1, upperBound := none } [0, 0, -1, 1])
+    (Omega.Coeffs.ofList [↑on, ↑missing, ↑q, ↑off, ↑δ, ↑missing · ↑(q − off), ↑(q − off)]) =
+  true
+              Apply Lean.Omega.Constraint.addInequality_sat to the supplied arguments.
+                { lowerBound := some (- -1), upperBound := none }.sat' [0, 0, -1, 1]
+    (Omega.Coeffs.ofList [↑on, ↑missing, ↑q, ↑off, ↑δ, ↑missing · ↑(q − off), ↑(q − off)]) =
+  true
+                Apply le_of_le_of_eq to the supplied arguments.
+                  0 ≤
+  ({ coeffs := [0, 0, 0, 1] } − { const := 1, coeffs := [0, 0, 1] }).eval
+    (Omega.Coeffs.ofList [↑on, ↑missing, ↑q, ↑off, ↑δ, ↑missing · ↑(q − off), ↑(q − off)])
+                  Apply Int.sub_nonneg_of_le to the supplied arguments.
+                    0 ≤ ↑off − (↑q + 1)
+                    Apply Int.add_one_le_of_lt to the supplied arguments.
+                      ↑q + 1 ≤ ↑off
+                      Apply Lean.Omega.Int.ofNat_lt_of_lt to the supplied arguments.
+                        ↑q < ↑off
+                        Take the first conjunct.
+                          q < off
+                          Use the hypothesis h₂: q < off ∧ ↑(q − off) = 0.
+                  The following calculation gives ↑off − (↑q + 1) =
+  ({ coeffs := [0, 0, 0, 1] } − { const := 1, coeffs := [0, 0, 1] }).eval
+    (Omega.Coeffs.ofList [↑on, ↑missing, ↑q, ↑off, ↑δ, ↑missing · ↑(q − off), ↑(q − off)]).
+                    Apply Lean.Omega.Int.sub_congr to the supplied arguments.
+                      ↑off − (↑q + 1) =
+  (Omega.LinearCombo.coordinate 3).eval
+      (Omega.Coeffs.ofList [↑on, ↑missing, ↑q, ↑off, ↑δ, ↑missing · ↑(q − off), ↑(q − off)]) -
+    ({ coeffs := [0, 0, 1] } + { const := 1 }).eval
+      (Omega.Coeffs.ofList [↑on, ↑missing, ↑q, ↑off, ↑δ, ↑missing · ↑(q − off), ↑(q − off)])
+                      Reverse the supplied equality.
+                        ↑off =
+  (Omega.LinearCombo.coordinate 3).eval
+    (Omega.Coeffs.ofList [↑on, ↑missing, ↑q, ↑off, ↑δ, ↑missing · ↑(q − off), ↑(q − off)])
+                        Apply Lean.Omega.LinearCombo.coordinate_eval_3 to the supplied arguments.
+                          (Omega.LinearCombo.coordinate 3).eval
+    (Omega.Coeffs.ofList [↑on, ↑missing, ↑q, ↑off, ↑δ, ↑missing · ↑(q − off), ↑(q − off)]) =
+  ↑off
+                      The following calculation gives ↑q + 1 =
+  ({ coeffs := [0, 0, 1] } + { const := 1 }).eval
+    (Omega.Coeffs.ofList [↑on, ↑missing, ↑q, ↑off, ↑δ, ↑missing · ↑(q − off), ↑(q − off)]).
+                        Apply Lean.Omega.Int.add_congr to the supplied arguments.
+                          ↑q + 1 =
+  (Omega.LinearCombo.coordinate 2).eval
+      (Omega.Coeffs.ofList [↑on, ↑missing, ↑q, ↑off, ↑δ, ↑missing · ↑(q − off), ↑(q − off)]) +
+    { const := 1 }.eval (Omega.Coeffs.ofList [↑on, ↑missing, ↑q, ↑off, ↑δ, ↑missing · ↑(q − off), ↑(q − off)])
+                          Reverse the supplied equality.
+                            ↑q =
+  (Omega.LinearCombo.coordinate 2).eval
+    (Omega.Coeffs.ofList [↑on, ↑missing, ↑q, ↑off, ↑δ, ↑missing · ↑(q − off), ↑(q − off)])
+                            Apply Lean.Omega.LinearCombo.coordinate_eval_2 to the supplied arguments.
+                              (Omega.LinearCombo.coordinate 2).eval
+    (Omega.Coeffs.ofList [↑on, ↑missing, ↑q, ↑off, ↑δ, ↑missing · ↑(q − off), ↑(q − off)]) =
+  ↑q
+                          Apply id to the supplied arguments.
+                            1 = { const := 1 }.eval (Omega.Coeffs.ofList [↑on, ↑missing, ↑q, ↑off, ↑δ, ↑missing · ↑(q − off), ↑(q − off)])
+                            By reflexivity, 1 = 1.
+                        Reverse the supplied equality.
+                          { coeffs := [0, 0, 1] }.eval (Omega.Coeffs.ofList [↑on, ↑missing, ↑q, ↑off, ↑δ, ↑missing · ↑(q − off), ↑(q − off)]) +
+    { const := 1 }.eval (Omega.Coeffs.ofList [↑on, ↑missing, ↑q, ↑off, ↑δ, ↑missing · ↑(q − off), ↑(q − off)]) =
+  ({ coeffs := [0, 0, 1] } + { const := 1 }).eval
+    (Omega.Coeffs.ofList [↑on, ↑missing, ↑q, ↑off, ↑δ, ↑missing · ↑(q − off), ↑(q − off)])
+                          Apply Lean.Omega.LinearCombo.add_eval to the supplied arguments.
+                            ({ coeffs := [0, 0, 1] } + { const := 1 }).eval
+    (Omega.Coeffs.ofList [↑on, ↑missing, ↑q, ↑off, ↑δ, ↑missing · ↑(q − off), ↑(q − off)]) =
+  { coeffs := [0, 0, 1] }.eval (Omega.Coeffs.ofList [↑on, ↑missing, ↑q, ↑off, ↑δ, ↑missing · ↑(q − off), ↑(q − off)]) +
+    { const := 1 }.eval (Omega.Coeffs.ofList [↑on, ↑missing, ↑q, ↑off, ↑δ, ↑missing · ↑(q − off), ↑(q − off)])
+                    Reverse the supplied equality.
+                      { coeffs := [0, 0, 0, 1] }.eval (Omega.Coeffs.ofList [↑on, ↑missing, ↑q, ↑off, ↑δ, ↑missing · ↑(q − off), ↑(q − off)]) -
+    { const := 1, coeffs := [0, 0, 1] }.eval
+      (Omega.Coeffs.ofList [↑on, ↑missing, ↑q, ↑off, ↑δ, ↑missing · ↑(q − off), ↑(q − off)]) =
+  ({ coeffs := [0, 0, 0, 1] } − { const := 1, coeffs := [0, 0, 1] }).eval
+    (Omega.Coeffs.ofList [↑on, ↑missing, ↑q, ↑off, ↑δ, ↑missing · ↑(q − off), ↑(q − off)])
+                      Apply Lean.Omega.LinearCombo.sub_eval to the supplied arguments.
+                        ({ coeffs := [0, 0, 0, 1] } − { const := 1, coeffs := [0, 0, 1] }).eval
+    (Omega.Coeffs.ofList [↑on, ↑missing, ↑q, ↑off, ↑δ, ↑missing · ↑(q − off), ↑(q − off)]) =
+  { coeffs := [0, 0, 0, 1] }.eval
+      (Omega.Coeffs.ofList [↑on, ↑missing, ↑q, ↑off, ↑δ, ↑missing · ↑(q − off), ↑(q − off)]) -
+    { const := 1, coeffs := [0, 0, 1] }.eval
+      (Omega.Coeffs.ofList [↑on, ↑missing, ↑q, ↑off, ↑δ, ↑missing · ↑(q − off), ↑(q − off)])
+            Apply Lean.Omega.combo_sat' to the supplied arguments.
+              (Omega.Constraint.combo 1 { lowerBound := some 1, upperBound := some 1 } 1
+        { lowerBound := some 0, upperBound := none }).sat'
+    (Omega.Coeffs.combo 1 [1, 1, -1] 1 [-1, 0, 1, -1])
+    (Omega.Coeffs.ofList [↑on, ↑missing, ↑q, ↑off, ↑δ, ↑missing · ↑(q − off), ↑(q − off)]) =
+  true
+              Apply Lean.Omega.Constraint.addEquality_sat to the supplied arguments.
+                { lowerBound := some (- -1), upperBound := some (- -1) }.sat' [1, 1, -1]
+    (Omega.Coeffs.ofList [↑on, ↑missing, ↑q, ↑off, ↑δ, ↑missing · ↑(q − off), ↑(q − off)]) =
+  true
+                The following calculation gives ({ coeffs := [1, 1] } − { const := 1, coeffs := [0, 0, 1] }).eval
+    (Omega.Coeffs.ofList [↑on, ↑missing, ↑q, ↑off, ↑δ, ↑missing · ↑(q − off), ↑(q − off)]) =
+  0.
+                  Reverse the supplied equality.
+                    ({ coeffs := [1, 1] } − { const := 1, coeffs := [0, 0, 1] }).eval
+    (Omega.Coeffs.ofList [↑on, ↑missing, ↑q, ↑off, ↑δ, ↑missing · ↑(q − off), ↑(q − off)]) =
+  ↑(on + missing) − ↑(q + 1)
+                    The following calculation gives ↑(on + missing) − ↑(q + 1) =
+  ({ coeffs := [1, 1] } − { const := 1, coeffs := [0, 0, 1] }).eval
+    (Omega.Coeffs.ofList [↑on, ↑missing, ↑q, ↑off, ↑δ, ↑missing · ↑(q − off), ↑(q − off)]).
+                      Apply Lean.Omega.Int.sub_congr to the supplied arguments.
+                        ↑(on + missing) − ↑(q + 1) =
+  ({ coeffs := [1] } + { coeffs := [0, 1] }).eval
+      (Omega.Coeffs.ofList [↑on, ↑missing, ↑q, ↑off, ↑δ, ↑missing · ↑(q − off), ↑(q − off)]) -
+    ({ coeffs := [0, 0, 1] } + { const := 1 }).eval
+      (Omega.Coeffs.ofList [↑on, ↑missing, ↑q, ↑off, ↑δ, ↑missing · ↑(q − off), ↑(q − off)])
+                        The following calculation gives ↑(on + missing) =
+  ({ coeffs := [1] } + { coeffs := [0, 1] }).eval
+    (Omega.Coeffs.ofList [↑on, ↑missing, ↑q, ↑off, ↑δ, ↑missing · ↑(q − off), ↑(q − off)]).
+                          Apply Int.natCast_add to the supplied arguments.
+                            ↑(on + missing) = ↑on + ↑missing
+                          Apply Lean.Omega.Int.add_congr to the supplied arguments.
+                            ↑on + ↑missing =
+  (Omega.LinearCombo.coordinate 0).eval
+      (Omega.Coeffs.ofList [↑on, ↑missing, ↑q, ↑off, ↑δ, ↑missing · ↑(q − off), ↑(q − off)]) +
+    (Omega.LinearCombo.coordinate 1).eval
+      (Omega.Coeffs.ofList [↑on, ↑missing, ↑q, ↑off, ↑δ, ↑missing · ↑(q − off), ↑(q − off)])
+                            Reverse the supplied equality.
+                              ↑on =
+  (Omega.LinearCombo.coordinate 0).eval
+    (Omega.Coeffs.ofList [↑on, ↑missing, ↑q, ↑off, ↑δ, ↑missing · ↑(q − off), ↑(q − off)])
+                              Apply Lean.Omega.LinearCombo.coordinate_eval_0 to the supplied arguments.
+                                (Omega.LinearCombo.coordinate 0).eval
+    (Omega.Coeffs.ofList [↑on, ↑missing, ↑q, ↑off, ↑δ, ↑missing · ↑(q − off), ↑(q − off)]) =
+  ↑on
+                            Reverse the supplied equality.
+                              ↑missing =
+  (Omega.LinearCombo.coordinate 1).eval
+    (Omega.Coeffs.ofList [↑on, ↑missing, ↑q, ↑off, ↑δ, ↑missing · ↑(q − off), ↑(q − off)])
+                              Apply Lean.Omega.LinearCombo.coordinate_eval_1 to the supplied arguments.
+                                (Omega.LinearCombo.coordinate 1).eval
+    (Omega.Coeffs.ofList [↑on, ↑missing, ↑q, ↑off, ↑δ, ↑missing · ↑(q − off), ↑(q − off)]) =
+  ↑missing
+                          Reverse the supplied equality.
+                            { coeffs := [1] }.eval (Omega.Coeffs.ofList [↑on, ↑missing, ↑q, ↑off, ↑δ, ↑missing · ↑(q − off), ↑(q − off)]) +
+    { coeffs := [0, 1] }.eval (Omega.Coeffs.ofList [↑on, ↑missing, ↑q, ↑off, ↑δ, ↑missing · ↑(q − off), ↑(q − off)]) =
+  ({ coeffs := [1] } + { coeffs := [0, 1] }).eval
+    (Omega.Coeffs.ofList [↑on, ↑missing, ↑q, ↑off, ↑δ, ↑missing · ↑(q − off), ↑(q − off)])
+                            Apply Lean.Omega.LinearCombo.add_eval to the supplied arguments.
+                              ({ coeffs := [1] } + { coeffs := [0, 1] }).eval
+    (Omega.Coeffs.ofList [↑on, ↑missing, ↑q, ↑off, ↑δ, ↑missing · ↑(q − off), ↑(q − off)]) =
+  { coeffs := [1] }.eval (Omega.Coeffs.ofList [↑on, ↑missing, ↑q, ↑off, ↑δ, ↑missing · ↑(q − off), ↑(q − off)]) +
+    { coeffs := [0, 1] }.eval (Omega.Coeffs.ofList [↑on, ↑missing, ↑q, ↑off, ↑δ, ↑missing · ↑(q − off), ↑(q − off)])
+                        The following calculation gives ↑(q + 1) =
+  ({ coeffs := [0, 0, 1] } + { const := 1 }).eval
+    (Omega.Coeffs.ofList [↑on, ↑missing, ↑q, ↑off, ↑δ, ↑missing · ↑(q − off), ↑(q − off)]).
+                          Apply Int.natCast_add to the supplied arguments.
+                            ↑(q + 1) = ↑q + ↑1
+                          Apply Lean.Omega.Int.add_congr to the supplied arguments.
+                            ↑q + ↑1 =
+  (Omega.LinearCombo.coordinate 2).eval
+      (Omega.Coeffs.ofList [↑on, ↑missing, ↑q, ↑off, ↑δ, ↑missing · ↑(q − off), ↑(q − off)]) +
+    { const := 1 }.eval (Omega.Coeffs.ofList [↑on, ↑missing, ↑q, ↑off, ↑δ, ↑missing · ↑(q − off), ↑(q − off)])
+                            Reverse the supplied equality.
+                              ↑q =
+  (Omega.LinearCombo.coordinate 2).eval
+    (Omega.Coeffs.ofList [↑on, ↑missing, ↑q, ↑off, ↑δ, ↑missing · ↑(q − off), ↑(q − off)])
+                              Apply Lean.Omega.LinearCombo.coordinate_eval_2 to the supplied arguments.
+                                (Omega.LinearCombo.coordinate 2).eval
+    (Omega.Coeffs.ofList [↑on, ↑missing, ↑q, ↑off, ↑δ, ↑missing · ↑(q − off), ↑(q − off)]) =
+  ↑q
+                            Apply id to the supplied arguments.
+                              ↑1 = { const := 1 }.eval (Omega.Coeffs.ofList [↑on, ↑missing, ↑q, ↑off, ↑δ, ↑missing · ↑(q − off), ↑(q − off)])
+                              By reflexivity, ↑1 = ↑1.
+                          Reverse the supplied equality.
+                            { coeffs := [0, 0, 1] }.eval (Omega.Coeffs.ofList [↑on, ↑missing, ↑q, ↑off, ↑δ, ↑missing · ↑(q − off), ↑(q − off)]) +
+    { const := 1 }.eval (Omega.Coeffs.ofList [↑on, ↑missing, ↑q, ↑off, ↑δ, ↑missing · ↑(q − off), ↑(q − off)]) =
+  ({ coeffs := [0, 0, 1] } + { const := 1 }).eval
+    (Omega.Coeffs.ofList [↑on, ↑missing, ↑q, ↑off, ↑δ, ↑missing · ↑(q − off), ↑(q − off)])
+                            Apply Lean.Omega.LinearCombo.add_eval to the supplied arguments.
+                              ({ coeffs := [0, 0, 1] } + { const := 1 }).eval
+    (Omega.Coeffs.ofList [↑on, ↑missing, ↑q, ↑off, ↑δ, ↑missing · ↑(q − off), ↑(q − off)]) =
+  { coeffs := [0, 0, 1] }.eval (Omega.Coeffs.ofList [↑on, ↑missing, ↑q, ↑off, ↑δ, ↑missing · ↑(q − off), ↑(q − off)]) +
+    { const := 1 }.eval (Omega.Coeffs.ofList [↑on, ↑missing, ↑q, ↑off, ↑δ, ↑missing · ↑(q − off), ↑(q − off)])
+                      Reverse the supplied equality.
+                        { coeffs := [1, 1] }.eval (Omega.Coeffs.ofList [↑on, ↑missing, ↑q, ↑off, ↑δ, ↑missing · ↑(q − off), ↑(q − off)]) -
+    { const := 1, coeffs := [0, 0, 1] }.eval
+      (Omega.Coeffs.ofList [↑on, ↑missing, ↑q, ↑off, ↑δ, ↑missing · ↑(q − off), ↑(q − off)]) =
+  ({ coeffs := [1, 1] } − { const := 1, coeffs := [0, 0, 1] }).eval
+    (Omega.Coeffs.ofList [↑on, ↑missing, ↑q, ↑off, ↑δ, ↑missing · ↑(q − off), ↑(q − off)])
+                        Apply Lean.Omega.LinearCombo.sub_eval to the supplied arguments.
+                          ({ coeffs := [1, 1] } − { const := 1, coeffs := [0, 0, 1] }).eval
+    (Omega.Coeffs.ofList [↑on, ↑missing, ↑q, ↑off, ↑δ, ↑missing · ↑(q − off), ↑(q − off)]) =
+  { coeffs := [1, 1] }.eval (Omega.Coeffs.ofList [↑on, ↑missing, ↑q, ↑off, ↑δ, ↑missing · ↑(q − off), ↑(q − off)]) -
+    { const := 1, coeffs := [0, 0, 1] }.eval
+      (Omega.Coeffs.ofList [↑on, ↑missing, ↑q, ↑off, ↑δ, ↑missing · ↑(q − off), ↑(q − off)])
+                  Apply Int.sub_eq_zero_of_eq to the supplied arguments.
+                    ↑(on + missing) − ↑(q + 1) = 0
+                    Apply Lean.Omega.Int.ofNat_congr to the supplied arguments.
+                      ↑(on + missing) = ↑(q + 1)
+                      Use the hypothesis hline: on + missing = q + 1.
+              Apply Lean.Omega.Constraint.addInequality_sat to the supplied arguments.
+                { lowerBound := some (-0), upperBound := none }.sat' [-1, 0, 1, -1]
+    (Omega.Coeffs.ofList [↑on, ↑missing, ↑q, ↑off, ↑δ, ↑missing · ↑(q − off), ↑(q − off)]) =
+  true
+                Apply le_of_le_of_eq to the supplied arguments.
+                  0 ≤
+  ({ coeffs := [0, 0, 1] } − { coeffs := [1, 0, 0, 1] }).eval
+    (Omega.Coeffs.ofList [↑on, ↑missing, ↑q, ↑off, ↑δ, ↑missing · ↑(q − off), ↑(q − off)])
+                  Apply Int.sub_nonneg_of_le to the supplied arguments.
+                    0 ≤ ↑q − ↑(off + on)
+                    Apply Lean.Omega.Int.ofNat_le_of_le to the supplied arguments.
+                      ↑(off + on) ≤ ↑q
+                      Use the hypothesis hsize: off + on ≤ q.
+                  The following calculation gives ↑q − ↑(off + on) =
+  ({ coeffs := [0, 0, 1] } − { coeffs := [1, 0, 0, 1] }).eval
+    (Omega.Coeffs.ofList [↑on, ↑missing, ↑q, ↑off, ↑δ, ↑missing · ↑(q − off), ↑(q − off)]).
+                    Apply Lean.Omega.Int.sub_congr to the supplied arguments.
+                      ↑q − ↑(off + on) =
+  (Omega.LinearCombo.coordinate 2).eval
+      (Omega.Coeffs.ofList [↑on, ↑missing, ↑q, ↑off, ↑δ, ↑missing · ↑(q − off), ↑(q − off)]) -
+    ({ coeffs := [0, 0, 0, 1] } + { coeffs := [1] }).eval
+      (Omega.Coeffs.ofList [↑on, ↑missing, ↑q, ↑off, ↑δ, ↑missing · ↑(q − off), ↑(q − off)])
+                      Reverse the supplied equality.
+                        ↑q =
+  (Omega.LinearCombo.coordinate 2).eval
+    (Omega.Coeffs.ofList [↑on, ↑missing, ↑q, ↑off, ↑δ, ↑missing · ↑(q − off), ↑(q − off)])
+                        Apply Lean.Omega.LinearCombo.coordinate_eval_2 to the supplied arguments.
+                          (Omega.LinearCombo.coordinate 2).eval
+    (Omega.Coeffs.ofList [↑on, ↑missing, ↑q, ↑off, ↑δ, ↑missing · ↑(q − off), ↑(q − off)]) =
+  ↑q
+                      The following calculation gives ↑(off + on) =
+  ({ coeffs := [0, 0, 0, 1] } + { coeffs := [1] }).eval
+    (Omega.Coeffs.ofList [↑on, ↑missing, ↑q, ↑off, ↑δ, ↑missing · ↑(q − off), ↑(q − off)]).
+                        Apply Int.natCast_add to the supplied arguments.
+                          ↑(off + on) = ↑off + ↑on
+                        Apply Lean.Omega.Int.add_congr to the supplied arguments.
+                          ↑off + ↑on =
+  (Omega.LinearCombo.coordinate 3).eval
+      (Omega.Coeffs.ofList [↑on, ↑missing, ↑q, ↑off, ↑δ, ↑missing · ↑(q − off), ↑(q − off)]) +
+    (Omega.LinearCombo.coordinate 0).eval
+      (Omega.Coeffs.ofList [↑on, ↑missing, ↑q, ↑off, ↑δ, ↑missing · ↑(q − off), ↑(q − off)])
+                          Reverse the supplied equality.
+                            ↑off =
+  (Omega.LinearCombo.coordinate 3).eval
+    (Omega.Coeffs.ofList [↑on, ↑missing, ↑q, ↑off, ↑δ, ↑missing · ↑(q − off), ↑(q − off)])
+                            Apply Lean.Omega.LinearCombo.coordinate_eval_3 to the supplied arguments.
+                              (Omega.LinearCombo.coordinate 3).eval
+    (Omega.Coeffs.ofList [↑on, ↑missing, ↑q, ↑off, ↑δ, ↑missing · ↑(q − off), ↑(q − off)]) =
+  ↑off
+                          Reverse the supplied equality.
+                            ↑on =
+  (Omega.LinearCombo.coordinate 0).eval
+    (Omega.Coeffs.ofList [↑on, ↑missing, ↑q, ↑off, ↑δ, ↑missing · ↑(q − off), ↑(q − off)])
+                            Apply Lean.Omega.LinearCombo.coordinate_eval_0 to the supplied arguments.
+                              (Omega.LinearCombo.coordinate 0).eval
+    (Omega.Coeffs.ofList [↑on, ↑missing, ↑q, ↑off, ↑δ, ↑missing · ↑(q − off), ↑(q − off)]) =
+  ↑on
+                        Reverse the supplied equality.
+                          { coeffs := [0, 0, 0, 1] }.eval (Omega.Coeffs.ofList [↑on, ↑missing, ↑q, ↑off, ↑δ, ↑missing · ↑(q − off), ↑(q − off)]) +
+    { coeffs := [1] }.eval (Omega.Coeffs.ofList [↑on, ↑missing, ↑q, ↑off, ↑δ, ↑missing · ↑(q − off), ↑(q − off)]) =
+  ({ coeffs := [0, 0, 0, 1] } + { coeffs := [1] }).eval
+    (Omega.Coeffs.ofList [↑on, ↑missing, ↑q, ↑off, ↑δ, ↑missing · ↑(q − off), ↑(q − off)])
+                          Apply Lean.Omega.LinearCombo.add_eval to the supplied arguments.
+                            ({ coeffs := [0, 0, 0, 1] } + { coeffs := [1] }).eval
+    (Omega.Coeffs.ofList [↑on, ↑missing, ↑q, ↑off, ↑δ, ↑missing · ↑(q − off), ↑(q − off)]) =
+  { coeffs := [0, 0, 0, 1] }.eval
+      (Omega.Coeffs.ofList [↑on, ↑missing, ↑q, ↑off, ↑δ, ↑missing · ↑(q − off), ↑(q − off)]) +
+    { coeffs := [1] }.eval (Omega.Coeffs.ofList [↑on, ↑missing, ↑q, ↑off, ↑δ, ↑missing · ↑(q − off), ↑(q − off)])
+                    Reverse the supplied equality.
+                      { coeffs := [0, 0, 1] }.eval (Omega.Coeffs.ofList [↑on, ↑missing, ↑q, ↑off, ↑δ, ↑missing · ↑(q − off), ↑(q − off)]) -
+    { coeffs := [1, 0, 0, 1] }.eval
+      (Omega.Coeffs.ofList [↑on, ↑missing, ↑q, ↑off, ↑δ, ↑missing · ↑(q − off), ↑(q − off)]) =
+  ({ coeffs := [0, 0, 1] } − { coeffs := [1, 0, 0, 1] }).eval
+    (Omega.Coeffs.ofList [↑on, ↑missing, ↑q, ↑off, ↑δ, ↑missing · ↑(q − off), ↑(q − off)])
+                      Apply Lean.Omega.LinearCombo.sub_eval to the supplied arguments.
+                        ({ coeffs := [0, 0, 1] } − { coeffs := [1, 0, 0, 1] }).eval
+    (Omega.Coeffs.ofList [↑on, ↑missing, ↑q, ↑off, ↑δ, ↑missing · ↑(q − off), ↑(q − off)]) =
+  { coeffs := [0, 0, 1] }.eval (Omega.Coeffs.ofList [↑on, ↑missing, ↑q, ↑off, ↑δ, ↑missing · ↑(q − off), ↑(q − off)]) -
+    { coeffs := [1, 0, 0, 1] }.eval
+      (Omega.Coeffs.ofList [↑on, ↑missing, ↑q, ↑off, ↑δ, ↑missing · ↑(q − off), ↑(q − off)])

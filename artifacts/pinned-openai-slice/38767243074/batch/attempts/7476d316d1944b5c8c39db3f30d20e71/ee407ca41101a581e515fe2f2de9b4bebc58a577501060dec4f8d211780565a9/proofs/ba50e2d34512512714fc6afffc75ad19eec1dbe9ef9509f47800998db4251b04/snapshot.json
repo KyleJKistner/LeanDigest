@@ -1,0 +1,459 @@
+{
+  "axioms": [
+    "propext",
+    "Quot.sound"
+  ],
+  "formula_backend": "Lean pretty-printer",
+  "frames": [
+    {
+      "binder": "q",
+      "budget_cut": false,
+      "children": [
+        1
+      ],
+      "context": [],
+      "domain": "ℕ",
+      "head": "",
+      "id": 0,
+      "objects": [],
+      "path": [],
+      "premises": [],
+      "role": "introduce",
+      "statement": "∀ {q d on : ℕ}, 3 * d < q → q - d ≤ on → q + 1 ≤ 2 * on"
+    },
+    {
+      "binder": "d",
+      "budget_cut": false,
+      "children": [
+        2
+      ],
+      "context": [
+        {
+          "name": "q",
+          "type": "ℕ"
+        }
+      ],
+      "domain": "ℕ",
+      "head": "",
+      "id": 1,
+      "objects": [],
+      "path": [
+        1
+      ],
+      "premises": [],
+      "role": "introduce",
+      "statement": "∀ {d on : ℕ}, 3 * d < q → q - d ≤ on → q + 1 ≤ 2 * on"
+    },
+    {
+      "binder": "on",
+      "budget_cut": false,
+      "children": [
+        3
+      ],
+      "context": [
+        {
+          "name": "q",
+          "type": "ℕ"
+        },
+        {
+          "name": "d",
+          "type": "ℕ"
+        }
+      ],
+      "domain": "ℕ",
+      "head": "",
+      "id": 2,
+      "objects": [],
+      "path": [
+        1,
+        1
+      ],
+      "premises": [],
+      "role": "introduce",
+      "statement": "∀ {on : ℕ}, 3 * d < q → q - d ≤ on → q + 1 ≤ 2 * on"
+    },
+    {
+      "binder": "hd",
+      "budget_cut": false,
+      "children": [
+        4
+      ],
+      "context": [
+        {
+          "name": "q",
+          "type": "ℕ"
+        },
+        {
+          "name": "d",
+          "type": "ℕ"
+        },
+        {
+          "name": "on",
+          "type": "ℕ"
+        }
+      ],
+      "domain": "3 * d < q",
+      "head": "",
+      "id": 3,
+      "objects": [],
+      "path": [
+        1,
+        1,
+        1
+      ],
+      "premises": [],
+      "role": "assume",
+      "statement": "3 * d < q → q - d ≤ on → q + 1 ≤ 2 * on"
+    },
+    {
+      "binder": "hon",
+      "budget_cut": false,
+      "children": [
+        5
+      ],
+      "context": [
+        {
+          "name": "q",
+          "type": "ℕ"
+        },
+        {
+          "name": "d",
+          "type": "ℕ"
+        },
+        {
+          "name": "on",
+          "type": "ℕ"
+        },
+        {
+          "name": "hd",
+          "type": "3 * d < q"
+        }
+      ],
+      "domain": "q - d ≤ on",
+      "head": "",
+      "id": 4,
+      "objects": [],
+      "path": [
+        1,
+        1,
+        1,
+        1
+      ],
+      "premises": [],
+      "role": "assume",
+      "statement": "q - d ≤ on → q + 1 ≤ 2 * on"
+    },
+    {
+      "budget_cut": false,
+      "children": [
+        6
+      ],
+      "context": [
+        {
+          "name": "q",
+          "type": "ℕ"
+        },
+        {
+          "name": "d",
+          "type": "ℕ"
+        },
+        {
+          "name": "on",
+          "type": "ℕ"
+        },
+        {
+          "name": "hd",
+          "type": "3 * d < q"
+        },
+        {
+          "name": "hon",
+          "type": "q - d ≤ on"
+        }
+      ],
+      "head": "Decidable.byContradiction",
+      "id": 5,
+      "objects": [
+        "q + 1 ≤ 2 * on",
+        "(q + 1).decLe (2 * on)"
+      ],
+      "path": [
+        1,
+        1,
+        1,
+        1,
+        1
+      ],
+      "premises": [
+        {
+          "argument": 2,
+          "frame": 6,
+          "statement": "¬q + 1 ≤ 2 * on → False"
+        }
+      ],
+      "role": "application",
+      "statement": "q + 1 ≤ 2 * on"
+    },
+    {
+      "binder": "a._@._internal.0.OAI.Combinatorics.BalancedRyser.Incidence.SmallProjectiveArithmetic.2146353204._hygCtx._hyg.38",
+      "budget_cut": false,
+      "children": [
+        7
+      ],
+      "context": [
+        {
+          "name": "q",
+          "type": "ℕ"
+        },
+        {
+          "name": "d",
+          "type": "ℕ"
+        },
+        {
+          "name": "on",
+          "type": "ℕ"
+        },
+        {
+          "name": "hd",
+          "type": "3 * d < q"
+        },
+        {
+          "name": "hon",
+          "type": "q - d ≤ on"
+        }
+      ],
+      "domain": "¬q + 1 ≤ 2 * on",
+      "head": "",
+      "id": 6,
+      "objects": [],
+      "path": [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1
+      ],
+      "premises": [],
+      "role": "assume",
+      "statement": "¬q + 1 ≤ 2 * on → False"
+    },
+    {
+      "budget_cut": false,
+      "children": [
+        8,
+        9,
+        10
+      ],
+      "context": [
+        {
+          "name": "q",
+          "type": "ℕ"
+        },
+        {
+          "name": "d",
+          "type": "ℕ"
+        },
+        {
+          "name": "on",
+          "type": "ℕ"
+        },
+        {
+          "name": "hd",
+          "type": "3 * d < q"
+        },
+        {
+          "name": "hon",
+          "type": "q - d ≤ on"
+        },
+        {
+          "name": "a._@._internal.0.OAI.Combinatorics.BalancedRyser.Incidence.SmallProjectiveArithmetic.2146353204._hygCtx._hyg.38",
+          "type": "¬q + 1 ≤ 2 * on"
+        }
+      ],
+      "head": "OAI.Balanced.SmallProjectiveArithmetic.half_line_of_degree_bound._proof_1_1",
+      "id": 7,
+      "objects": [
+        "q",
+        "d",
+        "on"
+      ],
+      "path": [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1
+      ],
+      "premises": [
+        {
+          "argument": 3,
+          "frame": 8,
+          "statement": "3 * d < q"
+        },
+        {
+          "argument": 4,
+          "frame": 9,
+          "statement": "q - d ≤ on"
+        },
+        {
+          "argument": 5,
+          "frame": 10,
+          "statement": "¬q + 1 ≤ 2 * on"
+        }
+      ],
+      "role": "application",
+      "statement": "False"
+    },
+    {
+      "binder": "hd",
+      "budget_cut": false,
+      "children": [],
+      "context": [
+        {
+          "name": "q",
+          "type": "ℕ"
+        },
+        {
+          "name": "d",
+          "type": "ℕ"
+        },
+        {
+          "name": "on",
+          "type": "ℕ"
+        },
+        {
+          "name": "hd",
+          "type": "3 * d < q"
+        },
+        {
+          "name": "hon",
+          "type": "q - d ≤ on"
+        },
+        {
+          "name": "a._@._internal.0.OAI.Combinatorics.BalancedRyser.Incidence.SmallProjectiveArithmetic.2146353204._hygCtx._hyg.38",
+          "type": "¬q + 1 ≤ 2 * on"
+        }
+      ],
+      "head": "",
+      "id": 8,
+      "objects": [],
+      "path": [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        0,
+        0,
+        1
+      ],
+      "premises": [],
+      "role": "given",
+      "statement": "3 * d < q"
+    },
+    {
+      "binder": "hon",
+      "budget_cut": false,
+      "children": [],
+      "context": [
+        {
+          "name": "q",
+          "type": "ℕ"
+        },
+        {
+          "name": "d",
+          "type": "ℕ"
+        },
+        {
+          "name": "on",
+          "type": "ℕ"
+        },
+        {
+          "name": "hd",
+          "type": "3 * d < q"
+        },
+        {
+          "name": "hon",
+          "type": "q - d ≤ on"
+        },
+        {
+          "name": "a._@._internal.0.OAI.Combinatorics.BalancedRyser.Incidence.SmallProjectiveArithmetic.2146353204._hygCtx._hyg.38",
+          "type": "¬q + 1 ≤ 2 * on"
+        }
+      ],
+      "head": "",
+      "id": 9,
+      "objects": [],
+      "path": [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        0,
+        1
+      ],
+      "premises": [],
+      "role": "given",
+      "statement": "q - d ≤ on"
+    },
+    {
+      "binder": "a._@._internal.0.OAI.Combinatorics.BalancedRyser.Incidence.SmallProjectiveArithmetic.2146353204._hygCtx._hyg.38",
+      "budget_cut": false,
+      "children": [],
+      "context": [
+        {
+          "name": "q",
+          "type": "ℕ"
+        },
+        {
+          "name": "d",
+          "type": "ℕ"
+        },
+        {
+          "name": "on",
+          "type": "ℕ"
+        },
+        {
+          "name": "hd",
+          "type": "3 * d < q"
+        },
+        {
+          "name": "hon",
+          "type": "q - d ≤ on"
+        },
+        {
+          "name": "a._@._internal.0.OAI.Combinatorics.BalancedRyser.Incidence.SmallProjectiveArithmetic.2146353204._hygCtx._hyg.38",
+          "type": "¬q + 1 ≤ 2 * on"
+        }
+      ],
+      "head": "",
+      "id": 10,
+      "objects": [],
+      "path": [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1
+      ],
+      "premises": [],
+      "role": "given",
+      "statement": "¬q + 1 ≤ 2 * on"
+    }
+  ],
+  "judgements_checked": 11,
+  "lean_version": "4.34.1",
+  "schema": "proofreader.narrative/v1",
+  "statement": "∀ {q d on : ℕ}, 3 * d < q → q - d ≤ on → q + 1 ≤ 2 * on",
+  "theorem": "OAI.Balanced.SmallProjectiveArithmetic.half_line_of_degree_bound"
+}

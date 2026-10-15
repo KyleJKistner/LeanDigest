@@ -1,0 +1,2913 @@
+{
+  "axioms": [
+    "propext",
+    "Classical.choice",
+    "Quot.sound"
+  ],
+  "formula_backend": "Lean pretty-printer",
+  "frames": [
+    {
+      "binder": "R",
+      "budget_cut": false,
+      "children": [
+        1
+      ],
+      "context": [],
+      "domain": "Type uR",
+      "head": "",
+      "id": 0,
+      "objects": [],
+      "path": [],
+      "premises": [],
+      "role": "introduce",
+      "statement": "∀ {R : Type uR} {ι : Type uIota} [inst : CommRing R] (σ : R →+* ℂ) (x : ι → R) (numerator denominator : Finset ι)\n  (z : R) (c : ℝ),\n  0 < c →\n    numerator.card = denominator.card →\n      (∀ i ∈ numerator, ‖σ (x i)‖ = c) →\n        (∀ i ∈ denominator, ‖σ (x i)‖ = c) → z * ∏ i ∈ denominator, x i = ∏ i ∈ numerator, x i → ‖σ z‖ = 1"
+    },
+    {
+      "binder": "ι",
+      "budget_cut": false,
+      "children": [
+        2
+      ],
+      "context": [
+        {
+          "name": "R",
+          "type": "Type uR"
+        }
+      ],
+      "domain": "Type uIota",
+      "head": "",
+      "id": 1,
+      "objects": [],
+      "path": [
+        1
+      ],
+      "premises": [],
+      "role": "introduce",
+      "statement": "∀ {ι : Type uIota} [inst : CommRing R] (σ : R →+* ℂ) (x : ι → R) (numerator denominator : Finset ι) (z : R) (c : ℝ),\n  0 < c →\n    numerator.card = denominator.card →\n      (∀ i ∈ numerator, ‖σ (x i)‖ = c) →\n        (∀ i ∈ denominator, ‖σ (x i)‖ = c) → z * ∏ i ∈ denominator, x i = ∏ i ∈ numerator, x i → ‖σ z‖ = 1"
+    },
+    {
+      "binder": "inst._@.OAI.LinearAlgebra.CirculantHadamard.AlternatingNorm.3207193924._hygCtx._hyg.4",
+      "budget_cut": false,
+      "children": [
+        3
+      ],
+      "context": [
+        {
+          "name": "R",
+          "type": "Type uR"
+        },
+        {
+          "name": "ι",
+          "type": "Type uIota"
+        }
+      ],
+      "domain": "CommRing R",
+      "head": "",
+      "id": 2,
+      "objects": [],
+      "path": [
+        1,
+        1
+      ],
+      "premises": [],
+      "role": "introduce",
+      "statement": "∀ [inst : CommRing R] (σ : R →+* ℂ) (x : ι → R) (numerator denominator : Finset ι) (z : R) (c : ℝ),\n  0 < c →\n    numerator.card = denominator.card →\n      (∀ i ∈ numerator, ‖σ (x i)‖ = c) →\n        (∀ i ∈ denominator, ‖σ (x i)‖ = c) → z * ∏ i ∈ denominator, x i = ∏ i ∈ numerator, x i → ‖σ z‖ = 1"
+    },
+    {
+      "binder": "σ",
+      "budget_cut": false,
+      "children": [
+        4
+      ],
+      "context": [
+        {
+          "name": "R",
+          "type": "Type uR"
+        },
+        {
+          "name": "ι",
+          "type": "Type uIota"
+        },
+        {
+          "name": "inst._@.OAI.LinearAlgebra.CirculantHadamard.AlternatingNorm.3207193924._hygCtx._hyg.4",
+          "type": "CommRing R"
+        }
+      ],
+      "domain": "R →+* ℂ",
+      "head": "",
+      "id": 3,
+      "objects": [],
+      "path": [
+        1,
+        1,
+        1
+      ],
+      "premises": [],
+      "role": "introduce",
+      "statement": "∀ (σ : R →+* ℂ) (x : ι → R) (numerator denominator : Finset ι) (z : R) (c : ℝ),\n  0 < c →\n    numerator.card = denominator.card →\n      (∀ i ∈ numerator, ‖σ (x i)‖ = c) →\n        (∀ i ∈ denominator, ‖σ (x i)‖ = c) → z * ∏ i ∈ denominator, x i = ∏ i ∈ numerator, x i → ‖σ z‖ = 1"
+    },
+    {
+      "binder": "x",
+      "budget_cut": false,
+      "children": [
+        5
+      ],
+      "context": [
+        {
+          "name": "R",
+          "type": "Type uR"
+        },
+        {
+          "name": "ι",
+          "type": "Type uIota"
+        },
+        {
+          "name": "inst._@.OAI.LinearAlgebra.CirculantHadamard.AlternatingNorm.3207193924._hygCtx._hyg.4",
+          "type": "CommRing R"
+        },
+        {
+          "name": "σ",
+          "type": "R →+* ℂ"
+        }
+      ],
+      "domain": "ι → R",
+      "head": "",
+      "id": 4,
+      "objects": [],
+      "path": [
+        1,
+        1,
+        1,
+        1
+      ],
+      "premises": [],
+      "role": "introduce",
+      "statement": "∀ (x : ι → R) (numerator denominator : Finset ι) (z : R) (c : ℝ),\n  0 < c →\n    numerator.card = denominator.card →\n      (∀ i ∈ numerator, ‖σ (x i)‖ = c) →\n        (∀ i ∈ denominator, ‖σ (x i)‖ = c) → z * ∏ i ∈ denominator, x i = ∏ i ∈ numerator, x i → ‖σ z‖ = 1"
+    },
+    {
+      "binder": "numerator",
+      "budget_cut": false,
+      "children": [
+        6
+      ],
+      "context": [
+        {
+          "name": "R",
+          "type": "Type uR"
+        },
+        {
+          "name": "ι",
+          "type": "Type uIota"
+        },
+        {
+          "name": "inst._@.OAI.LinearAlgebra.CirculantHadamard.AlternatingNorm.3207193924._hygCtx._hyg.4",
+          "type": "CommRing R"
+        },
+        {
+          "name": "σ",
+          "type": "R →+* ℂ"
+        },
+        {
+          "name": "x",
+          "type": "ι → R"
+        }
+      ],
+      "domain": "Finset ι",
+      "head": "",
+      "id": 5,
+      "objects": [],
+      "path": [
+        1,
+        1,
+        1,
+        1,
+        1
+      ],
+      "premises": [],
+      "role": "introduce",
+      "statement": "∀ (numerator denominator : Finset ι) (z : R) (c : ℝ),\n  0 < c →\n    numerator.card = denominator.card →\n      (∀ i ∈ numerator, ‖σ (x i)‖ = c) →\n        (∀ i ∈ denominator, ‖σ (x i)‖ = c) → z * ∏ i ∈ denominator, x i = ∏ i ∈ numerator, x i → ‖σ z‖ = 1"
+    },
+    {
+      "binder": "denominator",
+      "budget_cut": false,
+      "children": [
+        7
+      ],
+      "context": [
+        {
+          "name": "R",
+          "type": "Type uR"
+        },
+        {
+          "name": "ι",
+          "type": "Type uIota"
+        },
+        {
+          "name": "inst._@.OAI.LinearAlgebra.CirculantHadamard.AlternatingNorm.3207193924._hygCtx._hyg.4",
+          "type": "CommRing R"
+        },
+        {
+          "name": "σ",
+          "type": "R →+* ℂ"
+        },
+        {
+          "name": "x",
+          "type": "ι → R"
+        },
+        {
+          "name": "numerator",
+          "type": "Finset ι"
+        }
+      ],
+      "domain": "Finset ι",
+      "head": "",
+      "id": 6,
+      "objects": [],
+      "path": [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1
+      ],
+      "premises": [],
+      "role": "introduce",
+      "statement": "∀ (denominator : Finset ι) (z : R) (c : ℝ),\n  0 < c →\n    numerator.card = denominator.card →\n      (∀ i ∈ numerator, ‖σ (x i)‖ = c) →\n        (∀ i ∈ denominator, ‖σ (x i)‖ = c) → z * ∏ i ∈ denominator, x i = ∏ i ∈ numerator, x i → ‖σ z‖ = 1"
+    },
+    {
+      "binder": "z",
+      "budget_cut": false,
+      "children": [
+        8
+      ],
+      "context": [
+        {
+          "name": "R",
+          "type": "Type uR"
+        },
+        {
+          "name": "ι",
+          "type": "Type uIota"
+        },
+        {
+          "name": "inst._@.OAI.LinearAlgebra.CirculantHadamard.AlternatingNorm.3207193924._hygCtx._hyg.4",
+          "type": "CommRing R"
+        },
+        {
+          "name": "σ",
+          "type": "R →+* ℂ"
+        },
+        {
+          "name": "x",
+          "type": "ι → R"
+        },
+        {
+          "name": "numerator",
+          "type": "Finset ι"
+        },
+        {
+          "name": "denominator",
+          "type": "Finset ι"
+        }
+      ],
+      "domain": "R",
+      "head": "",
+      "id": 7,
+      "objects": [],
+      "path": [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1
+      ],
+      "premises": [],
+      "role": "introduce",
+      "statement": "∀ (z : R) (c : ℝ),\n  0 < c →\n    numerator.card = denominator.card →\n      (∀ i ∈ numerator, ‖σ (x i)‖ = c) →\n        (∀ i ∈ denominator, ‖σ (x i)‖ = c) → z * ∏ i ∈ denominator, x i = ∏ i ∈ numerator, x i → ‖σ z‖ = 1"
+    },
+    {
+      "binder": "c",
+      "budget_cut": false,
+      "children": [
+        9
+      ],
+      "context": [
+        {
+          "name": "R",
+          "type": "Type uR"
+        },
+        {
+          "name": "ι",
+          "type": "Type uIota"
+        },
+        {
+          "name": "inst._@.OAI.LinearAlgebra.CirculantHadamard.AlternatingNorm.3207193924._hygCtx._hyg.4",
+          "type": "CommRing R"
+        },
+        {
+          "name": "σ",
+          "type": "R →+* ℂ"
+        },
+        {
+          "name": "x",
+          "type": "ι → R"
+        },
+        {
+          "name": "numerator",
+          "type": "Finset ι"
+        },
+        {
+          "name": "denominator",
+          "type": "Finset ι"
+        },
+        {
+          "name": "z",
+          "type": "R"
+        }
+      ],
+      "domain": "ℝ",
+      "head": "",
+      "id": 8,
+      "objects": [],
+      "path": [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1
+      ],
+      "premises": [],
+      "role": "introduce",
+      "statement": "∀ (c : ℝ),\n  0 < c →\n    numerator.card = denominator.card →\n      (∀ i ∈ numerator, ‖σ (x i)‖ = c) →\n        (∀ i ∈ denominator, ‖σ (x i)‖ = c) → z * ∏ i ∈ denominator, x i = ∏ i ∈ numerator, x i → ‖σ z‖ = 1"
+    },
+    {
+      "binder": "hc",
+      "budget_cut": false,
+      "children": [
+        10
+      ],
+      "context": [
+        {
+          "name": "R",
+          "type": "Type uR"
+        },
+        {
+          "name": "ι",
+          "type": "Type uIota"
+        },
+        {
+          "name": "inst._@.OAI.LinearAlgebra.CirculantHadamard.AlternatingNorm.3207193924._hygCtx._hyg.4",
+          "type": "CommRing R"
+        },
+        {
+          "name": "σ",
+          "type": "R →+* ℂ"
+        },
+        {
+          "name": "x",
+          "type": "ι → R"
+        },
+        {
+          "name": "numerator",
+          "type": "Finset ι"
+        },
+        {
+          "name": "denominator",
+          "type": "Finset ι"
+        },
+        {
+          "name": "z",
+          "type": "R"
+        },
+        {
+          "name": "c",
+          "type": "ℝ"
+        }
+      ],
+      "domain": "0 < c",
+      "head": "",
+      "id": 9,
+      "objects": [],
+      "path": [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1
+      ],
+      "premises": [],
+      "role": "assume",
+      "statement": "0 < c →\n  numerator.card = denominator.card →\n    (∀ i ∈ numerator, ‖σ (x i)‖ = c) →\n      (∀ i ∈ denominator, ‖σ (x i)‖ = c) → z * ∏ i ∈ denominator, x i = ∏ i ∈ numerator, x i → ‖σ z‖ = 1"
+    },
+    {
+      "binder": "hcard",
+      "budget_cut": false,
+      "children": [
+        11
+      ],
+      "context": [
+        {
+          "name": "R",
+          "type": "Type uR"
+        },
+        {
+          "name": "ι",
+          "type": "Type uIota"
+        },
+        {
+          "name": "inst._@.OAI.LinearAlgebra.CirculantHadamard.AlternatingNorm.3207193924._hygCtx._hyg.4",
+          "type": "CommRing R"
+        },
+        {
+          "name": "σ",
+          "type": "R →+* ℂ"
+        },
+        {
+          "name": "x",
+          "type": "ι → R"
+        },
+        {
+          "name": "numerator",
+          "type": "Finset ι"
+        },
+        {
+          "name": "denominator",
+          "type": "Finset ι"
+        },
+        {
+          "name": "z",
+          "type": "R"
+        },
+        {
+          "name": "c",
+          "type": "ℝ"
+        },
+        {
+          "name": "hc",
+          "type": "0 < c"
+        }
+      ],
+      "domain": "numerator.card = denominator.card",
+      "head": "",
+      "id": 10,
+      "objects": [],
+      "path": [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1
+      ],
+      "premises": [],
+      "role": "assume",
+      "statement": "numerator.card = denominator.card →\n  (∀ i ∈ numerator, ‖σ (x i)‖ = c) →\n    (∀ i ∈ denominator, ‖σ (x i)‖ = c) → z * ∏ i ∈ denominator, x i = ∏ i ∈ numerator, x i → ‖σ z‖ = 1"
+    },
+    {
+      "binder": "hnumerator",
+      "budget_cut": false,
+      "children": [
+        12
+      ],
+      "context": [
+        {
+          "name": "R",
+          "type": "Type uR"
+        },
+        {
+          "name": "ι",
+          "type": "Type uIota"
+        },
+        {
+          "name": "inst._@.OAI.LinearAlgebra.CirculantHadamard.AlternatingNorm.3207193924._hygCtx._hyg.4",
+          "type": "CommRing R"
+        },
+        {
+          "name": "σ",
+          "type": "R →+* ℂ"
+        },
+        {
+          "name": "x",
+          "type": "ι → R"
+        },
+        {
+          "name": "numerator",
+          "type": "Finset ι"
+        },
+        {
+          "name": "denominator",
+          "type": "Finset ι"
+        },
+        {
+          "name": "z",
+          "type": "R"
+        },
+        {
+          "name": "c",
+          "type": "ℝ"
+        },
+        {
+          "name": "hc",
+          "type": "0 < c"
+        },
+        {
+          "name": "hcard",
+          "type": "numerator.card = denominator.card"
+        }
+      ],
+      "domain": "∀ i ∈ numerator, ‖σ (x i)‖ = c",
+      "head": "",
+      "id": 11,
+      "objects": [],
+      "path": [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1
+      ],
+      "premises": [],
+      "role": "assume",
+      "statement": "(∀ i ∈ numerator, ‖σ (x i)‖ = c) →\n  (∀ i ∈ denominator, ‖σ (x i)‖ = c) → z * ∏ i ∈ denominator, x i = ∏ i ∈ numerator, x i → ‖σ z‖ = 1"
+    },
+    {
+      "binder": "hdenominator",
+      "budget_cut": false,
+      "children": [
+        13
+      ],
+      "context": [
+        {
+          "name": "R",
+          "type": "Type uR"
+        },
+        {
+          "name": "ι",
+          "type": "Type uIota"
+        },
+        {
+          "name": "inst._@.OAI.LinearAlgebra.CirculantHadamard.AlternatingNorm.3207193924._hygCtx._hyg.4",
+          "type": "CommRing R"
+        },
+        {
+          "name": "σ",
+          "type": "R →+* ℂ"
+        },
+        {
+          "name": "x",
+          "type": "ι → R"
+        },
+        {
+          "name": "numerator",
+          "type": "Finset ι"
+        },
+        {
+          "name": "denominator",
+          "type": "Finset ι"
+        },
+        {
+          "name": "z",
+          "type": "R"
+        },
+        {
+          "name": "c",
+          "type": "ℝ"
+        },
+        {
+          "name": "hc",
+          "type": "0 < c"
+        },
+        {
+          "name": "hcard",
+          "type": "numerator.card = denominator.card"
+        },
+        {
+          "name": "hnumerator",
+          "type": "∀ i ∈ numerator, ‖σ (x i)‖ = c"
+        }
+      ],
+      "domain": "∀ i ∈ denominator, ‖σ (x i)‖ = c",
+      "head": "",
+      "id": 12,
+      "objects": [],
+      "path": [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1
+      ],
+      "premises": [],
+      "role": "assume",
+      "statement": "(∀ i ∈ denominator, ‖σ (x i)‖ = c) → z * ∏ i ∈ denominator, x i = ∏ i ∈ numerator, x i → ‖σ z‖ = 1"
+    },
+    {
+      "binder": "hclear",
+      "budget_cut": false,
+      "children": [
+        14
+      ],
+      "context": [
+        {
+          "name": "R",
+          "type": "Type uR"
+        },
+        {
+          "name": "ι",
+          "type": "Type uIota"
+        },
+        {
+          "name": "inst._@.OAI.LinearAlgebra.CirculantHadamard.AlternatingNorm.3207193924._hygCtx._hyg.4",
+          "type": "CommRing R"
+        },
+        {
+          "name": "σ",
+          "type": "R →+* ℂ"
+        },
+        {
+          "name": "x",
+          "type": "ι → R"
+        },
+        {
+          "name": "numerator",
+          "type": "Finset ι"
+        },
+        {
+          "name": "denominator",
+          "type": "Finset ι"
+        },
+        {
+          "name": "z",
+          "type": "R"
+        },
+        {
+          "name": "c",
+          "type": "ℝ"
+        },
+        {
+          "name": "hc",
+          "type": "0 < c"
+        },
+        {
+          "name": "hcard",
+          "type": "numerator.card = denominator.card"
+        },
+        {
+          "name": "hnumerator",
+          "type": "∀ i ∈ numerator, ‖σ (x i)‖ = c"
+        },
+        {
+          "name": "hdenominator",
+          "type": "∀ i ∈ denominator, ‖σ (x i)‖ = c"
+        }
+      ],
+      "domain": "z * ∏ i ∈ denominator, x i = ∏ i ∈ numerator, x i",
+      "head": "",
+      "id": 13,
+      "objects": [],
+      "path": [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1
+      ],
+      "premises": [],
+      "role": "assume",
+      "statement": "z * ∏ i ∈ denominator, x i = ∏ i ∈ numerator, x i → ‖σ z‖ = 1"
+    },
+    {
+      "binder": "hmap",
+      "budget_cut": false,
+      "children": [
+        15,
+        17
+      ],
+      "context": [
+        {
+          "name": "R",
+          "type": "Type uR"
+        },
+        {
+          "name": "ι",
+          "type": "Type uIota"
+        },
+        {
+          "name": "inst._@.OAI.LinearAlgebra.CirculantHadamard.AlternatingNorm.3207193924._hygCtx._hyg.4",
+          "type": "CommRing R"
+        },
+        {
+          "name": "σ",
+          "type": "R →+* ℂ"
+        },
+        {
+          "name": "x",
+          "type": "ι → R"
+        },
+        {
+          "name": "numerator",
+          "type": "Finset ι"
+        },
+        {
+          "name": "denominator",
+          "type": "Finset ι"
+        },
+        {
+          "name": "z",
+          "type": "R"
+        },
+        {
+          "name": "c",
+          "type": "ℝ"
+        },
+        {
+          "name": "hc",
+          "type": "0 < c"
+        },
+        {
+          "name": "hcard",
+          "type": "numerator.card = denominator.card"
+        },
+        {
+          "name": "hnumerator",
+          "type": "∀ i ∈ numerator, ‖σ (x i)‖ = c"
+        },
+        {
+          "name": "hdenominator",
+          "type": "∀ i ∈ denominator, ‖σ (x i)‖ = c"
+        },
+        {
+          "name": "hclear",
+          "type": "z * ∏ i ∈ denominator, x i = ∏ i ∈ numerator, x i"
+        }
+      ],
+      "domain": "σ (z * ∏ i ∈ denominator, x i) = σ (∏ i ∈ numerator, x i)",
+      "head": "",
+      "id": 14,
+      "objects": [],
+      "path": [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1
+      ],
+      "premises": [],
+      "role": "have",
+      "statement": "‖σ z‖ = 1"
+    },
+    {
+      "budget_cut": false,
+      "children": [
+        16
+      ],
+      "context": [
+        {
+          "name": "R",
+          "type": "Type uR"
+        },
+        {
+          "name": "ι",
+          "type": "Type uIota"
+        },
+        {
+          "name": "inst._@.OAI.LinearAlgebra.CirculantHadamard.AlternatingNorm.3207193924._hygCtx._hyg.4",
+          "type": "CommRing R"
+        },
+        {
+          "name": "σ",
+          "type": "R →+* ℂ"
+        },
+        {
+          "name": "x",
+          "type": "ι → R"
+        },
+        {
+          "name": "numerator",
+          "type": "Finset ι"
+        },
+        {
+          "name": "denominator",
+          "type": "Finset ι"
+        },
+        {
+          "name": "z",
+          "type": "R"
+        },
+        {
+          "name": "c",
+          "type": "ℝ"
+        },
+        {
+          "name": "hc",
+          "type": "0 < c"
+        },
+        {
+          "name": "hcard",
+          "type": "numerator.card = denominator.card"
+        },
+        {
+          "name": "hnumerator",
+          "type": "∀ i ∈ numerator, ‖σ (x i)‖ = c"
+        },
+        {
+          "name": "hdenominator",
+          "type": "∀ i ∈ denominator, ‖σ (x i)‖ = c"
+        },
+        {
+          "name": "hclear",
+          "type": "z * ∏ i ∈ denominator, x i = ∏ i ∈ numerator, x i"
+        }
+      ],
+      "head": "congrArg",
+      "id": 15,
+      "objects": [
+        "R",
+        "ℂ",
+        "z * ∏ i ∈ denominator, x i",
+        "∏ i ∈ numerator, x i",
+        "⇑σ"
+      ],
+      "path": [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1
+      ],
+      "premises": [
+        {
+          "argument": 5,
+          "frame": 16,
+          "statement": "z * ∏ i ∈ denominator, x i = ∏ i ∈ numerator, x i"
+        }
+      ],
+      "role": "congruence",
+      "statement": "σ (z * ∏ i ∈ denominator, x i) = σ (∏ i ∈ numerator, x i)"
+    },
+    {
+      "binder": "hclear",
+      "budget_cut": false,
+      "children": [],
+      "context": [
+        {
+          "name": "R",
+          "type": "Type uR"
+        },
+        {
+          "name": "ι",
+          "type": "Type uIota"
+        },
+        {
+          "name": "inst._@.OAI.LinearAlgebra.CirculantHadamard.AlternatingNorm.3207193924._hygCtx._hyg.4",
+          "type": "CommRing R"
+        },
+        {
+          "name": "σ",
+          "type": "R →+* ℂ"
+        },
+        {
+          "name": "x",
+          "type": "ι → R"
+        },
+        {
+          "name": "numerator",
+          "type": "Finset ι"
+        },
+        {
+          "name": "denominator",
+          "type": "Finset ι"
+        },
+        {
+          "name": "z",
+          "type": "R"
+        },
+        {
+          "name": "c",
+          "type": "ℝ"
+        },
+        {
+          "name": "hc",
+          "type": "0 < c"
+        },
+        {
+          "name": "hcard",
+          "type": "numerator.card = denominator.card"
+        },
+        {
+          "name": "hnumerator",
+          "type": "∀ i ∈ numerator, ‖σ (x i)‖ = c"
+        },
+        {
+          "name": "hdenominator",
+          "type": "∀ i ∈ denominator, ‖σ (x i)‖ = c"
+        },
+        {
+          "name": "hclear",
+          "type": "z * ∏ i ∈ denominator, x i = ∏ i ∈ numerator, x i"
+        }
+      ],
+      "head": "",
+      "id": 16,
+      "objects": [],
+      "path": [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1
+      ],
+      "premises": [],
+      "role": "given",
+      "statement": "z * ∏ i ∈ denominator, x i = ∏ i ∈ numerator, x i"
+    },
+    {
+      "binder": "hnorm",
+      "budget_cut": false,
+      "children": [
+        18,
+        20
+      ],
+      "context": [
+        {
+          "name": "R",
+          "type": "Type uR"
+        },
+        {
+          "name": "ι",
+          "type": "Type uIota"
+        },
+        {
+          "name": "inst._@.OAI.LinearAlgebra.CirculantHadamard.AlternatingNorm.3207193924._hygCtx._hyg.4",
+          "type": "CommRing R"
+        },
+        {
+          "name": "σ",
+          "type": "R →+* ℂ"
+        },
+        {
+          "name": "x",
+          "type": "ι → R"
+        },
+        {
+          "name": "numerator",
+          "type": "Finset ι"
+        },
+        {
+          "name": "denominator",
+          "type": "Finset ι"
+        },
+        {
+          "name": "z",
+          "type": "R"
+        },
+        {
+          "name": "c",
+          "type": "ℝ"
+        },
+        {
+          "name": "hc",
+          "type": "0 < c"
+        },
+        {
+          "name": "hcard",
+          "type": "numerator.card = denominator.card"
+        },
+        {
+          "name": "hnumerator",
+          "type": "∀ i ∈ numerator, ‖σ (x i)‖ = c"
+        },
+        {
+          "name": "hdenominator",
+          "type": "∀ i ∈ denominator, ‖σ (x i)‖ = c"
+        },
+        {
+          "name": "hclear",
+          "type": "z * ∏ i ∈ denominator, x i = ∏ i ∈ numerator, x i"
+        },
+        {
+          "name": "hmap",
+          "type": "σ (z * ∏ i ∈ denominator, x i) = σ (∏ i ∈ numerator, x i)"
+        }
+      ],
+      "domain": "‖σ z * σ (∏ i ∈ denominator, x i)‖ = ‖σ (∏ i ∈ numerator, x i)‖",
+      "head": "",
+      "id": 17,
+      "objects": [],
+      "path": [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        2
+      ],
+      "premises": [],
+      "role": "have",
+      "statement": "‖σ z‖ = 1"
+    },
+    {
+      "budget_cut": false,
+      "children": [
+        19
+      ],
+      "context": [
+        {
+          "name": "R",
+          "type": "Type uR"
+        },
+        {
+          "name": "ι",
+          "type": "Type uIota"
+        },
+        {
+          "name": "inst._@.OAI.LinearAlgebra.CirculantHadamard.AlternatingNorm.3207193924._hygCtx._hyg.4",
+          "type": "CommRing R"
+        },
+        {
+          "name": "σ",
+          "type": "R →+* ℂ"
+        },
+        {
+          "name": "x",
+          "type": "ι → R"
+        },
+        {
+          "name": "numerator",
+          "type": "Finset ι"
+        },
+        {
+          "name": "denominator",
+          "type": "Finset ι"
+        },
+        {
+          "name": "z",
+          "type": "R"
+        },
+        {
+          "name": "c",
+          "type": "ℝ"
+        },
+        {
+          "name": "hc",
+          "type": "0 < c"
+        },
+        {
+          "name": "hcard",
+          "type": "numerator.card = denominator.card"
+        },
+        {
+          "name": "hnumerator",
+          "type": "∀ i ∈ numerator, ‖σ (x i)‖ = c"
+        },
+        {
+          "name": "hdenominator",
+          "type": "∀ i ∈ denominator, ‖σ (x i)‖ = c"
+        },
+        {
+          "name": "hclear",
+          "type": "z * ∏ i ∈ denominator, x i = ∏ i ∈ numerator, x i"
+        },
+        {
+          "name": "hmap",
+          "type": "σ (z * ∏ i ∈ denominator, x i) = σ (∏ i ∈ numerator, x i)"
+        }
+      ],
+      "head": "congrArg",
+      "id": 18,
+      "objects": [
+        "ℂ",
+        "ℝ",
+        "σ z * σ (∏ i ∈ denominator, x i)",
+        "σ (∏ i ∈ numerator, x i)",
+        "norm"
+      ],
+      "path": [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        2,
+        1
+      ],
+      "premises": [
+        {
+          "argument": 5,
+          "frame": 19,
+          "statement": "σ z * σ (∏ i ∈ denominator, x i) = σ (∏ i ∈ numerator, x i)"
+        }
+      ],
+      "role": "congruence",
+      "statement": "‖σ z * σ (∏ i ∈ denominator, x i)‖ = ‖σ (∏ i ∈ numerator, x i)‖"
+    },
+    {
+      "budget_cut": false,
+      "children": [],
+      "context": [
+        {
+          "name": "R",
+          "type": "Type uR"
+        },
+        {
+          "name": "ι",
+          "type": "Type uIota"
+        },
+        {
+          "name": "inst._@.OAI.LinearAlgebra.CirculantHadamard.AlternatingNorm.3207193924._hygCtx._hyg.4",
+          "type": "CommRing R"
+        },
+        {
+          "name": "σ",
+          "type": "R →+* ℂ"
+        },
+        {
+          "name": "x",
+          "type": "ι → R"
+        },
+        {
+          "name": "numerator",
+          "type": "Finset ι"
+        },
+        {
+          "name": "denominator",
+          "type": "Finset ι"
+        },
+        {
+          "name": "z",
+          "type": "R"
+        },
+        {
+          "name": "c",
+          "type": "ℝ"
+        },
+        {
+          "name": "hc",
+          "type": "0 < c"
+        },
+        {
+          "name": "hcard",
+          "type": "numerator.card = denominator.card"
+        },
+        {
+          "name": "hnumerator",
+          "type": "∀ i ∈ numerator, ‖σ (x i)‖ = c"
+        },
+        {
+          "name": "hdenominator",
+          "type": "∀ i ∈ denominator, ‖σ (x i)‖ = c"
+        },
+        {
+          "name": "hclear",
+          "type": "z * ∏ i ∈ denominator, x i = ∏ i ∈ numerator, x i"
+        },
+        {
+          "name": "hmap",
+          "type": "σ (z * ∏ i ∈ denominator, x i) = σ (∏ i ∈ numerator, x i)"
+        }
+      ],
+      "head": "Eq.mp",
+      "id": 19,
+      "objects": [],
+      "path": [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        2,
+        1,
+        1
+      ],
+      "premises": [],
+      "role": "rewrite",
+      "statement": "σ z * σ (∏ i ∈ denominator, x i) = σ (∏ i ∈ numerator, x i)"
+    },
+    {
+      "binder": "hpositive",
+      "budget_cut": false,
+      "children": [
+        21,
+        26
+      ],
+      "context": [
+        {
+          "name": "R",
+          "type": "Type uR"
+        },
+        {
+          "name": "ι",
+          "type": "Type uIota"
+        },
+        {
+          "name": "inst._@.OAI.LinearAlgebra.CirculantHadamard.AlternatingNorm.3207193924._hygCtx._hyg.4",
+          "type": "CommRing R"
+        },
+        {
+          "name": "σ",
+          "type": "R →+* ℂ"
+        },
+        {
+          "name": "x",
+          "type": "ι → R"
+        },
+        {
+          "name": "numerator",
+          "type": "Finset ι"
+        },
+        {
+          "name": "denominator",
+          "type": "Finset ι"
+        },
+        {
+          "name": "z",
+          "type": "R"
+        },
+        {
+          "name": "c",
+          "type": "ℝ"
+        },
+        {
+          "name": "hc",
+          "type": "0 < c"
+        },
+        {
+          "name": "hcard",
+          "type": "numerator.card = denominator.card"
+        },
+        {
+          "name": "hnumerator",
+          "type": "∀ i ∈ numerator, ‖σ (x i)‖ = c"
+        },
+        {
+          "name": "hdenominator",
+          "type": "∀ i ∈ denominator, ‖σ (x i)‖ = c"
+        },
+        {
+          "name": "hclear",
+          "type": "z * ∏ i ∈ denominator, x i = ∏ i ∈ numerator, x i"
+        },
+        {
+          "name": "hmap",
+          "type": "σ (z * ∏ i ∈ denominator, x i) = σ (∏ i ∈ numerator, x i)"
+        },
+        {
+          "name": "hnorm",
+          "type": "‖σ z * σ (∏ i ∈ denominator, x i)‖ = ‖σ (∏ i ∈ numerator, x i)‖"
+        }
+      ],
+      "domain": "0 < c ^ denominator.card",
+      "head": "",
+      "id": 20,
+      "objects": [],
+      "path": [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        2,
+        2
+      ],
+      "premises": [],
+      "role": "have",
+      "statement": "‖σ z‖ = 1"
+    },
+    {
+      "budget_cut": false,
+      "children": [
+        22,
+        24,
+        25
+      ],
+      "context": [
+        {
+          "name": "R",
+          "type": "Type uR"
+        },
+        {
+          "name": "ι",
+          "type": "Type uIota"
+        },
+        {
+          "name": "inst._@.OAI.LinearAlgebra.CirculantHadamard.AlternatingNorm.3207193924._hygCtx._hyg.4",
+          "type": "CommRing R"
+        },
+        {
+          "name": "σ",
+          "type": "R →+* ℂ"
+        },
+        {
+          "name": "x",
+          "type": "ι → R"
+        },
+        {
+          "name": "numerator",
+          "type": "Finset ι"
+        },
+        {
+          "name": "denominator",
+          "type": "Finset ι"
+        },
+        {
+          "name": "z",
+          "type": "R"
+        },
+        {
+          "name": "c",
+          "type": "ℝ"
+        },
+        {
+          "name": "hc",
+          "type": "0 < c"
+        },
+        {
+          "name": "hcard",
+          "type": "numerator.card = denominator.card"
+        },
+        {
+          "name": "hnumerator",
+          "type": "∀ i ∈ numerator, ‖σ (x i)‖ = c"
+        },
+        {
+          "name": "hdenominator",
+          "type": "∀ i ∈ denominator, ‖σ (x i)‖ = c"
+        },
+        {
+          "name": "hclear",
+          "type": "z * ∏ i ∈ denominator, x i = ∏ i ∈ numerator, x i"
+        },
+        {
+          "name": "hmap",
+          "type": "σ (z * ∏ i ∈ denominator, x i) = σ (∏ i ∈ numerator, x i)"
+        },
+        {
+          "name": "hnorm",
+          "type": "‖σ z * σ (∏ i ∈ denominator, x i)‖ = ‖σ (∏ i ∈ numerator, x i)‖"
+        }
+      ],
+      "head": "pow_pos",
+      "id": 21,
+      "objects": [
+        "ℝ",
+        "Real.instMonoidWithZero",
+        "Real.partialOrder",
+        "c",
+        "denominator.card"
+      ],
+      "path": [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        2,
+        2,
+        1
+      ],
+      "premises": [
+        {
+          "argument": 4,
+          "frame": 22,
+          "statement": "PosMulStrictMono ℝ"
+        },
+        {
+          "argument": 5,
+          "frame": 24,
+          "statement": "ZeroLEOneClass ℝ"
+        },
+        {
+          "argument": 6,
+          "frame": 25,
+          "statement": "0 < c"
+        }
+      ],
+      "role": "application",
+      "statement": "0 < c ^ denominator.card"
+    },
+    {
+      "budget_cut": false,
+      "children": [
+        23
+      ],
+      "context": [
+        {
+          "name": "R",
+          "type": "Type uR"
+        },
+        {
+          "name": "ι",
+          "type": "Type uIota"
+        },
+        {
+          "name": "inst._@.OAI.LinearAlgebra.CirculantHadamard.AlternatingNorm.3207193924._hygCtx._hyg.4",
+          "type": "CommRing R"
+        },
+        {
+          "name": "σ",
+          "type": "R →+* ℂ"
+        },
+        {
+          "name": "x",
+          "type": "ι → R"
+        },
+        {
+          "name": "numerator",
+          "type": "Finset ι"
+        },
+        {
+          "name": "denominator",
+          "type": "Finset ι"
+        },
+        {
+          "name": "z",
+          "type": "R"
+        },
+        {
+          "name": "c",
+          "type": "ℝ"
+        },
+        {
+          "name": "hc",
+          "type": "0 < c"
+        },
+        {
+          "name": "hcard",
+          "type": "numerator.card = denominator.card"
+        },
+        {
+          "name": "hnumerator",
+          "type": "∀ i ∈ numerator, ‖σ (x i)‖ = c"
+        },
+        {
+          "name": "hdenominator",
+          "type": "∀ i ∈ denominator, ‖σ (x i)‖ = c"
+        },
+        {
+          "name": "hclear",
+          "type": "z * ∏ i ∈ denominator, x i = ∏ i ∈ numerator, x i"
+        },
+        {
+          "name": "hmap",
+          "type": "σ (z * ∏ i ∈ denominator, x i) = σ (∏ i ∈ numerator, x i)"
+        },
+        {
+          "name": "hnorm",
+          "type": "‖σ z * σ (∏ i ∈ denominator, x i)‖ = ‖σ (∏ i ∈ numerator, x i)‖"
+        }
+      ],
+      "head": "IsStrictOrderedRing.toPosMulStrictMono",
+      "id": 22,
+      "objects": [
+        "ℝ",
+        "Real.semiring",
+        "Real.partialOrder"
+      ],
+      "path": [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        2,
+        2,
+        1,
+        0,
+        0,
+        0,
+        1
+      ],
+      "premises": [
+        {
+          "argument": 3,
+          "frame": 23,
+          "statement": "IsStrictOrderedRing ℝ"
+        }
+      ],
+      "role": "application",
+      "statement": "PosMulStrictMono ℝ"
+    },
+    {
+      "budget_cut": false,
+      "children": [],
+      "context": [
+        {
+          "name": "R",
+          "type": "Type uR"
+        },
+        {
+          "name": "ι",
+          "type": "Type uIota"
+        },
+        {
+          "name": "inst._@.OAI.LinearAlgebra.CirculantHadamard.AlternatingNorm.3207193924._hygCtx._hyg.4",
+          "type": "CommRing R"
+        },
+        {
+          "name": "σ",
+          "type": "R →+* ℂ"
+        },
+        {
+          "name": "x",
+          "type": "ι → R"
+        },
+        {
+          "name": "numerator",
+          "type": "Finset ι"
+        },
+        {
+          "name": "denominator",
+          "type": "Finset ι"
+        },
+        {
+          "name": "z",
+          "type": "R"
+        },
+        {
+          "name": "c",
+          "type": "ℝ"
+        },
+        {
+          "name": "hc",
+          "type": "0 < c"
+        },
+        {
+          "name": "hcard",
+          "type": "numerator.card = denominator.card"
+        },
+        {
+          "name": "hnumerator",
+          "type": "∀ i ∈ numerator, ‖σ (x i)‖ = c"
+        },
+        {
+          "name": "hdenominator",
+          "type": "∀ i ∈ denominator, ‖σ (x i)‖ = c"
+        },
+        {
+          "name": "hclear",
+          "type": "z * ∏ i ∈ denominator, x i = ∏ i ∈ numerator, x i"
+        },
+        {
+          "name": "hmap",
+          "type": "σ (z * ∏ i ∈ denominator, x i) = σ (∏ i ∈ numerator, x i)"
+        },
+        {
+          "name": "hnorm",
+          "type": "‖σ z * σ (∏ i ∈ denominator, x i)‖ = ‖σ (∏ i ∈ numerator, x i)‖"
+        }
+      ],
+      "head": "Real.instIsStrictOrderedRing",
+      "id": 23,
+      "objects": [],
+      "path": [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        2,
+        2,
+        1,
+        0,
+        0,
+        0,
+        1,
+        1
+      ],
+      "premises": [],
+      "role": "named",
+      "statement": "IsStrictOrderedRing ℝ"
+    },
+    {
+      "budget_cut": false,
+      "children": [],
+      "context": [
+        {
+          "name": "R",
+          "type": "Type uR"
+        },
+        {
+          "name": "ι",
+          "type": "Type uIota"
+        },
+        {
+          "name": "inst._@.OAI.LinearAlgebra.CirculantHadamard.AlternatingNorm.3207193924._hygCtx._hyg.4",
+          "type": "CommRing R"
+        },
+        {
+          "name": "σ",
+          "type": "R →+* ℂ"
+        },
+        {
+          "name": "x",
+          "type": "ι → R"
+        },
+        {
+          "name": "numerator",
+          "type": "Finset ι"
+        },
+        {
+          "name": "denominator",
+          "type": "Finset ι"
+        },
+        {
+          "name": "z",
+          "type": "R"
+        },
+        {
+          "name": "c",
+          "type": "ℝ"
+        },
+        {
+          "name": "hc",
+          "type": "0 < c"
+        },
+        {
+          "name": "hcard",
+          "type": "numerator.card = denominator.card"
+        },
+        {
+          "name": "hnumerator",
+          "type": "∀ i ∈ numerator, ‖σ (x i)‖ = c"
+        },
+        {
+          "name": "hdenominator",
+          "type": "∀ i ∈ denominator, ‖σ (x i)‖ = c"
+        },
+        {
+          "name": "hclear",
+          "type": "z * ∏ i ∈ denominator, x i = ∏ i ∈ numerator, x i"
+        },
+        {
+          "name": "hmap",
+          "type": "σ (z * ∏ i ∈ denominator, x i) = σ (∏ i ∈ numerator, x i)"
+        },
+        {
+          "name": "hnorm",
+          "type": "‖σ z * σ (∏ i ∈ denominator, x i)‖ = ‖σ (∏ i ∈ numerator, x i)‖"
+        }
+      ],
+      "head": "Real.instZeroLEOneClass",
+      "id": 24,
+      "objects": [],
+      "path": [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        2,
+        2,
+        1,
+        0,
+        0,
+        1
+      ],
+      "premises": [],
+      "role": "named",
+      "statement": "ZeroLEOneClass ℝ"
+    },
+    {
+      "binder": "hc",
+      "budget_cut": false,
+      "children": [],
+      "context": [
+        {
+          "name": "R",
+          "type": "Type uR"
+        },
+        {
+          "name": "ι",
+          "type": "Type uIota"
+        },
+        {
+          "name": "inst._@.OAI.LinearAlgebra.CirculantHadamard.AlternatingNorm.3207193924._hygCtx._hyg.4",
+          "type": "CommRing R"
+        },
+        {
+          "name": "σ",
+          "type": "R →+* ℂ"
+        },
+        {
+          "name": "x",
+          "type": "ι → R"
+        },
+        {
+          "name": "numerator",
+          "type": "Finset ι"
+        },
+        {
+          "name": "denominator",
+          "type": "Finset ι"
+        },
+        {
+          "name": "z",
+          "type": "R"
+        },
+        {
+          "name": "c",
+          "type": "ℝ"
+        },
+        {
+          "name": "hc",
+          "type": "0 < c"
+        },
+        {
+          "name": "hcard",
+          "type": "numerator.card = denominator.card"
+        },
+        {
+          "name": "hnumerator",
+          "type": "∀ i ∈ numerator, ‖σ (x i)‖ = c"
+        },
+        {
+          "name": "hdenominator",
+          "type": "∀ i ∈ denominator, ‖σ (x i)‖ = c"
+        },
+        {
+          "name": "hclear",
+          "type": "z * ∏ i ∈ denominator, x i = ∏ i ∈ numerator, x i"
+        },
+        {
+          "name": "hmap",
+          "type": "σ (z * ∏ i ∈ denominator, x i) = σ (∏ i ∈ numerator, x i)"
+        },
+        {
+          "name": "hnorm",
+          "type": "‖σ z * σ (∏ i ∈ denominator, x i)‖ = ‖σ (∏ i ∈ numerator, x i)‖"
+        }
+      ],
+      "head": "",
+      "id": 25,
+      "objects": [],
+      "path": [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        2,
+        2,
+        1,
+        0,
+        1
+      ],
+      "premises": [],
+      "role": "given",
+      "statement": "0 < c"
+    },
+    {
+      "budget_cut": false,
+      "children": [
+        27,
+        31
+      ],
+      "context": [
+        {
+          "name": "R",
+          "type": "Type uR"
+        },
+        {
+          "name": "ι",
+          "type": "Type uIota"
+        },
+        {
+          "name": "inst._@.OAI.LinearAlgebra.CirculantHadamard.AlternatingNorm.3207193924._hygCtx._hyg.4",
+          "type": "CommRing R"
+        },
+        {
+          "name": "σ",
+          "type": "R →+* ℂ"
+        },
+        {
+          "name": "x",
+          "type": "ι → R"
+        },
+        {
+          "name": "numerator",
+          "type": "Finset ι"
+        },
+        {
+          "name": "denominator",
+          "type": "Finset ι"
+        },
+        {
+          "name": "z",
+          "type": "R"
+        },
+        {
+          "name": "c",
+          "type": "ℝ"
+        },
+        {
+          "name": "hc",
+          "type": "0 < c"
+        },
+        {
+          "name": "hcard",
+          "type": "numerator.card = denominator.card"
+        },
+        {
+          "name": "hnumerator",
+          "type": "∀ i ∈ numerator, ‖σ (x i)‖ = c"
+        },
+        {
+          "name": "hdenominator",
+          "type": "∀ i ∈ denominator, ‖σ (x i)‖ = c"
+        },
+        {
+          "name": "hclear",
+          "type": "z * ∏ i ∈ denominator, x i = ∏ i ∈ numerator, x i"
+        },
+        {
+          "name": "hmap",
+          "type": "σ (z * ∏ i ∈ denominator, x i) = σ (∏ i ∈ numerator, x i)"
+        },
+        {
+          "name": "hnorm",
+          "type": "‖σ z * σ (∏ i ∈ denominator, x i)‖ = ‖σ (∏ i ∈ numerator, x i)‖"
+        },
+        {
+          "name": "hpositive",
+          "type": "0 < c ^ denominator.card"
+        }
+      ],
+      "head": "Mathlib.Tactic.Linarith.eq_of_not_lt_of_not_gt",
+      "id": 26,
+      "objects": [
+        "ℝ",
+        "Real.linearOrder",
+        "‖σ z‖",
+        "1"
+      ],
+      "path": [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        2,
+        2,
+        2
+      ],
+      "premises": [
+        {
+          "argument": 4,
+          "frame": 27,
+          "statement": "¬‖σ z‖ < 1"
+        },
+        {
+          "argument": 5,
+          "frame": 31,
+          "statement": "¬1 < ‖σ z‖"
+        }
+      ],
+      "role": "application",
+      "statement": "‖σ z‖ = 1"
+    },
+    {
+      "budget_cut": false,
+      "children": [
+        28
+      ],
+      "context": [
+        {
+          "name": "R",
+          "type": "Type uR"
+        },
+        {
+          "name": "ι",
+          "type": "Type uIota"
+        },
+        {
+          "name": "inst._@.OAI.LinearAlgebra.CirculantHadamard.AlternatingNorm.3207193924._hygCtx._hyg.4",
+          "type": "CommRing R"
+        },
+        {
+          "name": "σ",
+          "type": "R →+* ℂ"
+        },
+        {
+          "name": "x",
+          "type": "ι → R"
+        },
+        {
+          "name": "numerator",
+          "type": "Finset ι"
+        },
+        {
+          "name": "denominator",
+          "type": "Finset ι"
+        },
+        {
+          "name": "z",
+          "type": "R"
+        },
+        {
+          "name": "c",
+          "type": "ℝ"
+        },
+        {
+          "name": "hc",
+          "type": "0 < c"
+        },
+        {
+          "name": "hcard",
+          "type": "numerator.card = denominator.card"
+        },
+        {
+          "name": "hnumerator",
+          "type": "∀ i ∈ numerator, ‖σ (x i)‖ = c"
+        },
+        {
+          "name": "hdenominator",
+          "type": "∀ i ∈ denominator, ‖σ (x i)‖ = c"
+        },
+        {
+          "name": "hclear",
+          "type": "z * ∏ i ∈ denominator, x i = ∏ i ∈ numerator, x i"
+        },
+        {
+          "name": "hmap",
+          "type": "σ (z * ∏ i ∈ denominator, x i) = σ (∏ i ∈ numerator, x i)"
+        },
+        {
+          "name": "hnorm",
+          "type": "‖σ z * σ (∏ i ∈ denominator, x i)‖ = ‖σ (∏ i ∈ numerator, x i)‖"
+        },
+        {
+          "name": "hpositive",
+          "type": "0 < c ^ denominator.card"
+        }
+      ],
+      "head": "Not.intro",
+      "id": 27,
+      "objects": [
+        "‖σ z‖ < 1"
+      ],
+      "path": [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        2,
+        2,
+        2,
+        0,
+        1
+      ],
+      "premises": [
+        {
+          "argument": 1,
+          "frame": 28,
+          "statement": "‖σ z‖ < 1 → False"
+        }
+      ],
+      "role": "application",
+      "statement": "¬‖σ z‖ < 1"
+    },
+    {
+      "binder": "a._@._internal._hyg.0",
+      "budget_cut": false,
+      "children": [
+        29
+      ],
+      "context": [
+        {
+          "name": "R",
+          "type": "Type uR"
+        },
+        {
+          "name": "ι",
+          "type": "Type uIota"
+        },
+        {
+          "name": "inst._@.OAI.LinearAlgebra.CirculantHadamard.AlternatingNorm.3207193924._hygCtx._hyg.4",
+          "type": "CommRing R"
+        },
+        {
+          "name": "σ",
+          "type": "R →+* ℂ"
+        },
+        {
+          "name": "x",
+          "type": "ι → R"
+        },
+        {
+          "name": "numerator",
+          "type": "Finset ι"
+        },
+        {
+          "name": "denominator",
+          "type": "Finset ι"
+        },
+        {
+          "name": "z",
+          "type": "R"
+        },
+        {
+          "name": "c",
+          "type": "ℝ"
+        },
+        {
+          "name": "hc",
+          "type": "0 < c"
+        },
+        {
+          "name": "hcard",
+          "type": "numerator.card = denominator.card"
+        },
+        {
+          "name": "hnumerator",
+          "type": "∀ i ∈ numerator, ‖σ (x i)‖ = c"
+        },
+        {
+          "name": "hdenominator",
+          "type": "∀ i ∈ denominator, ‖σ (x i)‖ = c"
+        },
+        {
+          "name": "hclear",
+          "type": "z * ∏ i ∈ denominator, x i = ∏ i ∈ numerator, x i"
+        },
+        {
+          "name": "hmap",
+          "type": "σ (z * ∏ i ∈ denominator, x i) = σ (∏ i ∈ numerator, x i)"
+        },
+        {
+          "name": "hnorm",
+          "type": "‖σ z * σ (∏ i ∈ denominator, x i)‖ = ‖σ (∏ i ∈ numerator, x i)‖"
+        },
+        {
+          "name": "hpositive",
+          "type": "0 < c ^ denominator.card"
+        }
+      ],
+      "domain": "‖σ z‖ < 1",
+      "head": "",
+      "id": 28,
+      "objects": [],
+      "path": [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        2,
+        2,
+        2,
+        0,
+        1,
+        1
+      ],
+      "premises": [],
+      "role": "assume",
+      "statement": "‖σ z‖ < 1 → False"
+    },
+    {
+      "budget_cut": false,
+      "children": [
+        30
+      ],
+      "context": [
+        {
+          "name": "R",
+          "type": "Type uR"
+        },
+        {
+          "name": "ι",
+          "type": "Type uIota"
+        },
+        {
+          "name": "inst._@.OAI.LinearAlgebra.CirculantHadamard.AlternatingNorm.3207193924._hygCtx._hyg.4",
+          "type": "CommRing R"
+        },
+        {
+          "name": "σ",
+          "type": "R →+* ℂ"
+        },
+        {
+          "name": "x",
+          "type": "ι → R"
+        },
+        {
+          "name": "numerator",
+          "type": "Finset ι"
+        },
+        {
+          "name": "denominator",
+          "type": "Finset ι"
+        },
+        {
+          "name": "z",
+          "type": "R"
+        },
+        {
+          "name": "c",
+          "type": "ℝ"
+        },
+        {
+          "name": "hc",
+          "type": "0 < c"
+        },
+        {
+          "name": "hcard",
+          "type": "numerator.card = denominator.card"
+        },
+        {
+          "name": "hnumerator",
+          "type": "∀ i ∈ numerator, ‖σ (x i)‖ = c"
+        },
+        {
+          "name": "hdenominator",
+          "type": "∀ i ∈ denominator, ‖σ (x i)‖ = c"
+        },
+        {
+          "name": "hclear",
+          "type": "z * ∏ i ∈ denominator, x i = ∏ i ∈ numerator, x i"
+        },
+        {
+          "name": "hmap",
+          "type": "σ (z * ∏ i ∈ denominator, x i) = σ (∏ i ∈ numerator, x i)"
+        },
+        {
+          "name": "hnorm",
+          "type": "‖σ z * σ (∏ i ∈ denominator, x i)‖ = ‖σ (∏ i ∈ numerator, x i)‖"
+        },
+        {
+          "name": "hpositive",
+          "type": "0 < c ^ denominator.card"
+        },
+        {
+          "name": "a._@._internal._hyg.0",
+          "type": "‖σ z‖ < 1"
+        }
+      ],
+      "head": "Mathlib.Tactic.Linarith.lt_irrefl",
+      "id": 29,
+      "objects": [
+        "ℝ",
+        "Real.instPreorder",
+        "0"
+      ],
+      "path": [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        2,
+        2,
+        2,
+        0,
+        1,
+        1,
+        1
+      ],
+      "premises": [
+        {
+          "argument": 3,
+          "frame": 30,
+          "statement": "0 < 0"
+        }
+      ],
+      "role": "application",
+      "statement": "False"
+    },
+    {
+      "budget_cut": false,
+      "children": [],
+      "context": [
+        {
+          "name": "R",
+          "type": "Type uR"
+        },
+        {
+          "name": "ι",
+          "type": "Type uIota"
+        },
+        {
+          "name": "inst._@.OAI.LinearAlgebra.CirculantHadamard.AlternatingNorm.3207193924._hygCtx._hyg.4",
+          "type": "CommRing R"
+        },
+        {
+          "name": "σ",
+          "type": "R →+* ℂ"
+        },
+        {
+          "name": "x",
+          "type": "ι → R"
+        },
+        {
+          "name": "numerator",
+          "type": "Finset ι"
+        },
+        {
+          "name": "denominator",
+          "type": "Finset ι"
+        },
+        {
+          "name": "z",
+          "type": "R"
+        },
+        {
+          "name": "c",
+          "type": "ℝ"
+        },
+        {
+          "name": "hc",
+          "type": "0 < c"
+        },
+        {
+          "name": "hcard",
+          "type": "numerator.card = denominator.card"
+        },
+        {
+          "name": "hnumerator",
+          "type": "∀ i ∈ numerator, ‖σ (x i)‖ = c"
+        },
+        {
+          "name": "hdenominator",
+          "type": "∀ i ∈ denominator, ‖σ (x i)‖ = c"
+        },
+        {
+          "name": "hclear",
+          "type": "z * ∏ i ∈ denominator, x i = ∏ i ∈ numerator, x i"
+        },
+        {
+          "name": "hmap",
+          "type": "σ (z * ∏ i ∈ denominator, x i) = σ (∏ i ∈ numerator, x i)"
+        },
+        {
+          "name": "hnorm",
+          "type": "‖σ z * σ (∏ i ∈ denominator, x i)‖ = ‖σ (∏ i ∈ numerator, x i)‖"
+        },
+        {
+          "name": "hpositive",
+          "type": "0 < c ^ denominator.card"
+        },
+        {
+          "name": "a._@._internal._hyg.0",
+          "type": "‖σ z‖ < 1"
+        }
+      ],
+      "head": "Eq.mp",
+      "id": 30,
+      "objects": [],
+      "path": [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        2,
+        2,
+        2,
+        0,
+        1,
+        1,
+        1,
+        1
+      ],
+      "premises": [],
+      "role": "rewrite",
+      "statement": "0 < 0"
+    },
+    {
+      "budget_cut": false,
+      "children": [
+        32
+      ],
+      "context": [
+        {
+          "name": "R",
+          "type": "Type uR"
+        },
+        {
+          "name": "ι",
+          "type": "Type uIota"
+        },
+        {
+          "name": "inst._@.OAI.LinearAlgebra.CirculantHadamard.AlternatingNorm.3207193924._hygCtx._hyg.4",
+          "type": "CommRing R"
+        },
+        {
+          "name": "σ",
+          "type": "R →+* ℂ"
+        },
+        {
+          "name": "x",
+          "type": "ι → R"
+        },
+        {
+          "name": "numerator",
+          "type": "Finset ι"
+        },
+        {
+          "name": "denominator",
+          "type": "Finset ι"
+        },
+        {
+          "name": "z",
+          "type": "R"
+        },
+        {
+          "name": "c",
+          "type": "ℝ"
+        },
+        {
+          "name": "hc",
+          "type": "0 < c"
+        },
+        {
+          "name": "hcard",
+          "type": "numerator.card = denominator.card"
+        },
+        {
+          "name": "hnumerator",
+          "type": "∀ i ∈ numerator, ‖σ (x i)‖ = c"
+        },
+        {
+          "name": "hdenominator",
+          "type": "∀ i ∈ denominator, ‖σ (x i)‖ = c"
+        },
+        {
+          "name": "hclear",
+          "type": "z * ∏ i ∈ denominator, x i = ∏ i ∈ numerator, x i"
+        },
+        {
+          "name": "hmap",
+          "type": "σ (z * ∏ i ∈ denominator, x i) = σ (∏ i ∈ numerator, x i)"
+        },
+        {
+          "name": "hnorm",
+          "type": "‖σ z * σ (∏ i ∈ denominator, x i)‖ = ‖σ (∏ i ∈ numerator, x i)‖"
+        },
+        {
+          "name": "hpositive",
+          "type": "0 < c ^ denominator.card"
+        }
+      ],
+      "head": "Not.intro",
+      "id": 31,
+      "objects": [
+        "1 < ‖σ z‖"
+      ],
+      "path": [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        2,
+        2,
+        2,
+        1
+      ],
+      "premises": [
+        {
+          "argument": 1,
+          "frame": 32,
+          "statement": "1 < ‖σ z‖ → False"
+        }
+      ],
+      "role": "application",
+      "statement": "¬1 < ‖σ z‖"
+    },
+    {
+      "binder": "a._@._internal._hyg.0",
+      "budget_cut": false,
+      "children": [
+        33
+      ],
+      "context": [
+        {
+          "name": "R",
+          "type": "Type uR"
+        },
+        {
+          "name": "ι",
+          "type": "Type uIota"
+        },
+        {
+          "name": "inst._@.OAI.LinearAlgebra.CirculantHadamard.AlternatingNorm.3207193924._hygCtx._hyg.4",
+          "type": "CommRing R"
+        },
+        {
+          "name": "σ",
+          "type": "R →+* ℂ"
+        },
+        {
+          "name": "x",
+          "type": "ι → R"
+        },
+        {
+          "name": "numerator",
+          "type": "Finset ι"
+        },
+        {
+          "name": "denominator",
+          "type": "Finset ι"
+        },
+        {
+          "name": "z",
+          "type": "R"
+        },
+        {
+          "name": "c",
+          "type": "ℝ"
+        },
+        {
+          "name": "hc",
+          "type": "0 < c"
+        },
+        {
+          "name": "hcard",
+          "type": "numerator.card = denominator.card"
+        },
+        {
+          "name": "hnumerator",
+          "type": "∀ i ∈ numerator, ‖σ (x i)‖ = c"
+        },
+        {
+          "name": "hdenominator",
+          "type": "∀ i ∈ denominator, ‖σ (x i)‖ = c"
+        },
+        {
+          "name": "hclear",
+          "type": "z * ∏ i ∈ denominator, x i = ∏ i ∈ numerator, x i"
+        },
+        {
+          "name": "hmap",
+          "type": "σ (z * ∏ i ∈ denominator, x i) = σ (∏ i ∈ numerator, x i)"
+        },
+        {
+          "name": "hnorm",
+          "type": "‖σ z * σ (∏ i ∈ denominator, x i)‖ = ‖σ (∏ i ∈ numerator, x i)‖"
+        },
+        {
+          "name": "hpositive",
+          "type": "0 < c ^ denominator.card"
+        }
+      ],
+      "domain": "1 < ‖σ z‖",
+      "head": "",
+      "id": 32,
+      "objects": [],
+      "path": [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        2,
+        2,
+        2,
+        1,
+        1
+      ],
+      "premises": [],
+      "role": "assume",
+      "statement": "1 < ‖σ z‖ → False"
+    },
+    {
+      "budget_cut": false,
+      "children": [
+        34
+      ],
+      "context": [
+        {
+          "name": "R",
+          "type": "Type uR"
+        },
+        {
+          "name": "ι",
+          "type": "Type uIota"
+        },
+        {
+          "name": "inst._@.OAI.LinearAlgebra.CirculantHadamard.AlternatingNorm.3207193924._hygCtx._hyg.4",
+          "type": "CommRing R"
+        },
+        {
+          "name": "σ",
+          "type": "R →+* ℂ"
+        },
+        {
+          "name": "x",
+          "type": "ι → R"
+        },
+        {
+          "name": "numerator",
+          "type": "Finset ι"
+        },
+        {
+          "name": "denominator",
+          "type": "Finset ι"
+        },
+        {
+          "name": "z",
+          "type": "R"
+        },
+        {
+          "name": "c",
+          "type": "ℝ"
+        },
+        {
+          "name": "hc",
+          "type": "0 < c"
+        },
+        {
+          "name": "hcard",
+          "type": "numerator.card = denominator.card"
+        },
+        {
+          "name": "hnumerator",
+          "type": "∀ i ∈ numerator, ‖σ (x i)‖ = c"
+        },
+        {
+          "name": "hdenominator",
+          "type": "∀ i ∈ denominator, ‖σ (x i)‖ = c"
+        },
+        {
+          "name": "hclear",
+          "type": "z * ∏ i ∈ denominator, x i = ∏ i ∈ numerator, x i"
+        },
+        {
+          "name": "hmap",
+          "type": "σ (z * ∏ i ∈ denominator, x i) = σ (∏ i ∈ numerator, x i)"
+        },
+        {
+          "name": "hnorm",
+          "type": "‖σ z * σ (∏ i ∈ denominator, x i)‖ = ‖σ (∏ i ∈ numerator, x i)‖"
+        },
+        {
+          "name": "hpositive",
+          "type": "0 < c ^ denominator.card"
+        },
+        {
+          "name": "a._@._internal._hyg.0",
+          "type": "1 < ‖σ z‖"
+        }
+      ],
+      "head": "Mathlib.Tactic.Linarith.lt_irrefl",
+      "id": 33,
+      "objects": [
+        "ℝ",
+        "Real.instPreorder",
+        "0"
+      ],
+      "path": [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        2,
+        2,
+        2,
+        1,
+        1,
+        1
+      ],
+      "premises": [
+        {
+          "argument": 3,
+          "frame": 34,
+          "statement": "0 < 0"
+        }
+      ],
+      "role": "application",
+      "statement": "False"
+    },
+    {
+      "budget_cut": false,
+      "children": [],
+      "context": [
+        {
+          "name": "R",
+          "type": "Type uR"
+        },
+        {
+          "name": "ι",
+          "type": "Type uIota"
+        },
+        {
+          "name": "inst._@.OAI.LinearAlgebra.CirculantHadamard.AlternatingNorm.3207193924._hygCtx._hyg.4",
+          "type": "CommRing R"
+        },
+        {
+          "name": "σ",
+          "type": "R →+* ℂ"
+        },
+        {
+          "name": "x",
+          "type": "ι → R"
+        },
+        {
+          "name": "numerator",
+          "type": "Finset ι"
+        },
+        {
+          "name": "denominator",
+          "type": "Finset ι"
+        },
+        {
+          "name": "z",
+          "type": "R"
+        },
+        {
+          "name": "c",
+          "type": "ℝ"
+        },
+        {
+          "name": "hc",
+          "type": "0 < c"
+        },
+        {
+          "name": "hcard",
+          "type": "numerator.card = denominator.card"
+        },
+        {
+          "name": "hnumerator",
+          "type": "∀ i ∈ numerator, ‖σ (x i)‖ = c"
+        },
+        {
+          "name": "hdenominator",
+          "type": "∀ i ∈ denominator, ‖σ (x i)‖ = c"
+        },
+        {
+          "name": "hclear",
+          "type": "z * ∏ i ∈ denominator, x i = ∏ i ∈ numerator, x i"
+        },
+        {
+          "name": "hmap",
+          "type": "σ (z * ∏ i ∈ denominator, x i) = σ (∏ i ∈ numerator, x i)"
+        },
+        {
+          "name": "hnorm",
+          "type": "‖σ z * σ (∏ i ∈ denominator, x i)‖ = ‖σ (∏ i ∈ numerator, x i)‖"
+        },
+        {
+          "name": "hpositive",
+          "type": "0 < c ^ denominator.card"
+        },
+        {
+          "name": "a._@._internal._hyg.0",
+          "type": "1 < ‖σ z‖"
+        }
+      ],
+      "head": "Eq.mp",
+      "id": 34,
+      "objects": [],
+      "path": [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        2,
+        2,
+        2,
+        1,
+        1,
+        1,
+        1
+      ],
+      "premises": [],
+      "role": "rewrite",
+      "statement": "0 < 0"
+    }
+  ],
+  "judgements_checked": 35,
+  "lean_version": "4.34.1",
+  "schema": "proofreader.narrative/v1",
+  "statement": "∀ {R : Type uR} {ι : Type uIota} [inst : CommRing R] (σ : R →+* ℂ) (x : ι → R) (numerator denominator : Finset ι)\n  (z : R) (c : ℝ),\n  0 < c →\n    numerator.card = denominator.card →\n      (∀ i ∈ numerator, ‖σ (x i)‖ = c) →\n        (∀ i ∈ denominator, ‖σ (x i)‖ = c) → z * ∏ i ∈ denominator, x i = ∏ i ∈ numerator, x i → ‖σ z‖ = 1",
+  "theorem": "OAI.CirculantHadamard.AlternatingNorm.norm_eq_one_of_balanced_products"
+}
