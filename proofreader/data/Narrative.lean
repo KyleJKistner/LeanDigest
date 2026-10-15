@@ -38,7 +38,7 @@ partial def visit (e : Expr) (xs : Array Expr) (path : Array Nat)
     context := context.push <| obj [("name", toJson d.userName.toString), ("type", toJson (← liftM <| pp d.type))]
   let head := nameOf e
   let arithmetic := head.startsWith "Mathlib.Tactic.Ring."
-  let rewrite := #["Eq.mpr", "Eq.mp", "of_eq_true", "congrArg", "congr", "congrFun", "congrFun'"].contains head
+  let rewrite := #["Eq.mpr", "Eq.mp", "of_eq_true", "congr", "congrFun", "congrFun'"].contains head
   let stopHere := depth == 0 || arithmetic || rewrite
   let mut role := if arithmetic then "ring" else if rewrite then "rewrite" else "application"
   let mut children : Array Nat := #[]
@@ -79,6 +79,8 @@ partial def visit (e : Expr) (xs : Array Expr) (path : Array Nat)
           premises := premises.push <| obj [("argument", toJson k), ("statement", toJson (← liftM <| pp atp)), ("frame", toJson ch)]
           children := children.push ch
         else objects := objects.push (← liftM <| pp a)
+      if head == "congrArg" then role := "congruence"
+      if #["Nat.rec", "Nat.recOn", "List.rec", "List.recOn"].contains head then role := "induction"
       if head == "Exists.intro" then role := "witness"
       if #["Exists.casesOn", "Exists.elim"].contains head then role := "choose"
       if #["dite", "ite", "Decidable.byCases", "Classical.byCases", "Or.elim", "Or.casesOn"].contains head then role := "cases"
@@ -139,15 +141,20 @@ private def checkPaths (original : Expr) (state : State) : MetaM Unit := do
 
 def exportOne (n : Name) : MetaM Json := do
   let info ← getConstInfo n
-  let .thmInfo v := info | throwError "Expected theorem"
+  let value ← match info with
+    | .thmInfo v => pure v.value
+    | .defnInfo v => pure v.value
+    | .opaqueInfo v => pure v.value
+    | _ => throwError "Expected a declaration with a proof body"
+  unless ← isProp info.type do throwError "Expected a proof-valued declaration"
   let ax ← collectAxioms n
   unless ax.all (fun n => #[`propext, `Classical.choice, `Quot.sound].contains n) do throwError "Disallowed axiom"
   let base ← mkFreshUserName `PRNarrativeCheck
-  let (_, s) ← (visit v.value #[] #[] base v.levelParams 160).run {}
-  checkPaths v.value s
+  let (_, s) ← (visit value #[] #[] base info.levelParams 160).run {}
+  checkPaths value s
   return obj [("schema", toJson "proofreader.narrative/v1"), ("theorem", toJson n.toString),
     ("lean_version", toJson Lean.versionString), ("axioms", toJson (ax.map Name.toString)),
-    ("statement", toJson (← pp v.type)), ("frames", toJson s.frames),
+    ("statement", toJson (← pp info.type)), ("frames", toJson s.frames),
     ("judgements_checked", toJson s.frames.size), ("formula_backend", toJson "Lean pretty-printer")]
 elab "#narrative " target:str : command => do
   let r ← liftTermElabM <| exportOne target.getString.toName

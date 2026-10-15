@@ -101,6 +101,16 @@ def parser(prog: str = "proofreader") -> argparse.ArgumentParser:
         cmd.add_argument("--project",type=Path);cmd.add_argument("--backend",choices=["native","axle"],default="native")
         cmd.add_argument("--trust-project",action="store_true");cmd.add_argument("--allow-remote",action="store_true")
         cmd.add_argument("--timeout",type=float,default=180)
+    nb=commands.add_parser("batch-narrative",help="Build module batches with checked snapshots and an explicit failure/gap ledger")
+    selection=nb.add_mutually_exclusive_group(required=True)
+    selection.add_argument("--module",nargs="+")
+    selection.add_argument("--plan",type=Path,help="JSON object with a modules array; no executable commands")
+    nb.add_argument("--project",type=Path,required=True);nb.add_argument("--output","-o",type=Path,required=True)
+    nb.add_argument("--lean-version",default="4.34.1");nb.add_argument("--trust-project",action="store_true")
+    nb.add_argument("--timeout",type=float,default=180);nb.add_argument("--max-declarations",type=int,default=1000)
+    nb.add_argument("--shard-index",type=int,default=0);nb.add_argument("--shard-count",type=int,default=1)
+    na=commands.add_parser("aggregate-narrative",help="Reconcile narrative shards; missing modules keep an unknown denominator")
+    na.add_argument("reports",type=Path,nargs="+");na.add_argument("--output","-o",type=Path,required=True)
     return p
 
 
@@ -113,6 +123,20 @@ def demo_document() -> Document:
 def main(argv: list[str] | None = None, *, prog: str = "proofreader") -> int:
     args=parser(prog).parse_args(argv)
     try:
+        if args.command=="batch-narrative":
+            from .narrative_batch import run_batch
+            from .kernel_io import strict_json
+            modules=strict_json(args.plan.read_bytes()).get("modules") if args.plan else args.module
+            result=run_batch(modules,args.project,args.output,version=args.lean_version,
+                             trust_project=args.trust_project,timeout=args.timeout,
+                             max_declarations=args.max_declarations,shard_index=args.shard_index,shard_count=args.shard_count)
+            print(json.dumps(result["summary"],ensure_ascii=False,indent=2))
+            return 0 if result["status"]=="complete" else 2
+        if args.command=="aggregate-narrative":
+            from .narrative_batch import aggregate
+            result=aggregate(args.reports,args.output)
+            print(json.dumps(result["summary"],ensure_ascii=False,indent=2))
+            return 0 if result["summary"]["pipeline_complete"] else 2
         if args.command=="narrative-demo":
             d=load_document((Path(__file__).parent/"data/narrative-demo.json").read_bytes())
             write_outputs(d,args.output);print(args.output);return 0

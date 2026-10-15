@@ -22,12 +22,13 @@ from .polynomial import certify, verify as verify_polynomial, certificate_text
 SCHEMA = 'proofreader.narrative/v1'
 PRINTER_VERSION = 'source-math-en/0.3.0'
 ROLES = {'introduce','assume','have','define','witness','choose','cases','combine','chain',
-         'reflexivity','cancel','identity','given','named','application','ring','rewrite','unexpanded'}
+         'reflexivity','cancel','identity','given','named','application','ring','rewrite','unexpanded','induction','congruence'}
 _HEAD_ROLES = {'Exists.intro':'witness','Exists.casesOn':'choose','Exists.elim':'choose',
                'And.intro':'combine','Trans.trans':'chain','Eq.trans':'chain',
                'mul_left_cancel₀':'cancel','id':'identity','Eq.refl':'reflexivity',
                'dite':'cases','ite':'cases','Decidable.byCases':'cases','Classical.byCases':'cases',
-               'Or.elim':'cases','Or.casesOn':'cases'}
+               'Or.elim':'cases','Or.casesOn':'cases',
+               'Nat.rec':'induction','Nat.recOn':'induction','List.rec':'induction','List.recOn':'induction'}
 _REWRITES = {'Eq.mpr','Eq.mp','of_eq_true','congrArg','congr','congrFun',"congrFun'"}
 _LEMMAS = {
     'EuclideanDomain.gcd_eq_zero_iff': 'A gcd is zero exactly when both entries are zero.',
@@ -83,7 +84,7 @@ class Snapshot:
             if head.startswith('Mathlib.Tactic.Ring.'):
                 require(role == 'ring', 'Arithmetic role mismatch')
             elif head in _REWRITES:
-                require(role == 'rewrite', 'Rewrite role mismatch')
+                require(role == 'rewrite' or (head == 'congrArg' and role == 'congruence'), 'Rewrite role mismatch')
             elif head in _HEAD_ROLES and not f['budget_cut']:
                 require(role == _HEAD_ROLES[head], 'Logical rule mismatch')
             require(isinstance(f['context'],list) and len(f['context']) <= 256, 'Context budget')
@@ -248,6 +249,26 @@ class Narrative:
             else:
                 s=self.step(i,f'Establish {domain}; call this fact {name}.',children=self.sequence(ch[0]))
             return [s]+self.sequence(ch[-1])
+        if role=='induction' and len(ch)==2 and f['objects']:
+            # These constructor recursors are recognized by exact fully qualified
+            # names, not an inferred tactic label or a theorem-specific template.
+            branches=[self.sequence(j) for j in ch]
+            labels=('Base case (zero). ', 'Successor step. ') if f['head'].startswith('Nat.') else ('Empty-list case. ', 'Constructor step. ')
+            for branch,label in zip(branches,labels):
+                if branch:
+                    branch[0].text=label+branch[0].text
+            return [self.step(i,'Proceed by induction on '+math_text(f['objects'][-1])+'.',
+                              conclusion=con,children=[s for branch in branches for s in branch])]
+        if role=='congruence' and f['head']=='congrArg' and len(ch)==1 and len(f['objects'])>=3:
+            return [self.step(i,'Apply '+math_text(f['objects'][-3])+' to both sides of the supplied equality.',
+                              conclusion=con,children=self.sequence(ch[0]))]
+        if role=='cases' and f['head'] in {'Or.elim','Or.casesOn'} and len(ch)==3 and all(self.frames[j]['role']=='assume' for j in ch[1:]):
+            branches=self.sequence(ch[0])
+            for j in ch[1:]:
+                b=self.frames[j]
+                branches.append(self.step(j,'Case '+math_text(b['domain'])+'.',rule='case',
+                                          children=self.sequence(b['children'][0])))
+            return [self.step(i,'Reason by cases from '+math_text(self.frames[ch[0]]['statement'])+'.',children=branches)]
         if role=='cases' and len(ch)==2 and all(self.frames[j]['role']=='assume' for j in ch):
             branches=[]
             for j in ch:
@@ -318,7 +339,7 @@ class Narrative:
             text=_LEMMAS[f['head']]
         else:
             text='Apply '+(f['head'] or 'the recorded term')+' to the supplied arguments.'
-        fallback=role in {'ring','rewrite','unexpanded','cases','choose','identity','combine','chain','witness'} or (role in {'application','named'} and f['head'] not in _LEMMAS)
+        fallback=role in {'ring','rewrite','unexpanded','cases','choose','identity','combine','chain','witness','induction','congruence'} or (role in {'application','named'} and f['head'] not in _LEMMAS)
         child_steps=[s for j in ch for s in self.sequence(j)]
         s=self.step(i,text,children=child_steps,
                     conclusion=None if con in text or role in {'assume','introduce'} else con,fallback=fallback)
