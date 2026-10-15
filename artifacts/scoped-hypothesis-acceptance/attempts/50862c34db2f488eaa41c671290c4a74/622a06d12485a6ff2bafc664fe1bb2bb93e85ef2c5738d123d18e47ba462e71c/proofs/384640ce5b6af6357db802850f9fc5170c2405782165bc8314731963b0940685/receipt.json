@@ -1,0 +1,16 @@
+{
+  "schema": "proofreader.narrative-receipt/v1",
+  "status": "passed",
+  "theorem": "BatchAcceptance.Logic.cases",
+  "lean_version": "4.34.1",
+  "backend": "native",
+  "snapshot_sha256": "1e6f0e868f6b61b3cebb458b5c7a55daca8846fa74c4ef16175ab2e9cdd6a4ce",
+  "source_sha256": "aa44e0acda9a8c01d88d26f38e5dd55c8dd158e0f71c72ae9cf445c958d29409",
+  "selected_judgements": 18,
+  "all_selected_judgements_kernel_checked": true,
+  "path_linkage_checked_in_lean": true,
+  "receipt_authenticated": false,
+  "english_formally_verified": false,
+  "exact_openai_project_replayed": false,
+  "module": "ProofReader.Acceptance.Logic"
+}

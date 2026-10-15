@@ -1,0 +1,6 @@
+Leanglish · BatchAcceptance.Logic.proof_definition
+
+Then True.
+
+Proof.
+Apply True.intro to the supplied arguments.

@@ -1,0 +1,97 @@
+name: Leanglish mathematician preview
+on:
+  push:
+    branches: [work/realization-v0.4]
+    paths:
+      - scripts/build_research_preview.py
+      - tests/test_research_preview.py
+      - docs/MATHEMATICIAN_PREVIEW.md
+      - .github/workflows/research-preview.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  build-preview:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Download frozen OpenAI dependency-pinned extraction
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mkdir -p /tmp/leanglish-pinned
+          gh run download 38792262410 -R "${GITHUB_REPOSITORY}" \
+            -n leanglish-pinned-acceptance -D /tmp/leanglish-pinned
+      - name: Assert source identity and record outstanding gaps
+        run: |
+          python - <<'PY'
+          import json,pathlib
+          root=pathlib.Path('/tmp/leanglish-pinned')
+          identity=json.loads((root/'run-identity.json').read_text())
+          report=json.loads((root/'acceptance.json').read_text())
+          assert identity['source_commit']=='4fd28f74a0bc1701b60e6a29804f0b533078fdeb',identity
+          assert report['plan']['commit']=='1581d4cbdd69a0faf34b2089614fe2a814316a6a'
+          assert report['status']=='partial'
+          summary=report['summary']
+          assert summary['kernel_checked']==14 and summary['rendered']==14
+          assert summary['unexpanded_steps']==796 and summary['total_candidates'] is None
+          print('Frozen sample identity verified; incomplete explanations retained:',summary)
+          PY
+      - name: Render offline mathematical proof catalog
+        run: |
+          python scripts/build_research_preview.py \
+            --batch /tmp/leanglish-pinned/batch --output public \
+            --source-commit 4fd28f74a0bc1701b60e6a29804f0b533078fdeb \
+            --run-id 38792262410
+      - name: Verify the gallery generator and manifest
+        run: |
+          python -m pip install 'pytest>=8,<10'
+          python -m pytest tests/test_research_preview.py -q
+          python - <<'PY'
+          import hashlib,json,pathlib
+          root=pathlib.Path('public')
+          m=json.loads((root/'manifest.json').read_text())
+          assert len(m['proofs'])==14 and not m['formal_english_certification']
+          for item in m['proofs']:
+              assert (root/item['page']).is_file()
+              assert hashlib.sha256((root/item['page']).read_bytes()).hexdigest()==item['html_sha256']
+          assert hashlib.sha256((root/'index.html').read_bytes()).hexdigest()==m['index_sha256']
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: leanglish-mathematician-site
+          path: public/
+          if-no-files-found: error
+          retention-days: 90
+  deploy-pages:
+    if: github.ref == 'refs/heads/main' && github.event_name == 'workflow_dispatch'
+    needs: build-preview
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+      contents: read
+      actions: read
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: leanglish-mathematician-site
+          path: public/
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v4
+        with:
+          path: public/
+      - id: deployment
+        uses: actions/deploy-pages@v4

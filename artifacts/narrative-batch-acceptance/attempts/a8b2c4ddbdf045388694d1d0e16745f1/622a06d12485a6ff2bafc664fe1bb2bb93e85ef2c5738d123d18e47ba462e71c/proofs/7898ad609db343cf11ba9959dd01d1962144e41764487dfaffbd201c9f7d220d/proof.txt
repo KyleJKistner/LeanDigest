@@ -1,0 +1,6 @@
+Leanglish · BatchAcceptance.Logic.opaque_proof
+
+Then True.
+
+Proof.
+Apply True.intro to the supplied arguments.

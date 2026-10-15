@@ -1,0 +1,27 @@
+Leanglish · BatchAcceptance.Logic.cases
+
+Let P be a proposition.
+Let Q be a proposition.
+Let R be a proposition.
+Assume P ∨ Q.
+Assume P → R.
+Assume Q → R.
+Then R.
+
+Proof.
+Use the intermediate claim h = h → R. Apply it to the additional premises shown below.
+  R
+  Reason by cases from P ∨ Q.
+    Use the hypothesis h: P ∨ Q.
+    Case P.
+      Assume h = ⋯.
+      Apply the hypothesis hp: P → R.
+        R
+        Use the hypothesis p: P.
+    Case Q.
+      Assume h = ⋯.
+      Apply the hypothesis hq: Q → R.
+        R
+        Use the hypothesis q: Q.
+  By reflexivity, h = h.
+    Use the hypothesis h: P ∨ Q.

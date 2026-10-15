@@ -10,3 +10,6 @@ name = "KernelExport"
 
 [[lean_lib]]
 name = "Narrative"
+
+[[lean_lib]]
+name = "NarrativeBatch"

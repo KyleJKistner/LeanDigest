@@ -1,0 +1,14 @@
+Leanglish · BatchAcceptance.Induction.addition_associates
+
+Let a, b, c be elements of Nat.
+Then a + b + c = a + (b + c).
+
+Proof.
+Proceed by induction on c.
+  a + b + c = a + (b + c)
+  Base case (zero). By reflexivity, a + b + 0 = a + b + 0.
+  Successor step. Let c ∈ Nat be arbitrary.
+  Assume a + b + c = a + (b + c).
+  Apply Nat.succ to both sides of the supplied equality.
+    ((a + b).add c).succ = (a.add (b.add c)).succ
+    Use the hypothesis ih: a + b + c = a + (b + c).

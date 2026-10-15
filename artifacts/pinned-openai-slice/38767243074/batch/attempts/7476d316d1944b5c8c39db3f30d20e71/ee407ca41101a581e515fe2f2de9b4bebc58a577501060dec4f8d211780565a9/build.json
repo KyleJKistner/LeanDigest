@@ -1,0 +1,1 @@
+{"command":["lake","build","OAI.Combinatorics.BalancedRyser.Incidence.SmallProjectiveArithmetic"],"elapsed_seconds":4.886,"exit_code":0,"reason":"","status":"passed","stderr":"","stdout":"✔ [3092/3092] Built OAI.Combinatorics.BalancedRyser.Incidence.SmallProjectiveArithmetic (3.2s)\nBuild completed successfully (3092 jobs).\n"}

@@ -1,0 +1,16 @@
+{
+  "schema": "proofreader.narrative-receipt/v1",
+  "status": "passed",
+  "theorem": "OAI.Balanced.SmallProjectiveArithmetic.three_degree_lt_order",
+  "lean_version": "4.34.1",
+  "backend": "native",
+  "snapshot_sha256": "c5224b737818efa82248b196c82cc726cbd5a613c5d60316e4b7d11adc1a076e",
+  "source_sha256": "1a3c5f3427b4b793dce13eb58424bb038b5a32d3300dbeb170e8b27946b80a1c",
+  "selected_judgements": 41,
+  "all_selected_judgements_kernel_checked": true,
+  "path_linkage_checked_in_lean": true,
+  "receipt_authenticated": false,
+  "english_formally_verified": false,
+  "exact_openai_project_replayed": false,
+  "module": "OAI.Combinatorics.BalancedRyser.Incidence.SmallProjectiveArithmetic"
+}

@@ -1,0 +1,16 @@
+{
+  "schema": "proofreader.narrative-receipt/v1",
+  "status": "passed",
+  "theorem": "OAI.Balanced.SmallProjectiveArithmetic.exists_interpolation_degree",
+  "lean_version": "4.34.1",
+  "backend": "native",
+  "snapshot_sha256": "f9d00c0a201810140372ffb4b2b5725893910bd1d4d55f5808a73fa7b5eb36bd",
+  "source_sha256": "1a3c5f3427b4b793dce13eb58424bb038b5a32d3300dbeb170e8b27946b80a1c",
+  "selected_judgements": 25,
+  "all_selected_judgements_kernel_checked": true,
+  "path_linkage_checked_in_lean": true,
+  "receipt_authenticated": false,
+  "english_formally_verified": false,
+  "exact_openai_project_replayed": false,
+  "module": "OAI.Combinatorics.BalancedRyser.Incidence.SmallProjectiveArithmetic"
+}

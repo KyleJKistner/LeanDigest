@@ -38,7 +38,7 @@ partial def visit (e : Expr) (xs : Array Expr) (path : Array Nat)
     context := context.push <| obj [("name", toJson d.userName.toString), ("type", toJson (← liftM <| pp d.type))]
   let head := nameOf e
   let arithmetic := head.startsWith "Mathlib.Tactic.Ring."
-  let rewrite := #["Eq.mpr", "Eq.mp", "of_eq_true", "congrArg", "congr", "congrFun", "congrFun'"].contains head
+  let rewrite := #["Eq.mpr", "Eq.mp", "of_eq_true", "congr", "congrFun", "congrFun'"].contains head
   let stopHere := depth == 0 || arithmetic || rewrite
   let mut role := if arithmetic then "ring" else if rewrite then "rewrite" else "application"
   let mut children : Array Nat := #[]
@@ -69,24 +69,58 @@ partial def visit (e : Expr) (xs : Array Expr) (path : Array Nat)
       children := children.push ch
     | .app .. =>
       let args := e.getAppArgs
-      for k in [:args.size] do
-        let a := args[k]!
-        let atp ← liftM <| inferType a
-        let proof ← liftM <| isProp atp
-        if proof then
-          let p := (path ++ Array.replicate (args.size-k-1) 0).push 1
-          let ch ← visit a xs p base levels (depth-1)
-          premises := premises.push <| obj [("argument", toJson k), ("statement", toJson (← liftM <| pp atp)), ("frame", toJson ch)]
+      let arity := if #["Nat.rec", "Nat.recOn", "Nat.recAux"].contains head then 4
+        else if #["List.rec", "List.recOn", "Exists.casesOn", "Exists.elim", "dite", "ite"].contains head then 5
+        else if #["Or.elim", "Or.casesOn"].contains head then 6 else 0
+      if arity > 0 && args.size > arity then
+        -- Preserve the proof of the quantified/conditional intermediate claim.
+        -- Its original path is a function-prefix, not an invented new proof.
+        let headProof := mkAppN e.getAppFn (args.extract 0 arity)
+        let prefixType ← liftM <| inferType headProof
+        if ← liftM <| isProp prefixType then
+          role := "specialize"
+          let prefixPath := path ++ Array.replicate (args.size-arity) 0
+          let ch ← visit headProof xs prefixPath base levels (depth-1)
           children := children.push ch
-        else objects := objects.push (← liftM <| pp a)
-      if head == "Exists.intro" then role := "witness"
-      if #["Exists.casesOn", "Exists.elim"].contains head then role := "choose"
-      if #["dite", "ite", "Decidable.byCases", "Classical.byCases", "Or.elim", "Or.casesOn"].contains head then role := "cases"
-      if head == "And.intro" then role := "combine"
-      if #["Eq.trans", "Trans.trans"].contains head then role := "chain"
-      if head == "Eq.refl" then role := "reflexivity"
-      if head == "mul_left_cancel₀" then role := "cancel"
-      if head == "id" then role := "identity"
+          for k in [arity:args.size] do
+            let a := args[k]!
+            let atp ← liftM <| inferType a
+            if ← liftM <| isProp atp then
+              let p := (path ++ Array.replicate (args.size-k-1) 0).push 1
+              let ch ← visit a xs p base levels (depth-1)
+              premises := premises.push <| obj [("argument", toJson k), ("statement", toJson (← liftM <| pp atp)), ("frame", toJson ch)]
+              children := children.push ch
+            else objects := objects.push (← liftM <| pp a)
+      if role != "specialize" then
+       for k in [:args.size] do
+         let a := args[k]!
+         let atp ← liftM <| inferType a
+         let proof ← liftM <| isProp atp
+         if proof then
+           let p := (path ++ Array.replicate (args.size-k-1) 0).push 1
+           let ch ← visit a xs p base levels (depth-1)
+           premises := premises.push <| obj [("argument", toJson k), ("statement", toJson (← liftM <| pp atp)), ("frame", toJson ch)]
+           children := children.push ch
+         else objects := objects.push (← liftM <| pp a)
+       if let .fvar fid := e.getAppFn then
+         let declaration ← liftM <| fid.getDecl
+         let mut localIndex : Option Nat := none
+         for k in [:xs.size] do
+           if xs[k]! == .fvar fid then localIndex := some k
+         let some k := localIndex | throwError "Local application head is outside the exported context"
+         role := "local-application"
+         fields := [("binder", toJson declaration.userName.toString),
+           ("domain", toJson (← liftM <| pp declaration.type)), ("local_index", toJson k)]
+       if head == "congrArg" then role := "congruence"
+       if #["Nat.rec", "Nat.recOn", "Nat.recAux", "List.rec", "List.recOn"].contains head then role := "induction"
+       if head == "Exists.intro" then role := "witness"
+       if #["Exists.casesOn", "Exists.elim"].contains head then role := "choose"
+       if #["dite", "ite", "Decidable.byCases", "Classical.byCases", "Or.elim", "Or.casesOn"].contains head then role := "cases"
+       if head == "And.intro" then role := "combine"
+       if #["Eq.trans", "Trans.trans"].contains head then role := "chain"
+       if #["Eq.refl", "rfl"].contains head then role := "reflexivity"
+       if head == "mul_left_cancel₀" then role := "cancel"
+       if head == "id" then role := "identity"
     | .fvar id =>
       role := "given"
       fields := [("binder", toJson (← liftM <| id.getDecl).userName.toString)]
@@ -139,15 +173,20 @@ private def checkPaths (original : Expr) (state : State) : MetaM Unit := do
 
 def exportOne (n : Name) : MetaM Json := do
   let info ← getConstInfo n
-  let .thmInfo v := info | throwError "Expected theorem"
+  let value ← match info with
+    | .thmInfo v => pure v.value
+    | .defnInfo v => pure v.value
+    | .opaqueInfo v => pure v.value
+    | _ => throwError "Expected a declaration with a proof body"
+  unless ← isProp info.type do throwError "Expected a proof-valued declaration"
   let ax ← collectAxioms n
   unless ax.all (fun n => #[`propext, `Classical.choice, `Quot.sound].contains n) do throwError "Disallowed axiom"
   let base ← mkFreshUserName `PRNarrativeCheck
-  let (_, s) ← (visit v.value #[] #[] base v.levelParams 160).run {}
-  checkPaths v.value s
+  let (_, s) ← (visit value #[] #[] base info.levelParams 160).run {}
+  checkPaths value s
   return obj [("schema", toJson "proofreader.narrative/v1"), ("theorem", toJson n.toString),
     ("lean_version", toJson Lean.versionString), ("axioms", toJson (ax.map Name.toString)),
-    ("statement", toJson (← pp v.type)), ("frames", toJson s.frames),
+    ("statement", toJson (← pp info.type)), ("frames", toJson s.frames),
     ("judgements_checked", toJson s.frames.size), ("formula_backend", toJson "Lean pretty-printer")]
 elab "#narrative " target:str : command => do
   let r ← liftTermElabM <| exportOne target.getString.toName

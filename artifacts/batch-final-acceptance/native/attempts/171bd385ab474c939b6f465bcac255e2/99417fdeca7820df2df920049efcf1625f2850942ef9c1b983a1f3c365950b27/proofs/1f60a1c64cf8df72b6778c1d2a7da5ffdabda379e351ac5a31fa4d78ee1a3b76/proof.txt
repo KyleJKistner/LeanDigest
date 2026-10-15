@@ -1,0 +1,16 @@
+Leanglish · BatchAcceptance.Lists.append_empty_recOn
+
+Let α be a type.
+Let xs be an element of List α.
+Then xs ++ [] = xs.
+
+Proof.
+Proceed by induction on fun ys => ys ++ [] = ys.
+  xs ++ [] = xs
+  Empty-list case. By reflexivity, [] ++ [] = [] ++ [].
+  Constructor step. Let x ∈ α be arbitrary.
+  Let ys ∈ List α be arbitrary.
+  Assume ys ++ [] = ys.
+  Apply List.cons x to both sides of the supplied equality.
+    x :: ys.append [] = x :: ys
+    Use the hypothesis ih: ys ++ [] = ys.
