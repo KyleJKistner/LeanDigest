@@ -1,0 +1,115 @@
+name: Assemble and test narrative batch
+on:
+  push:
+    branches: [work/narrative-batch]
+    paths: ['.github/workflows/stage-narrative-batch.yml']
+permissions:
+  contents: write
+concurrency:
+  group: narrative-batch-assembly
+  cancel-in-progress: false
+jobs:
+  assemble-and-test:
+    if: github.repository == 'KyleJKistner/LeanDigest'
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: work/narrative-batch
+      - name: Apply checksum-verified feature delta
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          python3 - <<'PY'
+          import base64, hashlib, json, lzma, os, pathlib, shutil, subprocess, urllib.request
+          root = pathlib.Path.cwd()
+          shas = '''3f6712802ea9d9325ab46558551ef4fc7369acf4
+          6953f51909e16ee2137b730e8ef80aac14e0b819
+          a36dbfb9874e4f1fb288591ebceb7206dd050aa6
+          3d0cb88f2f59cae5971c8224640c1e56ecba7919
+          0208fb08d8921632b739ecafa7b3214069469a75
+          f1455253315a2854833189052a47d697d7fe4051
+          c024ea7d94ae203afdf495c1213a68fb608bc981
+          62047b7028c61260414c9f9108d9887863b4e44b'''.split()
+          def blob(data):
+              return hashlib.sha1(b'blob '+str(len(data)).encode()+b'\0'+data).hexdigest()
+          parts = []
+          for sha in shas:
+              req = urllib.request.Request('https://api.github.com/repos/KyleJKistner/LeanDigest/git/blobs/'+sha,
+                  headers={'Authorization':'Bearer '+os.environ['GH_TOKEN'],'Accept':'application/vnd.github+json'})
+              with urllib.request.urlopen(req, timeout=30) as response:
+                  data = base64.b64decode(json.load(response)['content'])
+              assert blob(data) == sha
+              parts.append(data.decode('ascii').strip())
+          packed = base64.b64decode(''.join(parts), validate=True)
+          assert len(packed) == 16916
+          assert hashlib.sha256(packed).hexdigest() == '7b9c2b35c1d07619ea5b76402c8bc92c5b33b04c3586fbd6bc5b0e8a910c4788'
+          raw = lzma.decompress(packed, memlimit=128*1024*1024)
+          assert len(raw) == 68279
+          p = json.loads(raw)
+          def path(value):
+              rel = pathlib.PurePosixPath(value)
+              assert not rel.is_absolute() and '..' not in rel.parts and rel.parts[0] not in ('.git','.github')
+              target = root.joinpath(*rel.parts)
+              assert root in target.resolve().parents and not target.is_symlink()
+              return target
+          for name, expected in p['before'].items():
+              assert blob(path(name).read_bytes()) == expected, ('preimage',name)
+          original = path(p['copy_original'])
+          assert not original.exists()
+          original.parent.mkdir(parents=True, exist_ok=True)
+          shutil.copyfile(root/'lean/Narrative.lean', original)
+          subprocess.run(['git','apply','--check','-'],input=p['patch'],text=True,check=True)
+          subprocess.run(['git','apply','-'],input=p['patch'],text=True,check=True)
+          for name, text in p['files'].items():
+              target = path(name)
+              assert not target.exists(), name
+              target.parent.mkdir(parents=True, exist_ok=True)
+              target.write_text(text, encoding='utf-8')
+          if p['copy_batch']:
+              shutil.copyfile(root/'lean/NarrativeBatch.lean',root/'proofreader/data/NarrativeBatch.lean')
+          for name, expected in p['after'].items():
+              assert blob(path(name).read_bytes()) == expected, ('postimage',name)
+          subprocess.run(['git','config','user.name','github-actions[bot]'],check=True)
+          subprocess.run(['git','config','user.email','41898282+github-actions[bot]@users.noreply.github.com'],check=True)
+          subprocess.run(['git','add','--force','--',*p['after']],check=True)
+          subprocess.run(['git','commit','-m','Implement bounded narrative batch extraction and cross-shape acceptance'],check=True)
+          subprocess.run(['git','push','origin','HEAD:refs/heads/work/narrative-batch'],check=True)
+          print('ASSEMBLED',len(p['after']),'files',subprocess.check_output(['git','rev-parse','HEAD'],text=True).strip())
+          PY
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python -m pip install '.[dev,webtest]'
+      - run: python -m playwright install --with-deps chromium
+      - uses: leanprover/lean-action@v1
+        with:
+          lake-package-directory: lean
+          auto-config: false
+          build: true
+          build-args: 'ProofReader ProofReader.Smoke KernelExport Narrative NarrativeBatch'
+          test: false
+          lint: false
+          use-mathlib-cache: false
+          use-github-cache: false
+      - name: Run the complete suite with required native and browser tests
+        env:
+          PROOFREADER_REQUIRE_LEAN: '1'
+          PROOFREADER_REQUIRE_BROWSER: '1'
+          LEANGLISH_BATCH_ARTIFACTS: artifacts/ci-narrative-batch
+        run: |
+          python scripts/build_demo.py
+          python scripts/build_typed_demo.py
+          python scripts/build_narrative_demo.py
+          python -m pytest -q --junitxml=artifacts/batch-stage-tests.xml
+          git diff --exit-code -- proofreader/data artifacts/openai-sample
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: narrative-batch-stage
+          include-hidden-files: true
+          path: |
+            artifacts/batch-stage-tests.xml
+            artifacts/ci-narrative-batch/
+            lean/.lake/build/logs/
