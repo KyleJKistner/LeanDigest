@@ -1,0 +1,84 @@
+name: Publish Leanglish research preview
+on:
+  push:
+    branches: [main]
+    paths:
+      - scripts/build_research_preview.py
+      - docs/MATHEMATICIAN_PREVIEW.md
+      - .github/workflows/release-preview.yml
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  actions: read
+
+concurrency:
+  group: leanglish-research-preview-release
+  cancel-in-progress: false
+
+jobs:
+  release:
+    if: github.repository == 'KyleJKistner/LeanDigest' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Download exact frozen OpenAI proof observations
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mkdir -p /tmp/pinned
+          gh run download 38792262410 -R "${GITHUB_REPOSITORY}" \
+            -n leanglish-pinned-acceptance -D /tmp/pinned
+      - name: Build and verify an offline proof gallery
+        run: |
+          python scripts/build_research_preview.py \
+            --batch /tmp/pinned/batch --output public \
+            --source-commit 4fd28f74a0bc1701b60e6a29804f0b533078fdeb \
+            --run-id 38792262410
+          python -m pip install 'pytest>=8,<10'
+          python -m pytest tests/test_research_preview.py -q
+          python - <<'PY'
+          from pathlib import Path
+          from zipfile import ZipFile,ZIP_DEFLATED
+          import hashlib,json
+          root=Path('public')
+          m=json.loads((root/'manifest.json').read_text())
+          assert len(m['proofs'])==14 and m['summary']['total_candidates'] is None
+          assert m['summary']['unexpanded_steps']==796 and m['formal_english_certification'] is False
+          out=Path('leanglish-research-preview.zip')
+          with ZipFile(out,'w',ZIP_DEFLATED,compresslevel=9) as archive:
+              for p in root.rglob('*'):
+                  if p.is_file():
+                      archive.write(p,'Leanglish/'+p.relative_to(root).as_posix())
+          with ZipFile(out) as archive:
+              assert archive.testzip() is None
+          print('Offline research preview',out.stat().st_size,'bytes')
+          PY
+      - name: Publish prerelease with permanent asset URL
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -eu
+          tag=leanglish-research-preview-2026-10-15
+          if gh release view "$tag" -R "${GITHUB_REPOSITORY}" >/dev/null 2>&1; then
+            echo "::error::Release tag already exists; never overwrite frozen evidence"
+            exit 1
+          fi
+          gh release create "$tag" leanglish-research-preview.zip \
+            --repo "${GITHUB_REPOSITORY}" --target "${GITHUB_SHA}" \
+            --title "Leanglish: OpenAI mathematics research preview" \
+            --notes-file docs/MATHEMATICIAN_PREVIEW.md --prerelease
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: leanglish-research-preview-build
+          path: |
+            leanglish-research-preview.zip
+            public/manifest.json
+          if-no-files-found: warn
