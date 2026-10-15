@@ -1,0 +1,100 @@
+name: Assemble verified Leanglish naming change
+on:
+  push:
+    branches: [work/leanglish-branding]
+    paths: ['.github/workflows/stage-leanglish.yml']
+permissions:
+  contents: write
+jobs:
+  assemble:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: work/leanglish-branding
+      - name: Apply locally tested naming changes and verify every generated file
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import hashlib, subprocess
+          p=Path.cwd()
+          def replace(path, old, new, count=1):
+              f=p/path;s=f.read_text();assert s.count(old)==count,(path,old,s.count(old));f.write_text(s.replace(old,new))
+          replace('pyproject.toml','description = "Deterministic, evidence-labelled mathematical reading views for Lean proofs"','description = "Leanglish: deterministic, evidence-labelled mathematical reading views for Lean proofs"')
+          replace('pyproject.toml','[project.scripts]\nproofreader', '[project.scripts]\nleanglish = "leanglish.cli:main"\nproofreader')
+          replace('pyproject.toml','include = ["proofreader*"]','include = ["proofreader*", "leanglish*"]')
+          replace('proofreader/cli.py','from .model import Document, report','from . import __version__\nfrom .branding import PRODUCT_NAME\nfrom .model import Document, report')
+          replace('proofreader/cli.py','title or "ProofReader · source library"','title or f"{PRODUCT_NAME} · source library"')
+          replace('proofreader/cli.py','def parser() -> argparse.ArgumentParser:', 'def parser(prog: str = "proofreader") -> argparse.ArgumentParser:')
+          replace('proofreader/cli.py','prog="proofreader",description="Deterministic, evidence-labelled reading views for Lean. Source outlines are not checked English proofs."','prog=prog,description=f"{PRODUCT_NAME}: deterministic, evidence-labelled reading views for Lean. Source outlines are not checked English proofs."')
+          replace('proofreader/cli.py','version="lean-proofreader 0.3.0"','version=f"{PRODUCT_NAME} {__version__}"')
+          replace('proofreader/cli.py','def main(argv: list[str] | None = None) -> int:\n    args=parser().parse_args(argv)','def main(argv: list[str] | None = None, *, prog: str = "proofreader") -> int:\n    args=parser(prog).parse_args(argv)')
+          replace('proofreader/cli.py','print(f"proofreader: {exc}"','print(f"{prog}: {exc}"')
+          replace('proofreader/render.py','from .model import Document, Declaration, Span, Step, SCHEMA, report','from . import __version__\nfrom .branding import PRODUCT_NAME, TAGLINE\nfrom .model import Document, Declaration, Span, Step, SCHEMA, report')
+          replace('proofreader/render.py','    values = {\n','    values = {\n        "__PRODUCT_NAME__": html.escape(PRODUCT_NAME),\n        "__TAGLINE__": html.escape(TAGLINE),\n        "__VERSION__": html.escape(__version__),\n')
+          replace('proofreader/web/index.html','content="Deterministic, evidence-labelled mathematical reading views for Lean proofs."','content="__TAGLINE__ Deterministic, evidence-labelled reading views."')
+          replace('proofreader/web/index.html','<title>ProofReader — __TITLE__','<title>__PRODUCT_NAME__ — __TITLE__')
+          replace('proofreader/web/index.html','<a class="brand" href="#"><span class="brandmark">∴</span> ProofReader <span class="version">0.3</span></a>','<a class="brand" href="#" title="__TAGLINE__"><span class="brandmark">∴</span> __PRODUCT_NAME__ <span class="version">__VERSION__</span></a>')
+          replace('proofreader/web/app.js','This is not a supported ProofReader reading file.','This is not a supported reading file.')
+          replace('proofreader/web/app.js','start the local parser with: proofreader serve.','start the local parser with: leanglish serve.')
+          replace('proofreader/server.py','from .model import Document','from . import __version__\nfrom .branding import PRODUCT_NAME\nfrom .model import Document')
+          replace('proofreader/server.py','server_version = "ProofReader/0.1"','server_version = f"{PRODUCT_NAME}/{__version__}"')
+          replace('proofreader/server.py','print(f"ProofReader: http://','print(f"{PRODUCT_NAME}: http://')
+          replace('scripts/build_typed_demo.py',"doc=Document('Lean ProofReader · typed arguments'","doc=Document('Leanglish · typed arguments'")
+          replace('scripts/build_narrative_demo.py',"data.title='ProofReader · Mathematical proof library'","data.title='Leanglish · Mathematical proof library'")
+          replace('tests/test_render_cli.py',"'ProofReader' in out.read_text()","'<title>Leanglish — ' in out.read_text()")
+          replace('tests/test_server.py',"b'ProofReader' in body","b'<title>Leanglish ' in body")
+          replace('README.md','# LeanDigest\n\nLean ProofReader v0.3.0 development snapshot. The Python package and command-line\ninterface retain the `proofreader` name.', '# Leanglish\n\n**Lean proofs, in mathematical English.**\n\nLeanglish is the product name. The repository remains `KyleJKistner/LeanDigest`.\nUse `leanglish` or `python -m leanglish`; the existing `proofreader` command,\nPython package, installation name (`lean-proofreader`), and proof formats remain\ncompatible. This is the v0.3.0 development snapshot, now with the new public name.\nSee [naming and compatibility](docs/NAMING.md).')
+          x=p/'README.md';s=x.read_text().replace('python -m proofreader ', 'python -m leanglish ').replace('\nproofreader ', '\nleanglish ')
+          s=s.replace('under `artifacts/v0.2/`. The CI workflow is provided; it has not run on GitHub.', 'under `artifacts/v0.2/` and `artifacts/v0.3/`.\n\nBoth native Lean integration and Python/browser CI passed on commit `2d6b60f`\n([run 38667444089](https://github.com/KyleJKistner/LeanDigest/actions/runs/38667444089)).\nThis is the observed pre-rebranding baseline, not an assertion about future\ncommits. It does not establish the full pinned OpenAI dependency build.')
+          s=s.replace('python scripts/build_typed_demo.py\npython -m pytest','python scripts/build_typed_demo.py\npython scripts/build_narrative_demo.py\npython -m pytest')
+          s=s.replace('tests/test_lean_integration.py tests/test_kernel_integration.py -q','tests/test_lean_integration.py tests/test_kernel_integration.py tests/test_narrative_integration.py -q');x.write_text(s)
+          replace('HANDOFF.md','# Supervisor checkpoint — 0.3.0','# Leanglish supervisor checkpoint — 0.3.0')
+          replace('HANDOFF.md','## Do not repeat the previous blocker','## Current name and verified baseline\n\nThe user chose **Leanglish** as the product name. Keep the GitHub repository\n`KyleJKistner/LeanDigest` and implementation/proof-format identifiers unchanged.\nThe preferred command is `leanglish`; `proofreader` remains a supported alias.\nSee `docs/NAMING.md`. Do not rewrite historical evidence to update branding.\n\nBoth jobs in GitHub CI run 38667444089 passed on commit\n`2d6b60f01112f63ff56792b881e7a17678ddf558`, including native Lean integration.\nDo not repeat the missing-manifest blocker: it and the native API/IO issues\nwere fixed before this rename. The complete pinned OpenAI project build is still\nunvalidated; passing local-project integration does not establish that result.\n\n## Do not repeat the previous blocker')
+          replace('HANDOFF.md','1. Run all three native CI integration tests without skips and the exact OpenAI\n   4.34.1 dependency pin. Remote Lean version success is not a native CI success.','1. Preserve the passing native CI tests. Run the exact OpenAI 4.34.1 dependency\n   pin; native smoke integration is not a complete dependency-pinned corpus build.')
+          replace('HANDOFF.md','python -m proofreader narrative-demo -o reader.html','python -m leanglish narrative-demo -o reader.html')
+          replace('HANDOFF.md',"ran. `scripts/publish.sh` uses the user's authenticated GitHub CLI and defaults to\na private KyleJKistner/lean-proofreader repo. No remote repo or CI run was created.",'ran. The repository is already published at KyleJKistner/LeanDigest. Use ordinary\ncommits on top of its current history; do not rerun repository creation.')
+          x=p/'tests/test_browser.py'
+          x.write_text(x.read_text()+"\n\ndef test_leanglish_brand_preserves_reading_and_mobile_layout(page):\n    d=parse_source('theorem unchanged : True := by trivial\\n')\n    page.set_viewport_size({'width':390,'height':844})\n    page.set_content(html_document(d))\n    assert page.title().startswith('Leanglish — ')\n    assert 'Leanglish' in page.locator('.brand').inner_text()\n    assert page.locator('.brand').get_attribute('title') == 'Lean proofs, in mathematical English.'\n    assert page.locator('#theorem-title').inner_text()=='unchanged'\n    assert page.evaluate('document.documentElement.scrollWidth <= innerWidth')\n")
+          for script in ('build_demo.py','build_typed_demo.py','build_narrative_demo.py'):
+              subprocess.run(['python3','scripts/'+script],check=True)
+          expected = {
+            'HANDOFF.md': '1f124c81c80693c8de4d0e371e525e6b8a213e60',
+            'README.md': 'fe1245a6ad4df1566b5c4cb506ac7b173e7545b9',
+            'artifacts/openai-sample/index.html': '133ccc583e7d028c93d6d4ee135d49d12403f2c7',
+            'artifacts/v0.2/reader.html': 'dbc64bba36a298c2c5265eac91d4c35491543871',
+            'artifacts/v0.3/bezout-reader/reader.html': 'f451a0ee86a5b83738624998915ad59815160c36',
+            'artifacts/v0.3/reader-library.html': '04e74c15dffba18eec6d7fccd743eaa0c08774fc',
+            'docs/NAMING.md': '0eeff6fc0b6822ac37c0ec7b8df799a02d2b04e4',
+            'leanglish/__init__.py': 'fb37e8bc265d28b8ab74801362e8630442fd70fd',
+            'leanglish/__main__.py': 'eb53e2f31b2f703ad32ef64b8a41faa3e7d18e08',
+            'leanglish/cli.py': 'caa60ea724d6b0e25b8388e8ea97104338683f55',
+            'proofreader/branding.py': '698ad7e54ff4e20600bcc7e5889a07c3473118f9',
+            'proofreader/cli.py': '13ea9a6371920e02252fbfa3b6c0ac3600e2cd48',
+            'proofreader/data/kernel-demo.json': '4205f1c15eed5b312894fd52aaeecc46e077d3c7',
+            'proofreader/data/reader-demo.json': '13d530c65faaeb644bd8767f750a0d878522e3ea',
+            'proofreader/render.py': '74b6e972e2ecd0c237d52afaba23d6173aa5964a',
+            'proofreader/server.py': 'fec2a9bd5501014dd9331e79f2487171663979f1',
+            'proofreader/web/app.js': '82a552e7bac609ffda8d1dacf0c17b83cd29caec',
+            'proofreader/web/index.html': '48b356998b01ff6ce8176314538dad6dba6390c2',
+            'pyproject.toml': 'a638425ae8943aa1363689e13811e9fc73cee932',
+            'scripts/build_narrative_demo.py': 'bda5c37e0ad0343a596325adff5033b1b02bfc0b',
+            'scripts/build_typed_demo.py': '33968ea1300318a590470b6595f23f9928af0dc6',
+            'tests/test_branding.py': 'f971d96891a9169df6848cd63f34cea3e9d47d28',
+            'tests/test_browser.py': '90208e46a30a59a2be5b0937d99fcfca50a0013b',
+            'tests/test_render_cli.py': '93129bc59b740b05293088ed85c0ff7aa7e8aafa',
+            'tests/test_server.py': 'ea0754109828d7106c21679dba7765b529c18678'
+          }
+          for path, sha in expected.items():
+              data=(p/path).read_bytes()
+              actual=hashlib.sha1(b'blob '+str(len(data)).encode()+b'\0'+data).hexdigest()
+              assert actual==sha,(path,actual,sha)
+          print('ALL_25_CHANGED_FILES_MATCH_LOCAL_TESTED_HASHES')
+          subprocess.run(['git','config','user.name','github-actions[bot]'],check=True)
+          subprocess.run(['git','config','user.email','41898282+github-actions[bot]@users.noreply.github.com'],check=True)
+          subprocess.run(['git','add','--force','--',*expected],check=True)
+          subprocess.run(['git','commit','-m','Assemble tested Leanglish name and compatible commands'],check=True)
+          subprocess.run(['git','push','origin','HEAD:refs/heads/work/leanglish-branding'],check=True)
+          PY
