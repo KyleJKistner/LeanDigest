@@ -28,7 +28,7 @@ _HEAD_ROLES = {'Exists.intro':'witness','Exists.casesOn':'choose','Exists.elim':
                'mul_left_cancel₀':'cancel','id':'identity','Eq.refl':'reflexivity',
                'dite':'cases','ite':'cases','Decidable.byCases':'cases','Classical.byCases':'cases',
                'Or.elim':'cases','Or.casesOn':'cases',
-               'Nat.rec':'induction','Nat.recOn':'induction','List.rec':'induction','List.recOn':'induction'}
+               'Nat.rec':'induction','Nat.recOn':'induction','Nat.recAux':'induction','List.rec':'induction','List.recOn':'induction'}
 _REWRITES = {'Eq.mpr','Eq.mp','of_eq_true','congrArg','congr','congrFun',"congrFun'"}
 _LEMMAS = {
     'EuclideanDomain.gcd_eq_zero_iff': 'A gcd is zero exactly when both entries are zero.',
@@ -259,8 +259,8 @@ class Narrative:
                     branch[0].text=label+branch[0].text
             return [self.step(i,'Proceed by induction on '+math_text(f['objects'][-1])+'.',
                               conclusion=con,children=[s for branch in branches for s in branch])]
-        if role=='congruence' and f['head']=='congrArg' and len(ch)==1 and len(f['objects'])>=3:
-            return [self.step(i,'Apply '+math_text(f['objects'][-3])+' to both sides of the supplied equality.',
+        if role=='congruence' and f['head']=='congrArg' and len(ch)==1 and len(f['objects'])==5 and [p['argument'] for p in f['premises']]==[5]:
+            return [self.step(i,'Apply '+math_text(f['objects'][-1])+' to both sides of the supplied equality.',
                               conclusion=con,children=self.sequence(ch[0]))]
         if role=='cases' and f['head'] in {'Or.elim','Or.casesOn'} and len(ch)==3 and all(self.frames[j]['role']=='assume' for j in ch[1:]):
             branches=self.sequence(ch[0])

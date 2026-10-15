@@ -55,3 +55,6 @@ def test_native_batch_breadth_and_failure_accounting(tmp_path):
     result2=aggregate([output/'batch.json'],output/'aggregate.json')
     assert result2['summary']['total_candidates']==len(by_name)
     assert result2['summary']['certified_english_proofs']==0
+
+    path = output/by_name['BatchAcceptance.Induction.zero_adds']['reader']
+    assert 'Apply Nat.succ to both sides' in (path.parent/'proof.txt').read_text()

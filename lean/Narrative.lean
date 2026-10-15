@@ -80,7 +80,7 @@ partial def visit (e : Expr) (xs : Array Expr) (path : Array Nat)
           children := children.push ch
         else objects := objects.push (← liftM <| pp a)
       if head == "congrArg" then role := "congruence"
-      if #["Nat.rec", "Nat.recOn", "List.rec", "List.recOn"].contains head then role := "induction"
+      if #["Nat.rec", "Nat.recOn", "Nat.recAux", "List.rec", "List.recOn"].contains head then role := "induction"
       if head == "Exists.intro" then role := "witness"
       if #["Exists.casesOn", "Exists.elim"].contains head then role := "choose"
       if #["dite", "ite", "Decidable.byCases", "Classical.byCases", "Or.elim", "Or.casesOn"].contains head then role := "cases"
