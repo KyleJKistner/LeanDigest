@@ -22,7 +22,7 @@ from .polynomial import certify, verify as verify_polynomial, certificate_text
 SCHEMA = 'proofreader.narrative/v1'
 PRINTER_VERSION = 'source-math-en/0.3.0'
 ROLES = {'introduce','assume','have','define','witness','choose','cases','combine','chain',
-         'reflexivity','cancel','identity','given','named','application','ring','rewrite','unexpanded','induction','congruence'}
+         'reflexivity','cancel','identity','given','named','application','ring','rewrite','unexpanded','induction','congruence','local-application'}
 _HEAD_ROLES = {'Exists.intro':'witness','Exists.casesOn':'choose','Exists.elim':'choose',
                'And.intro':'combine','Trans.trans':'chain','Eq.trans':'chain',
                'mul_left_cancel₀':'cancel','id':'identity','Eq.refl':'reflexivity',
@@ -71,7 +71,7 @@ class Snapshot:
         parents: dict[int,int] = {}
         paths = set()
         for i, f in enumerate(self.frames):
-            require(isinstance(f,dict) and _BASE <= set(f) and set(f) <= _BASE | _EXTRAS, 'Invalid frame fields')
+            require(isinstance(f,dict) and _BASE <= set(f) and set(f) <= _BASE | _EXTRAS | {'local_index'}, 'Invalid frame fields')
             require(type(f['id']) is int and f['id'] == i, 'Noncanonical frame id')
             path = f['path']
             require(isinstance(path,list) and len(path) <= 4096 and all(type(x) is int and x in (0,1,2) for x in path), 'Invalid proof path')
@@ -109,6 +109,13 @@ class Snapshot:
             if role in {'introduce','assume','define','have'}:
                 require({'binder','domain'} <= set(f), 'Missing binder metadata')
                 require(len(ch) == (2 if role == 'have' else 1) and not f['premises'], 'Invalid binder children')
+            if role == 'local-application':
+                require({'binder','domain','local_index'} <= set(f) and head == '', 'Invalid local application metadata')
+                k=f['local_index']
+                require(type(k) is int and 0 <= k < len(f['context']), 'Local application escaped its context')
+                require(f['context'][k] == {'name':f['binder'],'type':f['domain']}, 'Local application context mismatch')
+            elif 'local_index' in f:
+                raise InvalidExport('Unexpected local application index')
             if role == 'define':
                 require('value' in f, 'Missing definition value')
             if role == 'given':
@@ -249,7 +256,23 @@ class Narrative:
             else:
                 s=self.step(i,f'Establish {domain}; call this fact {name}.',children=self.sequence(ch[0]))
             return [s]+self.sequence(ch[-1])
-        if role=='induction' and len(ch)==2 and f['objects']:
+        if role=='local-application':
+            name=_name(f['binder'])
+            if sum(c['name']==f['binder'] for c in f['context'])>1:
+                name+=' (context entry '+str(f['local_index']+1)+')'
+            text='Apply the hypothesis '+name+': '+math_text(f['domain'])+'.'
+            if f['objects']:
+                text+=' Substitute '+', '.join(math_text(v) for v in f['objects'])+' for its object arguments.'
+            return [self.step(i,text,conclusion=con,children=[s for j in ch for s in self.sequence(j)])]
+        if role=='named' and f['head']=='True.intro' and not ch and f['statement']=='True':
+            return [self.step(i,'The conclusion is the proposition True.',conclusion=None)]
+        recursor_proofs = {'Nat.rec':[1,2], 'Nat.recAux':[1,2], 'Nat.recOn':[2,3],
+                           'List.rec':[2,3], 'List.recOn':[3,4]}
+        # Do not mistake an argument supplied *after* a recursor for its major
+        # induction variable. Oversaturated/dependent variants stay explicit gaps.
+        if (role=='induction' and len(ch)==2 and f['head'] in recursor_proofs
+            and [p['argument'] for p in f['premises']]==recursor_proofs[f['head']]
+            and len(f['objects'])==(2 if f['head'].startswith('Nat.') else 3)):
             # These constructor recursors are recognized by exact fully qualified
             # names, not an inferred tactic label or a theorem-specific template.
             branches=[self.sequence(j) for j in ch]

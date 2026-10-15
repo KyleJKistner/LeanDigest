@@ -28,6 +28,7 @@ def test_native_batch_breadth_and_failure_accounting(tmp_path):
         'BatchAcceptance.Logic.implication', 'BatchAcceptance.Logic.cases', 'BatchAcceptance.Logic.choose',
         'BatchAcceptance.Logic.proof_definition', 'BatchAcceptance.Logic.opaque_proof',
         'BatchAcceptance.Induction.addition_associates', 'BatchAcceptance.Induction.zero_adds',
+        'BatchAcceptance.Induction.rec_overapplied',
         'BatchAcceptance.Lists.append_empty', 'BatchAcceptance.Lists.map_append',
         'BatchAcceptance.Rejected.must_fail', 'BatchAcceptance.Rejected.still_runs',
     }
@@ -58,3 +59,13 @@ def test_native_batch_breadth_and_failure_accounting(tmp_path):
 
     path = output/by_name['BatchAcceptance.Induction.zero_adds']['reader']
     assert 'Apply Nat.succ to both sides' in (path.parent/'proof.txt').read_text()
+
+    for name in ('BatchAcceptance.Logic.implication','BatchAcceptance.Logic.choose',
+                 'BatchAcceptance.Logic.proof_definition','BatchAcceptance.Logic.opaque_proof'):
+        assert by_name[name]['unexpanded_steps']==0, by_name[name]
+    assert 'Apply the hypothesis' in ((output/by_name['BatchAcceptance.Logic.implication']['reader']).parent/'proof.txt').read_text()
+
+    row=by_name['BatchAcceptance.Induction.rec_overapplied']
+    assert row['unexpanded_steps'] > 0
+    prose=((output/row['reader']).parent/'proof.txt').read_text()
+    assert 'Proceed by induction on m' not in prose

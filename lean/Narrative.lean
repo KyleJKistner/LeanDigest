@@ -79,6 +79,15 @@ partial def visit (e : Expr) (xs : Array Expr) (path : Array Nat)
           premises := premises.push <| obj [("argument", toJson k), ("statement", toJson (← liftM <| pp atp)), ("frame", toJson ch)]
           children := children.push ch
         else objects := objects.push (← liftM <| pp a)
+      if let .fvar fid := e.getAppFn then
+        let declaration ← liftM <| fid.getDecl
+        let mut localIndex : Option Nat := none
+        for k in [:xs.size] do
+          if xs[k]! == .fvar fid then localIndex := some k
+        let some k := localIndex | throwError "Local application head is outside the exported context"
+        role := "local-application"
+        fields := [("binder", toJson declaration.userName.toString),
+          ("domain", toJson (← liftM <| pp declaration.type)), ("local_index", toJson k)]
       if head == "congrArg" then role := "congruence"
       if #["Nat.rec", "Nat.recOn", "Nat.recAux", "List.rec", "List.recOn"].contains head then role := "induction"
       if head == "Exists.intro" then role := "witness"
