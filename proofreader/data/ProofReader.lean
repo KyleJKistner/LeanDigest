@@ -150,7 +150,7 @@ partial def view (e : Expr) (depth : Nat) : StateT Nat MetaM Json := do
         ("arguments", toJson arguments), ("references", toJson refs),
         ("children", toJson children)]
   | .fvar id =>
-      let localDecl ← liftM <| getLocalDecl id
+      let localDecl ← liftM <| id.getDecl
       return obj <| base ++ [("rule", toJson "assumption"),
         ("binder", toJson localDecl.userName.toString), ("children", toJson (#[] : Array Json))]
   | .const n _ =>
