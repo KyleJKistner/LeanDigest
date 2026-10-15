@@ -1,0 +1,18 @@
+Leanglish · BatchAcceptance.Lists.map_append
+
+Let α be a type.
+Let β be a type.
+Let f be an element of α → β.
+Let xs, ys be elements of List α.
+Then List.map f (xs ++ ys) = List.map f xs ++ List.map f ys.
+
+Proof.
+Proceed by induction on xs.
+  List.map f (xs ++ ys) = List.map f xs ++ List.map f ys
+  Empty-list case. By reflexivity, List.map f ([] ++ ys) = List.map f ([] ++ ys).
+  Constructor step. Let x ∈ α be arbitrary.
+  Let xs ∈ List α be arbitrary.
+  Assume List.map f (xs ++ ys) = List.map f xs ++ List.map f ys.
+  Apply List.cons (f x) to both sides of the supplied equality.
+    f x :: List.map f (xs.append ys) = f x :: (List.map f xs).append (List.map f ys)
+    Use the hypothesis ih: List.map f (xs ++ ys) = List.map f xs ++ List.map f ys.

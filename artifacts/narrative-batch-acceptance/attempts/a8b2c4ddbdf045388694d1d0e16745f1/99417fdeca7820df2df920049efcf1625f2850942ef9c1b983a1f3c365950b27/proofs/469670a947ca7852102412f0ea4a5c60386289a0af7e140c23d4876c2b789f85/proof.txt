@@ -1,0 +1,16 @@
+Leanglish · BatchAcceptance.Lists.append_empty
+
+Let α be a type.
+Let xs be an element of List α.
+Then xs ++ [] = xs.
+
+Proof.
+Proceed by induction on xs.
+  xs ++ [] = xs
+  Empty-list case. By reflexivity, [] ++ [] = [] ++ [].
+  Constructor step. Let x ∈ α be arbitrary.
+  Let xs ∈ List α be arbitrary.
+  Assume xs ++ [] = xs.
+  Apply List.cons x to both sides of the supplied equality.
+    x :: xs.append [] = x :: xs
+    Use the hypothesis ih: xs ++ [] = xs.
