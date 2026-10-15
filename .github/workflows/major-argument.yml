@@ -1,0 +1,133 @@
+name: Release batch acceptance
+on:
+  push:
+    branches: [work/batch-integration]
+    paths: ['.github/workflows/major-argument.yml']
+permissions:
+  contents: write
+jobs:
+  verify-batch:
+    if: github.repository == 'KyleJKistner/LeanDigest'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: work/batch-integration
+      - name: Bind major argument through observed full argument positions
+        run: |
+          python3 - <<'PY'
+          import hashlib,pathlib,subprocess
+          def replace(path,old,new):
+              p=pathlib.Path(path);s=p.read_text();assert s.count(old)==1,(path,old)
+              p.write_text(s.replace(old,new))
+          p='proofreader/narrative.py'
+          replace(p,'            branches=[self.sequence(j) for j in ch]\n',
+                  "            major_slot={'Nat.rec':3,'Nat.recAux':3,'Nat.recOn':1,'List.rec':4,'List.recOn':2}[f['head']]\n            object_slots=[k for k in range(len(f['objects'])+len(f['premises']))\n                          if k not in recursor_proofs[f['head']]]\n            branches=[self.sequence(j) for j in ch]\n")
+          replace(p,"f['objects'][{'Nat.recOn':0,'List.recOn':1}.get(f['head'],-1)]","f['objects'][object_slots.index(major_slot)]")
+          replace('lean/ProofReader/Acceptance/Induction.lean',
+                  '-- This recursor places its induction variable BEFORE its motive.',
+                  '-- recOn has different proof-argument positions; check the actual major argument.')
+          replace('lean/ProofReader/Acceptance/Lists.lean',
+                  '-- List.recOn also has a different major-argument position from List.rec.',
+                  '-- Exercise List.recOn with its own full argument-position contract.')
+          expected={'proofreader/narrative.py':'5176e73e2b149a1fcd0ea9a84c797492d958fb5e',
+                    'lean/ProofReader/Acceptance/Induction.lean':'0120c00b9ae74e09eca97640de6c8f9ad2a1d4c5',
+                    'lean/ProofReader/Acceptance/Lists.lean':'6105f33ea1cfa50f4891d3f674cebf40ff135362'}
+          for name,sha in expected.items():
+              data=pathlib.Path(name).read_bytes()
+              assert hashlib.sha1(b'blob '+str(len(data)).encode()+b'\0'+data).hexdigest()==sha,name
+          subprocess.run(['git','config','user.name','github-actions[bot]'],check=True)
+          subprocess.run(['git','config','user.email','41898282+github-actions[bot]@users.noreply.github.com'],check=True)
+          subprocess.run(['git','add','--',*expected],check=True)
+          subprocess.run(['git','commit','-m','Map actual recursor major slots through proof and object argument inventories'],check=True)
+          subprocess.run(['git','push','origin','HEAD:refs/heads/work/batch-integration'],check=True)
+          PY
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python -m pip install '.[dev,webtest]'
+      - run: python -m playwright install --with-deps chromium
+      - uses: leanprover/lean-action@v1
+        with:
+          lake-package-directory: lean
+          auto-config: false
+          build: true
+          build-args: 'ProofReader ProofReader.Smoke KernelExport Narrative NarrativeBatch'
+          test: false
+          lint: false
+          use-mathlib-cache: false
+          use-github-cache: false
+      - name: Require complete native and browser suite without skips
+        env:
+          PROOFREADER_REQUIRE_LEAN: '1'
+          PROOFREADER_REQUIRE_BROWSER: '1'
+          LEANGLISH_BATCH_ARTIFACTS: artifacts/ci-narrative-batch
+        run: |
+          python scripts/build_demo.py
+          python scripts/build_typed_demo.py
+          python scripts/build_narrative_demo.py
+          python -m pytest -q --junitxml=artifacts/batch-release-tests.xml
+          git diff --exit-code -- proofreader/data artifacts/openai-sample
+      - name: Exercise installed wheel outside the development checkout
+        run: |
+          python -m pip wheel --no-deps . -w "$RUNNER_TEMP/wheel"
+          python -m venv "$RUNNER_TEMP/installed"
+          "$RUNNER_TEMP/installed/bin/python" -m pip install --no-deps "$RUNNER_TEMP"/wheel/*.whl
+          cd "$RUNNER_TEMP"
+          installed/bin/leanglish batch-narrative --help
+          installed/bin/proofreader aggregate-narrative --help
+          installed/bin/python -m leanglish narrative-demo -o installed-reader.html
+          installed/bin/python -c "from proofreader.narrative_batch import batch_source; assert '#narrative_batch' in batch_source('ProofReader.Acceptance.Lists','4.34.1',100)"
+          installed/bin/leanglish batch-narrative --project "$GITHUB_WORKSPACE/lean" --module ProofReader.Acceptance.Lists --lean-version 4.34.1 --trust-project -o "$RUNNER_TEMP/installed-batch"
+          installed/bin/python - <<'PY'
+          import json,os,pathlib
+          r=json.loads((pathlib.Path(os.environ['RUNNER_TEMP'])/'installed-batch/batch.json').read_text())
+          s=r['summary']
+          assert r['status']=='complete' and s['total_candidates']==3 and s['kernel_checked']==3
+          assert s['rendered']==3 and s['unexpanded_steps']==0
+          print('INSTALLED_BATCH',json.dumps(s))
+          PY
+      - name: Retain actual successful or failed results with provenance
+        if: always()
+        env:
+          OBSERVATION_RUN: ${{ github.run_id }}
+        run: |
+          python3 - <<'PY'
+          import json,os,pathlib,shutil,subprocess
+          from proofreader.model import Document
+          from proofreader.render import load_document,write_html
+          from proofreader.narrative import prose
+          root=pathlib.Path('artifacts/batch-release-acceptance');root.mkdir(parents=True,exist_ok=True)
+          source=pathlib.Path('artifacts/ci-narrative-batch')
+          if source.exists():
+              target=root/'native';shutil.copytree(source,target,dirs_exist_ok=True)
+              report=json.loads((target/'batch.json').read_text())
+              print('NATIVE_SUMMARY',json.dumps(report['summary']))
+              docs=[]
+              for module in report['modules']:
+                  for row in module['rows']:
+                      print('PROOF_RESULT',row['name'],row['status'],row.get('unexpanded_steps'))
+                      if row.get('reader'):
+                          docs.append(load_document((target/row['reader']).with_name('reading.json').read_bytes()))
+              reader=Document('Leanglish · native induction and logic acceptance',
+                  [f for d in docs for f in d.files],[c for d in docs for c in d.declarations],
+                  warnings=['Controlled acceptance examples, not an OpenAI coverage result. One intentionally disallowed proof remains failed in the batch ledger.'],
+                  provenance={'scope':'controlled-native-acceptance','run':os.environ['OBSERVATION_RUN'],'pipeline_model_calls':0,'whole_corpus_coverage':False,'english_formally_verified':False})
+              write_html(reader,root/'reader.html')
+              (root/'proofs.txt').write_text('\n\n'.join(prose(d) for d in docs))
+          test=pathlib.Path('artifacts/batch-release-tests.xml')
+          if test.exists():shutil.copyfile(test,root/'tests.xml')
+          installed=pathlib.Path(os.environ['RUNNER_TEMP'])/'installed-batch'
+          if installed.exists():shutil.copytree(installed,root/'installed-batch',dirs_exist_ok=True)
+          commit=subprocess.check_output(['git','rev-parse','HEAD'],text=True).strip()
+          (root/'provenance.json').write_text(json.dumps({'run':os.environ['OBSERVATION_RUN'],'source_commit':commit,'formal_english_certification':False},indent=2)+'\n')
+          subprocess.run(['git','add','--force','--',str(root)],check=True)
+          subprocess.run(['git','commit','-m','Retain native batch and installed-package acceptance observations'],check=True)
+          subprocess.run(['git','push','origin','HEAD:refs/heads/work/batch-integration'],check=True)
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: batch-release-acceptance
+          path: artifacts/batch-release-acceptance/
