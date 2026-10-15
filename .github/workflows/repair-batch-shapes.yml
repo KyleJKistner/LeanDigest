@@ -26,7 +26,7 @@ jobs:
               replace(path,'#["Nat.rec", "Nat.recOn", "List.rec", "List.recOn"]','#["Nat.rec", "Nat.recOn", "Nat.recAux", "List.rec", "List.recOn"]')
           replace('proofreader/narrative.py',"'Nat.rec':'induction','Nat.recOn':'induction'","'Nat.rec':'induction','Nat.recOn':'induction','Nat.recAux':'induction'")
           replace('proofreader/narrative.py',"len(f['objects'])>=3:","len(f['objects'])==5 and [p['argument'] for p in f['premises']]==[5]:")
-          replace('proofreader/narrative.py',"math_text(f['objects'][-3])","math_text(f['objects'][-1])")
+          replace('proofreader/narrative.py',"'Apply '+math_text(f['objects'][-3])","'Apply '+math_text(f['objects'][-1])")
           p=Path('tests/test_narrative_batch_integration.py')
           p.write_text(p.read_text()+"\n    path = output/by_name['BatchAcceptance.Induction.zero_adds']['reader']\n    assert 'Apply Nat.succ to both sides' in (path.parent/'proof.txt').read_text()\n")
           paths=['lean/Narrative.lean','proofreader/data/Narrative.lean','proofreader/narrative.py','tests/test_narrative_batch_integration.py']
