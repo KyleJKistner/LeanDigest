@@ -20,6 +20,7 @@ from proofreader.lean import run_bounded
 PIN = '1581d4cbdd69a0faf34b2089614fe2a814316a6a'
 NAME = re.compile(r'[A-Za-z_][A-Za-z0-9_.]*')
 MARKER = 'LEANGLISH_STATEMENT:'
+OPTIONS = 'set_option maxRecDepth 10000\nset_option maxHeartbeats 2000000\nset_option pp.maxSteps 1000000\n'
 
 
 def run(project: Path, output: Path, shard: int, shards: int, *, trust_project=False):
@@ -54,6 +55,12 @@ def run(project: Path, output: Path, shard: int, shards: int, *, trust_project=F
     (output/'exporter-build.json').write_text(json.dumps(asdict(exporter),indent=2))
     if exporter.status!='passed':
         raise ValueError('Statement exporter did not compile')
+    probe=output/'Preflight.lean'
+    probe.write_text('import FindingStatements\n'+OPTIONS+'\n#leanglish_statement "True.intro"\n')
+    preflight=run_bounded(['lake','env','lean',str(probe.resolve())],project,timeout=60)
+    (output/'preflight.json').write_text(json.dumps(asdict(preflight),indent=2))
+    if preflight.status!='passed' or MARKER not in preflight.stdout:
+        raise ValueError('Statement driver preflight failed; refusing to repeat a broken driver across the corpus')
     def one(item):
         key,cfg,targets=item
         out=output/key;out.mkdir()
@@ -68,7 +75,7 @@ def run(project: Path, output: Path, shard: int, shards: int, *, trust_project=F
         record['status']='build-'+built.status
         rows={}
         if built.status=='passed':
-            driver='import '+cfg['challenge_module']+'\nimport FindingStatements\nset_option maxRecDepth 10000\nset_option maxHeartbeats 2000000\nset_option pp.maxDepth 1000\nset_option pp.maxSteps 1000000\n'
+            driver='import '+cfg['challenge_module']+'\nimport FindingStatements\n'+OPTIONS
             driver+=''.join('#leanglish_statement '+json.dumps(n)+'\n' for n in targets)
             path=out/'Statements.lean';path.write_text(driver)
             executed=run_bounded(['lake','env','lean',str(path.resolve())],project,timeout=120,max_output=8_000_000)
@@ -86,8 +93,6 @@ def run(project: Path, output: Path, shard: int, shards: int, *, trust_project=F
                     raise ValueError('Unacceptable statement provenance')
                 if r.get('lean_version')!='4.34.1':raise ValueError('Statement toolchain mismatch')
                 rows[n]=r
-            # Partial output from an unsuccessful process is retained but not
-            # promoted to a successful elaboration observation.
             if executed.status!='passed':rows={}
         if sha256(challenge.read_bytes()).hexdigest()!=source_digest:
             raise ValueError('Comparison source changed during execution')
@@ -99,6 +104,7 @@ def run(project: Path, output: Path, shard: int, shards: int, *, trust_project=F
         (out/'result.json').write_text(json.dumps(record,ensure_ascii=False,indent=2))
         return record
     records=[]
+    report={**identity,'configurations':[]}
     with ThreadPoolExecutor(max_workers=2) as pool:
         futures={pool.submit(one,item):item for item in configs}
         for future in as_completed(futures):
