@@ -6,6 +6,8 @@ import json
 import re
 from pathlib import Path
 from typing import Any
+from . import __version__
+from .branding import PRODUCT_NAME, TAGLINE
 from .model import Document, Declaration, Span, Step, SCHEMA, report
 
 ASSETS = Path(__file__).parent / "web"
@@ -55,6 +57,9 @@ def embedded_json(data: Any) -> str:
 def html_document(document: Document, coverage: dict | None = None) -> str:
     template = (ASSETS / "index.html").read_text(encoding="utf-8")
     values = {
+        "__PRODUCT_NAME__": html.escape(PRODUCT_NAME),
+        "__TAGLINE__": html.escape(TAGLINE),
+        "__VERSION__": html.escape(__version__),
         "__TITLE__": html.escape(document.title),
         "/*__STYLE__*/": (ASSETS / "style.css").read_text(encoding="utf-8"),
         "/*__APP__*/": (ASSETS / "app.js").read_text(encoding="utf-8"),

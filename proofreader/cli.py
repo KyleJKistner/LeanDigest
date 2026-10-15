@@ -4,6 +4,8 @@ import argparse
 import json
 from pathlib import Path
 import sys
+from . import __version__
+from .branding import PRODUCT_NAME
 from .model import Document, report
 from .render import load_document, markdown_document, write_html
 from .source import merge_documents, parse_source
@@ -24,7 +26,7 @@ def source_document(paths: list[str], title: str | None = None) -> Document:
             return d
         else:
             documents.append(parse_source(p.read_text(encoding="utf-8"), p.name))
-    return merge_documents(documents, title or "ProofReader · source library")
+    return merge_documents(documents, title or f"{PRODUCT_NAME} · source library")
 
 
 def write_outputs(d: Document, output: Path):
@@ -34,9 +36,9 @@ def write_outputs(d: Document, output: Path):
     else: write_html(d,output)
 
 
-def parser() -> argparse.ArgumentParser:
-    p=argparse.ArgumentParser(prog="proofreader",description="Deterministic, evidence-labelled reading views for Lean. Source outlines are not checked English proofs.")
-    p.add_argument("--version",action="version",version="lean-proofreader 0.3.0")
+def parser(prog: str = "proofreader") -> argparse.ArgumentParser:
+    p=argparse.ArgumentParser(prog=prog,description=f"{PRODUCT_NAME}: deterministic, evidence-labelled reading views for Lean. Source outlines are not checked English proofs.")
+    p.add_argument("--version",action="version",version=f"{PRODUCT_NAME} {__version__}")
     commands=p.add_subparsers(dest="command",required=True)
     read=commands.add_parser("read",help="Read Lean source or a reading JSON file without compiling")
     read.add_argument("inputs",nargs="+");read.add_argument("--output","-o",type=Path,default=Path("proofreader.html"));read.add_argument("--title")
@@ -108,8 +110,8 @@ def demo_document() -> Document:
     return load_document(p.read_bytes())
 
 
-def main(argv: list[str] | None = None) -> int:
-    args=parser().parse_args(argv)
+def main(argv: list[str] | None = None, *, prog: str = "proofreader") -> int:
+    args=parser(prog).parse_args(argv)
     try:
         if args.command=="narrative-demo":
             d=load_document((Path(__file__).parent/"data/narrative-demo.json").read_bytes())
@@ -223,7 +225,7 @@ def main(argv: list[str] | None = None) -> int:
             passed,reason=coverage_gate(json.loads(args.report.read_text()),args.level)
             print(json.dumps({"passed":passed,"level":args.level,"reason":reason}));return 0 if passed else 2
     except (OSError,ValueError,PermissionError,RuntimeError,RecursionError) as exc:
-        print(f"proofreader: {exc}",file=sys.stderr);return 2
+        print(f"{prog}: {exc}",file=sys.stderr);return 2
     return 2
 
 if __name__=="__main__": raise SystemExit(main())

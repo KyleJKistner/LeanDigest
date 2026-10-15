@@ -189,3 +189,14 @@ def test_substantial_mobile_expansion_and_audit_no_overflow(page):
     assert page.evaluate('document.documentElement.scrollWidth <= innerWidth')
     page.locator('#tab-audit').click()
     assert page.evaluate('document.documentElement.scrollWidth <= innerWidth')
+
+
+def test_leanglish_brand_preserves_reading_and_mobile_layout(page):
+    d=parse_source('theorem unchanged : True := by trivial\n')
+    page.set_viewport_size({'width':390,'height':844})
+    page.set_content(html_document(d))
+    assert page.title().startswith('Leanglish — ')
+    assert 'Leanglish' in page.locator('.brand').inner_text()
+    assert page.locator('.brand').get_attribute('title') == 'Lean proofs, in mathematical English.'
+    assert page.locator('#theorem-title').inner_text()=='unchanged'
+    assert page.evaluate('document.documentElement.scrollWidth <= innerWidth')

@@ -27,7 +27,7 @@ def test_health(local_server):
 
 def test_page(local_server):
     status,headers,body=req(local_server,'GET','/')
-    assert status==200 and b'ProofReader' in body
+    assert status==200 and b'<title>Leanglish ' in body
     assert headers['X-Content-Type-Options']=='nosniff'
 
 

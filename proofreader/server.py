@@ -4,6 +4,8 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 import json
 from urllib.parse import urlsplit
+from . import __version__
+from .branding import PRODUCT_NAME
 from .model import Document
 from .render import html_document
 from .source import parse_source
@@ -14,7 +16,7 @@ MAX_BODY = 4_000_000
 def make_handler(document: Document):
     page = html_document(document).encode()
     class Handler(BaseHTTPRequestHandler):
-        server_version = "ProofReader/0.1"
+        server_version = f"{PRODUCT_NAME}/{__version__}"
         def _allowed(self) -> bool:
             expected = f"127.0.0.1:{self.server.server_port}"
             host = self.headers.get("Host", "")
@@ -64,7 +66,7 @@ def make_handler(document: Document):
 def serve(document: Document, port: int = 8765):
     if not 0 <= port <= 65535: raise ValueError("Invalid port")
     with ThreadingHTTPServer(("127.0.0.1",port),make_handler(document)) as server:
-        print(f"ProofReader: http://127.0.0.1:{server.server_port}",flush=True)
+        print(f"{PRODUCT_NAME}: http://127.0.0.1:{server.server_port}",flush=True)
         print("Source parsing only. No build or execution endpoints.",flush=True)
         try: server.serve_forever()
         except KeyboardInterrupt: pass

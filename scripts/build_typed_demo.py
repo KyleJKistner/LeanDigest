@@ -33,7 +33,7 @@ def main():
         (ROOT/f'artifacts/v0.2/{name}.proof.txt').write_text(prose_text(raw))
     source_demo=load_document((data/'demo.json').read_bytes())
     declarations.extend(source_demo.declarations);files.extend(source_demo.files)
-    doc=Document('Lean ProofReader · typed arguments',list({f['path']:f for f in files}.values()),declarations,
+    doc=Document('Leanglish · typed arguments',list({f['path']:f for f in files}.values()),declarations,
         provenance={'scope':'five actual typed logical/function examples plus six OpenAI source files',
             'lean_version':'4.34.0','required_openai_lean_version':'4.34.1',
             'pipeline_model_calls':0,'typed_examples':observations,

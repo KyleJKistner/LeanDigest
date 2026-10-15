@@ -31,7 +31,7 @@ def main():
     data.declarations.extend(old.declarations)
     known={f['path'] for f in data.files}
     data.files.extend(f for f in old.files if f['path'] not in known)
-    data.title='ProofReader · Mathematical proof library'
+    data.title='Leanglish · Mathematical proof library'
     data.provenance['scope']='One source-bound substantial proof, five exact-DAG examples, eight source-only candidates'
     data.provenance['source_bound_experiments']=1
     (ROOT/'proofreader/data/reader-demo.json').write_text(data.to_json(),encoding='utf-8')
