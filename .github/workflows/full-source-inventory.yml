@@ -1,0 +1,37 @@
+name: Full OpenAI source inventory
+on:
+  workflow_dispatch:
+  push:
+    branches: [dev/native-and-corpus]
+    paths:
+      - scripts/index_full_openai.py
+      - .github/workflows/full-source-inventory.yml
+permissions:
+  contents: read
+concurrency:
+  group: full-source-inventory-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  source-only:
+    runs-on: ubuntu-latest
+    timeout-minutes: 50
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Acquire and hash the full OAI source subtree; index lexical headers separately
+        run: >-
+          python scripts/index_full_openai.py
+          --project "$RUNNER_TEMP/openai-source"
+          --output artifacts/full-source-inventory
+          --allow-network --index-headers --workers 2 --index-seconds 1200
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: openai-source-inventory
+          path: artifacts/full-source-inventory/
+          if-no-files-found: error
+          retention-days: 30
