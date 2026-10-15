@@ -1,0 +1,16 @@
+Leanglish · OAI.Balanced.SmallProjectiveArithmetic.half_line_of_degree_bound
+
+Let q, d, on be elements of ℕ.
+Assume 3 · d < q.
+Assume q − d ≤ on.
+Then q + 1 ≤ 2 · on.
+
+Proof.
+Apply Decidable.byContradiction to the supplied arguments.
+  q + 1 ≤ 2 · on
+  Assume ¬q + 1 ≤ 2 · on.
+  Apply OAI.Balanced.SmallProjectiveArithmetic.half_line_of_degree_bound._proof_1_1 to the supplied arguments.
+    False
+    Use the hypothesis hd: 3 · d < q.
+    Use the hypothesis hon: q − d ≤ on.
+    Use the hypothesis a: ¬q + 1 ≤ 2 · on.

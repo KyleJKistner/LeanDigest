@@ -1,0 +1,1144 @@
+Leanglish · OAI.Balanced.SmallProjectiveArithmetic.exists_interpolation_degree._proof_1_1
+
+Let δ be an element of ℕ.
+Assume 0 < δ.
+Assume ¬2 · δ − 1 + 1 = 2 · δ.
+Then False.
+
+Proof.
+Reason by cases from 2 · δ − 1 + 1 < 2 · δ ∨ 2 · δ − 1 + 1 > 2 · δ.
+  Apply Nat.lt_or_gt_of_ne to the supplied arguments.
+    2 · δ − 1 + 1 < 2 · δ ∨ 2 · δ − 1 + 1 > 2 · δ
+    Use the hypothesis a: ¬2 · δ − 1 + 1 = 2 · δ.
+  Case 2 · δ − 1 + 1 < 2 · δ.
+    Reason by cases from 1 ≤ 2 · δ ∧ ↑(2 · δ − 1) = ↑(2 · δ) − ↑1 ∨ 2 · δ < 1 ∧ ↑(2 · δ − 1) = 0.
+      Apply Lean.Omega.Int.ofNat_sub_dichotomy to the supplied arguments.
+        1 ≤ 2 · δ ∧ ↑(2 · δ − 1) = ↑(2 · δ) − ↑1 ∨ 2 · δ < 1 ∧ ↑(2 · δ − 1) = 0
+      Case 1 ≤ 2 · δ ∧ ↑(2 · δ − 1) = ↑(2 · δ) − ↑1.
+        Apply Lean.Omega.Constraint.not_sat'_of_isImpossible to the supplied arguments.
+          False
+          Apply of_decide_eq_true to the supplied arguments.
+            { lowerBound := some 2, upperBound := some 1 }.isImpossible = true
+            Apply id to the supplied arguments.
+              decide ({ lowerBound := some 2, upperBound := some 1 }.isImpossible = true) = true
+              By reflexivity, true = true.
+          Apply Lean.Omega.Constraint.combine_sat' to the supplied arguments.
+            ({ lowerBound := some 1, upperBound := some 1 }.combine { lowerBound := some 2, upperBound := none }).sat' [2, -1]
+    (Omega.Coeffs.ofList
+      [↑δ, ↑(2 · δ − 1), ↑((2 · δ − 1).sqrt ^ 2), ↑((2 · δ − 1).sqrt + 1) · ↑((2 · δ − 1).sqrt + 1)]) =
+  true
+            Apply Lean.Omega.tidy_sat to the supplied arguments.
+              (Omega.tidyConstraint { lowerBound := some (-1), upperBound := some (-1) } [-2, 1]).sat'
+    (Omega.tidyCoeffs { lowerBound := some (-1), upperBound := some (-1) } [-2, 1])
+    (Omega.Coeffs.ofList
+      [↑δ, ↑(2 · δ − 1), ↑((2 · δ − 1).sqrt ^ 2), ↑((2 · δ − 1).sqrt + 1) · ↑((2 · δ − 1).sqrt + 1)]) =
+  true
+              Apply Lean.Omega.Constraint.addEquality_sat to the supplied arguments.
+                { lowerBound := some (-1), upperBound := some (-1) }.sat' [-2, 1]
+    (Omega.Coeffs.ofList
+      [↑δ, ↑(2 · δ − 1), ↑((2 · δ − 1).sqrt ^ 2), ↑((2 · δ − 1).sqrt + 1) · ↑((2 · δ − 1).sqrt + 1)]) =
+  true
+                The following calculation gives ({ coeffs := [0, 1] } − { const := -1, coeffs := [2] }).eval
+    (Omega.Coeffs.ofList
+      [↑δ, ↑(2 · δ − 1), ↑((2 · δ − 1).sqrt ^ 2), ↑((2 · δ − 1).sqrt + 1) · ↑((2 · δ − 1).sqrt + 1)]) =
+  0.
+                  Reverse the supplied equality.
+                    ({ coeffs := [0, 1] } − { const := -1, coeffs := [2] }).eval
+    (Omega.Coeffs.ofList
+      [↑δ, ↑(2 · δ − 1), ↑((2 · δ − 1).sqrt ^ 2), ↑((2 · δ − 1).sqrt + 1) · ↑((2 · δ − 1).sqrt + 1)]) =
+  ↑(2 · δ − 1) − (↑(2 · δ) − ↑1)
+                    The following calculation gives ↑(2 · δ − 1) − (↑(2 · δ) − ↑1) =
+  ({ coeffs := [0, 1] } − { const := -1, coeffs := [2] }).eval
+    (Omega.Coeffs.ofList [↑δ, ↑(2 · δ − 1), ↑((2 · δ − 1).sqrt ^ 2), ↑((2 · δ − 1).sqrt + 1) · ↑((2 · δ − 1).sqrt + 1)]).
+                      Apply Lean.Omega.Int.sub_congr to the supplied arguments.
+                        ↑(2 · δ − 1) − (↑(2 · δ) − ↑1) =
+  (Omega.LinearCombo.coordinate 1).eval
+      (Omega.Coeffs.ofList
+        [↑δ, ↑(2 · δ − 1), ↑((2 · δ − 1).sqrt ^ 2), ↑((2 · δ − 1).sqrt + 1) · ↑((2 · δ − 1).sqrt + 1)]) -
+    ({ coeffs := [2] } − { const := 1 }).eval
+      (Omega.Coeffs.ofList
+        [↑δ, ↑(2 · δ − 1), ↑((2 · δ − 1).sqrt ^ 2), ↑((2 · δ − 1).sqrt + 1) · ↑((2 · δ − 1).sqrt + 1)])
+                        Reverse the supplied equality.
+                          ↑(2 · δ − 1) =
+  (Omega.LinearCombo.coordinate 1).eval
+    (Omega.Coeffs.ofList [↑δ, ↑(2 · δ − 1), ↑((2 · δ − 1).sqrt ^ 2), ↑((2 · δ − 1).sqrt + 1) · ↑((2 · δ − 1).sqrt + 1)])
+                          Apply Lean.Omega.LinearCombo.coordinate_eval_1 to the supplied arguments.
+                            (Omega.LinearCombo.coordinate 1).eval
+    (Omega.Coeffs.ofList
+      [↑δ, ↑(2 · δ − 1), ↑((2 · δ − 1).sqrt ^ 2), ↑((2 · δ − 1).sqrt + 1) · ↑((2 · δ − 1).sqrt + 1)]) =
+  ↑(2 · δ − 1)
+                        The following calculation gives ↑(2 · δ) − ↑1 =
+  ({ coeffs := [2] } − { const := 1 }).eval
+    (Omega.Coeffs.ofList [↑δ, ↑(2 · δ − 1), ↑((2 · δ − 1).sqrt ^ 2), ↑((2 · δ − 1).sqrt + 1) · ↑((2 · δ − 1).sqrt + 1)]).
+                          Apply Lean.Omega.Int.sub_congr to the supplied arguments.
+                            ↑(2 · δ) − ↑1 =
+  ({ const := 2 }.mul { coeffs := [1] }).eval
+      (Omega.Coeffs.ofList
+        [↑δ, ↑(2 · δ − 1), ↑((2 · δ − 1).sqrt ^ 2), ↑((2 · δ − 1).sqrt + 1) · ↑((2 · δ − 1).sqrt + 1)]) -
+    { const := 1 }.eval
+      (Omega.Coeffs.ofList
+        [↑δ, ↑(2 · δ − 1), ↑((2 · δ − 1).sqrt ^ 2), ↑((2 · δ − 1).sqrt + 1) · ↑((2 · δ − 1).sqrt + 1)])
+                            The following calculation gives ↑(2 · δ) =
+  ({ const := 2 }.mul { coeffs := [1] }).eval
+    (Omega.Coeffs.ofList [↑δ, ↑(2 · δ − 1), ↑((2 · δ − 1).sqrt ^ 2), ↑((2 · δ − 1).sqrt + 1) · ↑((2 · δ − 1).sqrt + 1)]).
+                              Apply Int.natCast_mul to the supplied arguments.
+                                ↑(2 · δ) = ↑2 · ↑δ
+                              Apply Lean.Omega.Int.mul_congr to the supplied arguments.
+                                ↑2 · ↑δ =
+  { const := 2 }.eval
+      (Omega.Coeffs.ofList
+        [↑δ, ↑(2 · δ − 1), ↑((2 · δ − 1).sqrt ^ 2), ↑((2 · δ − 1).sqrt + 1) · ↑((2 · δ − 1).sqrt + 1)]) *
+    (Omega.LinearCombo.coordinate 0).eval
+      (Omega.Coeffs.ofList
+        [↑δ, ↑(2 · δ − 1), ↑((2 · δ − 1).sqrt ^ 2), ↑((2 · δ − 1).sqrt + 1) · ↑((2 · δ − 1).sqrt + 1)])
+                                Apply id to the supplied arguments.
+                                  ↑2 =
+  { const := 2 }.eval
+    (Omega.Coeffs.ofList [↑δ, ↑(2 · δ − 1), ↑((2 · δ − 1).sqrt ^ 2), ↑((2 · δ − 1).sqrt + 1) · ↑((2 · δ − 1).sqrt + 1)])
+                                  By reflexivity, ↑2 = ↑2.
+                                Reverse the supplied equality.
+                                  ↑δ =
+  (Omega.LinearCombo.coordinate 0).eval
+    (Omega.Coeffs.ofList [↑δ, ↑(2 · δ − 1), ↑((2 · δ − 1).sqrt ^ 2), ↑((2 · δ − 1).sqrt + 1) · ↑((2 · δ − 1).sqrt + 1)])
+                                  Apply Lean.Omega.LinearCombo.coordinate_eval_0 to the supplied arguments.
+                                    (Omega.LinearCombo.coordinate 0).eval
+    (Omega.Coeffs.ofList
+      [↑δ, ↑(2 · δ − 1), ↑((2 · δ − 1).sqrt ^ 2), ↑((2 · δ − 1).sqrt + 1) · ↑((2 · δ − 1).sqrt + 1)]) =
+  ↑δ
+                              Reverse the supplied equality.
+                                { const := 2 }.eval
+      (Omega.Coeffs.ofList
+        [↑δ, ↑(2 · δ − 1), ↑((2 · δ − 1).sqrt ^ 2), ↑((2 · δ − 1).sqrt + 1) · ↑((2 · δ − 1).sqrt + 1)]) *
+    { coeffs := [1] }.eval
+      (Omega.Coeffs.ofList
+        [↑δ, ↑(2 · δ − 1), ↑((2 · δ − 1).sqrt ^ 2), ↑((2 · δ − 1).sqrt + 1) · ↑((2 · δ − 1).sqrt + 1)]) =
+  ({ const := 2 }.mul { coeffs := [1] }).eval
+    (Omega.Coeffs.ofList [↑δ, ↑(2 · δ − 1), ↑((2 · δ − 1).sqrt ^ 2), ↑((2 · δ − 1).sqrt + 1) · ↑((2 · δ − 1).sqrt + 1)])
+                                Apply Lean.Omega.LinearCombo.mul_eval to the supplied arguments.
+                                  ({ const := 2 }.mul { coeffs := [1] }).eval
+    (Omega.Coeffs.ofList
+      [↑δ, ↑(2 · δ − 1), ↑((2 · δ − 1).sqrt ^ 2), ↑((2 · δ − 1).sqrt + 1) · ↑((2 · δ − 1).sqrt + 1)]) =
+  { const := 2 }.eval
+      (Omega.Coeffs.ofList
+        [↑δ, ↑(2 · δ − 1), ↑((2 · δ − 1).sqrt ^ 2), ↑((2 · δ − 1).sqrt + 1) · ↑((2 · δ − 1).sqrt + 1)]) *
+    { coeffs := [1] }.eval
+      (Omega.Coeffs.ofList
+        [↑δ, ↑(2 · δ − 1), ↑((2 · δ − 1).sqrt ^ 2), ↑((2 · δ − 1).sqrt + 1) · ↑((2 · δ − 1).sqrt + 1)])
+                                  Apply of_decide_eq_true to the supplied arguments.
+                                    Omega.Coeffs.isZero [] ∨ Omega.Coeffs.isZero [1]
+                                    Apply id to the supplied arguments.
+                                      decide (Omega.Coeffs.isZero [] ∨ Omega.Coeffs.isZero [1]) = true
+                                      By reflexivity, true = true.
+                            Apply id to the supplied arguments.
+                              ↑1 =
+  { const := 1 }.eval
+    (Omega.Coeffs.ofList [↑δ, ↑(2 · δ − 1), ↑((2 · δ − 1).sqrt ^ 2), ↑((2 · δ − 1).sqrt + 1) · ↑((2 · δ − 1).sqrt + 1)])
+                              By reflexivity, ↑1 = ↑1.
+                          Reverse the supplied equality.
+                            { coeffs := [2] }.eval
+      (Omega.Coeffs.ofList
+        [↑δ, ↑(2 · δ − 1), ↑((2 · δ − 1).sqrt ^ 2), ↑((2 · δ − 1).sqrt + 1) · ↑((2 · δ − 1).sqrt + 1)]) -
+    { const := 1 }.eval
+      (Omega.Coeffs.ofList
+        [↑δ, ↑(2 · δ − 1), ↑((2 · δ − 1).sqrt ^ 2), ↑((2 · δ − 1).sqrt + 1) · ↑((2 · δ − 1).sqrt + 1)]) =
+  ({ coeffs := [2] } − { const := 1 }).eval
+    (Omega.Coeffs.ofList [↑δ, ↑(2 · δ − 1), ↑((2 · δ − 1).sqrt ^ 2), ↑((2 · δ − 1).sqrt + 1) · ↑((2 · δ − 1).sqrt + 1)])
+                            Apply Lean.Omega.LinearCombo.sub_eval to the supplied arguments.
+                              ({ coeffs := [2] } − { const := 1 }).eval
+    (Omega.Coeffs.ofList
+      [↑δ, ↑(2 · δ − 1), ↑((2 · δ − 1).sqrt ^ 2), ↑((2 · δ − 1).sqrt + 1) · ↑((2 · δ − 1).sqrt + 1)]) =
+  { coeffs := [2] }.eval
+      (Omega.Coeffs.ofList
+        [↑δ, ↑(2 · δ − 1), ↑((2 · δ − 1).sqrt ^ 2), ↑((2 · δ − 1).sqrt + 1) · ↑((2 · δ − 1).sqrt + 1)]) -
+    { const := 1 }.eval
+      (Omega.Coeffs.ofList
+        [↑δ, ↑(2 · δ − 1), ↑((2 · δ − 1).sqrt ^ 2), ↑((2 · δ − 1).sqrt + 1) · ↑((2 · δ − 1).sqrt + 1)])
+                      Reverse the supplied equality.
+                        { coeffs := [0, 1] }.eval
+      (Omega.Coeffs.ofList
+        [↑δ, ↑(2 · δ − 1), ↑((2 · δ − 1).sqrt ^ 2), ↑((2 · δ − 1).sqrt + 1) · ↑((2 · δ − 1).sqrt + 1)]) -
+    { const := -1, coeffs := [2] }.eval
+      (Omega.Coeffs.ofList
+        [↑δ, ↑(2 · δ − 1), ↑((2 · δ − 1).sqrt ^ 2), ↑((2 · δ − 1).sqrt + 1) · ↑((2 · δ − 1).sqrt + 1)]) =
+  ({ coeffs := [0, 1] } − { const := -1, coeffs := [2] }).eval
+    (Omega.Coeffs.ofList [↑δ, ↑(2 · δ − 1), ↑((2 · δ − 1).sqrt ^ 2), ↑((2 · δ − 1).sqrt + 1) · ↑((2 · δ − 1).sqrt + 1)])
+                        Apply Lean.Omega.LinearCombo.sub_eval to the supplied arguments.
+                          ({ coeffs := [0, 1] } − { const := -1, coeffs := [2] }).eval
+    (Omega.Coeffs.ofList
+      [↑δ, ↑(2 · δ − 1), ↑((2 · δ − 1).sqrt ^ 2), ↑((2 · δ − 1).sqrt + 1) · ↑((2 · δ − 1).sqrt + 1)]) =
+  { coeffs := [0, 1] }.eval
+      (Omega.Coeffs.ofList
+        [↑δ, ↑(2 · δ − 1), ↑((2 · δ − 1).sqrt ^ 2), ↑((2 · δ − 1).sqrt + 1) · ↑((2 · δ − 1).sqrt + 1)]) -
+    { const := -1, coeffs := [2] }.eval
+      (Omega.Coeffs.ofList
+        [↑δ, ↑(2 · δ − 1), ↑((2 · δ − 1).sqrt ^ 2), ↑((2 · δ − 1).sqrt + 1) · ↑((2 · δ − 1).sqrt + 1)])
+                  Apply Int.sub_eq_zero_of_eq to the supplied arguments.
+                    ↑(2 · δ − 1) − (↑(2 · δ) − ↑1) = 0
+                    Take the second conjunct.
+                      ↑(2 · δ − 1) = ↑(2 · δ) − ↑1
+                      Use the hypothesis h₁: 1 ≤ 2 · δ ∧ ↑(2 · δ − 1) = ↑(2 · δ) − ↑1.
+            Apply Lean.Omega.Constraint.addInequality_sat to the supplied arguments.
+              { lowerBound := some (- -2), upperBound := none }.sat' [2, -1]
+    (Omega.Coeffs.ofList
+      [↑δ, ↑(2 · δ − 1), ↑((2 · δ − 1).sqrt ^ 2), ↑((2 · δ − 1).sqrt + 1) · ↑((2 · δ − 1).sqrt + 1)]) =
+  true
+              Apply le_of_le_of_eq to the supplied arguments.
+                0 ≤
+  ({ coeffs := [2] } − { const := 2, coeffs := [0, 1] }).eval
+    (Omega.Coeffs.ofList [↑δ, ↑(2 · δ − 1), ↑((2 · δ − 1).sqrt ^ 2), ↑((2 · δ − 1).sqrt + 1) · ↑((2 · δ − 1).sqrt + 1)])
+                Apply Int.sub_nonneg_of_le to the supplied arguments.
+                  0 ≤ ↑(2 · δ) − (↑(2 · δ − 1 + 1) + 1)
+                  Apply Int.add_one_le_of_lt to the supplied arguments.
+                    ↑(2 · δ − 1 + 1) + 1 ≤ ↑(2 · δ)
+                    Apply Lean.Omega.Int.ofNat_lt_of_lt to the supplied arguments.
+                      ↑(2 · δ − 1 + 1) < ↑(2 · δ)
+                      Use the hypothesis h₁: 2 · δ − 1 + 1 < 2 · δ.
+                The following calculation gives ↑(2 · δ) − (↑(2 · δ − 1 + 1) + 1) =
+  ({ coeffs := [2] } − { const := 2, coeffs := [0, 1] }).eval
+    (Omega.Coeffs.ofList [↑δ, ↑(2 · δ − 1), ↑((2 · δ − 1).sqrt ^ 2), ↑((2 · δ − 1).sqrt + 1) · ↑((2 · δ − 1).sqrt + 1)]).
+                  Apply Lean.Omega.Int.sub_congr to the supplied arguments.
+                    ↑(2 · δ) − (↑(2 · δ − 1 + 1) + 1) =
+  ({ const := 2 }.mul { coeffs := [1] }).eval
+      (Omega.Coeffs.ofList
+        [↑δ, ↑(2 · δ − 1), ↑((2 · δ − 1).sqrt ^ 2), ↑((2 · δ − 1).sqrt + 1) · ↑((2 · δ − 1).sqrt + 1)]) -
+    ({ const := 1, coeffs := [0, 1] } + { const := 1 }).eval
+      (Omega.Coeffs.ofList
+        [↑δ, ↑(2 · δ − 1), ↑((2 · δ − 1).sqrt ^ 2), ↑((2 · δ − 1).sqrt + 1) · ↑((2 · δ − 1).sqrt + 1)])
+                    The following calculation gives ↑(2 · δ) =
+  ({ const := 2 }.mul { coeffs := [1] }).eval
+    (Omega.Coeffs.ofList [↑δ, ↑(2 · δ − 1), ↑((2 · δ − 1).sqrt ^ 2), ↑((2 · δ − 1).sqrt + 1) · ↑((2 · δ − 1).sqrt + 1)]).
+                      Apply Int.natCast_mul to the supplied arguments.
+                        ↑(2 · δ) = ↑2 · ↑δ
+                      Apply Lean.Omega.Int.mul_congr to the supplied arguments.
+                        ↑2 · ↑δ =
+  { const := 2 }.eval
+      (Omega.Coeffs.ofList
+        [↑δ, ↑(2 · δ − 1), ↑((2 · δ − 1).sqrt ^ 2), ↑((2 · δ − 1).sqrt + 1) · ↑((2 · δ − 1).sqrt + 1)]) *
+    (Omega.LinearCombo.coordinate 0).eval
+      (Omega.Coeffs.ofList
+        [↑δ, ↑(2 · δ − 1), ↑((2 · δ − 1).sqrt ^ 2), ↑((2 · δ − 1).sqrt + 1) · ↑((2 · δ − 1).sqrt + 1)])
+                        Apply id to the supplied arguments.
+                          ↑2 =
+  { const := 2 }.eval
+    (Omega.Coeffs.ofList [↑δ, ↑(2 · δ − 1), ↑((2 · δ − 1).sqrt ^ 2), ↑((2 · δ − 1).sqrt + 1) · ↑((2 · δ − 1).sqrt + 1)])
+                          By reflexivity, ↑2 = ↑2.
+                        Reverse the supplied equality.
+                          ↑δ =
+  (Omega.LinearCombo.coordinate 0).eval
+    (Omega.Coeffs.ofList [↑δ, ↑(2 · δ − 1), ↑((2 · δ − 1).sqrt ^ 2), ↑((2 · δ − 1).sqrt + 1) · ↑((2 · δ − 1).sqrt + 1)])
+                          Apply Lean.Omega.LinearCombo.coordinate_eval_0 to the supplied arguments.
+                            (Omega.LinearCombo.coordinate 0).eval
+    (Omega.Coeffs.ofList
+      [↑δ, ↑(2 · δ − 1), ↑((2 · δ − 1).sqrt ^ 2), ↑((2 · δ − 1).sqrt + 1) · ↑((2 · δ − 1).sqrt + 1)]) =
+  ↑δ
+                      Reverse the supplied equality.
+                        { const := 2 }.eval
+      (Omega.Coeffs.ofList
+        [↑δ, ↑(2 · δ − 1), ↑((2 · δ − 1).sqrt ^ 2), ↑((2 · δ − 1).sqrt + 1) · ↑((2 · δ − 1).sqrt + 1)]) *
+    { coeffs := [1] }.eval
+      (Omega.Coeffs.ofList
+        [↑δ, ↑(2 · δ − 1), ↑((2 · δ − 1).sqrt ^ 2), ↑((2 · δ − 1).sqrt + 1) · ↑((2 · δ − 1).sqrt + 1)]) =
+  ({ const := 2 }.mul { coeffs := [1] }).eval
+    (Omega.Coeffs.ofList [↑δ, ↑(2 · δ − 1), ↑((2 · δ − 1).sqrt ^ 2), ↑((2 · δ − 1).sqrt + 1) · ↑((2 · δ − 1).sqrt + 1)])
+                        Apply Lean.Omega.LinearCombo.mul_eval to the supplied arguments.
+                          ({ const := 2 }.mul { coeffs := [1] }).eval
+    (Omega.Coeffs.ofList
+      [↑δ, ↑(2 · δ − 1), ↑((2 · δ − 1).sqrt ^ 2), ↑((2 · δ − 1).sqrt + 1) · ↑((2 · δ − 1).sqrt + 1)]) =
+  { const := 2 }.eval
+      (Omega.Coeffs.ofList
+        [↑δ, ↑(2 · δ − 1), ↑((2 · δ − 1).sqrt ^ 2), ↑((2 · δ − 1).sqrt + 1) · ↑((2 · δ − 1).sqrt + 1)]) *
+    { coeffs := [1] }.eval
+      (Omega.Coeffs.ofList
+        [↑δ, ↑(2 · δ − 1), ↑((2 · δ − 1).sqrt ^ 2), ↑((2 · δ − 1).sqrt + 1) · ↑((2 · δ − 1).sqrt + 1)])
+                          Apply of_decide_eq_true to the supplied arguments.
+                            Omega.Coeffs.isZero [] ∨ Omega.Coeffs.isZero [1]
+                            Apply id to the supplied arguments.
+                              decide (Omega.Coeffs.isZero [] ∨ Omega.Coeffs.isZero [1]) = true
+                              By reflexivity, true = true.
+                    The following calculation gives ↑(2 · δ − 1 + 1) + 1 =
+  ({ const := 1, coeffs := [0, 1] } + { const := 1 }).eval
+    (Omega.Coeffs.ofList [↑δ, ↑(2 · δ − 1), ↑((2 · δ − 1).sqrt ^ 2), ↑((2 · δ − 1).sqrt + 1) · ↑((2 · δ − 1).sqrt + 1)]).
+                      Apply Lean.Omega.Int.add_congr to the supplied arguments.
+                        ↑(2 · δ − 1 + 1) + 1 =
+  ({ coeffs := [0, 1] } + { const := 1 }).eval
+      (Omega.Coeffs.ofList
+        [↑δ, ↑(2 · δ − 1), ↑((2 · δ − 1).sqrt ^ 2), ↑((2 · δ − 1).sqrt + 1) · ↑((2 · δ − 1).sqrt + 1)]) +
+    { const := 1 }.eval
+      (Omega.Coeffs.ofList
+        [↑δ, ↑(2 · δ − 1), ↑((2 · δ − 1).sqrt ^ 2), ↑((2 · δ − 1).sqrt + 1) · ↑((2 · δ − 1).sqrt + 1)])
+                        The following calculation gives ↑(2 · δ − 1 + 1) =
+  ({ coeffs := [0, 1] } + { const := 1 }).eval
+    (Omega.Coeffs.ofList [↑δ, ↑(2 · δ − 1), ↑((2 · δ − 1).sqrt ^ 2), ↑((2 · δ − 1).sqrt + 1) · ↑((2 · δ − 1).sqrt + 1)]).
+                          Apply Int.natCast_add to the supplied arguments.
+                            ↑(2 · δ − 1 + 1) = ↑(2 · δ − 1) + ↑1
+                          Apply Lean.Omega.Int.add_congr to the supplied arguments.
+                            ↑(2 · δ − 1) + ↑1 =
+  (Omega.LinearCombo.coordinate 1).eval
+      (Omega.Coeffs.ofList
+        [↑δ, ↑(2 · δ − 1), ↑((2 · δ − 1).sqrt ^ 2), ↑((2 · δ − 1).sqrt + 1) · ↑((2 · δ − 1).sqrt + 1)]) +
+    { const := 1 }.eval
+      (Omega.Coeffs.ofList
+        [↑δ, ↑(2 · δ − 1), ↑((2 · δ − 1).sqrt ^ 2), ↑((2 · δ − 1).sqrt + 1) · ↑((2 · δ − 1).sqrt + 1)])
+                            Reverse the supplied equality.
+                              ↑(2 · δ − 1) =
+  (Omega.LinearCombo.coordinate 1).eval
+    (Omega.Coeffs.ofList [↑δ, ↑(2 · δ − 1), ↑((2 · δ − 1).sqrt ^ 2), ↑((2 · δ − 1).sqrt + 1) · ↑((2 · δ − 1).sqrt + 1)])
+                              Apply Lean.Omega.LinearCombo.coordinate_eval_1 to the supplied arguments.
+                                (Omega.LinearCombo.coordinate 1).eval
+    (Omega.Coeffs.ofList
+      [↑δ, ↑(2 · δ − 1), ↑((2 · δ − 1).sqrt ^ 2), ↑((2 · δ − 1).sqrt + 1) · ↑((2 · δ − 1).sqrt + 1)]) =
+  ↑(2 · δ − 1)
+                            Apply id to the supplied arguments.
+                              ↑1 =
+  { const := 1 }.eval
+    (Omega.Coeffs.ofList [↑δ, ↑(2 · δ − 1), ↑((2 · δ − 1).sqrt ^ 2), ↑((2 · δ − 1).sqrt + 1) · ↑((2 · δ − 1).sqrt + 1)])
+                              By reflexivity, ↑1 = ↑1.
+                          Reverse the supplied equality.
+                            { coeffs := [0, 1] }.eval
+      (Omega.Coeffs.ofList
+        [↑δ, ↑(2 · δ − 1), ↑((2 · δ − 1).sqrt ^ 2), ↑((2 · δ − 1).sqrt + 1) · ↑((2 · δ − 1).sqrt + 1)]) +
+    { const := 1 }.eval
+      (Omega.Coeffs.ofList
+        [↑δ, ↑(2 · δ − 1), ↑((2 · δ − 1).sqrt ^ 2), ↑((2 · δ − 1).sqrt + 1) · ↑((2 · δ − 1).sqrt + 1)]) =
+  ({ coeffs := [0, 1] } + { const := 1 }).eval
+    (Omega.Coeffs.ofList [↑δ, ↑(2 · δ − 1), ↑((2 · δ − 1).sqrt ^ 2), ↑((2 · δ − 1).sqrt + 1) · ↑((2 · δ − 1).sqrt + 1)])
+                            Apply Lean.Omega.LinearCombo.add_eval to the supplied arguments.
+                              ({ coeffs := [0, 1] } + { const := 1 }).eval
+    (Omega.Coeffs.ofList
+      [↑δ, ↑(2 · δ − 1), ↑((2 · δ − 1).sqrt ^ 2), ↑((2 · δ − 1).sqrt + 1) · ↑((2 · δ − 1).sqrt + 1)]) =
+  { coeffs := [0, 1] }.eval
+      (Omega.Coeffs.ofList
+        [↑δ, ↑(2 · δ − 1), ↑((2 · δ − 1).sqrt ^ 2), ↑((2 · δ − 1).sqrt + 1) · ↑((2 · δ − 1).sqrt + 1)]) +
+    { const := 1 }.eval
+      (Omega.Coeffs.ofList
+        [↑δ, ↑(2 · δ − 1), ↑((2 · δ − 1).sqrt ^ 2), ↑((2 · δ − 1).sqrt + 1) · ↑((2 · δ − 1).sqrt + 1)])
+                        Apply id to the supplied arguments.
+                          1 =
+  { const := 1 }.eval
+    (Omega.Coeffs.ofList [↑δ, ↑(2 · δ − 1), ↑((2 · δ − 1).sqrt ^ 2), ↑((2 · δ − 1).sqrt + 1) · ↑((2 · δ − 1).sqrt + 1)])
+                          By reflexivity, 1 = 1.
+                      Reverse the supplied equality.
+                        { const := 1, coeffs := [0, 1] }.eval
+      (Omega.Coeffs.ofList
+        [↑δ, ↑(2 · δ − 1), ↑((2 · δ − 1).sqrt ^ 2), ↑((2 · δ − 1).sqrt + 1) · ↑((2 · δ − 1).sqrt + 1)]) +
+    { const := 1 }.eval
+      (Omega.Coeffs.ofList
+        [↑δ, ↑(2 · δ − 1), ↑((2 · δ − 1).sqrt ^ 2), ↑((2 · δ − 1).sqrt + 1) · ↑((2 · δ − 1).sqrt + 1)]) =
+  ({ const := 1, coeffs := [0, 1] } + { const := 1 }).eval
+    (Omega.Coeffs.ofList [↑δ, ↑(2 · δ − 1), ↑((2 · δ − 1).sqrt ^ 2), ↑((2 · δ − 1).sqrt + 1) · ↑((2 · δ − 1).sqrt + 1)])
+                        Apply Lean.Omega.LinearCombo.add_eval to the supplied arguments.
+                          ({ const := 1, coeffs := [0, 1] } + { const := 1 }).eval
+    (Omega.Coeffs.ofList
+      [↑δ, ↑(2 · δ − 1), ↑((2 · δ − 1).sqrt ^ 2), ↑((2 · δ − 1).sqrt + 1) · ↑((2 · δ − 1).sqrt + 1)]) =
+  { const := 1, coeffs := [0, 1] }.eval
+      (Omega.Coeffs.ofList
+        [↑δ, ↑(2 · δ − 1), ↑((2 · δ − 1).sqrt ^ 2), ↑((2 · δ − 1).sqrt + 1) · ↑((2 · δ − 1).sqrt + 1)]) +
+    { const := 1 }.eval
+      (Omega.Coeffs.ofList
+        [↑δ, ↑(2 · δ − 1), ↑((2 · δ − 1).sqrt ^ 2), ↑((2 · δ − 1).sqrt + 1) · ↑((2 · δ − 1).sqrt + 1)])
+                  Reverse the supplied equality.
+                    { coeffs := [2] }.eval
+      (Omega.Coeffs.ofList
+        [↑δ, ↑(2 · δ − 1), ↑((2 · δ − 1).sqrt ^ 2), ↑((2 · δ − 1).sqrt + 1) · ↑((2 · δ − 1).sqrt + 1)]) -
+    { const := 2, coeffs := [0, 1] }.eval
+      (Omega.Coeffs.ofList
+        [↑δ, ↑(2 · δ − 1), ↑((2 · δ − 1).sqrt ^ 2), ↑((2 · δ − 1).sqrt + 1) · ↑((2 · δ − 1).sqrt + 1)]) =
+  ({ coeffs := [2] } − { const := 2, coeffs := [0, 1] }).eval
+    (Omega.Coeffs.ofList [↑δ, ↑(2 · δ − 1), ↑((2 · δ − 1).sqrt ^ 2), ↑((2 · δ − 1).sqrt + 1) · ↑((2 · δ − 1).sqrt + 1)])
+                    Apply Lean.Omega.LinearCombo.sub_eval to the supplied arguments.
+                      ({ coeffs := [2] } − { const := 2, coeffs := [0, 1] }).eval
+    (Omega.Coeffs.ofList
+      [↑δ, ↑(2 · δ − 1), ↑((2 · δ − 1).sqrt ^ 2), ↑((2 · δ − 1).sqrt + 1) · ↑((2 · δ − 1).sqrt + 1)]) =
+  { coeffs := [2] }.eval
+      (Omega.Coeffs.ofList
+        [↑δ, ↑(2 · δ − 1), ↑((2 · δ − 1).sqrt ^ 2), ↑((2 · δ − 1).sqrt + 1) · ↑((2 · δ − 1).sqrt + 1)]) -
+    { const := 2, coeffs := [0, 1] }.eval
+      (Omega.Coeffs.ofList
+        [↑δ, ↑(2 · δ − 1), ↑((2 · δ − 1).sqrt ^ 2), ↑((2 · δ − 1).sqrt + 1) · ↑((2 · δ − 1).sqrt + 1)])
+      Case 2 · δ < 1 ∧ ↑(2 · δ − 1) = 0.
+        Apply Lean.Omega.Constraint.not_sat'_of_isImpossible to the supplied arguments.
+          False
+          Apply of_decide_eq_true to the supplied arguments.
+            { lowerBound := some 1, upperBound := some 0 }.isImpossible = true
+            Apply id to the supplied arguments.
+              decide ({ lowerBound := some 1, upperBound := some 0 }.isImpossible = true) = true
+              By reflexivity, true = true.
+          Apply Lean.Omega.Constraint.combine_sat' to the supplied arguments.
+            ({ lowerBound := none, upperBound := some 0 }.combine { lowerBound := some 1, upperBound := none }).sat' [1]
+    (Omega.Coeffs.ofList
+      [↑δ, ↑(2 · δ − 1), ↑((2 · δ − 1).sqrt ^ 2), ↑((2 · δ − 1).sqrt + 1) · ↑((2 · δ − 1).sqrt + 1)]) =
+  true
+            Apply Lean.Omega.tidy_sat to the supplied arguments.
+              (Omega.tidyConstraint { lowerBound := some 0, upperBound := none } [-2]).sat'
+    (Omega.tidyCoeffs { lowerBound := some 0, upperBound := none } [-2])
+    (Omega.Coeffs.ofList
+      [↑δ, ↑(2 · δ − 1), ↑((2 · δ − 1).sqrt ^ 2), ↑((2 · δ − 1).sqrt + 1) · ↑((2 · δ − 1).sqrt + 1)]) =
+  true
+              Apply Lean.Omega.Constraint.addInequality_sat to the supplied arguments.
+                { lowerBound := some (-0), upperBound := none }.sat' [-2]
+    (Omega.Coeffs.ofList
+      [↑δ, ↑(2 · δ − 1), ↑((2 · δ − 1).sqrt ^ 2), ↑((2 · δ − 1).sqrt + 1) · ↑((2 · δ − 1).sqrt + 1)]) =
+  true
+                Apply le_of_le_of_eq to the supplied arguments.
+                  0 ≤
+  ({ const := 1 } − { const := 1, coeffs := [2] }).eval
+    (Omega.Coeffs.ofList [↑δ, ↑(2 · δ − 1), ↑((2 · δ − 1).sqrt ^ 2), ↑((2 · δ − 1).sqrt + 1) · ↑((2 · δ − 1).sqrt + 1)])
+                  Apply Int.sub_nonneg_of_le to the supplied arguments.
+                    0 ≤ ↑1 − (↑(2 · δ) + 1)
+                    Apply Int.add_one_le_of_lt to the supplied arguments.
+                      ↑(2 · δ) + 1 ≤ ↑1
+                      Apply Lean.Omega.Int.ofNat_lt_of_lt to the supplied arguments.
+                        ↑(2 · δ) < ↑1
+                        Take the first conjunct.
+                          2 · δ < 1
+                          Use the hypothesis h₂: 2 · δ < 1 ∧ ↑(2 · δ − 1) = 0.
+                  The following calculation gives ↑1 − (↑(2 · δ) + 1) =
+  ({ const := 1 } − { const := 1, coeffs := [2] }).eval
+    (Omega.Coeffs.ofList [↑δ, ↑(2 · δ − 1), ↑((2 · δ − 1).sqrt ^ 2), ↑((2 · δ − 1).sqrt + 1) · ↑((2 · δ − 1).sqrt + 1)]).
+                    Apply Lean.Omega.Int.sub_congr to the supplied arguments.
+                      ↑1 − (↑(2 · δ) + 1) =
+  { const := 1 }.eval
+      (Omega.Coeffs.ofList
+        [↑δ, ↑(2 · δ − 1), ↑((2 · δ − 1).sqrt ^ 2), ↑((2 · δ − 1).sqrt + 1) · ↑((2 · δ − 1).sqrt + 1)]) -
+    ({ coeffs := [2] } + { const := 1 }).eval
+      (Omega.Coeffs.ofList
+        [↑δ, ↑(2 · δ − 1), ↑((2 · δ − 1).sqrt ^ 2), ↑((2 · δ − 1).sqrt + 1) · ↑((2 · δ − 1).sqrt + 1)])
+                      Apply id to the supplied arguments.
+                        ↑1 =
+  { const := 1 }.eval
+    (Omega.Coeffs.ofList [↑δ, ↑(2 · δ − 1), ↑((2 · δ − 1).sqrt ^ 2), ↑((2 · δ − 1).sqrt + 1) · ↑((2 · δ − 1).sqrt + 1)])
+                        By reflexivity, ↑1 = ↑1.
+                      The following calculation gives ↑(2 · δ) + 1 =
+  ({ coeffs := [2] } + { const := 1 }).eval
+    (Omega.Coeffs.ofList [↑δ, ↑(2 · δ − 1), ↑((2 · δ − 1).sqrt ^ 2), ↑((2 · δ − 1).sqrt + 1) · ↑((2 · δ − 1).sqrt + 1)]).
+                        Apply Lean.Omega.Int.add_congr to the supplied arguments.
+                          ↑(2 · δ) + 1 =
+  ({ const := 2 }.mul { coeffs := [1] }).eval
+      (Omega.Coeffs.ofList
+        [↑δ, ↑(2 · δ − 1), ↑((2 · δ − 1).sqrt ^ 2), ↑((2 · δ − 1).sqrt + 1) · ↑((2 · δ − 1).sqrt + 1)]) +
+    { const := 1 }.eval
+      (Omega.Coeffs.ofList
+        [↑δ, ↑(2 · δ − 1), ↑((2 · δ − 1).sqrt ^ 2), ↑((2 · δ − 1).sqrt + 1) · ↑((2 · δ − 1).sqrt + 1)])
+                          The following calculation gives ↑(2 · δ) =
+  ({ const := 2 }.mul { coeffs := [1] }).eval
+    (Omega.Coeffs.ofList [↑δ, ↑(2 · δ − 1), ↑((2 · δ − 1).sqrt ^ 2), ↑((2 · δ − 1).sqrt + 1) · ↑((2 · δ − 1).sqrt + 1)]).
+                            Apply Int.natCast_mul to the supplied arguments.
+                              ↑(2 · δ) = ↑2 · ↑δ
+                            Apply Lean.Omega.Int.mul_congr to the supplied arguments.
+                              ↑2 · ↑δ =
+  { const := 2 }.eval
+      (Omega.Coeffs.ofList
+        [↑δ, ↑(2 · δ − 1), ↑((2 · δ − 1).sqrt ^ 2), ↑((2 · δ − 1).sqrt + 1) · ↑((2 · δ − 1).sqrt + 1)]) *
+    (Omega.LinearCombo.coordinate 0).eval
+      (Omega.Coeffs.ofList
+        [↑δ, ↑(2 · δ − 1), ↑((2 · δ − 1).sqrt ^ 2), ↑((2 · δ − 1).sqrt + 1) · ↑((2 · δ − 1).sqrt + 1)])
+                              Apply id to the supplied arguments.
+                                ↑2 =
+  { const := 2 }.eval
+    (Omega.Coeffs.ofList [↑δ, ↑(2 · δ − 1), ↑((2 · δ − 1).sqrt ^ 2), ↑((2 · δ − 1).sqrt + 1) · ↑((2 · δ − 1).sqrt + 1)])
+                                By reflexivity, ↑2 = ↑2.
+                              Reverse the supplied equality.
+                                ↑δ =
+  (Omega.LinearCombo.coordinate 0).eval
+    (Omega.Coeffs.ofList [↑δ, ↑(2 · δ − 1), ↑((2 · δ − 1).sqrt ^ 2), ↑((2 · δ − 1).sqrt + 1) · ↑((2 · δ − 1).sqrt + 1)])
+                                Apply Lean.Omega.LinearCombo.coordinate_eval_0 to the supplied arguments.
+                                  (Omega.LinearCombo.coordinate 0).eval
+    (Omega.Coeffs.ofList
+      [↑δ, ↑(2 · δ − 1), ↑((2 · δ − 1).sqrt ^ 2), ↑((2 · δ − 1).sqrt + 1) · ↑((2 · δ − 1).sqrt + 1)]) =
+  ↑δ
+                            Reverse the supplied equality.
+                              { const := 2 }.eval
+      (Omega.Coeffs.ofList
+        [↑δ, ↑(2 · δ − 1), ↑((2 · δ − 1).sqrt ^ 2), ↑((2 · δ − 1).sqrt + 1) · ↑((2 · δ − 1).sqrt + 1)]) *
+    { coeffs := [1] }.eval
+      (Omega.Coeffs.ofList
+        [↑δ, ↑(2 · δ − 1), ↑((2 · δ − 1).sqrt ^ 2), ↑((2 · δ − 1).sqrt + 1) · ↑((2 · δ − 1).sqrt + 1)]) =
+  ({ const := 2 }.mul { coeffs := [1] }).eval
+    (Omega.Coeffs.ofList [↑δ, ↑(2 · δ − 1), ↑((2 · δ − 1).sqrt ^ 2), ↑((2 · δ − 1).sqrt + 1) · ↑((2 · δ − 1).sqrt + 1)])
+                              Apply Lean.Omega.LinearCombo.mul_eval to the supplied arguments.
+                                ({ const := 2 }.mul { coeffs := [1] }).eval
+    (Omega.Coeffs.ofList
+      [↑δ, ↑(2 · δ − 1), ↑((2 · δ − 1).sqrt ^ 2), ↑((2 · δ − 1).sqrt + 1) · ↑((2 · δ − 1).sqrt + 1)]) =
+  { const := 2 }.eval
+      (Omega.Coeffs.ofList
+        [↑δ, ↑(2 · δ − 1), ↑((2 · δ − 1).sqrt ^ 2), ↑((2 · δ − 1).sqrt + 1) · ↑((2 · δ − 1).sqrt + 1)]) *
+    { coeffs := [1] }.eval
+      (Omega.Coeffs.ofList
+        [↑δ, ↑(2 · δ − 1), ↑((2 · δ − 1).sqrt ^ 2), ↑((2 · δ − 1).sqrt + 1) · ↑((2 · δ − 1).sqrt + 1)])
+                                Apply of_decide_eq_true to the supplied arguments.
+                                  Omega.Coeffs.isZero [] ∨ Omega.Coeffs.isZero [1]
+                                  Apply id to the supplied arguments.
+                                    decide (Omega.Coeffs.isZero [] ∨ Omega.Coeffs.isZero [1]) = true
+                                    By reflexivity, true = true.
+                          Apply id to the supplied arguments.
+                            1 =
+  { const := 1 }.eval
+    (Omega.Coeffs.ofList [↑δ, ↑(2 · δ − 1), ↑((2 · δ − 1).sqrt ^ 2), ↑((2 · δ − 1).sqrt + 1) · ↑((2 · δ − 1).sqrt + 1)])
+                            By reflexivity, 1 = 1.
+                        Reverse the supplied equality.
+                          { coeffs := [2] }.eval
+      (Omega.Coeffs.ofList
+        [↑δ, ↑(2 · δ − 1), ↑((2 · δ − 1).sqrt ^ 2), ↑((2 · δ − 1).sqrt + 1) · ↑((2 · δ − 1).sqrt + 1)]) +
+    { const := 1 }.eval
+      (Omega.Coeffs.ofList
+        [↑δ, ↑(2 · δ − 1), ↑((2 · δ − 1).sqrt ^ 2), ↑((2 · δ − 1).sqrt + 1) · ↑((2 · δ − 1).sqrt + 1)]) =
+  ({ coeffs := [2] } + { const := 1 }).eval
+    (Omega.Coeffs.ofList [↑δ, ↑(2 · δ − 1), ↑((2 · δ − 1).sqrt ^ 2), ↑((2 · δ − 1).sqrt + 1) · ↑((2 · δ − 1).sqrt + 1)])
+                          Apply Lean.Omega.LinearCombo.add_eval to the supplied arguments.
+                            ({ coeffs := [2] } + { const := 1 }).eval
+    (Omega.Coeffs.ofList
+      [↑δ, ↑(2 · δ − 1), ↑((2 · δ − 1).sqrt ^ 2), ↑((2 · δ − 1).sqrt + 1) · ↑((2 · δ − 1).sqrt + 1)]) =
+  { coeffs := [2] }.eval
+      (Omega.Coeffs.ofList
+        [↑δ, ↑(2 · δ − 1), ↑((2 · δ − 1).sqrt ^ 2), ↑((2 · δ − 1).sqrt + 1) · ↑((2 · δ − 1).sqrt + 1)]) +
+    { const := 1 }.eval
+      (Omega.Coeffs.ofList
+        [↑δ, ↑(2 · δ − 1), ↑((2 · δ − 1).sqrt ^ 2), ↑((2 · δ − 1).sqrt + 1) · ↑((2 · δ − 1).sqrt + 1)])
+                    Reverse the supplied equality.
+                      { const := 1 }.eval
+      (Omega.Coeffs.ofList
+        [↑δ, ↑(2 · δ − 1), ↑((2 · δ − 1).sqrt ^ 2), ↑((2 · δ − 1).sqrt + 1) · ↑((2 · δ − 1).sqrt + 1)]) -
+    { const := 1, coeffs := [2] }.eval
+      (Omega.Coeffs.ofList
+        [↑δ, ↑(2 · δ − 1), ↑((2 · δ − 1).sqrt ^ 2), ↑((2 · δ − 1).sqrt + 1) · ↑((2 · δ − 1).sqrt + 1)]) =
+  ({ const := 1 } − { const := 1, coeffs := [2] }).eval
+    (Omega.Coeffs.ofList [↑δ, ↑(2 · δ − 1), ↑((2 · δ − 1).sqrt ^ 2), ↑((2 · δ − 1).sqrt + 1) · ↑((2 · δ − 1).sqrt + 1)])
+                      Apply Lean.Omega.LinearCombo.sub_eval to the supplied arguments.
+                        ({ const := 1 } − { const := 1, coeffs := [2] }).eval
+    (Omega.Coeffs.ofList
+      [↑δ, ↑(2 · δ − 1), ↑((2 · δ − 1).sqrt ^ 2), ↑((2 · δ − 1).sqrt + 1) · ↑((2 · δ − 1).sqrt + 1)]) =
+  { const := 1 }.eval
+      (Omega.Coeffs.ofList
+        [↑δ, ↑(2 · δ − 1), ↑((2 · δ − 1).sqrt ^ 2), ↑((2 · δ − 1).sqrt + 1) · ↑((2 · δ − 1).sqrt + 1)]) -
+    { const := 1, coeffs := [2] }.eval
+      (Omega.Coeffs.ofList
+        [↑δ, ↑(2 · δ − 1), ↑((2 · δ − 1).sqrt ^ 2), ↑((2 · δ − 1).sqrt + 1) · ↑((2 · δ − 1).sqrt + 1)])
+            Apply Lean.Omega.Constraint.addInequality_sat to the supplied arguments.
+              { lowerBound := some (- -1), upperBound := none }.sat' [1]
+    (Omega.Coeffs.ofList
+      [↑δ, ↑(2 · δ − 1), ↑((2 · δ − 1).sqrt ^ 2), ↑((2 · δ − 1).sqrt + 1) · ↑((2 · δ − 1).sqrt + 1)]) =
+  true
+              Apply le_of_le_of_eq to the supplied arguments.
+                0 ≤
+  ({ coeffs := [1] } − { const := 1 }).eval
+    (Omega.Coeffs.ofList [↑δ, ↑(2 · δ − 1), ↑((2 · δ − 1).sqrt ^ 2), ↑((2 · δ − 1).sqrt + 1) · ↑((2 · δ − 1).sqrt + 1)])
+                Apply Int.sub_nonneg_of_le to the supplied arguments.
+                  0 ≤ ↑δ − (↑0 + 1)
+                  Apply Int.add_one_le_of_lt to the supplied arguments.
+                    ↑0 + 1 ≤ ↑δ
+                    Apply Lean.Omega.Int.ofNat_lt_of_lt to the supplied arguments.
+                      ↑0 < ↑δ
+                      Use the hypothesis hδ: 0 < δ.
+                The following calculation gives ↑δ − (↑0 + 1) =
+  ({ coeffs := [1] } − { const := 1 }).eval
+    (Omega.Coeffs.ofList [↑δ, ↑(2 · δ − 1), ↑((2 · δ − 1).sqrt ^ 2), ↑((2 · δ − 1).sqrt + 1) · ↑((2 · δ − 1).sqrt + 1)]).
+                  Apply Lean.Omega.Int.sub_congr to the supplied arguments.
+                    ↑δ − (↑0 + 1) =
+  (Omega.LinearCombo.coordinate 0).eval
+      (Omega.Coeffs.ofList
+        [↑δ, ↑(2 · δ − 1), ↑((2 · δ − 1).sqrt ^ 2), ↑((2 · δ − 1).sqrt + 1) · ↑((2 · δ − 1).sqrt + 1)]) -
+    { const := 1 }.eval
+      (Omega.Coeffs.ofList
+        [↑δ, ↑(2 · δ − 1), ↑((2 · δ − 1).sqrt ^ 2), ↑((2 · δ − 1).sqrt + 1) · ↑((2 · δ − 1).sqrt + 1)])
+                    Reverse the supplied equality.
+                      ↑δ =
+  (Omega.LinearCombo.coordinate 0).eval
+    (Omega.Coeffs.ofList [↑δ, ↑(2 · δ − 1), ↑((2 · δ − 1).sqrt ^ 2), ↑((2 · δ − 1).sqrt + 1) · ↑((2 · δ − 1).sqrt + 1)])
+                      Apply Lean.Omega.LinearCombo.coordinate_eval_0 to the supplied arguments.
+                        (Omega.LinearCombo.coordinate 0).eval
+    (Omega.Coeffs.ofList
+      [↑δ, ↑(2 · δ − 1), ↑((2 · δ − 1).sqrt ^ 2), ↑((2 · δ − 1).sqrt + 1) · ↑((2 · δ − 1).sqrt + 1)]) =
+  ↑δ
+                    Apply id to the supplied arguments.
+                      ↑0 + 1 =
+  { const := 1 }.eval
+    (Omega.Coeffs.ofList [↑δ, ↑(2 · δ − 1), ↑((2 · δ − 1).sqrt ^ 2), ↑((2 · δ − 1).sqrt + 1) · ↑((2 · δ − 1).sqrt + 1)])
+                      By reflexivity, ↑0 + 1 = ↑0 + 1.
+                  Reverse the supplied equality.
+                    { coeffs := [1] }.eval
+      (Omega.Coeffs.ofList
+        [↑δ, ↑(2 · δ − 1), ↑((2 · δ − 1).sqrt ^ 2), ↑((2 · δ − 1).sqrt + 1) · ↑((2 · δ − 1).sqrt + 1)]) -
+    { const := 1 }.eval
+      (Omega.Coeffs.ofList
+        [↑δ, ↑(2 · δ − 1), ↑((2 · δ − 1).sqrt ^ 2), ↑((2 · δ − 1).sqrt + 1) · ↑((2 · δ − 1).sqrt + 1)]) =
+  ({ coeffs := [1] } − { const := 1 }).eval
+    (Omega.Coeffs.ofList [↑δ, ↑(2 · δ − 1), ↑((2 · δ − 1).sqrt ^ 2), ↑((2 · δ − 1).sqrt + 1) · ↑((2 · δ − 1).sqrt + 1)])
+                    Apply Lean.Omega.LinearCombo.sub_eval to the supplied arguments.
+                      ({ coeffs := [1] } − { const := 1 }).eval
+    (Omega.Coeffs.ofList
+      [↑δ, ↑(2 · δ − 1), ↑((2 · δ − 1).sqrt ^ 2), ↑((2 · δ − 1).sqrt + 1) · ↑((2 · δ − 1).sqrt + 1)]) =
+  { coeffs := [1] }.eval
+      (Omega.Coeffs.ofList
+        [↑δ, ↑(2 · δ − 1), ↑((2 · δ − 1).sqrt ^ 2), ↑((2 · δ − 1).sqrt + 1) · ↑((2 · δ − 1).sqrt + 1)]) -
+    { const := 1 }.eval
+      (Omega.Coeffs.ofList
+        [↑δ, ↑(2 · δ − 1), ↑((2 · δ − 1).sqrt ^ 2), ↑((2 · δ − 1).sqrt + 1) · ↑((2 · δ − 1).sqrt + 1)])
+  Case 2 · δ − 1 + 1 > 2 · δ.
+    Reason by cases from 1 ≤ 2 · δ ∧ ↑(2 · δ − 1) = ↑(2 · δ) − ↑1 ∨ 2 · δ < 1 ∧ ↑(2 · δ − 1) = 0.
+      Apply Lean.Omega.Int.ofNat_sub_dichotomy to the supplied arguments.
+        1 ≤ 2 · δ ∧ ↑(2 · δ − 1) = ↑(2 · δ) − ↑1 ∨ 2 · δ < 1 ∧ ↑(2 · δ − 1) = 0
+      Case 1 ≤ 2 · δ ∧ ↑(2 · δ − 1) = ↑(2 · δ) − ↑1.
+        Apply Lean.Omega.Constraint.not_sat'_of_isImpossible to the supplied arguments.
+          False
+          Apply of_decide_eq_true to the supplied arguments.
+            { lowerBound := some 1, upperBound := some 0 }.isImpossible = true
+            Apply id to the supplied arguments.
+              decide ({ lowerBound := some 1, upperBound := some 0 }.isImpossible = true) = true
+              By reflexivity, true = true.
+          Apply Lean.Omega.Constraint.combine_sat' to the supplied arguments.
+            ({ lowerBound := some 1, upperBound := some 1 }.combine { lowerBound := none, upperBound := some 0 }).sat' [2, -1]
+    (Omega.Coeffs.ofList
+      [↑δ, ↑(2 · δ − 1), ↑((2 · δ − 1).sqrt ^ 2), ↑((2 · δ − 1).sqrt + 1) · ↑((2 · δ − 1).sqrt + 1)]) =
+  true
+            Apply Lean.Omega.tidy_sat to the supplied arguments.
+              (Omega.tidyConstraint { lowerBound := some (-1), upperBound := some (-1) } [-2, 1]).sat'
+    (Omega.tidyCoeffs { lowerBound := some (-1), upperBound := some (-1) } [-2, 1])
+    (Omega.Coeffs.ofList
+      [↑δ, ↑(2 · δ − 1), ↑((2 · δ − 1).sqrt ^ 2), ↑((2 · δ − 1).sqrt + 1) · ↑((2 · δ − 1).sqrt + 1)]) =
+  true
+              Apply Lean.Omega.Constraint.addEquality_sat to the supplied arguments.
+                { lowerBound := some (-1), upperBound := some (-1) }.sat' [-2, 1]
+    (Omega.Coeffs.ofList
+      [↑δ, ↑(2 · δ − 1), ↑((2 · δ − 1).sqrt ^ 2), ↑((2 · δ − 1).sqrt + 1) · ↑((2 · δ − 1).sqrt + 1)]) =
+  true
+                The following calculation gives ({ coeffs := [0, 1] } − { const := -1, coeffs := [2] }).eval
+    (Omega.Coeffs.ofList
+      [↑δ, ↑(2 · δ − 1), ↑((2 · δ − 1).sqrt ^ 2), ↑((2 · δ − 1).sqrt + 1) · ↑((2 · δ − 1).sqrt + 1)]) =
+  0.
+                  Reverse the supplied equality.
+                    ({ coeffs := [0, 1] } − { const := -1, coeffs := [2] }).eval
+    (Omega.Coeffs.ofList
+      [↑δ, ↑(2 · δ − 1), ↑((2 · δ − 1).sqrt ^ 2), ↑((2 · δ − 1).sqrt + 1) · ↑((2 · δ − 1).sqrt + 1)]) =
+  ↑(2 · δ − 1) − (↑(2 · δ) − ↑1)
+                    The following calculation gives ↑(2 · δ − 1) − (↑(2 · δ) − ↑1) =
+  ({ coeffs := [0, 1] } − { const := -1, coeffs := [2] }).eval
+    (Omega.Coeffs.ofList [↑δ, ↑(2 · δ − 1), ↑((2 · δ − 1).sqrt ^ 2), ↑((2 · δ − 1).sqrt + 1) · ↑((2 · δ − 1).sqrt + 1)]).
+                      Apply Lean.Omega.Int.sub_congr to the supplied arguments.
+                        ↑(2 · δ − 1) − (↑(2 · δ) − ↑1) =
+  (Omega.LinearCombo.coordinate 1).eval
+      (Omega.Coeffs.ofList
+        [↑δ, ↑(2 · δ − 1), ↑((2 · δ − 1).sqrt ^ 2), ↑((2 · δ − 1).sqrt + 1) · ↑((2 · δ − 1).sqrt + 1)]) -
+    ({ coeffs := [2] } − { const := 1 }).eval
+      (Omega.Coeffs.ofList
+        [↑δ, ↑(2 · δ − 1), ↑((2 · δ − 1).sqrt ^ 2), ↑((2 · δ − 1).sqrt + 1) · ↑((2 · δ − 1).sqrt + 1)])
+                        Reverse the supplied equality.
+                          ↑(2 · δ − 1) =
+  (Omega.LinearCombo.coordinate 1).eval
+    (Omega.Coeffs.ofList [↑δ, ↑(2 · δ − 1), ↑((2 · δ − 1).sqrt ^ 2), ↑((2 · δ − 1).sqrt + 1) · ↑((2 · δ − 1).sqrt + 1)])
+                          Apply Lean.Omega.LinearCombo.coordinate_eval_1 to the supplied arguments.
+                            (Omega.LinearCombo.coordinate 1).eval
+    (Omega.Coeffs.ofList
+      [↑δ, ↑(2 · δ − 1), ↑((2 · δ − 1).sqrt ^ 2), ↑((2 · δ − 1).sqrt + 1) · ↑((2 · δ − 1).sqrt + 1)]) =
+  ↑(2 · δ − 1)
+                        The following calculation gives ↑(2 · δ) − ↑1 =
+  ({ coeffs := [2] } − { const := 1 }).eval
+    (Omega.Coeffs.ofList [↑δ, ↑(2 · δ − 1), ↑((2 · δ − 1).sqrt ^ 2), ↑((2 · δ − 1).sqrt + 1) · ↑((2 · δ − 1).sqrt + 1)]).
+                          Apply Lean.Omega.Int.sub_congr to the supplied arguments.
+                            ↑(2 · δ) − ↑1 =
+  ({ const := 2 }.mul { coeffs := [1] }).eval
+      (Omega.Coeffs.ofList
+        [↑δ, ↑(2 · δ − 1), ↑((2 · δ − 1).sqrt ^ 2), ↑((2 · δ − 1).sqrt + 1) · ↑((2 · δ − 1).sqrt + 1)]) -
+    { const := 1 }.eval
+      (Omega.Coeffs.ofList
+        [↑δ, ↑(2 · δ − 1), ↑((2 · δ − 1).sqrt ^ 2), ↑((2 · δ − 1).sqrt + 1) · ↑((2 · δ − 1).sqrt + 1)])
+                            The following calculation gives ↑(2 · δ) =
+  ({ const := 2 }.mul { coeffs := [1] }).eval
+    (Omega.Coeffs.ofList [↑δ, ↑(2 · δ − 1), ↑((2 · δ − 1).sqrt ^ 2), ↑((2 · δ − 1).sqrt + 1) · ↑((2 · δ − 1).sqrt + 1)]).
+                              Apply Int.natCast_mul to the supplied arguments.
+                                ↑(2 · δ) = ↑2 · ↑δ
+                              Apply Lean.Omega.Int.mul_congr to the supplied arguments.
+                                ↑2 · ↑δ =
+  { const := 2 }.eval
+      (Omega.Coeffs.ofList
+        [↑δ, ↑(2 · δ − 1), ↑((2 · δ − 1).sqrt ^ 2), ↑((2 · δ − 1).sqrt + 1) · ↑((2 · δ − 1).sqrt + 1)]) *
+    (Omega.LinearCombo.coordinate 0).eval
+      (Omega.Coeffs.ofList
+        [↑δ, ↑(2 · δ − 1), ↑((2 · δ − 1).sqrt ^ 2), ↑((2 · δ − 1).sqrt + 1) · ↑((2 · δ − 1).sqrt + 1)])
+                                Apply id to the supplied arguments.
+                                  ↑2 =
+  { const := 2 }.eval
+    (Omega.Coeffs.ofList [↑δ, ↑(2 · δ − 1), ↑((2 · δ − 1).sqrt ^ 2), ↑((2 · δ − 1).sqrt + 1) · ↑((2 · δ − 1).sqrt + 1)])
+                                  By reflexivity, ↑2 = ↑2.
+                                Reverse the supplied equality.
+                                  ↑δ =
+  (Omega.LinearCombo.coordinate 0).eval
+    (Omega.Coeffs.ofList [↑δ, ↑(2 · δ − 1), ↑((2 · δ − 1).sqrt ^ 2), ↑((2 · δ − 1).sqrt + 1) · ↑((2 · δ − 1).sqrt + 1)])
+                                  Apply Lean.Omega.LinearCombo.coordinate_eval_0 to the supplied arguments.
+                                    (Omega.LinearCombo.coordinate 0).eval
+    (Omega.Coeffs.ofList
+      [↑δ, ↑(2 · δ − 1), ↑((2 · δ − 1).sqrt ^ 2), ↑((2 · δ − 1).sqrt + 1) · ↑((2 · δ − 1).sqrt + 1)]) =
+  ↑δ
+                              Reverse the supplied equality.
+                                { const := 2 }.eval
+      (Omega.Coeffs.ofList
+        [↑δ, ↑(2 · δ − 1), ↑((2 · δ − 1).sqrt ^ 2), ↑((2 · δ − 1).sqrt + 1) · ↑((2 · δ − 1).sqrt + 1)]) *
+    { coeffs := [1] }.eval
+      (Omega.Coeffs.ofList
+        [↑δ, ↑(2 · δ − 1), ↑((2 · δ − 1).sqrt ^ 2), ↑((2 · δ − 1).sqrt + 1) · ↑((2 · δ − 1).sqrt + 1)]) =
+  ({ const := 2 }.mul { coeffs := [1] }).eval
+    (Omega.Coeffs.ofList [↑δ, ↑(2 · δ − 1), ↑((2 · δ − 1).sqrt ^ 2), ↑((2 · δ − 1).sqrt + 1) · ↑((2 · δ − 1).sqrt + 1)])
+                                Apply Lean.Omega.LinearCombo.mul_eval to the supplied arguments.
+                                  ({ const := 2 }.mul { coeffs := [1] }).eval
+    (Omega.Coeffs.ofList
+      [↑δ, ↑(2 · δ − 1), ↑((2 · δ − 1).sqrt ^ 2), ↑((2 · δ − 1).sqrt + 1) · ↑((2 · δ − 1).sqrt + 1)]) =
+  { const := 2 }.eval
+      (Omega.Coeffs.ofList
+        [↑δ, ↑(2 · δ − 1), ↑((2 · δ − 1).sqrt ^ 2), ↑((2 · δ − 1).sqrt + 1) · ↑((2 · δ − 1).sqrt + 1)]) *
+    { coeffs := [1] }.eval
+      (Omega.Coeffs.ofList
+        [↑δ, ↑(2 · δ − 1), ↑((2 · δ − 1).sqrt ^ 2), ↑((2 · δ − 1).sqrt + 1) · ↑((2 · δ − 1).sqrt + 1)])
+                                  Apply of_decide_eq_true to the supplied arguments.
+                                    Omega.Coeffs.isZero [] ∨ Omega.Coeffs.isZero [1]
+                                    Apply id to the supplied arguments.
+                                      decide (Omega.Coeffs.isZero [] ∨ Omega.Coeffs.isZero [1]) = true
+                                      By reflexivity, true = true.
+                            Apply id to the supplied arguments.
+                              ↑1 =
+  { const := 1 }.eval
+    (Omega.Coeffs.ofList [↑δ, ↑(2 · δ − 1), ↑((2 · δ − 1).sqrt ^ 2), ↑((2 · δ − 1).sqrt + 1) · ↑((2 · δ − 1).sqrt + 1)])
+                              By reflexivity, ↑1 = ↑1.
+                          Reverse the supplied equality.
+                            { coeffs := [2] }.eval
+      (Omega.Coeffs.ofList
+        [↑δ, ↑(2 · δ − 1), ↑((2 · δ − 1).sqrt ^ 2), ↑((2 · δ − 1).sqrt + 1) · ↑((2 · δ − 1).sqrt + 1)]) -
+    { const := 1 }.eval
+      (Omega.Coeffs.ofList
+        [↑δ, ↑(2 · δ − 1), ↑((2 · δ − 1).sqrt ^ 2), ↑((2 · δ − 1).sqrt + 1) · ↑((2 · δ − 1).sqrt + 1)]) =
+  ({ coeffs := [2] } − { const := 1 }).eval
+    (Omega.Coeffs.ofList [↑δ, ↑(2 · δ − 1), ↑((2 · δ − 1).sqrt ^ 2), ↑((2 · δ − 1).sqrt + 1) · ↑((2 · δ − 1).sqrt + 1)])
+                            Apply Lean.Omega.LinearCombo.sub_eval to the supplied arguments.
+                              ({ coeffs := [2] } − { const := 1 }).eval
+    (Omega.Coeffs.ofList
+      [↑δ, ↑(2 · δ − 1), ↑((2 · δ − 1).sqrt ^ 2), ↑((2 · δ − 1).sqrt + 1) · ↑((2 · δ − 1).sqrt + 1)]) =
+  { coeffs := [2] }.eval
+      (Omega.Coeffs.ofList
+        [↑δ, ↑(2 · δ − 1), ↑((2 · δ − 1).sqrt ^ 2), ↑((2 · δ − 1).sqrt + 1) · ↑((2 · δ − 1).sqrt + 1)]) -
+    { const := 1 }.eval
+      (Omega.Coeffs.ofList
+        [↑δ, ↑(2 · δ − 1), ↑((2 · δ − 1).sqrt ^ 2), ↑((2 · δ − 1).sqrt + 1) · ↑((2 · δ − 1).sqrt + 1)])
+                      Reverse the supplied equality.
+                        { coeffs := [0, 1] }.eval
+      (Omega.Coeffs.ofList
+        [↑δ, ↑(2 · δ − 1), ↑((2 · δ − 1).sqrt ^ 2), ↑((2 · δ − 1).sqrt + 1) · ↑((2 · δ − 1).sqrt + 1)]) -
+    { const := -1, coeffs := [2] }.eval
+      (Omega.Coeffs.ofList
+        [↑δ, ↑(2 · δ − 1), ↑((2 · δ − 1).sqrt ^ 2), ↑((2 · δ − 1).sqrt + 1) · ↑((2 · δ − 1).sqrt + 1)]) =
+  ({ coeffs := [0, 1] } − { const := -1, coeffs := [2] }).eval
+    (Omega.Coeffs.ofList [↑δ, ↑(2 · δ − 1), ↑((2 · δ − 1).sqrt ^ 2), ↑((2 · δ − 1).sqrt + 1) · ↑((2 · δ − 1).sqrt + 1)])
+                        Apply Lean.Omega.LinearCombo.sub_eval to the supplied arguments.
+                          ({ coeffs := [0, 1] } − { const := -1, coeffs := [2] }).eval
+    (Omega.Coeffs.ofList
+      [↑δ, ↑(2 · δ − 1), ↑((2 · δ − 1).sqrt ^ 2), ↑((2 · δ − 1).sqrt + 1) · ↑((2 · δ − 1).sqrt + 1)]) =
+  { coeffs := [0, 1] }.eval
+      (Omega.Coeffs.ofList
+        [↑δ, ↑(2 · δ − 1), ↑((2 · δ − 1).sqrt ^ 2), ↑((2 · δ − 1).sqrt + 1) · ↑((2 · δ − 1).sqrt + 1)]) -
+    { const := -1, coeffs := [2] }.eval
+      (Omega.Coeffs.ofList
+        [↑δ, ↑(2 · δ − 1), ↑((2 · δ − 1).sqrt ^ 2), ↑((2 · δ − 1).sqrt + 1) · ↑((2 · δ − 1).sqrt + 1)])
+                  Apply Int.sub_eq_zero_of_eq to the supplied arguments.
+                    ↑(2 · δ − 1) − (↑(2 · δ) − ↑1) = 0
+                    Take the second conjunct.
+                      ↑(2 · δ − 1) = ↑(2 · δ) − ↑1
+                      Use the hypothesis h₁: 1 ≤ 2 · δ ∧ ↑(2 · δ − 1) = ↑(2 · δ) − ↑1.
+            Apply Lean.Omega.tidy_sat to the supplied arguments.
+              (Omega.tidyConstraint { lowerBound := some 0, upperBound := none } [-2, 1]).sat'
+    (Omega.tidyCoeffs { lowerBound := some 0, upperBound := none } [-2, 1])
+    (Omega.Coeffs.ofList
+      [↑δ, ↑(2 · δ − 1), ↑((2 · δ − 1).sqrt ^ 2), ↑((2 · δ − 1).sqrt + 1) · ↑((2 · δ − 1).sqrt + 1)]) =
+  true
+              Apply Lean.Omega.Constraint.addInequality_sat to the supplied arguments.
+                { lowerBound := some (-0), upperBound := none }.sat' [-2, 1]
+    (Omega.Coeffs.ofList
+      [↑δ, ↑(2 · δ − 1), ↑((2 · δ − 1).sqrt ^ 2), ↑((2 · δ − 1).sqrt + 1) · ↑((2 · δ − 1).sqrt + 1)]) =
+  true
+                Apply le_of_le_of_eq to the supplied arguments.
+                  0 ≤
+  ({ const := 1, coeffs := [0, 1] } − { const := 1, coeffs := [2] }).eval
+    (Omega.Coeffs.ofList [↑δ, ↑(2 · δ − 1), ↑((2 · δ − 1).sqrt ^ 2), ↑((2 · δ − 1).sqrt + 1) · ↑((2 · δ − 1).sqrt + 1)])
+                  Apply Int.sub_nonneg_of_le to the supplied arguments.
+                    0 ≤ ↑(2 · δ − 1 + 1) − (↑(2 · δ) + 1)
+                    Apply Int.add_one_le_of_lt to the supplied arguments.
+                      ↑(2 · δ) + 1 ≤ ↑(2 · δ − 1 + 1)
+                      Apply Lean.Omega.Int.ofNat_lt_of_lt to the supplied arguments.
+                        ↑(2 · δ) < ↑(2 · δ − 1 + 1)
+                        Use the hypothesis h₂: 2 · δ − 1 + 1 > 2 · δ.
+                  The following calculation gives ↑(2 · δ − 1 + 1) − (↑(2 · δ) + 1) =
+  ({ const := 1, coeffs := [0, 1] } − { const := 1, coeffs := [2] }).eval
+    (Omega.Coeffs.ofList [↑δ, ↑(2 · δ − 1), ↑((2 · δ − 1).sqrt ^ 2), ↑((2 · δ − 1).sqrt + 1) · ↑((2 · δ − 1).sqrt + 1)]).
+                    Apply Lean.Omega.Int.sub_congr to the supplied arguments.
+                      ↑(2 · δ − 1 + 1) − (↑(2 · δ) + 1) =
+  ({ coeffs := [0, 1] } + { const := 1 }).eval
+      (Omega.Coeffs.ofList
+        [↑δ, ↑(2 · δ − 1), ↑((2 · δ − 1).sqrt ^ 2), ↑((2 · δ − 1).sqrt + 1) · ↑((2 · δ − 1).sqrt + 1)]) -
+    ({ coeffs := [2] } + { const := 1 }).eval
+      (Omega.Coeffs.ofList
+        [↑δ, ↑(2 · δ − 1), ↑((2 · δ − 1).sqrt ^ 2), ↑((2 · δ − 1).sqrt + 1) · ↑((2 · δ − 1).sqrt + 1)])
+                      The following calculation gives ↑(2 · δ − 1 + 1) =
+  ({ coeffs := [0, 1] } + { const := 1 }).eval
+    (Omega.Coeffs.ofList [↑δ, ↑(2 · δ − 1), ↑((2 · δ − 1).sqrt ^ 2), ↑((2 · δ − 1).sqrt + 1) · ↑((2 · δ − 1).sqrt + 1)]).
+                        Apply Int.natCast_add to the supplied arguments.
+                          ↑(2 · δ − 1 + 1) = ↑(2 · δ − 1) + ↑1
+                        Apply Lean.Omega.Int.add_congr to the supplied arguments.
+                          ↑(2 · δ − 1) + ↑1 =
+  (Omega.LinearCombo.coordinate 1).eval
+      (Omega.Coeffs.ofList
+        [↑δ, ↑(2 · δ − 1), ↑((2 · δ − 1).sqrt ^ 2), ↑((2 · δ − 1).sqrt + 1) · ↑((2 · δ − 1).sqrt + 1)]) +
+    { const := 1 }.eval
+      (Omega.Coeffs.ofList
+        [↑δ, ↑(2 · δ − 1), ↑((2 · δ − 1).sqrt ^ 2), ↑((2 · δ − 1).sqrt + 1) · ↑((2 · δ − 1).sqrt + 1)])
+                          Reverse the supplied equality.
+                            ↑(2 · δ − 1) =
+  (Omega.LinearCombo.coordinate 1).eval
+    (Omega.Coeffs.ofList [↑δ, ↑(2 · δ − 1), ↑((2 · δ − 1).sqrt ^ 2), ↑((2 · δ − 1).sqrt + 1) · ↑((2 · δ − 1).sqrt + 1)])
+                            Apply Lean.Omega.LinearCombo.coordinate_eval_1 to the supplied arguments.
+                              (Omega.LinearCombo.coordinate 1).eval
+    (Omega.Coeffs.ofList
+      [↑δ, ↑(2 · δ − 1), ↑((2 · δ − 1).sqrt ^ 2), ↑((2 · δ − 1).sqrt + 1) · ↑((2 · δ − 1).sqrt + 1)]) =
+  ↑(2 · δ − 1)
+                          Apply id to the supplied arguments.
+                            ↑1 =
+  { const := 1 }.eval
+    (Omega.Coeffs.ofList [↑δ, ↑(2 · δ − 1), ↑((2 · δ − 1).sqrt ^ 2), ↑((2 · δ − 1).sqrt + 1) · ↑((2 · δ − 1).sqrt + 1)])
+                            By reflexivity, ↑1 = ↑1.
+                        Reverse the supplied equality.
+                          { coeffs := [0, 1] }.eval
+      (Omega.Coeffs.ofList
+        [↑δ, ↑(2 · δ − 1), ↑((2 · δ − 1).sqrt ^ 2), ↑((2 · δ − 1).sqrt + 1) · ↑((2 · δ − 1).sqrt + 1)]) +
+    { const := 1 }.eval
+      (Omega.Coeffs.ofList
+        [↑δ, ↑(2 · δ − 1), ↑((2 · δ − 1).sqrt ^ 2), ↑((2 · δ − 1).sqrt + 1) · ↑((2 · δ − 1).sqrt + 1)]) =
+  ({ coeffs := [0, 1] } + { const := 1 }).eval
+    (Omega.Coeffs.ofList [↑δ, ↑(2 · δ − 1), ↑((2 · δ − 1).sqrt ^ 2), ↑((2 · δ − 1).sqrt + 1) · ↑((2 · δ − 1).sqrt + 1)])
+                          Apply Lean.Omega.LinearCombo.add_eval to the supplied arguments.
+                            ({ coeffs := [0, 1] } + { const := 1 }).eval
+    (Omega.Coeffs.ofList
+      [↑δ, ↑(2 · δ − 1), ↑((2 · δ − 1).sqrt ^ 2), ↑((2 · δ − 1).sqrt + 1) · ↑((2 · δ − 1).sqrt + 1)]) =
+  { coeffs := [0, 1] }.eval
+      (Omega.Coeffs.ofList
+        [↑δ, ↑(2 · δ − 1), ↑((2 · δ − 1).sqrt ^ 2), ↑((2 · δ − 1).sqrt + 1) · ↑((2 · δ − 1).sqrt + 1)]) +
+    { const := 1 }.eval
+      (Omega.Coeffs.ofList
+        [↑δ, ↑(2 · δ − 1), ↑((2 · δ − 1).sqrt ^ 2), ↑((2 · δ − 1).sqrt + 1) · ↑((2 · δ − 1).sqrt + 1)])
+                      The following calculation gives ↑(2 · δ) + 1 =
+  ({ coeffs := [2] } + { const := 1 }).eval
+    (Omega.Coeffs.ofList [↑δ, ↑(2 · δ − 1), ↑((2 · δ − 1).sqrt ^ 2), ↑((2 · δ − 1).sqrt + 1) · ↑((2 · δ − 1).sqrt + 1)]).
+                        Apply Lean.Omega.Int.add_congr to the supplied arguments.
+                          ↑(2 · δ) + 1 =
+  ({ const := 2 }.mul { coeffs := [1] }).eval
+      (Omega.Coeffs.ofList
+        [↑δ, ↑(2 · δ − 1), ↑((2 · δ − 1).sqrt ^ 2), ↑((2 · δ − 1).sqrt + 1) · ↑((2 · δ − 1).sqrt + 1)]) +
+    { const := 1 }.eval
+      (Omega.Coeffs.ofList
+        [↑δ, ↑(2 · δ − 1), ↑((2 · δ − 1).sqrt ^ 2), ↑((2 · δ − 1).sqrt + 1) · ↑((2 · δ − 1).sqrt + 1)])
+                          The following calculation gives ↑(2 · δ) =
+  ({ const := 2 }.mul { coeffs := [1] }).eval
+    (Omega.Coeffs.ofList [↑δ, ↑(2 · δ − 1), ↑((2 · δ − 1).sqrt ^ 2), ↑((2 · δ − 1).sqrt + 1) · ↑((2 · δ − 1).sqrt + 1)]).
+                            Apply Int.natCast_mul to the supplied arguments.
+                              ↑(2 · δ) = ↑2 · ↑δ
+                            Apply Lean.Omega.Int.mul_congr to the supplied arguments.
+                              ↑2 · ↑δ =
+  { const := 2 }.eval
+      (Omega.Coeffs.ofList
+        [↑δ, ↑(2 · δ − 1), ↑((2 · δ − 1).sqrt ^ 2), ↑((2 · δ − 1).sqrt + 1) · ↑((2 · δ − 1).sqrt + 1)]) *
+    (Omega.LinearCombo.coordinate 0).eval
+      (Omega.Coeffs.ofList
+        [↑δ, ↑(2 · δ − 1), ↑((2 · δ − 1).sqrt ^ 2), ↑((2 · δ − 1).sqrt + 1) · ↑((2 · δ − 1).sqrt + 1)])
+                              Apply id to the supplied arguments.
+                                ↑2 =
+  { const := 2 }.eval
+    (Omega.Coeffs.ofList [↑δ, ↑(2 · δ − 1), ↑((2 · δ − 1).sqrt ^ 2), ↑((2 · δ − 1).sqrt + 1) · ↑((2 · δ − 1).sqrt + 1)])
+                                By reflexivity, ↑2 = ↑2.
+                              Reverse the supplied equality.
+                                ↑δ =
+  (Omega.LinearCombo.coordinate 0).eval
+    (Omega.Coeffs.ofList [↑δ, ↑(2 · δ − 1), ↑((2 · δ − 1).sqrt ^ 2), ↑((2 · δ − 1).sqrt + 1) · ↑((2 · δ − 1).sqrt + 1)])
+                                Apply Lean.Omega.LinearCombo.coordinate_eval_0 to the supplied arguments.
+                                  (Omega.LinearCombo.coordinate 0).eval
+    (Omega.Coeffs.ofList
+      [↑δ, ↑(2 · δ − 1), ↑((2 · δ − 1).sqrt ^ 2), ↑((2 · δ − 1).sqrt + 1) · ↑((2 · δ − 1).sqrt + 1)]) =
+  ↑δ
+                            Reverse the supplied equality.
+                              { const := 2 }.eval
+      (Omega.Coeffs.ofList
+        [↑δ, ↑(2 · δ − 1), ↑((2 · δ − 1).sqrt ^ 2), ↑((2 · δ − 1).sqrt + 1) · ↑((2 · δ − 1).sqrt + 1)]) *
+    { coeffs := [1] }.eval
+      (Omega.Coeffs.ofList
+        [↑δ, ↑(2 · δ − 1), ↑((2 · δ − 1).sqrt ^ 2), ↑((2 · δ − 1).sqrt + 1) · ↑((2 · δ − 1).sqrt + 1)]) =
+  ({ const := 2 }.mul { coeffs := [1] }).eval
+    (Omega.Coeffs.ofList [↑δ, ↑(2 · δ − 1), ↑((2 · δ − 1).sqrt ^ 2), ↑((2 · δ − 1).sqrt + 1) · ↑((2 · δ − 1).sqrt + 1)])
+                              Apply Lean.Omega.LinearCombo.mul_eval to the supplied arguments.
+                                ({ const := 2 }.mul { coeffs := [1] }).eval
+    (Omega.Coeffs.ofList
+      [↑δ, ↑(2 · δ − 1), ↑((2 · δ − 1).sqrt ^ 2), ↑((2 · δ − 1).sqrt + 1) · ↑((2 · δ − 1).sqrt + 1)]) =
+  { const := 2 }.eval
+      (Omega.Coeffs.ofList
+        [↑δ, ↑(2 · δ − 1), ↑((2 · δ − 1).sqrt ^ 2), ↑((2 · δ − 1).sqrt + 1) · ↑((2 · δ − 1).sqrt + 1)]) *
+    { coeffs := [1] }.eval
+      (Omega.Coeffs.ofList
+        [↑δ, ↑(2 · δ − 1), ↑((2 · δ − 1).sqrt ^ 2), ↑((2 · δ − 1).sqrt + 1) · ↑((2 · δ − 1).sqrt + 1)])
+                                Apply of_decide_eq_true to the supplied arguments.
+                                  Omega.Coeffs.isZero [] ∨ Omega.Coeffs.isZero [1]
+                                  Apply id to the supplied arguments.
+                                    decide (Omega.Coeffs.isZero [] ∨ Omega.Coeffs.isZero [1]) = true
+                                    By reflexivity, true = true.
+                          Apply id to the supplied arguments.
+                            1 =
+  { const := 1 }.eval
+    (Omega.Coeffs.ofList [↑δ, ↑(2 · δ − 1), ↑((2 · δ − 1).sqrt ^ 2), ↑((2 · δ − 1).sqrt + 1) · ↑((2 · δ − 1).sqrt + 1)])
+                            By reflexivity, 1 = 1.
+                        Reverse the supplied equality.
+                          { coeffs := [2] }.eval
+      (Omega.Coeffs.ofList
+        [↑δ, ↑(2 · δ − 1), ↑((2 · δ − 1).sqrt ^ 2), ↑((2 · δ − 1).sqrt + 1) · ↑((2 · δ − 1).sqrt + 1)]) +
+    { const := 1 }.eval
+      (Omega.Coeffs.ofList
+        [↑δ, ↑(2 · δ − 1), ↑((2 · δ − 1).sqrt ^ 2), ↑((2 · δ − 1).sqrt + 1) · ↑((2 · δ − 1).sqrt + 1)]) =
+  ({ coeffs := [2] } + { const := 1 }).eval
+    (Omega.Coeffs.ofList [↑δ, ↑(2 · δ − 1), ↑((2 · δ − 1).sqrt ^ 2), ↑((2 · δ − 1).sqrt + 1) · ↑((2 · δ − 1).sqrt + 1)])
+                          Apply Lean.Omega.LinearCombo.add_eval to the supplied arguments.
+                            ({ coeffs := [2] } + { const := 1 }).eval
+    (Omega.Coeffs.ofList
+      [↑δ, ↑(2 · δ − 1), ↑((2 · δ − 1).sqrt ^ 2), ↑((2 · δ − 1).sqrt + 1) · ↑((2 · δ − 1).sqrt + 1)]) =
+  { coeffs := [2] }.eval
+      (Omega.Coeffs.ofList
+        [↑δ, ↑(2 · δ − 1), ↑((2 · δ − 1).sqrt ^ 2), ↑((2 · δ − 1).sqrt + 1) · ↑((2 · δ − 1).sqrt + 1)]) +
+    { const := 1 }.eval
+      (Omega.Coeffs.ofList
+        [↑δ, ↑(2 · δ − 1), ↑((2 · δ − 1).sqrt ^ 2), ↑((2 · δ − 1).sqrt + 1) · ↑((2 · δ − 1).sqrt + 1)])
+                    Reverse the supplied equality.
+                      { const := 1, coeffs := [0, 1] }.eval
+      (Omega.Coeffs.ofList
+        [↑δ, ↑(2 · δ − 1), ↑((2 · δ − 1).sqrt ^ 2), ↑((2 · δ − 1).sqrt + 1) · ↑((2 · δ − 1).sqrt + 1)]) -
+    { const := 1, coeffs := [2] }.eval
+      (Omega.Coeffs.ofList
+        [↑δ, ↑(2 · δ − 1), ↑((2 · δ − 1).sqrt ^ 2), ↑((2 · δ − 1).sqrt + 1) · ↑((2 · δ − 1).sqrt + 1)]) =
+  ({ const := 1, coeffs := [0, 1] } − { const := 1, coeffs := [2] }).eval
+    (Omega.Coeffs.ofList [↑δ, ↑(2 · δ − 1), ↑((2 · δ − 1).sqrt ^ 2), ↑((2 · δ − 1).sqrt + 1) · ↑((2 · δ − 1).sqrt + 1)])
+                      Apply Lean.Omega.LinearCombo.sub_eval to the supplied arguments.
+                        ({ const := 1, coeffs := [0, 1] } − { const := 1, coeffs := [2] }).eval
+    (Omega.Coeffs.ofList
+      [↑δ, ↑(2 · δ − 1), ↑((2 · δ − 1).sqrt ^ 2), ↑((2 · δ − 1).sqrt + 1) · ↑((2 · δ − 1).sqrt + 1)]) =
+  { const := 1, coeffs := [0, 1] }.eval
+      (Omega.Coeffs.ofList
+        [↑δ, ↑(2 · δ − 1), ↑((2 · δ − 1).sqrt ^ 2), ↑((2 · δ − 1).sqrt + 1) · ↑((2 · δ − 1).sqrt + 1)]) -
+    { const := 1, coeffs := [2] }.eval
+      (Omega.Coeffs.ofList
+        [↑δ, ↑(2 · δ − 1), ↑((2 · δ − 1).sqrt ^ 2), ↑((2 · δ − 1).sqrt + 1) · ↑((2 · δ − 1).sqrt + 1)])
+      Case 2 · δ < 1 ∧ ↑(2 · δ − 1) = 0.
+        Apply Lean.Omega.Constraint.not_sat'_of_isImpossible to the supplied arguments.
+          False
+          Apply of_decide_eq_true to the supplied arguments.
+            { lowerBound := some 1, upperBound := some 0 }.isImpossible = true
+            Apply id to the supplied arguments.
+              decide ({ lowerBound := some 1, upperBound := some 0 }.isImpossible = true) = true
+              By reflexivity, true = true.
+          Apply Lean.Omega.Constraint.combine_sat' to the supplied arguments.
+            ({ lowerBound := none, upperBound := some 0 }.combine { lowerBound := some 1, upperBound := none }).sat' [1]
+    (Omega.Coeffs.ofList
+      [↑δ, ↑(2 · δ − 1), ↑((2 · δ − 1).sqrt ^ 2), ↑((2 · δ − 1).sqrt + 1) · ↑((2 · δ − 1).sqrt + 1)]) =
+  true
+            Apply Lean.Omega.tidy_sat to the supplied arguments.
+              (Omega.tidyConstraint { lowerBound := some 0, upperBound := none } [-2]).sat'
+    (Omega.tidyCoeffs { lowerBound := some 0, upperBound := none } [-2])
+    (Omega.Coeffs.ofList
+      [↑δ, ↑(2 · δ − 1), ↑((2 · δ − 1).sqrt ^ 2), ↑((2 · δ − 1).sqrt + 1) · ↑((2 · δ − 1).sqrt + 1)]) =
+  true
+              Apply Lean.Omega.Constraint.addInequality_sat to the supplied arguments.
+                { lowerBound := some (-0), upperBound := none }.sat' [-2]
+    (Omega.Coeffs.ofList
+      [↑δ, ↑(2 · δ − 1), ↑((2 · δ − 1).sqrt ^ 2), ↑((2 · δ − 1).sqrt + 1) · ↑((2 · δ − 1).sqrt + 1)]) =
+  true
+                Apply le_of_le_of_eq to the supplied arguments.
+                  0 ≤
+  ({ const := 1 } − { const := 1, coeffs := [2] }).eval
+    (Omega.Coeffs.ofList [↑δ, ↑(2 · δ − 1), ↑((2 · δ − 1).sqrt ^ 2), ↑((2 · δ − 1).sqrt + 1) · ↑((2 · δ − 1).sqrt + 1)])
+                  Apply Int.sub_nonneg_of_le to the supplied arguments.
+                    0 ≤ ↑1 − (↑(2 · δ) + 1)
+                    Apply Int.add_one_le_of_lt to the supplied arguments.
+                      ↑(2 · δ) + 1 ≤ ↑1
+                      Apply Lean.Omega.Int.ofNat_lt_of_lt to the supplied arguments.
+                        ↑(2 · δ) < ↑1
+                        Take the first conjunct.
+                          2 · δ < 1
+                          Use the hypothesis h₂: 2 · δ < 1 ∧ ↑(2 · δ − 1) = 0.
+                  The following calculation gives ↑1 − (↑(2 · δ) + 1) =
+  ({ const := 1 } − { const := 1, coeffs := [2] }).eval
+    (Omega.Coeffs.ofList [↑δ, ↑(2 · δ − 1), ↑((2 · δ − 1).sqrt ^ 2), ↑((2 · δ − 1).sqrt + 1) · ↑((2 · δ − 1).sqrt + 1)]).
+                    Apply Lean.Omega.Int.sub_congr to the supplied arguments.
+                      ↑1 − (↑(2 · δ) + 1) =
+  { const := 1 }.eval
+      (Omega.Coeffs.ofList
+        [↑δ, ↑(2 · δ − 1), ↑((2 · δ − 1).sqrt ^ 2), ↑((2 · δ − 1).sqrt + 1) · ↑((2 · δ − 1).sqrt + 1)]) -
+    ({ coeffs := [2] } + { const := 1 }).eval
+      (Omega.Coeffs.ofList
+        [↑δ, ↑(2 · δ − 1), ↑((2 · δ − 1).sqrt ^ 2), ↑((2 · δ − 1).sqrt + 1) · ↑((2 · δ − 1).sqrt + 1)])
+                      Apply id to the supplied arguments.
+                        ↑1 =
+  { const := 1 }.eval
+    (Omega.Coeffs.ofList [↑δ, ↑(2 · δ − 1), ↑((2 · δ − 1).sqrt ^ 2), ↑((2 · δ − 1).sqrt + 1) · ↑((2 · δ − 1).sqrt + 1)])
+                        By reflexivity, ↑1 = ↑1.
+                      The following calculation gives ↑(2 · δ) + 1 =
+  ({ coeffs := [2] } + { const := 1 }).eval
+    (Omega.Coeffs.ofList [↑δ, ↑(2 · δ − 1), ↑((2 · δ − 1).sqrt ^ 2), ↑((2 · δ − 1).sqrt + 1) · ↑((2 · δ − 1).sqrt + 1)]).
+                        Apply Lean.Omega.Int.add_congr to the supplied arguments.
+                          ↑(2 · δ) + 1 =
+  ({ const := 2 }.mul { coeffs := [1] }).eval
+      (Omega.Coeffs.ofList
+        [↑δ, ↑(2 · δ − 1), ↑((2 · δ − 1).sqrt ^ 2), ↑((2 · δ − 1).sqrt + 1) · ↑((2 · δ − 1).sqrt + 1)]) +
+    { const := 1 }.eval
+      (Omega.Coeffs.ofList
+        [↑δ, ↑(2 · δ − 1), ↑((2 · δ − 1).sqrt ^ 2), ↑((2 · δ − 1).sqrt + 1) · ↑((2 · δ − 1).sqrt + 1)])
+                          The following calculation gives ↑(2 · δ) =
+  ({ const := 2 }.mul { coeffs := [1] }).eval
+    (Omega.Coeffs.ofList [↑δ, ↑(2 · δ − 1), ↑((2 · δ − 1).sqrt ^ 2), ↑((2 · δ − 1).sqrt + 1) · ↑((2 · δ − 1).sqrt + 1)]).
+                            Apply Int.natCast_mul to the supplied arguments.
+                              ↑(2 · δ) = ↑2 · ↑δ
+                            Apply Lean.Omega.Int.mul_congr to the supplied arguments.
+                              ↑2 · ↑δ =
+  { const := 2 }.eval
+      (Omega.Coeffs.ofList
+        [↑δ, ↑(2 · δ − 1), ↑((2 · δ − 1).sqrt ^ 2), ↑((2 · δ − 1).sqrt + 1) · ↑((2 · δ − 1).sqrt + 1)]) *
+    (Omega.LinearCombo.coordinate 0).eval
+      (Omega.Coeffs.ofList
+        [↑δ, ↑(2 · δ − 1), ↑((2 · δ − 1).sqrt ^ 2), ↑((2 · δ − 1).sqrt + 1) · ↑((2 · δ − 1).sqrt + 1)])
+                              Apply id to the supplied arguments.
+                                ↑2 =
+  { const := 2 }.eval
+    (Omega.Coeffs.ofList [↑δ, ↑(2 · δ − 1), ↑((2 · δ − 1).sqrt ^ 2), ↑((2 · δ − 1).sqrt + 1) · ↑((2 · δ − 1).sqrt + 1)])
+                                By reflexivity, ↑2 = ↑2.
+                              Reverse the supplied equality.
+                                ↑δ =
+  (Omega.LinearCombo.coordinate 0).eval
+    (Omega.Coeffs.ofList [↑δ, ↑(2 · δ − 1), ↑((2 · δ − 1).sqrt ^ 2), ↑((2 · δ − 1).sqrt + 1) · ↑((2 · δ − 1).sqrt + 1)])
+                                Apply Lean.Omega.LinearCombo.coordinate_eval_0 to the supplied arguments.
+                                  (Omega.LinearCombo.coordinate 0).eval
+    (Omega.Coeffs.ofList
+      [↑δ, ↑(2 · δ − 1), ↑((2 · δ − 1).sqrt ^ 2), ↑((2 · δ − 1).sqrt + 1) · ↑((2 · δ − 1).sqrt + 1)]) =
+  ↑δ
+                            Reverse the supplied equality.
+                              { const := 2 }.eval
+      (Omega.Coeffs.ofList
+        [↑δ, ↑(2 · δ − 1), ↑((2 · δ − 1).sqrt ^ 2), ↑((2 · δ − 1).sqrt + 1) · ↑((2 · δ − 1).sqrt + 1)]) *
+    { coeffs := [1] }.eval
+      (Omega.Coeffs.ofList
+        [↑δ, ↑(2 · δ − 1), ↑((2 · δ − 1).sqrt ^ 2), ↑((2 · δ − 1).sqrt + 1) · ↑((2 · δ − 1).sqrt + 1)]) =
+  ({ const := 2 }.mul { coeffs := [1] }).eval
+    (Omega.Coeffs.ofList [↑δ, ↑(2 · δ − 1), ↑((2 · δ − 1).sqrt ^ 2), ↑((2 · δ − 1).sqrt + 1) · ↑((2 · δ − 1).sqrt + 1)])
+                              Apply Lean.Omega.LinearCombo.mul_eval to the supplied arguments.
+                                ({ const := 2 }.mul { coeffs := [1] }).eval
+    (Omega.Coeffs.ofList
+      [↑δ, ↑(2 · δ − 1), ↑((2 · δ − 1).sqrt ^ 2), ↑((2 · δ − 1).sqrt + 1) · ↑((2 · δ − 1).sqrt + 1)]) =
+  { const := 2 }.eval
+      (Omega.Coeffs.ofList
+        [↑δ, ↑(2 · δ − 1), ↑((2 · δ − 1).sqrt ^ 2), ↑((2 · δ − 1).sqrt + 1) · ↑((2 · δ − 1).sqrt + 1)]) *
+    { coeffs := [1] }.eval
+      (Omega.Coeffs.ofList
+        [↑δ, ↑(2 · δ − 1), ↑((2 · δ − 1).sqrt ^ 2), ↑((2 · δ − 1).sqrt + 1) · ↑((2 · δ − 1).sqrt + 1)])
+                                Apply of_decide_eq_true to the supplied arguments.
+                                  Omega.Coeffs.isZero [] ∨ Omega.Coeffs.isZero [1]
+                                  Apply id to the supplied arguments.
+                                    decide (Omega.Coeffs.isZero [] ∨ Omega.Coeffs.isZero [1]) = true
+                                    By reflexivity, true = true.
+                          Apply id to the supplied arguments.
+                            1 =
+  { const := 1 }.eval
+    (Omega.Coeffs.ofList [↑δ, ↑(2 · δ − 1), ↑((2 · δ − 1).sqrt ^ 2), ↑((2 · δ − 1).sqrt + 1) · ↑((2 · δ − 1).sqrt + 1)])
+                            By reflexivity, 1 = 1.
+                        Reverse the supplied equality.
+                          { coeffs := [2] }.eval
+      (Omega.Coeffs.ofList
+        [↑δ, ↑(2 · δ − 1), ↑((2 · δ − 1).sqrt ^ 2), ↑((2 · δ − 1).sqrt + 1) · ↑((2 · δ − 1).sqrt + 1)]) +
+    { const := 1 }.eval
+      (Omega.Coeffs.ofList
+        [↑δ, ↑(2 · δ − 1), ↑((2 · δ − 1).sqrt ^ 2), ↑((2 · δ − 1).sqrt + 1) · ↑((2 · δ − 1).sqrt + 1)]) =
+  ({ coeffs := [2] } + { const := 1 }).eval
+    (Omega.Coeffs.ofList [↑δ, ↑(2 · δ − 1), ↑((2 · δ − 1).sqrt ^ 2), ↑((2 · δ − 1).sqrt + 1) · ↑((2 · δ − 1).sqrt + 1)])
+                          Apply Lean.Omega.LinearCombo.add_eval to the supplied arguments.
+                            ({ coeffs := [2] } + { const := 1 }).eval
+    (Omega.Coeffs.ofList
+      [↑δ, ↑(2 · δ − 1), ↑((2 · δ − 1).sqrt ^ 2), ↑((2 · δ − 1).sqrt + 1) · ↑((2 · δ − 1).sqrt + 1)]) =
+  { coeffs := [2] }.eval
+      (Omega.Coeffs.ofList
+        [↑δ, ↑(2 · δ − 1), ↑((2 · δ − 1).sqrt ^ 2), ↑((2 · δ − 1).sqrt + 1) · ↑((2 · δ − 1).sqrt + 1)]) +
+    { const := 1 }.eval
+      (Omega.Coeffs.ofList
+        [↑δ, ↑(2 · δ − 1), ↑((2 · δ − 1).sqrt ^ 2), ↑((2 · δ − 1).sqrt + 1) · ↑((2 · δ − 1).sqrt + 1)])
+                    Reverse the supplied equality.
+                      { const := 1 }.eval
+      (Omega.Coeffs.ofList
+        [↑δ, ↑(2 · δ − 1), ↑((2 · δ − 1).sqrt ^ 2), ↑((2 · δ − 1).sqrt + 1) · ↑((2 · δ − 1).sqrt + 1)]) -
+    { const := 1, coeffs := [2] }.eval
+      (Omega.Coeffs.ofList
+        [↑δ, ↑(2 · δ − 1), ↑((2 · δ − 1).sqrt ^ 2), ↑((2 · δ − 1).sqrt + 1) · ↑((2 · δ − 1).sqrt + 1)]) =
+  ({ const := 1 } − { const := 1, coeffs := [2] }).eval
+    (Omega.Coeffs.ofList [↑δ, ↑(2 · δ − 1), ↑((2 · δ − 1).sqrt ^ 2), ↑((2 · δ − 1).sqrt + 1) · ↑((2 · δ − 1).sqrt + 1)])
+                      Apply Lean.Omega.LinearCombo.sub_eval to the supplied arguments.
+                        ({ const := 1 } − { const := 1, coeffs := [2] }).eval
+    (Omega.Coeffs.ofList
+      [↑δ, ↑(2 · δ − 1), ↑((2 · δ − 1).sqrt ^ 2), ↑((2 · δ − 1).sqrt + 1) · ↑((2 · δ − 1).sqrt + 1)]) =
+  { const := 1 }.eval
+      (Omega.Coeffs.ofList
+        [↑δ, ↑(2 · δ − 1), ↑((2 · δ − 1).sqrt ^ 2), ↑((2 · δ − 1).sqrt + 1) · ↑((2 · δ − 1).sqrt + 1)]) -
+    { const := 1, coeffs := [2] }.eval
+      (Omega.Coeffs.ofList
+        [↑δ, ↑(2 · δ − 1), ↑((2 · δ − 1).sqrt ^ 2), ↑((2 · δ − 1).sqrt + 1) · ↑((2 · δ − 1).sqrt + 1)])
+            Apply Lean.Omega.Constraint.addInequality_sat to the supplied arguments.
+              { lowerBound := some (- -1), upperBound := none }.sat' [1]
+    (Omega.Coeffs.ofList
+      [↑δ, ↑(2 · δ − 1), ↑((2 · δ − 1).sqrt ^ 2), ↑((2 · δ − 1).sqrt + 1) · ↑((2 · δ − 1).sqrt + 1)]) =
+  true
+              Apply le_of_le_of_eq to the supplied arguments.
+                0 ≤
+  ({ coeffs := [1] } − { const := 1 }).eval
+    (Omega.Coeffs.ofList [↑δ, ↑(2 · δ − 1), ↑((2 · δ − 1).sqrt ^ 2), ↑((2 · δ − 1).sqrt + 1) · ↑((2 · δ − 1).sqrt + 1)])
+                Apply Int.sub_nonneg_of_le to the supplied arguments.
+                  0 ≤ ↑δ − (↑0 + 1)
+                  Apply Int.add_one_le_of_lt to the supplied arguments.
+                    ↑0 + 1 ≤ ↑δ
+                    Apply Lean.Omega.Int.ofNat_lt_of_lt to the supplied arguments.
+                      ↑0 < ↑δ
+                      Use the hypothesis hδ: 0 < δ.
+                The following calculation gives ↑δ − (↑0 + 1) =
+  ({ coeffs := [1] } − { const := 1 }).eval
+    (Omega.Coeffs.ofList [↑δ, ↑(2 · δ − 1), ↑((2 · δ − 1).sqrt ^ 2), ↑((2 · δ − 1).sqrt + 1) · ↑((2 · δ − 1).sqrt + 1)]).
+                  Apply Lean.Omega.Int.sub_congr to the supplied arguments.
+                    ↑δ − (↑0 + 1) =
+  (Omega.LinearCombo.coordinate 0).eval
+      (Omega.Coeffs.ofList
+        [↑δ, ↑(2 · δ − 1), ↑((2 · δ − 1).sqrt ^ 2), ↑((2 · δ − 1).sqrt + 1) · ↑((2 · δ − 1).sqrt + 1)]) -
+    { const := 1 }.eval
+      (Omega.Coeffs.ofList
+        [↑δ, ↑(2 · δ − 1), ↑((2 · δ − 1).sqrt ^ 2), ↑((2 · δ − 1).sqrt + 1) · ↑((2 · δ − 1).sqrt + 1)])
+                    Reverse the supplied equality.
+                      ↑δ =
+  (Omega.LinearCombo.coordinate 0).eval
+    (Omega.Coeffs.ofList [↑δ, ↑(2 · δ − 1), ↑((2 · δ − 1).sqrt ^ 2), ↑((2 · δ − 1).sqrt + 1) · ↑((2 · δ − 1).sqrt + 1)])
+                      Apply Lean.Omega.LinearCombo.coordinate_eval_0 to the supplied arguments.
+                        (Omega.LinearCombo.coordinate 0).eval
+    (Omega.Coeffs.ofList
+      [↑δ, ↑(2 · δ − 1), ↑((2 · δ − 1).sqrt ^ 2), ↑((2 · δ − 1).sqrt + 1) · ↑((2 · δ − 1).sqrt + 1)]) =
+  ↑δ
+                    Apply id to the supplied arguments.
+                      ↑0 + 1 =
+  { const := 1 }.eval
+    (Omega.Coeffs.ofList [↑δ, ↑(2 · δ − 1), ↑((2 · δ − 1).sqrt ^ 2), ↑((2 · δ − 1).sqrt + 1) · ↑((2 · δ − 1).sqrt + 1)])
+                      By reflexivity, ↑0 + 1 = ↑0 + 1.
+                  Reverse the supplied equality.
+                    { coeffs := [1] }.eval
+      (Omega.Coeffs.ofList
+        [↑δ, ↑(2 · δ − 1), ↑((2 · δ − 1).sqrt ^ 2), ↑((2 · δ − 1).sqrt + 1) · ↑((2 · δ − 1).sqrt + 1)]) -
+    { const := 1 }.eval
+      (Omega.Coeffs.ofList
+        [↑δ, ↑(2 · δ − 1), ↑((2 · δ − 1).sqrt ^ 2), ↑((2 · δ − 1).sqrt + 1) · ↑((2 · δ − 1).sqrt + 1)]) =
+  ({ coeffs := [1] } − { const := 1 }).eval
+    (Omega.Coeffs.ofList [↑δ, ↑(2 · δ − 1), ↑((2 · δ − 1).sqrt ^ 2), ↑((2 · δ − 1).sqrt + 1) · ↑((2 · δ − 1).sqrt + 1)])
+                    Apply Lean.Omega.LinearCombo.sub_eval to the supplied arguments.
+                      ({ coeffs := [1] } − { const := 1 }).eval
+    (Omega.Coeffs.ofList
+      [↑δ, ↑(2 · δ − 1), ↑((2 · δ − 1).sqrt ^ 2), ↑((2 · δ − 1).sqrt + 1) · ↑((2 · δ − 1).sqrt + 1)]) =
+  { coeffs := [1] }.eval
+      (Omega.Coeffs.ofList
+        [↑δ, ↑(2 · δ − 1), ↑((2 · δ − 1).sqrt ^ 2), ↑((2 · δ − 1).sqrt + 1) · ↑((2 · δ − 1).sqrt + 1)]) -
+    { const := 1 }.eval
+      (Omega.Coeffs.ofList
+        [↑δ, ↑(2 · δ − 1), ↑((2 · δ − 1).sqrt ^ 2), ↑((2 · δ − 1).sqrt + 1) · ↑((2 · δ − 1).sqrt + 1)])
