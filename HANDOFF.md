@@ -1,4 +1,17 @@
-# Supervisor checkpoint — 0.3.0
+# Leanglish supervisor checkpoint — 0.3.0
+
+## Current name and verified baseline
+
+The user chose **Leanglish** as the product name. Keep the GitHub repository
+`KyleJKistner/LeanDigest` and implementation/proof-format identifiers unchanged.
+The preferred command is `leanglish`; `proofreader` remains a supported alias.
+See `docs/NAMING.md`. Do not rewrite historical evidence to update branding.
+
+Both jobs in GitHub CI run 38667444089 passed on commit
+`2d6b60f01112f63ff56792b881e7a17678ddf558`, including native Lean integration.
+Do not repeat the missing-manifest blocker: it and the native API/IO issues
+were fixed before this rename. The complete pinned OpenAI project build is still
+unvalidated; passing local-project integration does not establish that result.
 
 ## Do not repeat the previous blocker
 
@@ -43,8 +56,8 @@ so namespace/notation/source changes cannot silently alter re-extraction.
 
 ## Next acceptance work
 
-1. Run all three native CI integration tests without skips and the exact OpenAI
-   4.34.1 dependency pin. Remote Lean version success is not a native CI success.
+1. Preserve the passing native CI tests. Run the exact OpenAI 4.34.1 dependency
+   pin; native smoke integration is not a complete dependency-pinned corpus build.
 2. Independently select several unseen proofs in different areas. Do not expand
    only the current sample or add theorem-name-specific prose. Extend safe cases,
    induction, recursors, scope-aware abbreviations and lemma statement expansion.
@@ -64,9 +77,9 @@ python scripts/build_demo.py
 python scripts/build_typed_demo.py
 python scripts/build_narrative_demo.py
 python -m pytest -q
-python -m proofreader narrative-demo -o reader.html
+python -m leanglish narrative-demo -o reader.html
 ```
 
 The agent work packages remain preparation only; no independent coding agents
-ran. `scripts/publish.sh` uses the user's authenticated GitHub CLI and defaults to
-a private KyleJKistner/lean-proofreader repo. No remote repo or CI run was created.
+ran. The repository is already published at KyleJKistner/LeanDigest. Use ordinary
+commits on top of its current history; do not rerun repository creation.

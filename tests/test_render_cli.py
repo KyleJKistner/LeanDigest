@@ -41,7 +41,7 @@ def test_cli_read_does_not_require_lean(tmp_path):
     f=tmp_path/'Proof.lean';f.write_text('theorem t : True := by trivial')
     out=tmp_path/'index.html'
     assert main(['read',str(f),'--output',str(out)])==0
-    assert out.is_file() and 'ProofReader' in out.read_text()
+    assert out.is_file() and '<title>Leanglish — ' in out.read_text()
 
 
 def test_cli_gate_fails_closed(tmp_path):

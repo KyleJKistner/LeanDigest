@@ -12,7 +12,7 @@
   const say = message => {$("toast").textContent=message;$("toast").hidden=false;setTimeout(()=>$("toast").hidden=true,4500);};
   const clear = node => node.replaceChildren();
   function validate(d) {
-    if (!d || d.schema !== "proofreader.document/v1" || !Array.isArray(d.declarations) || !Array.isArray(d.files)) throw Error("This is not a supported ProofReader reading file.");
+    if (!d || d.schema !== "proofreader.document/v1" || !Array.isArray(d.declarations) || !Array.isArray(d.files)) throw Error("This is not a supported reading file.");
     if (d.declarations.length > 100000) throw Error("The file exceeds the browser declaration budget.");
     for(const x of d.declarations) {
       if(!x || typeof x.name !== "string" || typeof x.id !== "string" || !Array.isArray(x.steps)) throw Error("Invalid declaration.");
@@ -168,7 +168,7 @@
   $("coverage-btn").addEventListener("click",coverage);$("dialog-close").addEventListener("click",()=>$("coverage-dialog").close());
   $("coverage-dialog").addEventListener("click",e=>{if(e.target===$("coverage-dialog"))$("coverage-dialog").close();});
   $("export-btn").addEventListener("click",downloadDocument);$("import-btn").addEventListener("click",()=>$("import-file").click());
-  $("import-file").addEventListener("change",async e=>{try {const f=e.target.files[0];if(!f)return;if(f.size>64000000)throw Error("Use the CLI for reading files above 64 MB.");let input; if(f.name.endsWith(".lean")){if(location.protocol!=="http:" || location.hostname!=="127.0.0.1")throw Error("To open Lean source, start the local parser with: proofreader serve. Offline HTML can open reading JSON files.");const response=await fetch("/api/read",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({name:f.name,source:await f.text()})});input=await response.json();if(!response.ok)throw Error(input.error||"Source parsing failed");}else{input=JSON.parse(await f.text());}doc=validate(input.document||input);current=null;filter="all";$("search").value="";setFilters();$("library-title").textContent=doc.title;updateList();say("Reading file opened. Imported receipts have not been authenticated.");}catch(err){say(err.message);}finally{e.target.value="";}});
+  $("import-file").addEventListener("change",async e=>{try {const f=e.target.files[0];if(!f)return;if(f.size>64000000)throw Error("Use the CLI for reading files above 64 MB.");let input; if(f.name.endsWith(".lean")){if(location.protocol!=="http:" || location.hostname!=="127.0.0.1")throw Error("To open Lean source, start the local parser with: leanglish serve. Offline HTML can open reading JSON files.");const response=await fetch("/api/read",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({name:f.name,source:await f.text()})});input=await response.json();if(!response.ok)throw Error(input.error||"Source parsing failed");}else{input=JSON.parse(await f.text());}doc=validate(input.document||input);current=null;filter="all";$("search").value="";setFilters();$("library-title").textContent=doc.title;updateList();say("Reading file opened. Imported receipts have not been authenticated.");}catch(err){say(err.message);}finally{e.target.value="";}});
   document.addEventListener("keydown",e=>{if(e.key==="Escape")$("inspector").hidden=true;});
   try {validate(doc);$("library-title").textContent=doc.title;const id=decodeURIComponent(location.hash.slice(1));current=doc.declarations.find(d=>d.id===id)||doc.declarations[0]||null;updateList();if(current)select(current.id);}catch(err){say(err.message);}
 })();
