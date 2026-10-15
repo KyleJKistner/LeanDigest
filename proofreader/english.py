@@ -13,7 +13,7 @@ from .kernel import Argument, Dag, InvalidExport, display_name, plain_name, requ
 from .normalization import Reduction, DisplayLimit
 from .model import Declaration, Document, Span, Step, canonical_json, digest, walk_steps
 
-PRINTER_VERSION = "math-en/0.2.0"
+PRINTER_VERSION = "math-en/0.3.1"
 
 
 def fresh_name(raw: dict, used: list[str], fallback: str = "x") -> str:
@@ -88,13 +88,17 @@ class Formula:
             if name == "Ne" and arity == 3: return f"({r(args[1])} ≠ {r(args[2])})"
             if name == "OfNat.ofNat" and arity == 3 and self.dag.nodes[args[1]]["tag"] == "nat":
                 return self.dag.nodes[args[1]]["value"]
+            if name == "List.nil" and arity == 1: return "[]"
+            if name == "List.cons" and arity == 3: return f"({r(args[1])} :: {r(args[2])})"
+            if name == "List.map" and arity == 4: return f"map({r(args[2])}, {r(args[3])})"
             if name == "Nat.succ" and arity == 1: return f"({r(args[0])} + 1)"
             if name == "Exists" and arity == 2:
                 p = self.dag.nodes[args[1]]
                 if p["tag"] == "lam":
                     x = fresh_name(p["name"], ctx)
-                    return f"∃ {x} : {r(args[0])}, {r(p['body'], ctx + [x])}"
-                return f"∃ x : {r(args[0])}, {r(args[1])}(x)"
+                    return f"(∃ {x} : {r(args[0])}, {r(p['body'], ctx + [x])})"
+                x = fresh_name({"tag": "anonymous"}, ctx)
+                return f"(∃ {x} : {r(args[0])}, {r(args[1])}({x}))"
             if name == "Function.Injective" and arity == 3:
                 return f"{r(args[-1])} is injective"
             if name == "Function.Surjective" and arity == 3:
@@ -107,7 +111,7 @@ class Formula:
             dom = r(n["domain"]); body = r(n["body"], ctx + [x])
             if t == "lam": return f"({x} ↦ {body})"
             if not self.dag.uses_binder(n["body"]): return f"({dom} → {body})"
-            return f"∀ {x} : {dom}, {body}"
+            return f"(∀ {x} : {dom}, {body})"
         if t == "let":
             x = fresh_name(n["name"], ctx)
             return f"(let {x} : {r(n['type'])} = {r(n['value'])}; {r(n['body'], ctx + [x])})"
@@ -206,6 +210,48 @@ class English:
                 text = f"Take the witness {r(args[2])}. The supplied fact {prop} establishes {con}."
             if name == "Or.elim" and len(args) == 6:
                 text = f"Use the disjunction {r(s['arguments'][3]['type'])}. In the {r(args[0])} case, use {r(args[4])}; in the {r(args[1])} case, use {r(args[5])}. In either case, conclude {con}."
+            # Recursor branches are scoped arguments, not facts established in
+            # the parent context. Keep them nested even for an unknown recursor.
+            if name in {"Or.elim", "Or.casesOn"} and len(args) >= 6:
+                rule = "cases"
+                text = (f"Use the disjunction {r(s['arguments'][3]['type'])}. "
+                        f"Prove the result separately in the {r(args[0])} case and the {r(args[1])} case; "
+                        f"then conclude {con}. Each branch keeps its own assumptions.")
+                for k, label in ((4, "First case"), (5, "Second case")):
+                    child_index = s['arguments'][k].get('step')
+                    children = [replace(c, text=label + ": " + c.text)
+                                if c.id == f"{self.aid}:s{child_index}" else c for c in children]
+            if name in {"Exists.elim", "Exists.casesOn"} and len(args) == 5:
+                rule = "existential-elimination"
+                text = (f"Use the existential premise {r(s['arguments'][3]['type'])}. "
+                        f"For its chosen witness, the following local argument establishes {con}.")
+                child_index = s['arguments'][4].get('step')
+                if child_index is not None:
+                    child_term = self.dag.nodes[self.argument.steps[child_index]['term']]
+                    if child_term['tag'] == 'lam':
+                        label = fresh_name(child_term['name'], labels)
+                        children = [replace(c, text=f"Fix {label} : {r(child_term['domain'])} as the chosen witness.")
+                                    if c.id == f"{self.aid}:s{child_index}" else c for c in children]
+            recursors = {
+                ("Nat.rec", 4): (3, 1, 2, "natural number", "Zero case", "Successor step"),
+                ("List.rec", 5): (4, 2, 3, "list", "Empty-list case", "Cons step"),
+            }
+            recursor = recursors.get((name, len(args)))
+            if recursor is not None:
+                major, base, step, kind, base_label, step_label = recursor
+                if s['arguments'][base]['is_proof'] and s['arguments'][step]['is_proof']:
+                    rule = "induction"
+                    text = (f"We prove {con} by induction on the {kind} {r(args[major])}. "
+                            f"{base_label}: {r(s['arguments'][base]['type'])}. "
+                            f"{step_label}: {r(s['arguments'][step]['type'])}.")
+                    for k, label in ((base, base_label), (step, step_label)):
+                        child_index = s['arguments'][k].get('step')
+                        children = [replace(c, text=label + ": " + c.text)
+                                    if c.id == f"{self.aid}:s{child_index}" else c for c in children]
+            if name == "congrArg" and len(args) == 6:
+                rule = "congruence"
+                text = (f"Apply the function {r(args[4])} to both sides of "
+                        f"{r(s['arguments'][5]['type'])}. This gives {con}.")
             if rule == "lemma-application":
                 # It is a faithful citation at lemma granularity, not a conceptual expansion.
                 fallback = True
@@ -241,9 +287,12 @@ class English:
             child = root.children[0]
             root = replace(root, children=[], conclusion=None)
             out.append(root); root = child
-        branch_rules = {"introduce", "assume", "have", "let", "cases", "existential-elimination", "contradiction-proof"}
+        branch_rules = {"introduce", "assume", "have", "let", "cases", "existential-elimination", "contradiction-proof", "induction"}
         def flat(s: Step) -> list[Step]:
-            if s.rule in branch_rules:
+            if s.rule in branch_rules or any(c.rule in branch_rules for c in s.children):
+                # An application of a locally proved implication/recursor takes
+                # whole scoped subarguments. Lifting their assumptions into a
+                # common surrounding context would change the displayed proof.
                 return [s]
             result = []
             for child in s.children:
@@ -306,7 +355,7 @@ class English:
                         provenance={"mode": "path-bound-typed-proof", "argument_sha256": a.sha256,
                                     "printer": PRINTER_VERSION, "pipeline_model_calls": 0,
                                     "lean_version": a.record["lean_version"], **a.coverage()},
-                        generator="lean-proofreader/0.2.0")
+                        generator="lean-proofreader/0.3.0")
 
 
 def reading_binding(document: Document) -> dict:
@@ -328,4 +377,14 @@ def check_reading(record: dict, document: Document) -> None:
 def prose_text(record: dict) -> str:
     doc = English(record).document()
     d = doc.declarations[0]
-    return "\n\n".join([d.name] + [p["text"] for p in d.parameters] + ["Claim: " + d.statement, "Proof."] + [s.text for s in d.steps] + ["∎"]) + "\n"
+    lines = [d.name, ""] + [p["text"] for p in d.parameters] + ["", "Claim: " + d.statement, "", "Proof."]
+    def visit(step: Step, depth: int) -> None:
+        # Plain text must contain nested subproofs too; printing only top-level
+        # introductions dropped the actual proofs of cases, witnesses and lets.
+        lines.append("  " * depth + step.text)
+        for child in step.children:
+            visit(child, depth + 1)
+    for step in d.steps:
+        visit(step, 0)
+    lines.extend(["", "∎", ""])
+    return "\n".join(lines)

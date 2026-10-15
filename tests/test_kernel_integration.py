@@ -5,6 +5,7 @@ import pytest
 from proofreader.kernel_pipeline import extract_kernel
 from proofreader.kernel import read_record, replay_source, Argument
 from proofreader.lean import driver_file, run_bounded
+from proofreader.english import English, prose_text, check_reading
 
 REQUIRED=os.environ.get('PROOFREADER_REQUIRE_LEAN')=='1'
 @pytest.mark.skipif(not shutil.which('lake') and not REQUIRED,reason='Native v2 pipeline requires Lean/Lake; remote observations are recorded separately')
@@ -38,8 +39,24 @@ def test_native_varied_proofs_and_judgements(tmp_path):
     assert result['theorems_expected']==result['theorems_checked']==10
     assert all(r['exported'] and r['checked'] and r['rendered'] for r in result['rows'])
     assert not result['english_formally_verified']
-    # These are synthetic controls. Passing typing/replay is not polished exposition.
     assert result['checked_english_proofs']==0
+    phrases={
+        'alternatives':['First case:', 'Second case:', 'Each branch keeps its own assumptions.'],
+        'witnesses':['chosen witness', 'Take the witness', 'conclude'],
+        'induction':['by induction on the natural number','Zero case:','Successor step:'],
+        'list_induction':['by induction on the list','Empty-list case:','Cons step:','Apply the function'],
+    }
+    for row in result['rows']:
+        record=read_record(tmp_path/row['directory']/'argument.json')
+        doc=English(record).document();check_reading(record,doc)
+        text=prose_text(record)
+        for phrase in phrases.get(row['name'].split('.')[-1],[]):
+            assert phrase in text,(row['name'],phrase,text)
+        if row['name'].endswith(('.alternatives','.witnesses','.induction','.list_induction')):
+            assert len(doc.declarations[0].steps)==1
+            assert doc.declarations[0].steps[0].children
+    # These are synthetic controls, not additional OpenAI corpus proofs or a
+    # formal proof of the English templates' interpretation.
 
 
 @pytest.mark.skipif(not shutil.which('lake') and not REQUIRED,reason='Native axiom-policy regression requires actual Lean execution')
