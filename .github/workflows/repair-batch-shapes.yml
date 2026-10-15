@@ -1,0 +1,89 @@
+name: Repair and validate native proof shapes
+on:
+  push:
+    branches: [work/narrative-batch]
+    paths: ['.github/workflows/repair-batch-shapes.yml']
+permissions:
+  contents: write
+jobs:
+  repair-and-test:
+    if: github.repository == 'KyleJKistner/LeanDigest'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: work/narrative-batch
+      - name: Correct contracts observed in native Lean 4.34.1
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import subprocess
+          def replace(path, old, new):
+              p=Path(path);s=p.read_text();assert s.count(old)==1,(path,old)
+              p.write_text(s.replace(old,new))
+          for path in ('lean/Narrative.lean','proofreader/data/Narrative.lean'):
+              replace(path,'#["Nat.rec", "Nat.recOn", "List.rec", "List.recOn"]','#["Nat.rec", "Nat.recOn", "Nat.recAux", "List.rec", "List.recOn"]')
+          replace('proofreader/narrative.py',"'Nat.rec':'induction','Nat.recOn':'induction'","'Nat.rec':'induction','Nat.recOn':'induction','Nat.recAux':'induction'")
+          replace('proofreader/narrative.py',"len(f['objects'])>=3:","len(f['objects'])==5 and [p['argument'] for p in f['premises']]==[5]:")
+          replace('proofreader/narrative.py',"math_text(f['objects'][-3])","math_text(f['objects'][-1])")
+          p=Path('tests/test_narrative_batch_integration.py')
+          p.write_text(p.read_text()+"\n    path = output/by_name['BatchAcceptance.Induction.zero_adds']['reader']\n    assert 'Apply Nat.succ to both sides' in (path.parent/'proof.txt').read_text()\n")
+          paths=['lean/Narrative.lean','proofreader/data/Narrative.lean','proofreader/narrative.py','tests/test_narrative_batch_integration.py']
+          subprocess.run(['git','config','user.name','github-actions[bot]'],check=True)
+          subprocess.run(['git','config','user.email','41898282+github-actions[bot]@users.noreply.github.com'],check=True)
+          subprocess.run(['git','add','--',*paths],check=True)
+          subprocess.run(['git','commit','-m','Recognize Nat.recAux and bind congruence to its function argument'],check=True)
+          subprocess.run(['git','push','origin','HEAD:refs/heads/work/narrative-batch'],check=True)
+          PY
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python -m pip install '.[dev,webtest]'
+      - run: python -m playwright install --with-deps chromium
+      - uses: leanprover/lean-action@v1
+        with:
+          lake-package-directory: lean
+          auto-config: false
+          build: true
+          build-args: 'ProofReader ProofReader.Smoke KernelExport Narrative NarrativeBatch'
+          test: false
+          lint: false
+          use-mathlib-cache: false
+          use-github-cache: false
+      - name: Require native, browser, and failure-accounting acceptance
+        env:
+          PROOFREADER_REQUIRE_LEAN: '1'
+          PROOFREADER_REQUIRE_BROWSER: '1'
+          LEANGLISH_BATCH_ARTIFACTS: artifacts/ci-narrative-batch
+        run: |
+          python scripts/build_demo.py
+          python scripts/build_typed_demo.py
+          python scripts/build_narrative_demo.py
+          python -m pytest -q --junitxml=artifacts/batch-stage-tests.xml
+          git diff --exit-code -- proofreader/data artifacts/openai-sample
+      - name: Retain native acceptance artifacts on the work branch
+        if: always()
+        run: |
+          python3 - <<'PY'
+          import json, pathlib, shutil, subprocess
+          source=pathlib.Path('artifacts/ci-narrative-batch')
+          if source.exists():
+              target=pathlib.Path('artifacts/narrative-batch-acceptance')
+              shutil.copytree(source,target,dirs_exist_ok=True)
+              report=json.loads((target/'batch.json').read_text())
+              print('NATIVE_BATCH_SUMMARY',json.dumps(report['summary']))
+              for module in report['modules']:
+                  for row in module['rows']:
+                      print('PROOF_RESULT',row['name'],row['status'],row.get('unexpanded_steps'))
+              subprocess.run(['git','add','--force','--',str(target)],check=True)
+              subprocess.run(['git','commit','-m','Retain observed native narrative batch outcomes and proof readers'],check=True)
+              subprocess.run(['git','push','origin','HEAD:refs/heads/work/narrative-batch'],check=True)
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: narrative-batch-acceptance
+          path: |
+            artifacts/batch-stage-tests.xml
+            artifacts/ci-narrative-batch/
