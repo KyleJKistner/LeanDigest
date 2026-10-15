@@ -69,35 +69,58 @@ partial def visit (e : Expr) (xs : Array Expr) (path : Array Nat)
       children := children.push ch
     | .app .. =>
       let args := e.getAppArgs
-      for k in [:args.size] do
-        let a := args[k]!
-        let atp ← liftM <| inferType a
-        let proof ← liftM <| isProp atp
-        if proof then
-          let p := (path ++ Array.replicate (args.size-k-1) 0).push 1
-          let ch ← visit a xs p base levels (depth-1)
-          premises := premises.push <| obj [("argument", toJson k), ("statement", toJson (← liftM <| pp atp)), ("frame", toJson ch)]
+      let arity := if #["Nat.rec", "Nat.recOn", "Nat.recAux"].contains head then 4
+        else if #["List.rec", "List.recOn", "Exists.casesOn", "Exists.elim", "dite", "ite"].contains head then 5
+        else if #["Or.elim", "Or.casesOn"].contains head then 6 else 0
+      if arity > 0 && args.size > arity then
+        -- Preserve the proof of the quantified/conditional intermediate claim.
+        -- Its original path is a function-prefix, not an invented new proof.
+        let prefix := mkAppN e.getAppFn (args.extract 0 arity)
+        let prefixType ← liftM <| inferType prefix
+        if ← liftM <| isProp prefixType then
+          role := "specialize"
+          let prefixPath := path ++ Array.replicate (args.size-arity) 0
+          let ch ← visit prefix xs prefixPath base levels (depth-1)
           children := children.push ch
-        else objects := objects.push (← liftM <| pp a)
-      if let .fvar fid := e.getAppFn then
-        let declaration ← liftM <| fid.getDecl
-        let mut localIndex : Option Nat := none
-        for k in [:xs.size] do
-          if xs[k]! == .fvar fid then localIndex := some k
-        let some k := localIndex | throwError "Local application head is outside the exported context"
-        role := "local-application"
-        fields := [("binder", toJson declaration.userName.toString),
-          ("domain", toJson (← liftM <| pp declaration.type)), ("local_index", toJson k)]
-      if head == "congrArg" then role := "congruence"
-      if #["Nat.rec", "Nat.recOn", "Nat.recAux", "List.rec", "List.recOn"].contains head then role := "induction"
-      if head == "Exists.intro" then role := "witness"
-      if #["Exists.casesOn", "Exists.elim"].contains head then role := "choose"
-      if #["dite", "ite", "Decidable.byCases", "Classical.byCases", "Or.elim", "Or.casesOn"].contains head then role := "cases"
-      if head == "And.intro" then role := "combine"
-      if #["Eq.trans", "Trans.trans"].contains head then role := "chain"
-      if head == "Eq.refl" then role := "reflexivity"
-      if head == "mul_left_cancel₀" then role := "cancel"
-      if head == "id" then role := "identity"
+          for k in [arity:args.size] do
+            let a := args[k]!
+            let atp ← liftM <| inferType a
+            if ← liftM <| isProp atp then
+              let p := (path ++ Array.replicate (args.size-k-1) 0).push 1
+              let ch ← visit a xs p base levels (depth-1)
+              premises := premises.push <| obj [("argument", toJson k), ("statement", toJson (← liftM <| pp atp)), ("frame", toJson ch)]
+              children := children.push ch
+            else objects := objects.push (← liftM <| pp a)
+      if role != "specialize" then
+       for k in [:args.size] do
+         let a := args[k]!
+         let atp ← liftM <| inferType a
+         let proof ← liftM <| isProp atp
+         if proof then
+           let p := (path ++ Array.replicate (args.size-k-1) 0).push 1
+           let ch ← visit a xs p base levels (depth-1)
+           premises := premises.push <| obj [("argument", toJson k), ("statement", toJson (← liftM <| pp atp)), ("frame", toJson ch)]
+           children := children.push ch
+         else objects := objects.push (← liftM <| pp a)
+       if let .fvar fid := e.getAppFn then
+         let declaration ← liftM <| fid.getDecl
+         let mut localIndex : Option Nat := none
+         for k in [:xs.size] do
+           if xs[k]! == .fvar fid then localIndex := some k
+         let some k := localIndex | throwError "Local application head is outside the exported context"
+         role := "local-application"
+         fields := [("binder", toJson declaration.userName.toString),
+           ("domain", toJson (← liftM <| pp declaration.type)), ("local_index", toJson k)]
+       if head == "congrArg" then role := "congruence"
+       if #["Nat.rec", "Nat.recOn", "Nat.recAux", "List.rec", "List.recOn"].contains head then role := "induction"
+       if head == "Exists.intro" then role := "witness"
+       if #["Exists.casesOn", "Exists.elim"].contains head then role := "choose"
+       if #["dite", "ite", "Decidable.byCases", "Classical.byCases", "Or.elim", "Or.casesOn"].contains head then role := "cases"
+       if head == "And.intro" then role := "combine"
+       if #["Eq.trans", "Trans.trans"].contains head then role := "chain"
+       if head == "Eq.refl" then role := "reflexivity"
+       if head == "mul_left_cancel₀" then role := "cancel"
+       if head == "id" then role := "identity"
     | .fvar id =>
       role := "given"
       fields := [("binder", toJson (← liftM <| id.getDecl).userName.toString)]

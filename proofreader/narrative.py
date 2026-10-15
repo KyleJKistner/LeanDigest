@@ -22,13 +22,15 @@ from .polynomial import certify, verify as verify_polynomial, certificate_text
 SCHEMA = 'proofreader.narrative/v1'
 PRINTER_VERSION = 'source-math-en/0.3.0'
 ROLES = {'introduce','assume','have','define','witness','choose','cases','combine','chain',
-         'reflexivity','cancel','identity','given','named','application','ring','rewrite','unexpanded','induction','congruence','local-application'}
+         'reflexivity','cancel','identity','given','named','application','ring','rewrite','unexpanded','induction','congruence','local-application','specialize'}
 _HEAD_ROLES = {'Exists.intro':'witness','Exists.casesOn':'choose','Exists.elim':'choose',
                'And.intro':'combine','Trans.trans':'chain','Eq.trans':'chain',
                'mul_left_cancel₀':'cancel','id':'identity','Eq.refl':'reflexivity',
                'dite':'cases','ite':'cases','Decidable.byCases':'cases','Classical.byCases':'cases',
                'Or.elim':'cases','Or.casesOn':'cases',
                'Nat.rec':'induction','Nat.recOn':'induction','Nat.recAux':'induction','List.rec':'induction','List.recOn':'induction'}
+_SPECIALIZATION_ARITIES = {'Nat.rec':4,'Nat.recOn':4,'Nat.recAux':4,'List.rec':5,'List.recOn':5,
+                           'Exists.casesOn':5,'Exists.elim':5,'Or.elim':6,'Or.casesOn':6,'dite':5,'ite':5}
 _REWRITES = {'Eq.mpr','Eq.mp','of_eq_true','congrArg','congr','congrFun',"congrFun'"}
 _LEMMAS = {
     'EuclideanDomain.gcd_eq_zero_iff': 'A gcd is zero exactly when both entries are zero.',
@@ -86,7 +88,7 @@ class Snapshot:
             elif head in _REWRITES:
                 require(role == 'rewrite' or (head == 'congrArg' and role == 'congruence'), 'Rewrite role mismatch')
             elif head in _HEAD_ROLES and not f['budget_cut']:
-                require(role == _HEAD_ROLES[head], 'Logical rule mismatch')
+                require(role == _HEAD_ROLES[head] or (role == 'specialize' and head in _SPECIALIZATION_ARITIES), 'Logical rule mismatch')
             require(isinstance(f['context'],list) and len(f['context']) <= 256, 'Context budget')
             for c in f['context']:
                 require(isinstance(c,dict) and set(c) == {'name','type'}, 'Invalid context entry')
@@ -109,6 +111,14 @@ class Snapshot:
             if role in {'introduce','assume','define','have'}:
                 require({'binder','domain'} <= set(f), 'Missing binder metadata')
                 require(len(ch) == (2 if role == 'have' else 1) and not f['premises'], 'Invalid binder children')
+            if role == 'specialize':
+                require(head in _SPECIALIZATION_ARITIES, 'Unsupported specialization head')
+                extra=len(f['objects'])+len(f['premises'])
+                require(extra > 0 and len(ch)==len(f['premises'])+1
+                        and ch[1:]==[p['frame'] for p in f['premises']], 'Missing quantified/conditional source proof')
+                require(isinstance(self.frames[ch[0]],dict) and self.frames[ch[0]].get('path')==path+[0]*extra, 'Specialization prefix path mismatch')
+                arity=_SPECIALIZATION_ARITIES[head]
+                require(all(arity <= p['argument'] < arity+extra for p in f['premises']), 'Specialization argument mismatch')
             if role == 'local-application':
                 require({'binder','domain','local_index'} <= set(f) and head == '', 'Invalid local application metadata')
                 k=f['local_index']
@@ -256,6 +266,14 @@ class Narrative:
             else:
                 s=self.step(i,f'Establish {domain}; call this fact {name}.',children=self.sequence(ch[0]))
             return [s]+self.sequence(ch[-1])
+        if role=='specialize' and ch:
+            claim=math_text(self.frames[ch[0]]['statement'])
+            text='Use the intermediate claim '+claim+'.'
+            if f['objects']:
+                text+=' Specialize its object arguments to '+', '.join(math_text(v) for v in f['objects'])+'.'
+            if f['premises']:
+                text+=' Apply it to the additional premises shown below.'
+            return [self.step(i,text,conclusion=con,children=[s for j in ch for s in self.sequence(j)])]
         if role=='local-application':
             name=_name(f['binder'])
             if sum(c['name']==f['binder'] for c in f['context'])>1:

@@ -66,6 +66,10 @@ def test_native_batch_breadth_and_failure_accounting(tmp_path):
     assert 'Apply the hypothesis' in ((output/by_name['BatchAcceptance.Logic.implication']['reader']).parent/'proof.txt').read_text()
 
     row=by_name['BatchAcceptance.Induction.rec_overapplied']
-    assert row['unexpanded_steps'] > 0
+    assert row['unexpanded_steps'] == 0
     prose=((output/row['reader']).parent/'proof.txt').read_text()
     assert 'Proceed by induction on m' not in prose
+
+    assert by_name['BatchAcceptance.Logic.cases']['unexpanded_steps']==0
+    assert 'Specialize its object arguments to m' in prose
+    assert 'Proceed by induction on n' in prose
