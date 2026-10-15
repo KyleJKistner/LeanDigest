@@ -5,12 +5,17 @@ on:
   workflow_dispatch:
 permissions:
   contents: read
+concurrency:
+  group: proofreader-ci-${{ github.ref }}
+  cancel-in-progress: true
 jobs:
   python-and-browser:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
@@ -33,6 +38,8 @@ jobs:
     timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
@@ -42,7 +49,7 @@ jobs:
           lake-package-directory: lean
           auto-config: false
           build: true
-          build-args: 'ProofReader ProofReader.Smoke KernelExport Narrative'
+          build-args: 'ProofReader ProofReader.Smoke ProofReader.Breadth KernelExport Narrative'
           test: false
           lint: false
           use-mathlib-cache: false
@@ -50,11 +57,12 @@ jobs:
       - name: Require actual export, exact replay and tamper rejection
         env:
           PROOFREADER_REQUIRE_LEAN: '1'
-        run: python -m pytest tests/test_lean_integration.py tests/test_kernel_integration.py tests/test_narrative_integration.py -q --junitxml=artifacts/ci-lean.xml
+        run: python -m pytest tests/test_lean_integration.py tests/test_kernel_integration.py tests/test_narrative_integration.py -q --basetemp=artifacts/ci-native --junitxml=artifacts/ci-lean.xml
       - uses: actions/upload-artifact@v4
         if: always()
         with:
           name: lean-integration-results
           path: |
             artifacts/ci-lean.xml
-            lean/.lake/build/logs/
+            artifacts/ci-native/
+          retention-days: 30
