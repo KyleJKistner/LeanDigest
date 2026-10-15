@@ -235,7 +235,7 @@ run_elab do
     throwError "ProofReader: proof AST does not match the imported declaration"
   withOptions (fun opts => opts.setBool `debug.skipKernelTC false) do
     addDecl <| .thmDecl {{ name := {fresh}, levelParams := [{params}], type := original.type, value := reconstructed }}
-  liftIO <| IO.println "PROOFREADER_REPLAY_OK"
+  liftM <| IO.println "PROOFREADER_REPLAY_OK"
 '''
 
 
