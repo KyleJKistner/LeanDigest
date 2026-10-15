@@ -1,0 +1,15 @@
+Leanglish · OAI.CirculantHadamard.AlternatingNorm.norm_map_prod_of_const
+
+Let R be a type.
+Let ι be a type.
+Let inst be an element of CommRing R.
+Let σ be an element of R →+* ℂ.
+Let x be an element of ι → R.
+Let s be an element of Finset ι.
+Let c be an element of ℝ.
+Assume ∀ i ∈ s, ‖σ (x i)‖ = c.
+Then ‖σ (∏ i ∈ s, x i)‖ = c ^ s.card.
+
+Proof.
+Apply Eq.mpr to the supplied arguments.
+  ‖σ (∏ i ∈ s, x i)‖ = c ^ s.card

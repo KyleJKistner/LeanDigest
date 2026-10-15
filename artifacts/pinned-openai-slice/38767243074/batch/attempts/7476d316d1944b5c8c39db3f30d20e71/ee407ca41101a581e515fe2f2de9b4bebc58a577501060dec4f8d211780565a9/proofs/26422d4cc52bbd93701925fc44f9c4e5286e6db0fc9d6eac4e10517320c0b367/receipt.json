@@ -1,0 +1,16 @@
+{
+  "schema": "proofreader.narrative-receipt/v1",
+  "status": "passed",
+  "theorem": "OAI.Balanced.SmallProjectiveArithmetic.tangent_total_gt_degree_threshold",
+  "lean_version": "4.34.1",
+  "backend": "native",
+  "snapshot_sha256": "31d9c4e51a9ac0eaa691bf9f4605440b391f5d4aef79afb99adfd25a6576502c",
+  "source_sha256": "1a3c5f3427b4b793dce13eb58424bb038b5a32d3300dbeb170e8b27946b80a1c",
+  "selected_judgements": 134,
+  "all_selected_judgements_kernel_checked": true,
+  "path_linkage_checked_in_lean": true,
+  "receipt_authenticated": false,
+  "english_formally_verified": false,
+  "exact_openai_project_replayed": false,
+  "module": "OAI.Combinatorics.BalancedRyser.Incidence.SmallProjectiveArithmetic"
+}

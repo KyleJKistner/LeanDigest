@@ -1,0 +1,1 @@
+{"candidates":[{"kind":"theorem","name":"BatchAcceptance.Induction.addition_associates"},{"kind":"theorem","name":"BatchAcceptance.Induction.zero_adds"}],"excluded":[],"lean_version":"4.34.1","schema":"leanglish.narrative-inventory/v1","scope":"module:ProofReader.Acceptance.Induction"}

@@ -1,0 +1,6 @@
+Leanglish · BatchAcceptance.Rejected.still_runs
+
+Then True.
+
+Proof.
+The conclusion is the proposition True.

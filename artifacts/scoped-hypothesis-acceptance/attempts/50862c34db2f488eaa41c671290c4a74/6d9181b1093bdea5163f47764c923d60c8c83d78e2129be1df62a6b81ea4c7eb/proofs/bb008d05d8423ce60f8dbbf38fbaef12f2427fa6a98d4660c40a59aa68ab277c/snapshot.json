@@ -1,0 +1,332 @@
+{
+  "axioms": [],
+  "formula_backend": "Lean pretty-printer",
+  "frames": [
+    {
+      "binder": "a",
+      "budget_cut": false,
+      "children": [
+        1
+      ],
+      "context": [],
+      "domain": "Nat",
+      "head": "",
+      "id": 0,
+      "objects": [],
+      "path": [],
+      "premises": [],
+      "role": "introduce",
+      "statement": "∀ (a b c : Nat), a + b + c = a + (b + c)"
+    },
+    {
+      "binder": "b",
+      "budget_cut": false,
+      "children": [
+        2
+      ],
+      "context": [
+        {
+          "name": "a",
+          "type": "Nat"
+        }
+      ],
+      "domain": "Nat",
+      "head": "",
+      "id": 1,
+      "objects": [],
+      "path": [
+        1
+      ],
+      "premises": [],
+      "role": "introduce",
+      "statement": "∀ (b c : Nat), a + b + c = a + (b + c)"
+    },
+    {
+      "binder": "c",
+      "budget_cut": false,
+      "children": [
+        3
+      ],
+      "context": [
+        {
+          "name": "a",
+          "type": "Nat"
+        },
+        {
+          "name": "b",
+          "type": "Nat"
+        }
+      ],
+      "domain": "Nat",
+      "head": "",
+      "id": 2,
+      "objects": [],
+      "path": [
+        1,
+        1
+      ],
+      "premises": [],
+      "role": "introduce",
+      "statement": "∀ (c : Nat), a + b + c = a + (b + c)"
+    },
+    {
+      "budget_cut": false,
+      "children": [
+        4,
+        5
+      ],
+      "context": [
+        {
+          "name": "a",
+          "type": "Nat"
+        },
+        {
+          "name": "b",
+          "type": "Nat"
+        },
+        {
+          "name": "c",
+          "type": "Nat"
+        }
+      ],
+      "head": "Nat.recAux",
+      "id": 3,
+      "objects": [
+        "fun c => a + b + c = a + (b + c)",
+        "c"
+      ],
+      "path": [
+        1,
+        1,
+        1
+      ],
+      "premises": [
+        {
+          "argument": 1,
+          "frame": 4,
+          "statement": "a + b + 0 = a + b + 0"
+        },
+        {
+          "argument": 2,
+          "frame": 5,
+          "statement": "∀ (c : Nat), a + b + c = a + (b + c) → ((a + b).add c).succ = (a.add (b.add c)).succ"
+        }
+      ],
+      "role": "induction",
+      "statement": "a + b + c = a + (b + c)"
+    },
+    {
+      "budget_cut": false,
+      "children": [],
+      "context": [
+        {
+          "name": "a",
+          "type": "Nat"
+        },
+        {
+          "name": "b",
+          "type": "Nat"
+        },
+        {
+          "name": "c",
+          "type": "Nat"
+        }
+      ],
+      "head": "Eq.refl",
+      "id": 4,
+      "objects": [
+        "Nat",
+        "a + b + 0"
+      ],
+      "path": [
+        1,
+        1,
+        1,
+        0,
+        0,
+        1
+      ],
+      "premises": [],
+      "role": "reflexivity",
+      "statement": "a + b + 0 = a + b + 0"
+    },
+    {
+      "binder": "c",
+      "budget_cut": false,
+      "children": [
+        6
+      ],
+      "context": [
+        {
+          "name": "a",
+          "type": "Nat"
+        },
+        {
+          "name": "b",
+          "type": "Nat"
+        },
+        {
+          "name": "c",
+          "type": "Nat"
+        }
+      ],
+      "domain": "Nat",
+      "head": "",
+      "id": 5,
+      "objects": [],
+      "path": [
+        1,
+        1,
+        1,
+        0,
+        1
+      ],
+      "premises": [],
+      "role": "introduce",
+      "statement": "∀ (c : Nat), a + b + c = a + (b + c) → ((a + b).add c).succ = (a.add (b.add c)).succ"
+    },
+    {
+      "binder": "ih",
+      "budget_cut": false,
+      "children": [
+        7
+      ],
+      "context": [
+        {
+          "name": "a",
+          "type": "Nat"
+        },
+        {
+          "name": "b",
+          "type": "Nat"
+        },
+        {
+          "name": "c",
+          "type": "Nat"
+        },
+        {
+          "name": "c",
+          "type": "Nat"
+        }
+      ],
+      "domain": "a + b + c = a + (b + c)",
+      "head": "",
+      "id": 6,
+      "objects": [],
+      "path": [
+        1,
+        1,
+        1,
+        0,
+        1,
+        1
+      ],
+      "premises": [],
+      "role": "assume",
+      "statement": "a + b + c = a + (b + c) → ((a + b).add c).succ = (a.add (b.add c)).succ"
+    },
+    {
+      "budget_cut": false,
+      "children": [
+        8
+      ],
+      "context": [
+        {
+          "name": "a",
+          "type": "Nat"
+        },
+        {
+          "name": "b",
+          "type": "Nat"
+        },
+        {
+          "name": "c",
+          "type": "Nat"
+        },
+        {
+          "name": "c",
+          "type": "Nat"
+        },
+        {
+          "name": "ih",
+          "type": "a + b + c = a + (b + c)"
+        }
+      ],
+      "head": "congrArg",
+      "id": 7,
+      "objects": [
+        "Nat",
+        "Nat",
+        "(a + b).add c",
+        "a.add (b.add c)",
+        "Nat.succ"
+      ],
+      "path": [
+        1,
+        1,
+        1,
+        0,
+        1,
+        1,
+        1
+      ],
+      "premises": [
+        {
+          "argument": 5,
+          "frame": 8,
+          "statement": "a + b + c = a + (b + c)"
+        }
+      ],
+      "role": "congruence",
+      "statement": "((a + b).add c).succ = (a.add (b.add c)).succ"
+    },
+    {
+      "binder": "ih",
+      "budget_cut": false,
+      "children": [],
+      "context": [
+        {
+          "name": "a",
+          "type": "Nat"
+        },
+        {
+          "name": "b",
+          "type": "Nat"
+        },
+        {
+          "name": "c",
+          "type": "Nat"
+        },
+        {
+          "name": "c",
+          "type": "Nat"
+        },
+        {
+          "name": "ih",
+          "type": "a + b + c = a + (b + c)"
+        }
+      ],
+      "head": "",
+      "id": 8,
+      "objects": [],
+      "path": [
+        1,
+        1,
+        1,
+        0,
+        1,
+        1,
+        1,
+        1
+      ],
+      "premises": [],
+      "role": "given",
+      "statement": "a + b + c = a + (b + c)"
+    }
+  ],
+  "judgements_checked": 9,
+  "lean_version": "4.34.1",
+  "schema": "proofreader.narrative/v1",
+  "statement": "∀ (a b c : Nat), a + b + c = a + (b + c)",
+  "theorem": "BatchAcceptance.Induction.addition_associates"
+}

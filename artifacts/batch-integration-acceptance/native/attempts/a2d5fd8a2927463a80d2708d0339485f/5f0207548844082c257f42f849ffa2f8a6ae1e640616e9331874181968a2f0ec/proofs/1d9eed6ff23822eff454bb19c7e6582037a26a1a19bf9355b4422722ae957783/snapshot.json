@@ -1,0 +1,23 @@
+{
+  "axioms": [],
+  "formula_backend": "Lean pretty-printer",
+  "frames": [
+    {
+      "budget_cut": false,
+      "children": [],
+      "context": [],
+      "head": "True.intro",
+      "id": 0,
+      "objects": [],
+      "path": [],
+      "premises": [],
+      "role": "named",
+      "statement": "True"
+    }
+  ],
+  "judgements_checked": 1,
+  "lean_version": "4.34.1",
+  "schema": "proofreader.narrative/v1",
+  "statement": "True",
+  "theorem": "BatchAcceptance.Rejected.still_runs"
+}

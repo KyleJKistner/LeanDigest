@@ -22,12 +22,15 @@ from .polynomial import certify, verify as verify_polynomial, certificate_text
 SCHEMA = 'proofreader.narrative/v1'
 PRINTER_VERSION = 'source-math-en/0.3.0'
 ROLES = {'introduce','assume','have','define','witness','choose','cases','combine','chain',
-         'reflexivity','cancel','identity','given','named','application','ring','rewrite','unexpanded'}
+         'reflexivity','cancel','identity','given','named','application','ring','rewrite','unexpanded','induction','congruence','local-application','specialize'}
 _HEAD_ROLES = {'Exists.intro':'witness','Exists.casesOn':'choose','Exists.elim':'choose',
                'And.intro':'combine','Trans.trans':'chain','Eq.trans':'chain',
-               'mul_left_cancel₀':'cancel','id':'identity','Eq.refl':'reflexivity',
+               'mul_left_cancel₀':'cancel','id':'identity','Eq.refl':'reflexivity','rfl':'reflexivity',
                'dite':'cases','ite':'cases','Decidable.byCases':'cases','Classical.byCases':'cases',
-               'Or.elim':'cases','Or.casesOn':'cases'}
+               'Or.elim':'cases','Or.casesOn':'cases',
+               'Nat.rec':'induction','Nat.recOn':'induction','Nat.recAux':'induction','List.rec':'induction','List.recOn':'induction'}
+_SPECIALIZATION_ARITIES = {'Nat.rec':4,'Nat.recOn':4,'Nat.recAux':4,'List.rec':5,'List.recOn':5,
+                           'Exists.casesOn':5,'Exists.elim':5,'Or.elim':6,'Or.casesOn':6,'dite':5,'ite':5}
 _REWRITES = {'Eq.mpr','Eq.mp','of_eq_true','congrArg','congr','congrFun',"congrFun'"}
 _LEMMAS = {
     'EuclideanDomain.gcd_eq_zero_iff': 'A gcd is zero exactly when both entries are zero.',
@@ -70,7 +73,7 @@ class Snapshot:
         parents: dict[int,int] = {}
         paths = set()
         for i, f in enumerate(self.frames):
-            require(isinstance(f,dict) and _BASE <= set(f) and set(f) <= _BASE | _EXTRAS, 'Invalid frame fields')
+            require(isinstance(f,dict) and _BASE <= set(f) and set(f) <= _BASE | _EXTRAS | {'local_index'}, 'Invalid frame fields')
             require(type(f['id']) is int and f['id'] == i, 'Noncanonical frame id')
             path = f['path']
             require(isinstance(path,list) and len(path) <= 4096 and all(type(x) is int and x in (0,1,2) for x in path), 'Invalid proof path')
@@ -83,9 +86,10 @@ class Snapshot:
             if head.startswith('Mathlib.Tactic.Ring.'):
                 require(role == 'ring', 'Arithmetic role mismatch')
             elif head in _REWRITES:
-                require(role == 'rewrite', 'Rewrite role mismatch')
+                require(role == 'rewrite' or (head == 'congrArg' and role == 'congruence'), 'Rewrite role mismatch')
             elif head in _HEAD_ROLES and not f['budget_cut']:
-                require(role == _HEAD_ROLES[head], 'Logical rule mismatch')
+                require(role == _HEAD_ROLES[head] or (head == 'rfl' and role == 'application')
+                        or (role == 'specialize' and head in _SPECIALIZATION_ARITIES), 'Logical rule mismatch')
             require(isinstance(f['context'],list) and len(f['context']) <= 256, 'Context budget')
             for c in f['context']:
                 require(isinstance(c,dict) and set(c) == {'name','type'}, 'Invalid context entry')
@@ -108,6 +112,21 @@ class Snapshot:
             if role in {'introduce','assume','define','have'}:
                 require({'binder','domain'} <= set(f), 'Missing binder metadata')
                 require(len(ch) == (2 if role == 'have' else 1) and not f['premises'], 'Invalid binder children')
+            if role == 'specialize':
+                require(head in _SPECIALIZATION_ARITIES, 'Unsupported specialization head')
+                extra=len(f['objects'])+len(f['premises'])
+                require(extra > 0 and len(ch)==len(f['premises'])+1
+                        and ch[1:]==[p['frame'] for p in f['premises']], 'Missing quantified/conditional source proof')
+                require(isinstance(self.frames[ch[0]],dict) and self.frames[ch[0]].get('path')==path+[0]*extra, 'Specialization prefix path mismatch')
+                arity=_SPECIALIZATION_ARITIES[head]
+                require(all(arity <= p['argument'] < arity+extra for p in f['premises']), 'Specialization argument mismatch')
+            if role == 'local-application':
+                require({'binder','domain','local_index'} <= set(f) and head == '', 'Invalid local application metadata')
+                k=f['local_index']
+                require(type(k) is int and 0 <= k < len(f['context']), 'Local application escaped its context')
+                require(f['context'][k] == {'name':f['binder'],'type':f['domain']}, 'Local application context mismatch')
+            elif 'local_index' in f:
+                raise InvalidExport('Unexpected local application index')
             if role == 'define':
                 require('value' in f, 'Missing definition value')
             if role == 'given':
@@ -248,6 +267,53 @@ class Narrative:
             else:
                 s=self.step(i,f'Establish {domain}; call this fact {name}.',children=self.sequence(ch[0]))
             return [s]+self.sequence(ch[-1])
+        if role=='specialize' and ch:
+            claim=math_text(self.frames[ch[0]]['statement'])
+            text='Use the intermediate claim '+claim+'.'
+            if f['objects']:
+                text+=' Specialize its object arguments to '+', '.join(math_text(v) for v in f['objects'])+'.'
+            if f['premises']:
+                text+=' Apply it to the additional premises shown below.'
+            return [self.step(i,text,conclusion=con,children=[s for j in ch for s in self.sequence(j)])]
+        if role=='local-application':
+            name=_name(f['binder'])
+            if sum(c['name']==f['binder'] for c in f['context'])>1:
+                name+=' (context entry '+str(f['local_index']+1)+')'
+            text='Apply the hypothesis '+name+': '+math_text(f['domain'])+'.'
+            if f['objects']:
+                text+=' Substitute '+', '.join(math_text(v) for v in f['objects'])+' for its object arguments.'
+            return [self.step(i,text,conclusion=con,children=[s for j in ch for s in self.sequence(j)])]
+        if role=='named' and f['head']=='True.intro' and not ch and f['statement']=='True':
+            return [self.step(i,'The conclusion is the proposition True.',conclusion=None)]
+        recursor_proofs = {'Nat.rec':[1,2], 'Nat.recAux':[1,2], 'Nat.recOn':[2,3],
+                           'List.rec':[2,3], 'List.recOn':[3,4]}
+        # Do not mistake an argument supplied *after* a recursor for its major
+        # induction variable. Oversaturated/dependent variants stay explicit gaps.
+        if (role=='induction' and len(ch)==2 and f['head'] in recursor_proofs
+            and [p['argument'] for p in f['premises']]==recursor_proofs[f['head']]
+            and len(f['objects'])==(2 if f['head'].startswith('Nat.') else 3)):
+            # These constructor recursors are recognized by exact fully qualified
+            # names, not an inferred tactic label or a theorem-specific template.
+            major_slot={'Nat.rec':3,'Nat.recAux':3,'Nat.recOn':1,'List.rec':4,'List.recOn':2}[f['head']]
+            object_slots=[k for k in range(len(f['objects'])+len(f['premises']))
+                          if k not in recursor_proofs[f['head']]]
+            branches=[self.sequence(j) for j in ch]
+            labels=('Base case (zero). ', 'Successor step. ') if f['head'].startswith('Nat.') else ('Empty-list case. ', 'Constructor step. ')
+            for branch,label in zip(branches,labels):
+                if branch:
+                    branch[0].text=label+branch[0].text
+            return [self.step(i,'Proceed by induction on '+math_text(f['objects'][object_slots.index(major_slot)])+'.',
+                              conclusion=con,children=[s for branch in branches for s in branch])]
+        if role=='congruence' and f['head']=='congrArg' and len(ch)==1 and len(f['objects'])==5 and [p['argument'] for p in f['premises']]==[5]:
+            return [self.step(i,'Apply '+math_text(f['objects'][-1])+' to both sides of the supplied equality.',
+                              conclusion=con,children=self.sequence(ch[0]))]
+        if role=='cases' and f['head'] in {'Or.elim','Or.casesOn'} and len(ch)==3 and all(self.frames[j]['role']=='assume' for j in ch[1:]):
+            branches=self.sequence(ch[0])
+            for j in ch[1:]:
+                b=self.frames[j]
+                branches.append(self.step(j,'Case '+math_text(b['domain'])+'.',rule='case',
+                                          children=self.sequence(b['children'][0])))
+            return [self.step(i,'Reason by cases from '+math_text(self.frames[ch[0]]['statement'])+'.',children=branches)]
         if role=='cases' and len(ch)==2 and all(self.frames[j]['role']=='assume' for j in ch):
             branches=[]
             for j in ch:
@@ -318,7 +384,7 @@ class Narrative:
             text=_LEMMAS[f['head']]
         else:
             text='Apply '+(f['head'] or 'the recorded term')+' to the supplied arguments.'
-        fallback=role in {'ring','rewrite','unexpanded','cases','choose','identity','combine','chain','witness'} or (role in {'application','named'} and f['head'] not in _LEMMAS)
+        fallback=role in {'ring','rewrite','unexpanded','cases','choose','identity','combine','chain','witness','induction','congruence'} or (role in {'application','named'} and f['head'] not in _LEMMAS)
         child_steps=[s for j in ch for s in self.sequence(j)]
         s=self.step(i,text,children=child_steps,
                     conclusion=None if con in text or role in {'assume','introduce'} else con,fallback=fallback)

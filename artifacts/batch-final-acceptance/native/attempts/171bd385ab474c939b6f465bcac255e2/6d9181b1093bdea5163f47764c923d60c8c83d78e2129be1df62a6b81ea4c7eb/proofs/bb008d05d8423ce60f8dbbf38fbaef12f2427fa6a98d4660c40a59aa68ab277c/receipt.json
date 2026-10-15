@@ -1,0 +1,16 @@
+{
+  "schema": "proofreader.narrative-receipt/v1",
+  "status": "passed",
+  "theorem": "BatchAcceptance.Induction.addition_associates",
+  "lean_version": "4.34.1",
+  "backend": "native",
+  "snapshot_sha256": "50bf69a011245cffe87938e37e859734f55559f12e8635bde665d2ca596845cd",
+  "source_sha256": "7347d1ce67a60484fed161bd23b0ec7e7cf4588ec7cd17901244e20b9189fef8",
+  "selected_judgements": 9,
+  "all_selected_judgements_kernel_checked": true,
+  "path_linkage_checked_in_lean": true,
+  "receipt_authenticated": false,
+  "english_formally_verified": false,
+  "exact_openai_project_replayed": false,
+  "module": "ProofReader.Acceptance.Induction"
+}

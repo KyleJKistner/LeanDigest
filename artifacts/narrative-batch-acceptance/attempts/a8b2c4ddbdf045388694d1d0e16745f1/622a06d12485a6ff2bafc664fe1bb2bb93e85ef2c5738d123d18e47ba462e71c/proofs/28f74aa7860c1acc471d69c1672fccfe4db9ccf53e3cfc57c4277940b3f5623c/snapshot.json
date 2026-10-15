@@ -1,0 +1,453 @@
+{
+  "axioms": [],
+  "formula_backend": "Lean pretty-printer",
+  "frames": [
+    {
+      "binder": "α",
+      "budget_cut": false,
+      "children": [
+        1
+      ],
+      "context": [],
+      "domain": "Type",
+      "head": "",
+      "id": 0,
+      "objects": [],
+      "path": [],
+      "premises": [],
+      "role": "introduce",
+      "statement": "∀ {α : Type} (P : α → Prop) (Q : Prop), (∃ x, P x) → (∀ (x : α), P x → Q) → Q"
+    },
+    {
+      "binder": "P",
+      "budget_cut": false,
+      "children": [
+        2
+      ],
+      "context": [
+        {
+          "name": "α",
+          "type": "Type"
+        }
+      ],
+      "domain": "α → Prop",
+      "head": "",
+      "id": 1,
+      "objects": [],
+      "path": [
+        1
+      ],
+      "premises": [],
+      "role": "introduce",
+      "statement": "∀ (P : α → Prop) (Q : Prop), (∃ x, P x) → (∀ (x : α), P x → Q) → Q"
+    },
+    {
+      "binder": "Q",
+      "budget_cut": false,
+      "children": [
+        3
+      ],
+      "context": [
+        {
+          "name": "α",
+          "type": "Type"
+        },
+        {
+          "name": "P",
+          "type": "α → Prop"
+        }
+      ],
+      "domain": "Prop",
+      "head": "",
+      "id": 2,
+      "objects": [],
+      "path": [
+        1,
+        1
+      ],
+      "premises": [],
+      "role": "introduce",
+      "statement": "∀ (Q : Prop), (∃ x, P x) → (∀ (x : α), P x → Q) → Q"
+    },
+    {
+      "binder": "h",
+      "budget_cut": false,
+      "children": [
+        4
+      ],
+      "context": [
+        {
+          "name": "α",
+          "type": "Type"
+        },
+        {
+          "name": "P",
+          "type": "α → Prop"
+        },
+        {
+          "name": "Q",
+          "type": "Prop"
+        }
+      ],
+      "domain": "∃ x, P x",
+      "head": "",
+      "id": 3,
+      "objects": [],
+      "path": [
+        1,
+        1,
+        1
+      ],
+      "premises": [],
+      "role": "assume",
+      "statement": "(∃ x, P x) → (∀ (x : α), P x → Q) → Q"
+    },
+    {
+      "binder": "use",
+      "budget_cut": false,
+      "children": [
+        5
+      ],
+      "context": [
+        {
+          "name": "α",
+          "type": "Type"
+        },
+        {
+          "name": "P",
+          "type": "α → Prop"
+        },
+        {
+          "name": "Q",
+          "type": "Prop"
+        },
+        {
+          "name": "h",
+          "type": "∃ x, P x"
+        }
+      ],
+      "domain": "∀ (x : α), P x → Q",
+      "head": "",
+      "id": 4,
+      "objects": [],
+      "path": [
+        1,
+        1,
+        1,
+        1
+      ],
+      "premises": [],
+      "role": "assume",
+      "statement": "(∀ (x : α), P x → Q) → Q"
+    },
+    {
+      "budget_cut": false,
+      "children": [
+        6,
+        7
+      ],
+      "context": [
+        {
+          "name": "α",
+          "type": "Type"
+        },
+        {
+          "name": "P",
+          "type": "α → Prop"
+        },
+        {
+          "name": "Q",
+          "type": "Prop"
+        },
+        {
+          "name": "h",
+          "type": "∃ x, P x"
+        },
+        {
+          "name": "use",
+          "type": "∀ (x : α), P x → Q"
+        }
+      ],
+      "head": "Exists.casesOn",
+      "id": 5,
+      "objects": [
+        "α",
+        "fun x => P x",
+        "fun x => Q"
+      ],
+      "path": [
+        1,
+        1,
+        1,
+        1,
+        1
+      ],
+      "premises": [
+        {
+          "argument": 3,
+          "frame": 6,
+          "statement": "∃ x, P x"
+        },
+        {
+          "argument": 4,
+          "frame": 7,
+          "statement": "∀ (x : α), P x → Q"
+        }
+      ],
+      "role": "choose",
+      "statement": "Q"
+    },
+    {
+      "binder": "h",
+      "budget_cut": false,
+      "children": [],
+      "context": [
+        {
+          "name": "α",
+          "type": "Type"
+        },
+        {
+          "name": "P",
+          "type": "α → Prop"
+        },
+        {
+          "name": "Q",
+          "type": "Prop"
+        },
+        {
+          "name": "h",
+          "type": "∃ x, P x"
+        },
+        {
+          "name": "use",
+          "type": "∀ (x : α), P x → Q"
+        }
+      ],
+      "head": "",
+      "id": 6,
+      "objects": [],
+      "path": [
+        1,
+        1,
+        1,
+        1,
+        1,
+        0,
+        1
+      ],
+      "premises": [],
+      "role": "given",
+      "statement": "∃ x, P x"
+    },
+    {
+      "binder": "x",
+      "budget_cut": false,
+      "children": [
+        8
+      ],
+      "context": [
+        {
+          "name": "α",
+          "type": "Type"
+        },
+        {
+          "name": "P",
+          "type": "α → Prop"
+        },
+        {
+          "name": "Q",
+          "type": "Prop"
+        },
+        {
+          "name": "h",
+          "type": "∃ x, P x"
+        },
+        {
+          "name": "use",
+          "type": "∀ (x : α), P x → Q"
+        }
+      ],
+      "domain": "α",
+      "head": "",
+      "id": 7,
+      "objects": [],
+      "path": [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1
+      ],
+      "premises": [],
+      "role": "introduce",
+      "statement": "∀ (x : α), P x → Q"
+    },
+    {
+      "binder": "hx",
+      "budget_cut": false,
+      "children": [
+        9
+      ],
+      "context": [
+        {
+          "name": "α",
+          "type": "Type"
+        },
+        {
+          "name": "P",
+          "type": "α → Prop"
+        },
+        {
+          "name": "Q",
+          "type": "Prop"
+        },
+        {
+          "name": "h",
+          "type": "∃ x, P x"
+        },
+        {
+          "name": "use",
+          "type": "∀ (x : α), P x → Q"
+        },
+        {
+          "name": "x",
+          "type": "α"
+        }
+      ],
+      "domain": "P x",
+      "head": "",
+      "id": 8,
+      "objects": [],
+      "path": [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1
+      ],
+      "premises": [],
+      "role": "assume",
+      "statement": "P x → Q"
+    },
+    {
+      "budget_cut": false,
+      "children": [
+        10
+      ],
+      "context": [
+        {
+          "name": "α",
+          "type": "Type"
+        },
+        {
+          "name": "P",
+          "type": "α → Prop"
+        },
+        {
+          "name": "Q",
+          "type": "Prop"
+        },
+        {
+          "name": "h",
+          "type": "∃ x, P x"
+        },
+        {
+          "name": "use",
+          "type": "∀ (x : α), P x → Q"
+        },
+        {
+          "name": "x",
+          "type": "α"
+        },
+        {
+          "name": "hx",
+          "type": "P x"
+        }
+      ],
+      "head": "",
+      "id": 9,
+      "objects": [
+        "x"
+      ],
+      "path": [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1
+      ],
+      "premises": [
+        {
+          "argument": 1,
+          "frame": 10,
+          "statement": "P x"
+        }
+      ],
+      "role": "application",
+      "statement": "Q"
+    },
+    {
+      "binder": "hx",
+      "budget_cut": false,
+      "children": [],
+      "context": [
+        {
+          "name": "α",
+          "type": "Type"
+        },
+        {
+          "name": "P",
+          "type": "α → Prop"
+        },
+        {
+          "name": "Q",
+          "type": "Prop"
+        },
+        {
+          "name": "h",
+          "type": "∃ x, P x"
+        },
+        {
+          "name": "use",
+          "type": "∀ (x : α), P x → Q"
+        },
+        {
+          "name": "x",
+          "type": "α"
+        },
+        {
+          "name": "hx",
+          "type": "P x"
+        }
+      ],
+      "head": "",
+      "id": 10,
+      "objects": [],
+      "path": [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1
+      ],
+      "premises": [],
+      "role": "given",
+      "statement": "P x"
+    }
+  ],
+  "judgements_checked": 11,
+  "lean_version": "4.34.1",
+  "schema": "proofreader.narrative/v1",
+  "statement": "∀ {α : Type} (P : α → Prop) (Q : Prop), (∃ x, P x) → (∀ (x : α), P x → Q) → Q",
+  "theorem": "BatchAcceptance.Logic.choose"
+}
