@@ -1,0 +1,6 @@
+Leanglish · BatchAcceptance.Logic.proof_definition
+
+Then True.
+
+Proof.
+The conclusion is the proposition True.
