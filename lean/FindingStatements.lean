@@ -1,9 +1,7 @@
-/-!
-Read the type of a named declaration from an imported comparison specification.
+/- Read the type of a named declaration from an imported comparison specification.
 Comparison modules intentionally contain admitted target proofs. This exporter
 checks and exposes STATEMENTS; it does not verify the supplied solution proof.
-The source file, compiler, pretty-printer and English renderer remain trusted.
--/
+The source file, compiler, pretty-printer and English renderer remain trusted. -/
 import Lean
 import Lean.Util.CollectAxioms
 open Lean Meta Elab Command
