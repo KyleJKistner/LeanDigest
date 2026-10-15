@@ -181,7 +181,8 @@ def run(plan: dict, project: Path, output: Path, *, allow_download=False, trust_
     project, output = Path(project), Path(output)
     require(not project.exists() and not project.is_symlink(), 'Use a new empty project path')
     require(not output.exists() and not output.is_symlink(), 'Use a new output path')
-    require(project.resolve()!=output.resolve() and project.resolve() not in output.resolve().parents,
+    require(project.resolve()!=output.resolve() and project.resolve() not in output.resolve().parents
+            and output.resolve() not in project.resolve().parents,
             'Put results outside the Lean project')
     project.mkdir(parents=True);output.mkdir(parents=True)
     project, output = project.resolve(),output.resolve()

@@ -126,7 +126,12 @@ def main(argv: list[str] | None = None, *, prog: str = "proofreader") -> int:
         if args.command=="batch-narrative":
             from .narrative_batch import run_batch
             from .kernel_io import strict_json
-            modules=strict_json(args.plan.read_bytes()).get("modules") if args.plan else args.module
+            modules=args.module
+            if args.plan:
+                plan=strict_json(args.plan.read_bytes())
+                if not isinstance(plan,dict) or set(plan)!={"modules"}:
+                    raise ValueError("A narrative plan must be an object containing only a modules array")
+                modules=plan["modules"]
             result=run_batch(modules,args.project,args.output,version=args.lean_version,
                              trust_project=args.trust_project,timeout=args.timeout,
                              max_declarations=args.max_declarations,shard_index=args.shard_index,shard_count=args.shard_count)

@@ -75,12 +75,12 @@ partial def visit (e : Expr) (xs : Array Expr) (path : Array Nat)
       if arity > 0 && args.size > arity then
         -- Preserve the proof of the quantified/conditional intermediate claim.
         -- Its original path is a function-prefix, not an invented new proof.
-        let prefix := mkAppN e.getAppFn (args.extract 0 arity)
-        let prefixType ← liftM <| inferType prefix
+        let headProof := mkAppN e.getAppFn (args.extract 0 arity)
+        let prefixType ← liftM <| inferType headProof
         if ← liftM <| isProp prefixType then
           role := "specialize"
           let prefixPath := path ++ Array.replicate (args.size-arity) 0
-          let ch ← visit prefix xs prefixPath base levels (depth-1)
+          let ch ← visit headProof xs prefixPath base levels (depth-1)
           children := children.push ch
           for k in [arity:args.size] do
             let a := args[k]!

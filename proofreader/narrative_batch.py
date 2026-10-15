@@ -377,8 +377,9 @@ def _validate_report(report: dict) -> None:
     plan = report.get('plan')
     require(isinstance(plan, dict) and isinstance(plan.get('modules'), list), 'Missing plan')
     require(report.get('plan_sha256') == digest(canonical_json(plan)), 'Plan digest mismatch')
-    require(len(plan['modules']) == len(set(plan['modules'])) and
-            all(isinstance(m, str) and MODULE_RE.fullmatch(m) for m in plan['modules']), 'Invalid plan modules')
+    require(all(isinstance(m, str) and MODULE_RE.fullmatch(m) for m in plan['modules']) and
+            len(plan['modules']) == len(set(plan['modules'])), 'Invalid plan modules')
+    require(isinstance(plan.get('version'), str) and re.fullmatch(r'4\.\d+\.\d+', plan['version']), 'Invalid plan toolchain')
     require(isinstance(report.get('modules'), list), 'Missing module outcomes')
     require(isinstance(report.get('project_source_fingerprint'), str), 'Missing project fingerprint')
     count, index = report.get('shard_count'), report.get('shard_index')
@@ -386,7 +387,9 @@ def _validate_report(report: dict) -> None:
     selected = {m for m in plan['modules'] if int(digest(m)[:16], 16) % count == index}
     seen = set()
     for module in report['modules']:
+        require(isinstance(module, dict), 'Invalid module outcome')
         name = module.get('module')
+        _name(name)
         require(name in selected and name not in seen, 'Duplicate/unexpected module outcome')
         seen.add(name)
         expected = module.get('expected')
@@ -403,6 +406,8 @@ def _validate_report(report: dict) -> None:
         names = {r['name']: r['kind'] for r in inv['candidates']}
         observed = set()
         for row in rows:
+            require(isinstance(row, dict), 'Invalid declaration outcome')
+            _name(row.get('name'))
             require(row.get('name') in names and row.get('name') not in observed, 'Duplicate/unexpected declaration')
             observed.add(row['name'])
             require(row.get('kind') == names[row['name']], 'Declaration kind mismatch')
@@ -420,7 +425,13 @@ def _validate_report(report: dict) -> None:
 def aggregate(paths: list[Path], output: Path) -> dict:
     """Reconcile unsigned local run records. This never executes or authenticates Lean."""
     require(bool(paths), 'No shard reports supplied')
-    runs = [strict_json(Path(p).read_bytes()) for p in paths]
+    require(len(paths) <= 10000, 'Too many shard reports')
+    runs=[]
+    for p in paths:
+        with Path(p).open('rb') as f:
+            raw=f.read(MAX_OUTPUT+1)
+        require(len(raw) <= MAX_OUTPUT, 'Shard report exceeds the input budget')
+        runs.append(strict_json(raw))
     for run in runs:
         _validate_report(run)
     first = runs[0]
