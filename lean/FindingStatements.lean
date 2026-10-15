@@ -22,25 +22,25 @@ private def kindOf : ConstantInfo → String
 private def exportStatement (name : Name) : MetaM Json := do
   let info ← getConstInfo name
   let statement ← pp info.type
-  let exact ← withOptions (fun o => o.setBool `pp.fullNames true |>.setBool `pp.universes true) <| pp info.type
+  let fullStatement ← withOptions (fun o => o.setBool `pp.fullNames true |>.setBool `pp.universes true) <| pp info.type
   let proposition ← isProp info.type
   let (binders, conclusion) ← forallTelescope info.type fun xs body => do
     let mut binders : Array Json := #[]
     for x in xs do
-      let local ← x.fvarId!.getDecl
+      let decl ← x.fvarId!.getDecl
       binders := binders.push <| Json.mkObj [
         ("name", toJson (← pp x)),
-        ("type", toJson (← pp local.type)),
-        ("is_assumption", toJson (← isProp local.type)),
-        ("is_instance", toJson local.binderInfo.isInstImplicit),
-        ("implicit", toJson (local.binderInfo != .default))]
+        ("type", toJson (← pp decl.type)),
+        ("is_assumption", toJson (← isProp decl.type)),
+        ("is_instance", toJson (decl.binderInfo == .instImplicit)),
+        ("implicit", toJson (decl.binderInfo != .default))]
     return (binders, ← pp body)
   let axioms ← collectAxioms name
   return Json.mkObj [
     ("schema", toJson "leanglish.finding-statement/v1"),
     ("name", toJson name.toString), ("declaration_kind", toJson (kindOf info)),
     ("lean_version", toJson Lean.versionString),
-    ("statement", toJson statement), ("qualified_statement", toJson exact),
+    ("statement", toJson statement), ("qualified_statement", toJson fullStatement),
     ("is_proposition", toJson proposition), ("binders", toJson binders),
     ("conclusion", toJson conclusion),
     ("specification_axioms", toJson (axioms.map Name.toString)),
