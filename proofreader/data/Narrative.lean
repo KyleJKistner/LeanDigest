@@ -18,13 +18,30 @@ def pp (e : Expr) : MetaM String := do
 def nameOf (e : Expr) : String :=
   match e.getAppFn with | .const n _ => n.toString | _ => ""
 
+/-- Choose a display-local name without changing the original proof expression.
+Source paths are still checked against the original term after abstraction. -/
+private def readableName (n : Name) (xs : Array Expr) : MetaM Name := do
+  let stem := n.eraseMacroScopes
+  let text := if stem.isAnonymous then "x" else stem.toString
+  let used ← xs.mapM fun x => return (← x.fvarId!.getDecl).userName
+  let mut candidate := text.toName
+  let mut suffix := 1
+  while used.contains candidate do
+    candidate := (text ++ "_" ++ toString suffix).toName
+    suffix := suffix + 1
+  return candidate
+
 partial def visit (e : Expr) (xs : Array Expr) (path : Array Nat)
-    (base : Name) (levels : List Name) (depth : Nat) : M Nat := do
+    (base : Name) (levels : List Name) (depth : Nat) (expectedType : Option Expr := none) : M Nat := do
   let e := e.consumeMData
   let i := (← get).frames.size
   if i ≥ 1000 then throwError "Narrative frame budget exceeded; no complete record"
   modify fun s => {s with frames := s.frames.push Json.null, terms := s.terms.push (e.abstract xs)}
-  let typ ← liftM <| inferType e
+  let inferred ← liftM <| inferType e
+  let typ := expectedType.getD inferred
+  if expectedType.isSome then
+    unless ← liftM <| isDefEq inferred typ do
+      throwError "Original declaration type does not match proof type"
   let isProof ← liftM <| isProp typ
   let ct ← liftM <| mkForallFVars xs typ (usedLetOnly := false)
   let cv ← liftM <| mkLambdaFVars xs e (usedLetOnly := false)
@@ -48,6 +65,7 @@ partial def visit (e : Expr) (xs : Array Expr) (path : Array Nat)
   if !stopHere then
     match e with
     | .lam n d b bi =>
+      let n ← liftM <| readableName n xs
       let dp ← liftM <| isProp d
       role := if dp then "assume" else "introduce"
       fields := [("binder", toJson n.toString), ("domain", toJson (← liftM <| pp d))]
@@ -57,6 +75,7 @@ partial def visit (e : Expr) (xs : Array Expr) (path : Array Nat)
       set st
       children := #[ch]
     | .letE n t v b nd =>
+      let n ← liftM <| readableName n xs
       let vp ← liftM <| isProp t
       role := if vp then "have" else "define"
       fields := [("binder", toJson n.toString), ("domain", toJson (← liftM <| pp t))]
@@ -143,7 +162,7 @@ def exportOne (n : Name) : MetaM Json := do
   let ax ← collectAxioms n
   unless ax.all (fun n => #[`propext, `Classical.choice, `Quot.sound].contains n) do throwError "Disallowed axiom"
   let base ← mkFreshUserName `PRNarrativeCheck
-  let (_, s) ← (visit v.value #[] #[] base v.levelParams 160).run {}
+  let (_, s) ← (visit v.value #[] #[] base v.levelParams 160 (some v.type)).run {}
   checkPaths v.value s
   return obj [("schema", toJson "proofreader.narrative/v1"), ("theorem", toJson n.toString),
     ("lean_version", toJson Lean.versionString), ("axioms", toJson (ax.map Name.toString)),

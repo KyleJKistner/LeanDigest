@@ -126,10 +126,11 @@ def extract_narrative(theorem: str, output: Path, *, context: str | None = None,
             receipt['service_info']=response['info']
         else:
             assert project is not None
-            with driver_file(project,source) as driver:
-                run=run_bounded(['lake','env','lean',str(driver)],project.resolve(),timeout=timeout)
+            with driver_file(project,source) as driver_path:
+                run=run_bounded(['lake','env','lean',str(driver_path)],project.resolve(),timeout=timeout)
             _write_json(output/'run.json',asdict(run))
             (output/'stderr.txt').write_text(run.stderr,encoding='utf-8')
+            (output/'stdout.txt').write_text(run.stdout,encoding='utf-8')
             require(run.status=='passed' and run.exit_code==0,run.reason or 'Native Lean did not succeed')
             stdout=run.stdout
         (output/'stdout.txt').write_text(stdout,encoding='utf-8')

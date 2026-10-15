@@ -156,8 +156,9 @@ def test_release_sources_reproduce_observed_hashes():
         assert digest((a/f'bezout-4.34.1-{name}.lean').read_bytes())==obs[name]['source_sha256']
     snapshot=Snapshot.read(a/'bezout.narrative.json')
     assert snapshot.sha256==obs['valid']['record_sha256']
-    # Tool code shipped is the exact tested body, ignoring blank lines only.
-    packaged=io.exporter_source();body=packaged[packaged.index('open Lean Meta Elab Command'):]
+    # Preserve the exact historical exporter. The current exporter has its own
+    # native integration tests; it must not inherit this old experiment's receipt.
+    packaged=(a/'Narrative.lean').read_text();body=packaged[packaged.index('open Lean Meta Elab Command'):]
     exact=(a/'bezout-4.34.1-valid.lean').read_text()
     assert '\n'.join(x for x in body.splitlines() if x.strip()) in exact
 
@@ -166,3 +167,20 @@ def test_cli_execution_not_accidentally_enabled(tmp_path,record):
     path=tmp_path/'context.lean';path.write_text('import Lean')
     assert main(['extract-narrative',record['theorem'],'--context',str(path),'-o',str(tmp_path/'out'),'--backend','axle'])==2
     assert not (tmp_path/'out').exists()
+
+
+def test_native_module_does_not_replace_source_with_temporary_driver_path(tmp_path,record,monkeypatch):
+    stdout='PR_NARRATIVE:'+canonical_json(record)+'\n'
+    monkeypatch.setattr(io,'run_bounded',lambda *a,**k:RunResult('passed',[],0,stdout,'',0))
+    r=io.extract_narrative(record['theorem'],tmp_path/'out',module='Example',project=tmp_path,trust_project=True)
+    assert r['status']=='passed',r
+    doc=load_document((tmp_path/'out/reading.json').read_bytes())
+    assert doc.declarations[0].source=='import Example\n'
+    assert r['driver_sha256'] is None
+
+
+def test_native_failed_stdout_is_retained(tmp_path,record,monkeypatch):
+    monkeypatch.setattr(io,'run_bounded',lambda *a,**k:RunResult('failed',[],1,'Precise compiler diagnostic','',0))
+    r=io.extract_narrative(record['theorem'],tmp_path/'out',module='Example',project=tmp_path,trust_project=True)
+    assert r['status']=='failed'
+    assert (tmp_path/'out/stdout.txt').read_text()=='Precise compiler diagnostic'
