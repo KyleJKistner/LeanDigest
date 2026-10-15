@@ -1,0 +1,93 @@
+name: Scoped hypothesis and recursor contracts
+on:
+  push:
+    branches: [work/narrative-batch]
+    paths: ['.github/workflows/local-applications.yml']
+permissions:
+  contents: write
+jobs:
+  apply-and-test:
+    if: github.repository == 'KyleJKistner/LeanDigest'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: work/narrative-batch
+      - name: Apply locally tested exact delta
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          python3 - <<'PY'
+          import base64,hashlib,json,os,pathlib,shutil,subprocess,urllib.request
+          def get(sha):
+              req=urllib.request.Request('https://api.github.com/repos/KyleJKistner/LeanDigest/git/blobs/'+sha,headers={'Authorization':'Bearer '+os.environ['GH_TOKEN']})
+              with urllib.request.urlopen(req,timeout=30) as r:data=base64.b64decode(json.load(r)['content'])
+              assert hashlib.sha1(b'blob '+str(len(data)).encode()+b'\0'+data).hexdigest()==sha
+              return data
+          patch=get('38c274429f13cde525db70082dc43b050cee034e')
+          assert hashlib.sha256(patch).hexdigest()=='dc282add4bb7962cdead85e133ae683039d936a6c71cef1c61613bb3f1e7f54e'
+          subprocess.run(['git','apply','--check','-'],input=patch,check=True)
+          subprocess.run(['git','apply','-'],input=patch,check=True)
+          shutil.copyfile('lean/Narrative.lean','proofreader/data/Narrative.lean')
+          p=pathlib.Path('tests/test_local_applications.py');assert not p.exists()
+          p.write_bytes(get('039d0b740c044c08d8decb3a4c26a2580ccae097'))
+          paths=['lean/Narrative.lean','proofreader/data/Narrative.lean','proofreader/narrative.py','tests/test_local_applications.py','tests/test_narrative_batch_integration.py','lean/ProofReader/Acceptance/Induction.lean']
+          subprocess.run(['git','config','user.name','github-actions[bot]'],check=True)
+          subprocess.run(['git','config','user.email','41898282+github-actions[bot]@users.noreply.github.com'],check=True)
+          subprocess.run(['git','add','--',*paths],check=True)
+          subprocess.run(['git','commit','-m','Bind local hypothesis applications to exact context entries; guard recursor arities'],check=True)
+          subprocess.run(['git','push','origin','HEAD:refs/heads/work/narrative-batch'],check=True)
+          PY
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python -m pip install '.[dev,webtest]'
+      - run: python -m playwright install --with-deps chromium
+      - uses: leanprover/lean-action@v1
+        with:
+          lake-package-directory: lean
+          auto-config: false
+          build: true
+          build-args: 'ProofReader ProofReader.Smoke KernelExport Narrative NarrativeBatch'
+          test: false
+          lint: false
+          use-mathlib-cache: false
+          use-github-cache: false
+      - name: Require all native, browser, and negative tests
+        env:
+          PROOFREADER_REQUIRE_LEAN: '1'
+          PROOFREADER_REQUIRE_BROWSER: '1'
+          LEANGLISH_BATCH_ARTIFACTS: artifacts/ci-narrative-batch
+        run: |
+          python scripts/build_demo.py
+          python scripts/build_typed_demo.py
+          python scripts/build_narrative_demo.py
+          python -m pytest -q --junitxml=artifacts/local-applications-tests.xml
+          git diff --exit-code -- proofreader/data artifacts/openai-sample
+      - name: Retain the measured native results separately
+        if: always()
+        run: |
+          python3 - <<'PY'
+          import json,pathlib,shutil,subprocess
+          source=pathlib.Path('artifacts/ci-narrative-batch')
+          if source.exists():
+              target=pathlib.Path('artifacts/scoped-hypothesis-acceptance')
+              shutil.copytree(source,target,dirs_exist_ok=True)
+              report=json.loads((target/'batch.json').read_text())
+              print('NATIVE_SUMMARY',json.dumps(report['summary']))
+              for module in report['modules']:
+                  for row in module['rows']:print('PROOF_RESULT',row['name'],row['status'],row.get('unexpanded_steps'))
+              test=pathlib.Path('artifacts/local-applications-tests.xml')
+              if test.exists():shutil.copyfile(test,target/'tests.xml')
+              subprocess.run(['git','add','--force','--',str(target)],check=True)
+              subprocess.run(['git','commit','-m','Retain native scoped-application and induction guard observations'],check=True)
+              subprocess.run(['git','push','origin','HEAD:refs/heads/work/narrative-batch'],check=True)
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: scoped-hypothesis-acceptance
+          path: |
+            artifacts/local-applications-tests.xml
+            artifacts/ci-narrative-batch/
