@@ -1,0 +1,115 @@
+name: Pinned selected OpenAI proof slice
+on:
+  push:
+    branches: [work/openai-slice]
+    paths:
+      - '.github/workflows/openai-slice.yml'
+      - 'proofreader/openai_acceptance.py'
+      - 'benchmarks/openai-slice.json'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  selected-proof-slice:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python -m pip install '.[dev]'
+      - name: Test acquisition and pin validation offline first
+        run: python -m pytest tests/test_openai_acceptance.py tests/test_narrative_batch.py -q
+      - uses: leanprover/lean-action@v1
+        with:
+          lake-package-directory: lean
+          auto-config: false
+          build: true
+          build-args: 'Narrative NarrativeBatch'
+          test: false
+          lint: false
+          use-mathlib-cache: false
+          use-github-cache: false
+      - name: Build unchanged original imports against original shared dependency pins
+        id: acceptance
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: >-
+          python -m proofreader.openai_acceptance benchmarks/openai-slice.json
+          --work "$RUNNER_TEMP/openai-slice" --output artifacts/pinned-openai-slice
+          --allow-download --trust-project
+      - name: Print measured outcome, not an assumed success
+        if: always()
+        run: |
+          python3 - <<'PY'
+          import json,pathlib
+          p=pathlib.Path('artifacts/pinned-openai-slice/acceptance.json')
+          if p.exists():
+              r=json.loads(p.read_text())
+              print('SCOPE',r['scope'],'STATUS',r['status'])
+              print('SUMMARY',json.dumps(r.get('summary')))
+              print('ERROR',r.get('error'))
+          p=pathlib.Path('artifacts/pinned-openai-slice/batch/batch.json')
+          if p.exists():
+              r=json.loads(p.read_text())
+              for m in r['modules']:
+                  print('MODULE',m['module'],m['status'])
+                  for row in m['rows']:
+                      print('PROOF',json.dumps({k:row.get(k) for k in ['name','kind','status','error','unexpanded_steps']}))
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: pinned-openai-slice
+          path: artifacts/pinned-openai-slice/
+          if-no-files-found: error
+      - name: Incomplete acceptance must not be green
+        if: steps.acceptance.outcome == 'failure'
+        run: exit 1
+  retain-evidence:
+    needs: selected-proof-slice
+    if: always() && github.ref == 'refs/heads/work/openai-slice'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: write
+      actions: read
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: work/openai-slice
+      - uses: actions/download-artifact@v4
+        with:
+          name: pinned-openai-slice
+          path: retained-results
+      - name: Save bounded UTF-8 observations on work branch only
+        env:
+          OBSERVATION_RUN: ${{ github.run_id }}
+          OBSERVATION_SHA: ${{ github.sha }}
+        run: |
+          python3 - <<'PY'
+          import hashlib,json,os,pathlib,subprocess
+          source=pathlib.Path('retained-results')
+          root=pathlib.Path('artifacts/pinned-openai-slice')/os.environ['OBSERVATION_RUN']
+          files=sorted(source.rglob('*'))
+          assert sum(p.stat().st_size for p in files if p.is_file())<=64_000_000
+          manifest=[]
+          for p in files:
+              assert not p.is_symlink()
+              if not p.is_file():continue
+              rel=p.relative_to(source)
+              assert '..' not in rel.parts and '.git' not in rel.parts
+              data=p.read_bytes();data.decode('utf-8')
+              target=root/rel;target.parent.mkdir(parents=True,exist_ok=True);target.write_bytes(data)
+              manifest.append({'path':rel.as_posix(),'sha256':hashlib.sha256(data).hexdigest(),'bytes':len(data)})
+          (root/'run-provenance.json').write_text(json.dumps({'run':os.environ['OBSERVATION_RUN'],'source_commit':os.environ['OBSERVATION_SHA'],'files':manifest},indent=2)+'\n')
+          subprocess.run(['git','config','user.name','github-actions[bot]'],check=True)
+          subprocess.run(['git','config','user.email','41898282+github-actions[bot]@users.noreply.github.com'],check=True)
+          subprocess.run(['git','add','--force','--',str(root)],check=True)
+          subprocess.run(['git','commit','-m','Retain measured pinned-slice outcomes, including any failures'],check=True)
+          subprocess.run(['git','push','origin','HEAD:refs/heads/work/openai-slice'],check=True)
+          PY
