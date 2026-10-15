@@ -2,6 +2,14 @@
 
 **Lean proofs, in mathematical English.**
 
+## Research preview for mathematicians (October 2026)
+
+**[Download the Leanglish OpenAI proof gallery](https://github.com/KyleJKistner/LeanDigest/releases/tag/leanglish-research-preview-2026-10-15)**. Extract the ZIP and open `Leanglish/index.html`; the 14 source-linked proof readers work offline. Start with the Bézout-frame argument. [See the reading guide and limitations](docs/MATHEMATICIAN_PREVIEW.md).
+
+The frozen dependency-pinned slice yielded **14 kernel-checked and rendered declarations**, but **13 readings have 796 explicitly unexpanded steps**. Three selected modules completed; a fourth timed out, so its declaration denominator is **unknown**. A successful Lean checking observation **does not** certify the generated English, and there has been no human comprehension study. This release is a **research preview**, not whole-corpus coverage.
+
+For source-to-English accuracy problems, [open an issue](https://github.com/KyleJKistner/LeanDigest/issues/new) with the theorem, exact generated sentence, and source-frame information.
+
 Leanglish is the product name. The repository remains `KyleJKistner/LeanDigest`.
 Use `leanglish` or `python -m leanglish`; the existing `proofreader` command,
 Python package, installation name (`lean-proofreader`), and proof formats remain
@@ -196,7 +204,7 @@ This repository is `KyleJKistner/LeanDigest`. It contains the v0.3.0 development
 snapshot, including the application, Lean extraction/checking code, tests,
 examples and retained validation evidence. Historical reports describe the
 state at the time of each experiment; they are not claims that GitHub CI has
-subsequently passed. There is no hosted deployment.
+subsequently passed. An offline public prerelease is available; GitHub Pages hosting is not yet enabled.
 
 The original creation helper, `scripts/publish.sh`, now targets `LeanDigest`.
 It fails rather than overwriting an existing repository; ordinary updates should
