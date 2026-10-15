@@ -1,0 +1,89 @@
+name: Source-bound specialization acceptance
+on:
+  push:
+    branches: [work/narrative-batch]
+    paths: ['.github/workflows/specialization.yml']
+permissions:
+  contents: write
+jobs:
+  specialize-and-test:
+    if: github.repository == 'KyleJKistner/LeanDigest'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: work/narrative-batch
+      - name: Apply exact specialization delta
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          python3 - <<'PY'
+          import base64,hashlib,json,os,shutil,subprocess,urllib.request
+          sha='9f025688fae40a10d9c2fc40de0883fe6e20d3a4'
+          req=urllib.request.Request('https://api.github.com/repos/KyleJKistner/LeanDigest/git/blobs/'+sha,headers={'Authorization':'Bearer '+os.environ['GH_TOKEN']})
+          with urllib.request.urlopen(req,timeout=30) as r:patch=base64.b64decode(json.load(r)['content'])
+          assert hashlib.sha1(b'blob '+str(len(patch)).encode()+b'\0'+patch).hexdigest()==sha
+          assert hashlib.sha256(patch).hexdigest()=='de9d2018b31d6c64848279984f9cc233b8f290feaa2c846f0223faa02291284e'
+          subprocess.run(['git','apply','--check','-'],input=patch,check=True)
+          subprocess.run(['git','apply','-'],input=patch,check=True)
+          shutil.copyfile('lean/Narrative.lean','proofreader/data/Narrative.lean')
+          paths=['lean/Narrative.lean','proofreader/data/Narrative.lean','proofreader/narrative.py','tests/test_narrative_batch_integration.py']
+          subprocess.run(['git','config','user.name','github-actions[bot]'],check=True)
+          subprocess.run(['git','config','user.email','41898282+github-actions[bot]@users.noreply.github.com'],check=True)
+          subprocess.run(['git','add','--',*paths],check=True)
+          subprocess.run(['git','commit','-m','Explain oversaturated recursors through their checked conditional proof prefixes'],check=True)
+          subprocess.run(['git','push','origin','HEAD:refs/heads/work/narrative-batch'],check=True)
+          PY
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python -m pip install '.[dev,webtest]'
+      - run: python -m playwright install --with-deps chromium
+      - uses: leanprover/lean-action@v1
+        with:
+          lake-package-directory: lean
+          auto-config: false
+          build: true
+          build-args: 'ProofReader ProofReader.Smoke KernelExport Narrative NarrativeBatch'
+          test: false
+          lint: false
+          use-mathlib-cache: false
+          use-github-cache: false
+      - name: Require native and browser tests without skips
+        env:
+          PROOFREADER_REQUIRE_LEAN: '1'
+          PROOFREADER_REQUIRE_BROWSER: '1'
+          LEANGLISH_BATCH_ARTIFACTS: artifacts/ci-narrative-batch
+        run: |
+          python scripts/build_demo.py
+          python scripts/build_typed_demo.py
+          python scripts/build_narrative_demo.py
+          python -m pytest -q --junitxml=artifacts/specialization-tests.xml
+          git diff --exit-code -- proofreader/data artifacts/openai-sample
+      - name: Preserve actual observed readers and failures
+        if: always()
+        run: |
+          python3 - <<'PY'
+          import json,pathlib,shutil,subprocess
+          source=pathlib.Path('artifacts/ci-narrative-batch')
+          if source.exists():
+              target=pathlib.Path('artifacts/specialization-acceptance')
+              shutil.copytree(source,target,dirs_exist_ok=True)
+              report=json.loads((target/'batch.json').read_text())
+              print('NATIVE_SUMMARY',json.dumps(report['summary']))
+              for module in report['modules']:
+                  for row in module['rows']:print('PROOF_RESULT',row['name'],row['status'],row.get('unexpanded_steps'))
+              test=pathlib.Path('artifacts/specialization-tests.xml')
+              if test.exists():shutil.copyfile(test,target/'tests.xml')
+              subprocess.run(['git','add','--force','--',str(target)],check=True)
+              subprocess.run(['git','commit','-m','Retain source-prefix specialization native acceptance evidence'],check=True)
+              subprocess.run(['git','push','origin','HEAD:refs/heads/work/narrative-batch'],check=True)
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: specialization-acceptance
+          path: |
+            artifacts/specialization-tests.xml
+            artifacts/ci-narrative-batch/
