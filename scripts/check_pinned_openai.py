@@ -25,7 +25,7 @@ COMMIT = '1581d4cbdd69a0faf34b2089614fe2a814316a6a'
 MATHLIB = 'd13f23b723b8a846827a245b89c10fc7d3f11612'
 MODULE = 'OAI.Algebra.AffineCancellation.BezoutFrame'
 TARGETS = [
-    (MODULE + '.exists_frame', 'OpenAI source target'),
+    ('OAI.ComplexCancellation.BezoutFrame.exists_frame', 'OpenAI source target'),
     ('Nat.add_comm', 'standard-library control'),
     ('List.reverse_reverse', 'standard-library control'),
     ('Set.union_assoc', 'Mathlib control'),
@@ -170,23 +170,30 @@ def execute(project: Path, output: Path, info: dict) -> dict:
         ledger['original_source_hashes_matched'] = True
         for i, row in enumerate(ledger['rows']):
             dest = output/f'target-{i:02}'
-            receipt = extract_narrative(row['theorem'], dest, module=MODULE, version='4.34.1',
-                                        project=project, trust_project=True, timeout=240)
-            row.update(status=receipt['status'], errors=receipt['errors'], directory=dest.name)
-            if receipt['status'] == 'passed':
-                coverage = json.loads((dest/'coverage.json').read_text())
-                row.update(coverage=coverage, snapshot_sha256=receipt['snapshot_sha256'])
-                again = extract_narrative(row['theorem'], output/f'repeat-{i:02}', module=MODULE,
-                    version='4.34.1', project=project, trust_project=True, timeout=240,
-                    expected=json.loads((dest/'snapshot.json').read_text()))
-                row['reextraction_matched'] = again['status'] == 'passed'
-                if again['status'] != 'passed':
-                    row.update(status='failed', errors=again['errors'])
+            row['status'] = 'running'
+            save()
+            try:
+                receipt = extract_narrative(row['theorem'], dest, module=MODULE, version='4.34.1',
+                                            project=project, trust_project=True, timeout=240)
+                row.update(status=receipt['status'], errors=receipt['errors'], directory=dest.name)
+                if receipt['status'] == 'passed':
+                    coverage = json.loads((dest/'coverage.json').read_text())
+                    row.update(coverage=coverage, snapshot_sha256=receipt['snapshot_sha256'])
+                    again = extract_narrative(row['theorem'], output/f'repeat-{i:02}', module=MODULE,
+                        version='4.34.1', project=project, trust_project=True, timeout=240,
+                        expected=json.loads((dest/'snapshot.json').read_text()))
+                    row['reextraction_matched'] = again['status'] == 'passed'
+                    if again['status'] != 'passed':
+                        row.update(status='failed', errors=again['errors'])
+            except Exception as exc:
+                # Isolate a target's tool/renderer bug without losing the remaining
+                # denominator. This is a failed outcome, never a passing fallback.
+                row.update(status='failed', errors=[type(exc).__name__ + ': ' + str(exc)])
             print(json.dumps(row, ensure_ascii=False, sort_keys=True), flush=True)
             save()
         verify_checkout(project, info)
         ledger['status'] = 'passed' if all(x['status']=='passed' for x in ledger['rows']) else 'partial'
-    except (OSError, ValueError, RuntimeError, KeyError) as exc:
+    except Exception as exc:
         ledger.update(status='failed', error=str(exc))
     ledger['targets_passed'] = sum(x['status']=='passed' for x in ledger['rows'])
     save()
@@ -204,12 +211,14 @@ def main() -> int:
     if not args.allow_network or not args.trust_project:
         p.error('Both --allow-network and --trust-project are required: dependencies and Lean metaprograms execute code')
     project, output = args.project.resolve(), args.output.resolve()
+    output_was_empty = not output.exists() or (output.is_dir() and not any(output.iterdir()))
     try:
         info = prepare(project, output)
         return 0 if execute(project, output, info)['status'] == 'passed' else 1
     except (OSError, ValueError, KeyError) as exc:
-        write_json(output/'result.json', {'status':'preparation-failed', 'error':str(exc),
-            'expected_targets':len(TARGETS), 'targets_passed':0, 'full_openai_project_built':False})
+        if output_was_empty:
+            write_json(output/'result.json', {'status':'preparation-failed', 'error':str(exc),
+                'expected_targets':len(TARGETS), 'targets_passed':0, 'full_openai_project_built':False})
         print(str(exc), file=sys.stderr)
         return 1
 
