@@ -1,0 +1,47 @@
+name: Pinned OpenAI acceptance
+on:
+  workflow_dispatch:
+  push:
+    branches: [main, dev/native-and-corpus]
+    paths:
+      - scripts/check_pinned_openai.py
+      - .github/workflows/pinned-openai.yml
+permissions:
+  contents: read
+concurrency:
+  group: pinned-openai-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  source-closure:
+    runs-on: ubuntu-latest
+    timeout-minutes: 55
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python -m pip install '.[dev]'
+      - uses: leanprover/lean-action@v1
+        with:
+          lake-package-directory: lean
+          auto-config: false
+          build: false
+          test: false
+          lint: false
+          use-mathlib-cache: false
+          use-github-cache: false
+      - name: Check unchanged original imports and pinned dependency revisions
+        run: >-
+          python scripts/check_pinned_openai.py
+          --project "$RUNNER_TEMP/leandigest-pinned-oai"
+          --output artifacts/pinned-openai
+          --allow-network --trust-project
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: pinned-openai-evidence
+          path: artifacts/pinned-openai/
+          if-no-files-found: error
+          retention-days: 30
