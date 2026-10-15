@@ -1,0 +1,529 @@
+{
+  "axioms": [],
+  "formula_backend": "Lean pretty-printer",
+  "frames": [
+    {
+      "binder": "α",
+      "budget_cut": false,
+      "children": [
+        1
+      ],
+      "context": [],
+      "domain": "Type",
+      "head": "",
+      "id": 0,
+      "objects": [],
+      "path": [],
+      "premises": [],
+      "role": "introduce",
+      "statement": "∀ {α β : Type} (f : α → β) (xs ys : List α), List.map f (xs ++ ys) = List.map f xs ++ List.map f ys"
+    },
+    {
+      "binder": "β",
+      "budget_cut": false,
+      "children": [
+        2
+      ],
+      "context": [
+        {
+          "name": "α",
+          "type": "Type"
+        }
+      ],
+      "domain": "Type",
+      "head": "",
+      "id": 1,
+      "objects": [],
+      "path": [
+        1
+      ],
+      "premises": [],
+      "role": "introduce",
+      "statement": "∀ {β : Type} (f : α → β) (xs ys : List α), List.map f (xs ++ ys) = List.map f xs ++ List.map f ys"
+    },
+    {
+      "binder": "f",
+      "budget_cut": false,
+      "children": [
+        3
+      ],
+      "context": [
+        {
+          "name": "α",
+          "type": "Type"
+        },
+        {
+          "name": "β",
+          "type": "Type"
+        }
+      ],
+      "domain": "α → β",
+      "head": "",
+      "id": 2,
+      "objects": [],
+      "path": [
+        1,
+        1
+      ],
+      "premises": [],
+      "role": "introduce",
+      "statement": "∀ (f : α → β) (xs ys : List α), List.map f (xs ++ ys) = List.map f xs ++ List.map f ys"
+    },
+    {
+      "binder": "xs",
+      "budget_cut": false,
+      "children": [
+        4
+      ],
+      "context": [
+        {
+          "name": "α",
+          "type": "Type"
+        },
+        {
+          "name": "β",
+          "type": "Type"
+        },
+        {
+          "name": "f",
+          "type": "α → β"
+        }
+      ],
+      "domain": "List α",
+      "head": "",
+      "id": 3,
+      "objects": [],
+      "path": [
+        1,
+        1,
+        1
+      ],
+      "premises": [],
+      "role": "introduce",
+      "statement": "∀ (xs ys : List α), List.map f (xs ++ ys) = List.map f xs ++ List.map f ys"
+    },
+    {
+      "binder": "ys",
+      "budget_cut": false,
+      "children": [
+        5
+      ],
+      "context": [
+        {
+          "name": "α",
+          "type": "Type"
+        },
+        {
+          "name": "β",
+          "type": "Type"
+        },
+        {
+          "name": "f",
+          "type": "α → β"
+        },
+        {
+          "name": "xs",
+          "type": "List α"
+        }
+      ],
+      "domain": "List α",
+      "head": "",
+      "id": 4,
+      "objects": [],
+      "path": [
+        1,
+        1,
+        1,
+        1
+      ],
+      "premises": [],
+      "role": "introduce",
+      "statement": "∀ (ys : List α), List.map f (xs ++ ys) = List.map f xs ++ List.map f ys"
+    },
+    {
+      "budget_cut": false,
+      "children": [
+        6,
+        7
+      ],
+      "context": [
+        {
+          "name": "α",
+          "type": "Type"
+        },
+        {
+          "name": "β",
+          "type": "Type"
+        },
+        {
+          "name": "f",
+          "type": "α → β"
+        },
+        {
+          "name": "xs",
+          "type": "List α"
+        },
+        {
+          "name": "ys",
+          "type": "List α"
+        }
+      ],
+      "head": "List.rec",
+      "id": 5,
+      "objects": [
+        "α",
+        "fun xs => List.map f (xs ++ ys) = List.map f xs ++ List.map f ys",
+        "xs"
+      ],
+      "path": [
+        1,
+        1,
+        1,
+        1,
+        1
+      ],
+      "premises": [
+        {
+          "argument": 2,
+          "frame": 6,
+          "statement": "List.map f ([] ++ ys) = List.map f ([] ++ ys)"
+        },
+        {
+          "argument": 3,
+          "frame": 7,
+          "statement": "∀ (x : α) (xs : List α),\n  List.map f (xs ++ ys) = List.map f xs ++ List.map f ys →\n    f x :: List.map f (xs.append ys) = f x :: (List.map f xs).append (List.map f ys)"
+        }
+      ],
+      "role": "induction",
+      "statement": "List.map f (xs ++ ys) = List.map f xs ++ List.map f ys"
+    },
+    {
+      "budget_cut": false,
+      "children": [],
+      "context": [
+        {
+          "name": "α",
+          "type": "Type"
+        },
+        {
+          "name": "β",
+          "type": "Type"
+        },
+        {
+          "name": "f",
+          "type": "α → β"
+        },
+        {
+          "name": "xs",
+          "type": "List α"
+        },
+        {
+          "name": "ys",
+          "type": "List α"
+        }
+      ],
+      "head": "Eq.refl",
+      "id": 6,
+      "objects": [
+        "List β",
+        "List.map f ([] ++ ys)"
+      ],
+      "path": [
+        1,
+        1,
+        1,
+        1,
+        1,
+        0,
+        0,
+        1
+      ],
+      "premises": [],
+      "role": "reflexivity",
+      "statement": "List.map f ([] ++ ys) = List.map f ([] ++ ys)"
+    },
+    {
+      "binder": "x",
+      "budget_cut": false,
+      "children": [
+        8
+      ],
+      "context": [
+        {
+          "name": "α",
+          "type": "Type"
+        },
+        {
+          "name": "β",
+          "type": "Type"
+        },
+        {
+          "name": "f",
+          "type": "α → β"
+        },
+        {
+          "name": "xs",
+          "type": "List α"
+        },
+        {
+          "name": "ys",
+          "type": "List α"
+        }
+      ],
+      "domain": "α",
+      "head": "",
+      "id": 7,
+      "objects": [],
+      "path": [
+        1,
+        1,
+        1,
+        1,
+        1,
+        0,
+        1
+      ],
+      "premises": [],
+      "role": "introduce",
+      "statement": "∀ (x : α) (xs : List α),\n  List.map f (xs ++ ys) = List.map f xs ++ List.map f ys →\n    f x :: List.map f (xs.append ys) = f x :: (List.map f xs).append (List.map f ys)"
+    },
+    {
+      "binder": "xs",
+      "budget_cut": false,
+      "children": [
+        9
+      ],
+      "context": [
+        {
+          "name": "α",
+          "type": "Type"
+        },
+        {
+          "name": "β",
+          "type": "Type"
+        },
+        {
+          "name": "f",
+          "type": "α → β"
+        },
+        {
+          "name": "xs",
+          "type": "List α"
+        },
+        {
+          "name": "ys",
+          "type": "List α"
+        },
+        {
+          "name": "x",
+          "type": "α"
+        }
+      ],
+      "domain": "List α",
+      "head": "",
+      "id": 8,
+      "objects": [],
+      "path": [
+        1,
+        1,
+        1,
+        1,
+        1,
+        0,
+        1,
+        1
+      ],
+      "premises": [],
+      "role": "introduce",
+      "statement": "∀ (xs : List α),\n  List.map f (xs ++ ys) = List.map f xs ++ List.map f ys →\n    f x :: List.map f (xs.append ys) = f x :: (List.map f xs).append (List.map f ys)"
+    },
+    {
+      "binder": "ih",
+      "budget_cut": false,
+      "children": [
+        10
+      ],
+      "context": [
+        {
+          "name": "α",
+          "type": "Type"
+        },
+        {
+          "name": "β",
+          "type": "Type"
+        },
+        {
+          "name": "f",
+          "type": "α → β"
+        },
+        {
+          "name": "xs",
+          "type": "List α"
+        },
+        {
+          "name": "ys",
+          "type": "List α"
+        },
+        {
+          "name": "x",
+          "type": "α"
+        },
+        {
+          "name": "xs",
+          "type": "List α"
+        }
+      ],
+      "domain": "List.map f (xs ++ ys) = List.map f xs ++ List.map f ys",
+      "head": "",
+      "id": 9,
+      "objects": [],
+      "path": [
+        1,
+        1,
+        1,
+        1,
+        1,
+        0,
+        1,
+        1,
+        1
+      ],
+      "premises": [],
+      "role": "assume",
+      "statement": "List.map f (xs ++ ys) = List.map f xs ++ List.map f ys →\n  f x :: List.map f (xs.append ys) = f x :: (List.map f xs).append (List.map f ys)"
+    },
+    {
+      "budget_cut": false,
+      "children": [
+        11
+      ],
+      "context": [
+        {
+          "name": "α",
+          "type": "Type"
+        },
+        {
+          "name": "β",
+          "type": "Type"
+        },
+        {
+          "name": "f",
+          "type": "α → β"
+        },
+        {
+          "name": "xs",
+          "type": "List α"
+        },
+        {
+          "name": "ys",
+          "type": "List α"
+        },
+        {
+          "name": "x",
+          "type": "α"
+        },
+        {
+          "name": "xs",
+          "type": "List α"
+        },
+        {
+          "name": "ih",
+          "type": "List.map f (xs ++ ys) = List.map f xs ++ List.map f ys"
+        }
+      ],
+      "head": "congrArg",
+      "id": 10,
+      "objects": [
+        "List β",
+        "List β",
+        "List.map f (xs.append ys)",
+        "(List.map f xs).append (List.map f ys)",
+        "List.cons (f x)"
+      ],
+      "path": [
+        1,
+        1,
+        1,
+        1,
+        1,
+        0,
+        1,
+        1,
+        1,
+        1
+      ],
+      "premises": [
+        {
+          "argument": 5,
+          "frame": 11,
+          "statement": "List.map f (xs ++ ys) = List.map f xs ++ List.map f ys"
+        }
+      ],
+      "role": "congruence",
+      "statement": "f x :: List.map f (xs.append ys) = f x :: (List.map f xs).append (List.map f ys)"
+    },
+    {
+      "binder": "ih",
+      "budget_cut": false,
+      "children": [],
+      "context": [
+        {
+          "name": "α",
+          "type": "Type"
+        },
+        {
+          "name": "β",
+          "type": "Type"
+        },
+        {
+          "name": "f",
+          "type": "α → β"
+        },
+        {
+          "name": "xs",
+          "type": "List α"
+        },
+        {
+          "name": "ys",
+          "type": "List α"
+        },
+        {
+          "name": "x",
+          "type": "α"
+        },
+        {
+          "name": "xs",
+          "type": "List α"
+        },
+        {
+          "name": "ih",
+          "type": "List.map f (xs ++ ys) = List.map f xs ++ List.map f ys"
+        }
+      ],
+      "head": "",
+      "id": 11,
+      "objects": [],
+      "path": [
+        1,
+        1,
+        1,
+        1,
+        1,
+        0,
+        1,
+        1,
+        1,
+        1,
+        1
+      ],
+      "premises": [],
+      "role": "given",
+      "statement": "List.map f (xs ++ ys) = List.map f xs ++ List.map f ys"
+    }
+  ],
+  "judgements_checked": 12,
+  "lean_version": "4.34.1",
+  "schema": "proofreader.narrative/v1",
+  "statement": "∀ {α β : Type} (f : α → β) (xs ys : List α), List.map f (xs ++ ys) = List.map f xs ++ List.map f ys",
+  "theorem": "BatchAcceptance.Lists.map_append"
+}
