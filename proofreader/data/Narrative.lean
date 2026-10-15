@@ -118,7 +118,7 @@ partial def visit (e : Expr) (xs : Array Expr) (path : Array Nat)
        if #["dite", "ite", "Decidable.byCases", "Classical.byCases", "Or.elim", "Or.casesOn"].contains head then role := "cases"
        if head == "And.intro" then role := "combine"
        if #["Eq.trans", "Trans.trans"].contains head then role := "chain"
-       if head == "Eq.refl" then role := "reflexivity"
+       if #["Eq.refl", "rfl"].contains head then role := "reflexivity"
        if head == "mul_left_cancel₀" then role := "cancel"
        if head == "id" then role := "identity"
     | .fvar id =>

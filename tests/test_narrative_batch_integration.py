@@ -28,7 +28,8 @@ def test_native_batch_breadth_and_failure_accounting(tmp_path):
         'BatchAcceptance.Logic.implication', 'BatchAcceptance.Logic.cases', 'BatchAcceptance.Logic.choose',
         'BatchAcceptance.Logic.proof_definition', 'BatchAcceptance.Logic.opaque_proof',
         'BatchAcceptance.Induction.addition_associates', 'BatchAcceptance.Induction.zero_adds',
-        'BatchAcceptance.Induction.rec_overapplied',
+        'BatchAcceptance.Induction.rec_overapplied', 'BatchAcceptance.Induction.zero_add_recOn',
+        'BatchAcceptance.Lists.append_empty_recOn',
         'BatchAcceptance.Lists.append_empty', 'BatchAcceptance.Lists.map_append',
         'BatchAcceptance.Rejected.must_fail', 'BatchAcceptance.Rejected.still_runs',
     }
@@ -73,3 +74,11 @@ def test_native_batch_breadth_and_failure_accounting(tmp_path):
     assert by_name['BatchAcceptance.Logic.cases']['unexpanded_steps']==0
     assert 'Specialize its object arguments to m' in prose
     assert 'Proceed by induction on n' in prose
+
+    for name, variable in [('BatchAcceptance.Induction.zero_add_recOn','n'),
+                           ('BatchAcceptance.Lists.append_empty_recOn','xs')]:
+        row=by_name[name]
+        assert row['unexpanded_steps']==0, row
+        text=((output/row['reader']).parent/'proof.txt').read_text()
+        assert 'Proceed by induction on '+variable+'.' in text, text
+        assert 'Proceed by induction on fun' not in text

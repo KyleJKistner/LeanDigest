@@ -25,7 +25,7 @@ ROLES = {'introduce','assume','have','define','witness','choose','cases','combin
          'reflexivity','cancel','identity','given','named','application','ring','rewrite','unexpanded','induction','congruence','local-application','specialize'}
 _HEAD_ROLES = {'Exists.intro':'witness','Exists.casesOn':'choose','Exists.elim':'choose',
                'And.intro':'combine','Trans.trans':'chain','Eq.trans':'chain',
-               'mul_left_cancel₀':'cancel','id':'identity','Eq.refl':'reflexivity',
+               'mul_left_cancel₀':'cancel','id':'identity','Eq.refl':'reflexivity','rfl':'reflexivity',
                'dite':'cases','ite':'cases','Decidable.byCases':'cases','Classical.byCases':'cases',
                'Or.elim':'cases','Or.casesOn':'cases',
                'Nat.rec':'induction','Nat.recOn':'induction','Nat.recAux':'induction','List.rec':'induction','List.recOn':'induction'}
@@ -88,7 +88,8 @@ class Snapshot:
             elif head in _REWRITES:
                 require(role == 'rewrite' or (head == 'congrArg' and role == 'congruence'), 'Rewrite role mismatch')
             elif head in _HEAD_ROLES and not f['budget_cut']:
-                require(role == _HEAD_ROLES[head] or (role == 'specialize' and head in _SPECIALIZATION_ARITIES), 'Logical rule mismatch')
+                require(role == _HEAD_ROLES[head] or (head == 'rfl' and role == 'application')
+                        or (role == 'specialize' and head in _SPECIALIZATION_ARITIES), 'Logical rule mismatch')
             require(isinstance(f['context'],list) and len(f['context']) <= 256, 'Context budget')
             for c in f['context']:
                 require(isinstance(c,dict) and set(c) == {'name','type'}, 'Invalid context entry')
@@ -298,7 +299,7 @@ class Narrative:
             for branch,label in zip(branches,labels):
                 if branch:
                     branch[0].text=label+branch[0].text
-            return [self.step(i,'Proceed by induction on '+math_text(f['objects'][-1])+'.',
+            return [self.step(i,'Proceed by induction on '+math_text(f['objects'][{'Nat.recOn':0,'List.recOn':1}.get(f['head'],-1)])+'.',
                               conclusion=con,children=[s for branch in branches for s in branch])]
         if role=='congruence' and f['head']=='congrArg' and len(ch)==1 and len(f['objects'])==5 and [p['argument'] for p in f['premises']]==[5]:
             return [self.step(i,'Apply '+math_text(f['objects'][-1])+' to both sides of the supplied equality.',
