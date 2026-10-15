@@ -16,7 +16,7 @@ theorem rec_overapplied (n m : Nat) : 0 + n = n :=
   (Nat.rec (motive := fun k => ∀ _z : Nat, 0 + k = k)
     (fun _z => rfl)
     (fun k ih z => congrArg Nat.succ (ih z)) n) m
--- This recursor places its induction variable BEFORE its motive.
+-- recOn has different proof-argument positions; check the actual major argument.
 theorem zero_add_recOn (n : Nat) : 0 + n = n :=
   Nat.recOn n (motive := fun k => 0 + k = k) rfl
     (fun k ih => congrArg Nat.succ ih)

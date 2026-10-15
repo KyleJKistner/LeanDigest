@@ -294,12 +294,15 @@ class Narrative:
             and len(f['objects'])==(2 if f['head'].startswith('Nat.') else 3)):
             # These constructor recursors are recognized by exact fully qualified
             # names, not an inferred tactic label or a theorem-specific template.
+            major_slot={'Nat.rec':3,'Nat.recAux':3,'Nat.recOn':1,'List.rec':4,'List.recOn':2}[f['head']]
+            object_slots=[k for k in range(len(f['objects'])+len(f['premises']))
+                          if k not in recursor_proofs[f['head']]]
             branches=[self.sequence(j) for j in ch]
             labels=('Base case (zero). ', 'Successor step. ') if f['head'].startswith('Nat.') else ('Empty-list case. ', 'Constructor step. ')
             for branch,label in zip(branches,labels):
                 if branch:
                     branch[0].text=label+branch[0].text
-            return [self.step(i,'Proceed by induction on '+math_text(f['objects'][{'Nat.recOn':0,'List.recOn':1}.get(f['head'],-1)])+'.',
+            return [self.step(i,'Proceed by induction on '+math_text(f['objects'][object_slots.index(major_slot)])+'.',
                               conclusion=con,children=[s for branch in branches for s in branch])]
         if role=='congruence' and f['head']=='congrArg' and len(ch)==1 and len(f['objects'])==5 and [p['argument'] for p in f['premises']]==[5]:
             return [self.step(i,'Apply '+math_text(f['objects'][-1])+' to both sides of the supplied equality.',
