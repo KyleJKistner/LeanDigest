@@ -1,0 +1,117 @@
+name: Final recursor and batch acceptance
+on:
+  push:
+    branches: [work/batch-integration]
+    paths: ['.github/workflows/recursor-order.yml']
+permissions:
+  contents: write
+jobs:
+  contracts-and-test:
+    if: github.repository == 'KyleJKistner/LeanDigest'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: work/batch-integration
+      - name: Apply exact recursor and reflexivity contracts
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          python3 - <<'PY'
+          import base64,hashlib,json,os,pathlib,subprocess,urllib.request
+          def get(sha):
+              req=urllib.request.Request('https://api.github.com/repos/KyleJKistner/LeanDigest/git/blobs/'+sha,headers={'Authorization':'Bearer '+os.environ['GH_TOKEN']})
+              with urllib.request.urlopen(req,timeout=30) as r:data=base64.b64decode(json.load(r)['content'])
+              assert hashlib.sha1(b'blob '+str(len(data)).encode()+b'\0'+data).hexdigest()==sha
+              return data
+          patch=get('d2c72790c05baa91725a9d5456c7bcb00c848291')
+          assert hashlib.sha256(patch).hexdigest()=='f22ae6a6ea005c4c25e91c94425a0c58901559f73f9a8cdcaebac9dc2f27ad4d'
+          subprocess.run(['git','apply','--check','-'],input=patch,check=True)
+          subprocess.run(['git','apply','-'],input=patch,check=True)
+          p=pathlib.Path('tests/test_specialization_contracts.py');assert not p.exists()
+          p.write_bytes(get('14003a4fc3325026be3af236b568d654348a9547'))
+          paths=['proofreader/narrative.py','lean/Narrative.lean','proofreader/data/Narrative.lean','lean/ProofReader/Acceptance/Induction.lean','lean/ProofReader/Acceptance/Lists.lean','tests/test_narrative_batch_integration.py','tests/test_specialization_contracts.py']
+          subprocess.run(['git','config','user.name','github-actions[bot]'],check=True)
+          subprocess.run(['git','config','user.email','41898282+github-actions[bot]@users.noreply.github.com'],check=True)
+          subprocess.run(['git','add','--',*paths],check=True)
+          subprocess.run(['git','commit','-m','Honor each recursor major-argument position and preserve legacy reflexivity records'],check=True)
+          subprocess.run(['git','push','origin','HEAD:refs/heads/work/batch-integration'],check=True)
+          PY
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python -m pip install '.[dev,webtest]'
+      - run: python -m playwright install --with-deps chromium
+      - uses: leanprover/lean-action@v1
+        with:
+          lake-package-directory: lean
+          auto-config: false
+          build: true
+          build-args: 'ProofReader ProofReader.Smoke KernelExport Narrative NarrativeBatch'
+          test: false
+          lint: false
+          use-mathlib-cache: false
+          use-github-cache: false
+      - name: Require all native and browser tests without skips
+        env:
+          PROOFREADER_REQUIRE_LEAN: '1'
+          PROOFREADER_REQUIRE_BROWSER: '1'
+          LEANGLISH_BATCH_ARTIFACTS: artifacts/ci-narrative-batch
+        run: |
+          python scripts/build_demo.py
+          python scripts/build_typed_demo.py
+          python scripts/build_narrative_demo.py
+          python -m pytest -q --junitxml=artifacts/batch-final-tests.xml
+          git diff --exit-code -- proofreader/data artifacts/openai-sample
+      - name: Verify the installed wheel outside the repository
+        run: |
+          python -m pip wheel --no-deps . -w "$RUNNER_TEMP/wheel"
+          python -m venv "$RUNNER_TEMP/installed"
+          "$RUNNER_TEMP/installed/bin/python" -m pip install --no-deps "$RUNNER_TEMP"/wheel/*.whl
+          cd "$RUNNER_TEMP"
+          installed/bin/leanglish batch-narrative --help
+          installed/bin/proofreader aggregate-narrative --help
+          installed/bin/python -m leanglish narrative-demo -o installed-reader.html
+          installed/bin/python -c "from proofreader.narrative_batch import batch_source; assert '#narrative_batch' in batch_source()"
+      - name: Retain tested readers and observations on the work branch
+        if: always()
+        env:
+          OBSERVATION_RUN: ${{ github.run_id }}
+        run: |
+          python3 - <<'PY'
+          import json,os,pathlib,shutil,subprocess
+          from proofreader.model import Document
+          from proofreader.render import load_document,write_html
+          from proofreader.narrative import prose
+          root=pathlib.Path('artifacts/batch-final-acceptance');root.mkdir(parents=True,exist_ok=True)
+          source=pathlib.Path('artifacts/ci-narrative-batch')
+          if source.exists():
+              target=root/'native';shutil.copytree(source,target,dirs_exist_ok=True)
+              report=json.loads((target/'batch.json').read_text())
+              print('NATIVE_SUMMARY',json.dumps(report['summary']))
+              docs=[]
+              for m in report['modules']:
+                  for r in m['rows']:
+                      print('PROOF_RESULT',r['name'],r['status'],r.get('unexpanded_steps'))
+                      if r.get('reader'):
+                          docs.append(load_document((target/r['reader']).with_name('reading.json').read_bytes()))
+              reader=Document('Leanglish · native induction and logic acceptance',
+                  [f for d in docs for f in d.files],[c for d in docs for c in d.declarations],
+                  warnings=['Controlled acceptance examples, not an OpenAI coverage result. One intentionally disallowed proof is retained as failed in the batch ledger.'],
+                  provenance={'scope':'controlled-native-acceptance','run':os.environ['OBSERVATION_RUN'],'pipeline_model_calls':0,'whole_corpus_coverage':False,'english_formally_verified':False})
+              write_html(reader,root/'reader.html')
+              (root/'proofs.txt').write_text('\n\n'.join(prose(d) for d in docs))
+          test=pathlib.Path('artifacts/batch-final-tests.xml')
+          if test.exists():shutil.copyfile(test,root/'tests.xml')
+          commit=subprocess.check_output(['git','rev-parse','HEAD'],text=True).strip()
+          (root/'provenance.json').write_text(json.dumps({'run':os.environ['OBSERVATION_RUN'],'source_commit':commit,'formal_english_certification':False},indent=2)+'\n')
+          subprocess.run(['git','add','--force','--',str(root)],check=True)
+          subprocess.run(['git','commit','-m','Retain final native induction/case readers and complete test results'],check=True)
+          subprocess.run(['git','push','origin','HEAD:refs/heads/work/batch-integration'],check=True)
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: batch-final-acceptance
+          path: artifacts/batch-final-acceptance/
