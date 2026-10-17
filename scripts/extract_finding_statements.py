@@ -23,17 +23,29 @@ MARKER = 'LEANGLISH_STATEMENT:'
 OPTIONS = 'set_option maxRecDepth 10000\nset_option maxHeartbeats 2000000\nset_option pp.maxSteps 1000000\n'
 
 
-def run(project: Path, output: Path, shard: int, shards: int, *, trust_project=False):
+def run(project: Path, output: Path, shard: int, shards: int, *, trust_project=False, configurations=None, build_timeout=180, workers=2):
     if not trust_project:
         raise PermissionError('Statement elaboration executes upstream Lean; --trust-project is required')
     if not 0 <= shard < shards <= 64:
         raise ValueError('Invalid shard')
+    if type(build_timeout) is not int or not 1 <= build_timeout <= 3600:
+        raise ValueError('Invalid build timeout')
+    if type(workers) is not int or not 1 <= workers <= 4:
+        raise ValueError('Invalid worker count')
+    selected = None if configurations is None else set(configurations)
+    if selected is not None and (not selected or len(selected) != len(configurations) or any(not NAME.fullmatch(n) for n in selected)):
+        raise ValueError('Invalid configuration selection')
+    available = {p.stem for p in (project/'ComparatorChallenges').glob('*.json')}
+    if selected is not None and not selected <= available:
+        raise ValueError('Requested configurations are absent from the source inventory')
     if output.exists():
         raise ValueError('Output must be a new directory')
     output.mkdir(parents=True)
     configs = []
     for path in sorted((project/'ComparatorChallenges').glob('*.json')):
         key = path.stem
+        if selected is not None and key not in selected:
+            continue
         if int(sha256(key.encode()).hexdigest(),16) % shards != shard:
             continue
         config = json.loads(path.read_text())
@@ -46,7 +58,9 @@ def run(project: Path, output: Path, shard: int, shards: int, *, trust_project=F
     identity = {'schema':'leanglish.statement-shard/v1','upstream_commit':PIN,
                 'shard':shard,'shards':shards,'expected_configurations':len(configs),
                 'expected_occurrences':sum(len(t) for _,_,t in configs),
-                'solution_proofs_checked':0,'english_formally_certified':0}
+                'solution_proofs_checked':0,'english_formally_certified':0,
+                'configuration_selection':sorted(selected) if selected is not None else None,
+                'build_timeout':build_timeout,'workers':workers}
     (output/'identity.json').write_text(json.dumps(identity,indent=2))
     version=run_bounded(['lake','env','lean','--version'],project,timeout=60)
     if version.status!='passed' or not re.search(r'\b4\.34\.1\b',version.stdout):
@@ -70,7 +84,7 @@ def run(project: Path, output: Path, shard: int, shards: int, *, trust_project=F
         challenge=project/'ComparatorChallenges'/(key+'.lean')
         source_digest=sha256(challenge.read_bytes()).hexdigest()
         record['challenge_sha256']=source_digest
-        built=run_bounded(['lake','build',cfg['challenge_module']],project,timeout=180,max_output=4_000_000)
+        built=run_bounded(['lake','build',cfg['challenge_module']],project,timeout=build_timeout,max_output=4_000_000)
         (out/'build.json').write_text(json.dumps(asdict(built),ensure_ascii=False))
         record['status']='build-'+built.status
         rows={}
@@ -105,7 +119,7 @@ def run(project: Path, output: Path, shard: int, shards: int, *, trust_project=F
         return record
     records=[]
     report={**identity,'configurations':[]}
-    with ThreadPoolExecutor(max_workers=2) as pool:
+    with ThreadPoolExecutor(max_workers=workers) as pool:
         futures={pool.submit(one,item):item for item in configs}
         for future in as_completed(futures):
             key,cfg,targets=futures[future]
@@ -131,8 +145,11 @@ def main():
     p.add_argument('--shard',type=int,required=True)
     p.add_argument('--shards',type=int,default=4)
     p.add_argument('--trust-project',action='store_true')
+    p.add_argument('--configuration',action='append',help='Explicit configuration subset; omissions remain outside this run')
+    p.add_argument('--build-timeout',type=int,default=180)
+    p.add_argument('--workers',type=int,default=2)
     a=p.parse_args()
-    r=run(a.project.resolve(),a.output.resolve(),a.shard,a.shards,trust_project=a.trust_project)
+    r=run(a.project.resolve(),a.output.resolve(),a.shard,a.shards,trust_project=a.trust_project,configurations=a.configuration,build_timeout=a.build_timeout,workers=a.workers)
     print(json.dumps({k:v for k,v in r.items() if k!='configurations'},indent=2))
     return 0 if r['elaborated_occurrences']==r['expected_occurrences'] else 2
 
