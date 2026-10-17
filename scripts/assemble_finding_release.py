@@ -16,6 +16,7 @@ from zipfile import ZipFile, ZIP_DEFLATED, ZipInfo
 sys.path.insert(0,str(Path(__file__).resolve().parents[1]))
 from proofreader.finding_catalog import PIN, build, read_json, write_json, safe_child
 from proofreader.catalog_audit import audit
+from proofreader.breadth import reconcile, attach
 
 SOURCE_SHA256='7f596ba4fe17fe0d7d55655e6e82d99d4d87181e0a9032721c048d7385163f3c'
 INPUT_RUNS={'source':38822475057,'observations':39049596449,
@@ -61,7 +62,7 @@ def deterministic_zip(site: Path, output: Path) -> str:
     return sha256(output.read_bytes()).hexdigest()
 
 
-def assemble(inputs: Path, output: Path) -> dict:
+def assemble(inputs: Path, output: Path, *, breadth_inputs: Path | None = None) -> dict:
     if output.exists():raise ValueError('Use a fresh release output directory')
     output.mkdir(parents=True)
     lean=unpack_source(inputs,output/'original-source')
@@ -80,17 +81,23 @@ def assemble(inputs: Path, output: Path) -> dict:
         raise ValueError('The 28-target retry inventory does not reconcile')
     if any(r['status']!='reading-generated' or not r['kernel_checked'] for r in targets):
         raise ValueError('The retained 28-target retry is not complete')
+    proof_roots=[obs/'inputs/proofs',inputs/'proof-retries']
+    ledger=None
+    if breadth_inputs is not None:
+        ledger=reconcile(lean,proof_roots,breadth_inputs/'remaining')
+        proof_roots.append(breadth_inputs/'remaining')
     site=output/'site'
     coverage=build(obs/'inputs/catalog/upstream',lean,
         [obs/'inputs/statements',inputs/'statement-retries'],
-        [obs/'inputs/proofs',inputs/'proof-retries'],site,
+        proof_roots,site,
         math_assets=obs/'assets',source_inventory=inputs/'source/source-inventory.json')
     expected={'findings':372,'documented_findings':242,'configurations':416,
               'expected_statement_entries':602,'elaborated_statement_entries':602,
               'unique_formal_targets':601,'expected_theorem_targets':536,
-              'definition_references':65,'proof_readings':109,'solution_source_modules':413}
+              'definition_references':65,'proof_readings':ledger['total_retained_readings'] if ledger else 109,'solution_source_modules':413}
     if any(coverage[k]!=v for k,v in expected.items()) or coverage['rendering_failures']:
         raise ValueError('Frozen release coverage regression')
+    if ledger is not None: attach(site,ledger)
     checks=audit(site)
     if not checks['passed']:raise ValueError('Catalog link audit failed: '+str(checks['errors']))
     repo=Path(__file__).resolve().parents[1]
@@ -98,13 +105,15 @@ def assemble(inputs: Path, output: Path) -> dict:
     identity={'schema':'leanglish.finding-release/v1','upstream_commit':PIN,
         'application_commit':commit,'application_tracked_tree_clean':not subprocess.check_output(['git','status','--porcelain','--untracked-files=no'],cwd=repo,text=True).strip(),
         'application_source_hashes':{p.relative_to(repo).as_posix():sha256(p.read_bytes()).hexdigest() for folder in ('proofreader','leanglish','scripts') for p in sorted((repo/folder).rglob('*')) if p.is_file() and p.suffix in {'.py','.js','.css','.html','.lean'}},
-        'input_workflow_runs':INPUT_RUNS,
+        'input_workflow_runs':dict(INPUT_RUNS,**({'breadth_collection':39076207515,'breadth_native':39067324637} if ledger else {})),
+        'release_version':'0.4.1' if ledger else '0.4.0',
+        'breadth_report':ledger,
         'original_source_archive_sha256':SOURCE_SHA256,'coverage':coverage,
         'static_audit':checks,'proof_retry_targets_recovered':28,
         'native_lean_executed_by_builder':False,'observations_authenticated':False}
     write_json(site/'release.json',identity)
     write_json(site/'static-audit.json',checks)
-    shutil.copy2(repo/'docs/ALL_FINDINGS.md',site/'RELEASE-NOTES.md')
+    shutil.copy2(repo/('docs/BREADTH_V0_4_1.md' if ledger else 'docs/ALL_FINDINGS.md'),site/'RELEASE-NOTES.md')
     return identity
 
 
@@ -128,6 +137,7 @@ def package(output: Path) -> dict:
     (dist/'SHA256SUMS').write_text(checksum+'  '+archive.name+'\n')
     shutil.copy2(site/'coverage.json',dist/'coverage.json')
     shutil.copy2(site/'release.json',dist/'release.json')
+    if (site/'breadth.json').exists():shutil.copy2(site/'breadth.json',dist/'breadth.json')
     return {'archive':str(archive),'sha256':checksum,'bytes':archive.stat().st_size}
 
 
@@ -135,10 +145,11 @@ def main():
     p=argparse.ArgumentParser(description=__doc__)
     p.add_argument('--inputs',type=Path);p.add_argument('--output',required=True,type=Path)
     p.add_argument('--package',action='store_true')
+    p.add_argument('--breadth-inputs',type=Path,help='Retained breadth artifact directory; missing shards remain explicit')
     a=p.parse_args()
     if a.package:r=package(a.output)
     else:
         if a.inputs is None:p.error('--inputs is required for assembly')
-        r=assemble(a.inputs,a.output)
+        r=assemble(a.inputs,a.output,breadth_inputs=a.breadth_inputs)
     print(json.dumps(r,indent=2))
 if __name__=='__main__':main()

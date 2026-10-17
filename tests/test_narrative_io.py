@@ -183,3 +183,15 @@ def test_native_module_driver_path_does_not_replace_source(tmp_path,record,monke
 
 def test_current_narrative_exporter_has_no_packaged_drift():
     assert io.exporter_source()==(ROOT/'lean/Narrative.lean').read_text()
+
+@pytest.mark.parametrize('budget',[True,0,-1,20_000_001,1.5,'2000000'])
+def test_invalid_heartbeat_budget_rejected(budget):
+    with pytest.raises(InvalidExport):
+        io.extraction_source('T',version='4.34.1',module='Test',max_heartbeats=budget)
+
+def test_heartbeat_limit_is_explicit_and_does_not_rewrite_source():
+    s=io.extraction_source('T',version='4.34.1',module='Test',max_heartbeats=2_000_000)
+    assert 'import Test\n' in s
+    assert 'set_option maxHeartbeats 2000000 in\n#narrative "T"' in s
+    with pytest.raises(InvalidExport,match='exact driver'):
+        io.extraction_source('T',version='4.34.1',driver=s,max_heartbeats=2_000_000)

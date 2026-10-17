@@ -80,11 +80,19 @@ def audit(site: Path, screenshots: Path | None = None, *, document_harness: bool
         follow(page.locator('.card:visible h2 a').first)
         assert page.evaluate('document.documentElement.scrollWidth <= innerWidth')
         if screenshots:page.screenshot(path=str(screenshots/'finding-mobile.png'))
+        if (site/'breadth.json').exists():
+            load('index.html')
+            follow(page.locator('a[href="progress.html"]').first)
+            assert 'Proof-reading coverage' in page.locator('h1').inner_text()
+            ledger=json.loads((site/'breadth.json').read_text())
+            assert str(ledger['total_retained_readings'])+' of '+str(ledger['expected_theorem_targets']) in page.locator('#content').inner_text()
+            assert page.evaluate('document.documentElement.scrollWidth <= innerWidth')
+            assert page.locator('a[href="breadth.json"]').count()==1
         page.close();browser.close()
     assert not errors,errors
     assert not external,external
     return {'navigation_backend':'direct-document-test-harness' if document_harness else 'real-offline-file-navigation','browser':'Chromium','catalog_filtering':True,'search':True,'empty_result_recovery':True,
-        'finding_navigation':True,'proof_reader_navigation':True,'exact_source_panel':True,
+        'breadth_progress_navigation':(site/'breadth.json').exists(),'finding_navigation':True,'proof_reader_navigation':True,'exact_source_panel':True,
         'mathml_rendering':True,'mobile_overflow':False,'external_requests':external,'page_errors':errors,'passed':True}
 
 if __name__=='__main__':
