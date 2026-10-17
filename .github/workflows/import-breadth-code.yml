@@ -1,0 +1,57 @@
+name: Import exact Leanglish breadth source
+on:
+  push:
+    branches: [import/breadth-code-v041]
+permissions:
+  contents: write
+jobs:
+  import:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - name: Decode and authenticate the local source patch
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import base64,lzma,hashlib
+          parts=sorted(Path('.transport').glob('part-*.b64'))
+          assert len(parts)==4
+          data=lzma.decompress(base64.b64decode(''.join(p.read_text() for p in parts),validate=True))
+          assert len(data)==52063
+          assert hashlib.sha256(data).hexdigest()=='206a64115190f3840bffc7b9897811ecc351ed7b28e766b458e21183048b7508'
+          Path('/tmp/breadth-code.patch').write_bytes(data)
+          PY
+      - name: Reconstruct the exact tested source tree on its original parent
+        run: |
+          set -eu
+          parent=7e80297e5c25065db0373649522f5af9c615582d
+          test "$(git ls-remote origin refs/heads/work/breadth-recovery | cut -f1)" = "$parent"
+          git worktree add --detach /tmp/leanglish-code "$parent"
+          cd /tmp/leanglish-code
+          git apply --index --unidiff-zero /tmp/breadth-code.patch
+          python scripts/build_demo.py
+          python scripts/build_typed_demo.py
+          python scripts/build_narrative_demo.py
+          git add .
+          tree=$(git write-tree)
+          test "$tree" = a0c251d5cce18c6bd488d711d9b8d87dc0799ceb
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git commit -m 'Expand Leanglish to 216 source-bound theorem readings with complete breadth accounting'
+          git push origin HEAD:refs/heads/work/breadth-recovery
+          mkdir -p /tmp/import-result
+          git rev-parse HEAD > /tmp/import-result/commit.txt
+          git rev-parse HEAD^{tree} > /tmp/import-result/tree.txt
+          git archive --format=zip --prefix=Leanglish/ -o /tmp/import-result/application.zip HEAD
+          echo "SOURCE_COMMIT=$(git rev-parse HEAD)"
+          echo "SOURCE_TREE=$tree"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: leanglish-imported-breadth-source
+          path: /tmp/import-result/
+          if-no-files-found: error
