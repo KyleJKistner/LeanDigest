@@ -1,85 +1,101 @@
-# Leanglish supervisor checkpoint — 0.3.0
+# Leanglish all-findings checkpoint — 0.4.0
 
-## Current name and verified baseline
+## Goal and current product
 
-The user chose **Leanglish** as the product name. Keep the GitHub repository
-`KyleJKistner/LeanDigest` and implementation/proof-format identifiers unchanged.
-The preferred command is `leanglish`; `proofreader` remains a supported alias.
-See `docs/NAMING.md`. Do not rewrite historical evidence to update branding.
+The user wants every OpenAI finding with full Lean documentation accessible to
+mathematicians. Do not restart with another toy example or rename the repository.
+The product is Leanglish, repository KyleJKistner/LeanDigest, legacy proofreader
+package and formats retained. All new catalog commands use `leanglish`.
 
-Both jobs in GitHub CI run 38667444089 passed on commit
-`2d6b60f01112f63ff56792b881e7a17678ddf558`, including native Lean integration.
-Do not repeat the missing-manifest blocker: it and the native API/IO issues
-were fixed before this rename. The complete pinned OpenAI project build is still
-unvalidated; passing local-project integration does not establish that result.
+The finding catalog is generated from the pinned upstream scope notes and
+comparison configurations, not from the subset of successful proof extractions.
+See docs/ALL_FINDINGS.md and scripts/assemble_finding_release.py.
 
-## Do not repeat the previous blocker
+Frozen catalog coverage: 372 total findings, all 242 documented findings, all 416
+comparison configurations, all 602 statement entries, 601 distinct formal targets
+(536 theorem targets and 65 definition references), 413 direct solution modules.
+The frozen proof inventory contains 109 readings from 4,090 checked frames,
+including all 28 formerly failed extractions. There are 1,357 explicit explanation
+gaps. 56 findings have any reading; 41 have readings for every listed theorem target.
+These counts do not establish fully explained or certified English proofs.
 
-The substantial Bézout proof is now fully retained as a source-bound mathematical
-snapshot. Lean **4.34.1** became usable during the run. Do not claim only 4.34.0 is
-available or repeat the huge raw-DAG/base64 transfer attempts.
+## Exact inputs
 
-Start with `docs/VALIDATION_V0_3.md` and `docs/NARRATIVE.md`. The primary files are
-`lean/Narrative.lean`, `proofreader/narrative.py`, `proofreader/polynomial.py`,
-`proofreader/narrative_io.py`, and `artifacts/v0.3/bezout-4.34.1-valid.lean`.
+Upstream commit: 1581d4cbdd69a0faf34b2089614fe2a814316a6a.
+Source archive SHA256: 7f596ba4fe17fe0d7d55655e6e82d99d4d87181e0a9032721c048d7385163f3c.
+All 123,565 source files in the Lean-directory inventory were locally verified.
+The 122,458 OAI-file number from old turns has a narrower scope; do not mix them.
 
-## Retained evidence
+GitHub Actions input runs:
+- 38822475057: complete-openai-lean-source.
+- 39049596449: leanglish-all-finding-observations, containing original catalog,
+  four statement shards and sixteen proof shards.
+- 39050823104: both previously timed-out statement configurations recovered.
+- 39065371645: all 28 extraction-failed proof targets recovered, 16 shards,
+  exact application commit 375219a70949f3d3e3e698bd53ad2788de132cab.
 
-* Exact successful driver: SHA b7d4fa6cbc3c9aac0160bdfa31556d2fd5e0ad1adcc693d55e7a7670583ff066.
-* Canonical snapshot: SHA dad8ef23a231904f37b73979f8284ea3662ffe8f8cd30c79066856f2095b4dd7.
-* 86 selected proof judgements, 86 independently matched original paths, repeat
-  extraction identical, changed snapshot rejected, wrong path rejected, false
-  intermediate type rejected. Exact source programs and observations are stored.
-* All 86 frames accounted for in 59 display steps. Sixteen arithmetic/rewrite
-  passages have independently replayable integer-polynomial certificates.
-* The proof body is unchanged; minimal Mathlib imports were adapted. The exact
-  pinned mathlib revision and complete OpenAI build have NOT run.
-* All observations are unsigned. Pretty-printing and English semantics remain
-  trusted. Zero formally certified English proofs, no human comprehension study.
+The statements come from comparison specifications with placeholders. They are
+NOT solution-proof observations. Proof snapshots have separate receipts, native
+run logs, original source hashes, driver hashes and checked source-proof paths.
+The catalog verifies consistency, not authenticity of unsigned observations.
 
-The earlier 760-judgement raw-DAG experiment was successful remotely but the
-oversized raw output was not retained. Do not merge that experiment's count with
-the retained snapshot's 86 judgements or infer full corpus coverage.
+## Native exporter repair already completed
 
-## Execution and transport
+Commit 0140dd37f1aa86fe45a06d0e9945283a461effc7 preserves the declared root type
+(with definitional-equality and kernel checks) and alpha-renames shadowing local
+binders before pretty-printing. Required native regression tests and repeat
+extraction passed. All 28 real failures were then recovered. Do not weaken the
+snapshot validator or repeat the previous declared-type/context problem.
 
-This container has Python, Chromium/Playwright and git, but no Lean/Lake or direct
-outbound networking. Wolfram can call AXLE via URLRead. Use ExportByteArray JSON
-and ImportByteArray responses. `ImportByteArray[gzip,{"GZIP","Text"}] strips a
-final newline; use `{ "GZIP", "Byte" }` then UTF-8 decoding for exact sources.
-Source checksum failures are transport failures, not failed Lean proofs. Large
-base64 output is truncated. Prefer source-bound snapshots and compare hashes.
+Native Lean 4.34.1 runs in GitHub Actions. The local chat container lacks Lean and
+outbound networking; this is not a blocker to native CI. Binary workflow artifacts
+are downloaded with the GitHub artifact action and mounted automatically. Do not
+revert to manually copying enormous base64 outputs or pretend independent coding
+agents ran. Parallel GitHub jobs are native test workers, not AI agents.
 
-The packaged direct AXLE adapter has no chat-message transport limit. It requires
-explicit user consent. A saved source driver can be used with `verify-narrative`
-so namespace/notation/source changes cannot silently alter re-extraction.
+## Active breadth work
 
-## Next acceptance work
+Run 39067324637, commit 2a1f9a195b530d64682140516050c2be3bd18ffb, processes the
+remaining 427 theorem targets (54 previous build timeouts plus 373 not attempted)
+in 64 bounded shards, at most 16 concurrently. Each original module is built once
+per shard. All failed, timed-out and unattempted targets remain in its output.
+Inspect actual job/artifact results before reporting progress. This run does not
+increase the frozen 109-reading release until its records are reconciled.
 
-1. Preserve the passing native CI tests. Run the exact OpenAI 4.34.1 dependency
-   pin; native smoke integration is not a complete dependency-pinned corpus build.
-2. Independently select several unseen proofs in different areas. Do not expand
-   only the current sample or add theorem-name-specific prose. Extend safe cases,
-   induction, recursors, scope-aware abbreviations and lemma statement expansion.
-3. Add an honest narrative batch engine. Current narrative commands select one
-   named theorem; the existing whole-corpus engine still uses constructor DAGs.
-   Preserve unknown denominators and every failure. v2 enumerates theorem
-   constants, not all proof-valued definitions or informal manuscripts.
-4. Benchmark mathematicians' ability to follow proofs and their review time.
-   Readability and a formal interpretation of English are separate deliverables.
-5. Independently audit pretty-printer overrides, shadowed names, arithmetic
-   assumptions, kernel options, source changes, failure receipts and UI omissions.
+The workflow is .github/workflows/finding-proofs-remaining.yml and artifacts are
+finding-proof-remaining-0 through -63. Some jobs may need larger build budgets or
+unavailable original-project dependencies; do not omit them or claim completion.
 
-## Commands
+## Catalog code and checks
 
-```
-python scripts/build_demo.py
-python scripts/build_typed_demo.py
-python scripts/build_narrative_demo.py
-python -m pytest -q
-python -m leanglish narrative-demo -o reader.html
-```
+- proofreader/catalog_inputs.py: frozen universe, source/provenance consistency.
+- proofreader/finding_catalog.py and catalog_web/: offline finding/statement pages.
+- proofreader/catalog_audit.py: every local file link and source-line anchor.
+- scripts/assemble_finding_release.py: deterministic source-verified assembly.
+- scripts/audit_finding_browser.py: actual offline file navigation in CI.
+- tests/test_finding_catalog.py: hostile inputs and coverage/receipt regressions.
 
-The agent work packages remain preparation only; no independent coding agents
-ran. The repository is already published at KyleJKistner/LeanDigest. Use ordinary
-commits on top of its current history; do not rerun repository creation.
+Local browser-admin policy blocks navigation; --document-harness is an explicitly
+labelled local test route, not evidence of real offline file navigation. Public
+packaging requires the real-file CI audit and an unchanged committed source tree.
+The two different PYTHONHASHSEED catalog builds were byte-identical across 3,733
+files after deterministic declaration-name ordering was fixed.
+
+## Release gate and next steps
+
+1. Run all-findings-release.yml and ordinary/native CI on the exact committed
+   catalog source. Require real file navigation, no external resource requests,
+   complete link inventory, and zero font files. Inspect resulting artifact.
+2. Merge only after those checks pass. The main-only publication job creates the
+   immutable prerelease leanglish-all-findings-v0.4.0; it does not overwrite one.
+   Check the actual release before claiming publication.
+3. Reconcile all 64 remaining-proof shards, integrate newly checked readings,
+   diagnose remaining failures, and preserve every denominator and attempt.
+4. Improve the large automation traces with mathematically meaningful checked
+   summaries. Never replace explanation gaps with plausible invented prose.
+5. The full original Lake project, its compatibility patches and Comparator,
+   formally verified English semantics, and human comprehension study remain open.
+
+An optional Vercel plugin connection was suggested on October 17 for a live URL.
+It was not connected or deployed. Do not repeat the suggestion or claim a live
+website. Offline artifacts and GitHub Releases do not depend on that connection.
