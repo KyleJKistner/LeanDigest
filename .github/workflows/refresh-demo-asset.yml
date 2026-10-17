@@ -1,0 +1,43 @@
+name: Prepare regenerated demo asset
+on:
+  workflow_dispatch:
+  push:
+    branches: [work/all-findings-delivery]
+    paths: ['.github/workflows/refresh-demo-asset.yml']
+permissions:
+  contents: read
+jobs:
+  prepare:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with: {persist-credentials: false}
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - name: Regenerate only the existing demo and store its Git blob
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          python scripts/build_demo.py
+          python - <<'PY'
+          import base64,json,os,pathlib,subprocess
+          changed=subprocess.check_output(['git','diff','--name-only'],text=True).splitlines()
+          target='artifacts/openai-sample/index.html'
+          assert changed==[target], changed
+          data=pathlib.Path(target).read_bytes()
+          expected=subprocess.check_output(['git','hash-object',target],text=True).strip()
+          request=json.dumps({'encoding':'base64','content':base64.b64encode(data).decode()})
+          result=json.loads(subprocess.check_output(['gh','api','repos/'+os.environ['GITHUB_REPOSITORY']+'/git/blobs','--input','-'],input=request,text=True))
+          assert result['sha']==expected
+          out=pathlib.Path('/tmp/generated-demo');out.mkdir()
+          (out/'blob.json').write_text(json.dumps({'path':target,'blob_sha':expected,'source_commit':os.environ['GITHUB_SHA'],'branch_updated':False},indent=2))
+          (out/'index.html').write_bytes(data)
+          print((out/'blob.json').read_text())
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: regenerated-demo-asset
+          path: /tmp/generated-demo/
