@@ -1,4 +1,5 @@
 """Mandatory native CI integration; local absence is an explicit skip."""
+from proofreader.model import walk_steps
 from pathlib import Path
 import os,shutil
 import pytest
@@ -61,3 +62,22 @@ end NarrativeBindingRegression
         project=Path(__file__).parents[1]/'lean', context=context,
         trust_project=True, expected=record)
     assert repeated['status'] == 'passed', repeated
+
+
+@pytest.mark.skipif(not shutil.which('lake') and not REQUIRED, reason='Native logic rendering and resource gates require Lean/Lake')
+def test_native_conjunction_reading_and_bounded_heartbeats(tmp_path):
+    if not shutil.which('lake'): pytest.fail('Required Lean gate cannot skip')
+    context = ('import Lean\nnamespace NativeLogic\n'
+       'theorem unpack (P Q : Prop) (h : P ∧ Q) : P := And.casesOn h (fun hp hq => hp)\n'
+       'end NativeLogic\n')
+    project=Path(__file__).parents[1]/'lean'
+    good=extract_narrative('NativeLogic.unpack',tmp_path/'good',project=project,context=context,
+                           trust_project=True,max_heartbeats=2_000_000)
+    assert good['status']=='passed',good
+    d=load_document((tmp_path/'good/reading.json').read_bytes())
+    assert any(s.rule=='unpack-conjunction' for s in walk_steps(d.declarations[0].steps))
+    assert good['execution_limits']['max_heartbeats']==2_000_000
+    bad=extract_narrative('NativeLogic.unpack',tmp_path/'low',project=project,context=context,
+                          trust_project=True,max_heartbeats=1)
+    assert bad['status']=='failed' and not (tmp_path/'low/reader.html').exists()
+    assert (tmp_path/'low/stdout.txt').is_file()

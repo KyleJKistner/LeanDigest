@@ -29,11 +29,15 @@ def exporter_source() -> str:
 
 
 def extraction_source(theorem: str, *, version: str, context: str | None = None,
-                      module: str | None = None, driver: str | None = None) -> str:
+                      module: str | None = None, driver: str | None = None,
+                      max_heartbeats: int = 200_000) -> str:
     require(sum(x is not None for x in (context,module,driver)) == 1, 'Supply one source context, imported module or exact driver')
     require(isinstance(theorem,str) and 0 < len(theorem) <= 2000 and '\x00' not in theorem,
             'Invalid theorem name')
     require(isinstance(version,str) and VERSION.fullmatch(version) is not None, 'An exact Lean version is required')
+    require(type(max_heartbeats) is int and 1 <= max_heartbeats <= 20_000_000, 'Invalid heartbeat budget')
+    require(driver is None or max_heartbeats == 200_000,
+            'An exact driver preserves its own execution options')
     exporter = exporter_source()
     marker = 'open Lean Meta Elab Command'
     require(marker in exporter, 'Missing exporter boundary')
@@ -50,7 +54,9 @@ def extraction_source(theorem: str, *, version: str, context: str | None = None,
         # complete import header. No source line or existing import is dropped.
         prefix = 'import Lean\nimport Lean.Util.CollectAxioms\n'+context.rstrip()+'\n'+exporter[exporter.index(marker):]
     gate = '\nrun_elab do\n  unless Lean.versionString == '+lean_string(version)+' do\n    throwError "ProofReader exact Lean version mismatch"\n'
-    return prefix+gate+('' if driver is not None else '\n#narrative '+lean_string(theorem)+'\n')
+    budget = (f'\nset_option maxHeartbeats {max_heartbeats} in\n'
+              if max_heartbeats != 200_000 else '\n')
+    return prefix+gate+('' if driver is not None else budget+'#narrative '+lean_string(theorem)+'\n')
 
 
 def parse_stream(stdout: str, *, theorem: str, version: str) -> Snapshot:
@@ -86,7 +92,8 @@ def extract_narrative(theorem: str, output: Path, *, context: str | None = None,
                       module: str | None = None, version: str = '4.34.1', backend: str = 'native',
                       project: Path | None = None, trust_project: bool = False,
                       allow_remote: bool = False, timeout: float = 180,
-                      expected: dict | None = None, driver: str | None = None) -> dict:
+                      expected: dict | None = None, driver: str | None = None,
+                      max_heartbeats: int = 200_000) -> dict:
     """Expected snapshot, when given, must match fresh extraction exactly."""
     require(backend in {'native','axle'}, 'Unknown execution backend')
     if backend == 'native' and not trust_project:
@@ -102,7 +109,8 @@ def extract_narrative(theorem: str, output: Path, *, context: str | None = None,
     if expected_snapshot is not None:
         require(expected_snapshot.record['theorem'] == theorem and expected_snapshot.record['lean_version'] == version,
                 'Expected snapshot theorem/version mismatch')
-    source = extraction_source(theorem,version=version,context=context,module=module,driver=driver)
+    source = extraction_source(theorem,version=version,context=context,module=module,driver=driver,
+                               max_heartbeats=max_heartbeats)
     output=Path(output);output.mkdir(parents=True,exist_ok=True)
     (output/'Extract.lean').write_text(source,encoding='utf-8')
     if driver is not None:
@@ -117,7 +125,8 @@ def extract_narrative(theorem: str, output: Path, *, context: str | None = None,
              'theorem':theorem,'lean_version':version,'backend':backend,
              'source_sha256':digest(source),'context_sha256':digest(context) if context is not None else None,
              'driver_sha256':digest(driver) if driver is not None else None, 'module':module,'receipt_authenticated':False,'english_formally_verified':False,
-             'exact_openai_project_replayed':False,'errors':[], 'expected_snapshot_sha256':expected_snapshot.sha256 if expected_snapshot else None}
+             'exact_openai_project_replayed':False,'execution_limits':{'wall_seconds':timeout,
+                 'max_heartbeats':max_heartbeats if driver is None else 'preserved-in-exact-driver'},'errors':[], 'expected_snapshot_sha256':expected_snapshot.sha256 if expected_snapshot else None}
     try:
         if backend=='axle':
             response=axle_request(source,version,allow_remote=True,timeout=timeout)
@@ -130,6 +139,7 @@ def extract_narrative(theorem: str, output: Path, *, context: str | None = None,
                 run=run_bounded(['lake','env','lean',str(driver_path)],project.resolve(),timeout=timeout)
             _write_json(output/'run.json',asdict(run))
             (output/'stderr.txt').write_text(run.stderr,encoding='utf-8')
+            (output/'stdout.txt').write_text(run.stdout,encoding='utf-8')
             require(run.status=='passed' and run.exit_code==0,run.reason or 'Native Lean did not succeed')
             stdout=run.stdout
         (output/'stdout.txt').write_text(stdout,encoding='utf-8')

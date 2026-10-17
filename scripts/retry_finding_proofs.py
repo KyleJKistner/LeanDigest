@@ -37,13 +37,16 @@ def selected_targets(project: Path, selections: list[dict], shard: int, shards: 
 
 def run(project: Path, output: Path, selections: list[dict], shard: int, shards: int,
         *, trust_project: bool = False, wall_seconds: int = 2400,
-        build_timeout: int = 900, extract_timeout: int = 180) -> dict:
+        build_timeout: int = 900, extract_timeout: int = 180,
+        max_heartbeats: int = 200_000) -> dict:
     if not trust_project:
         raise PermissionError('--trust-project is required; Lean elaboration executes code')
     if output.exists():
         raise ValueError('Use a new output directory')
-    if not 1 <= wall_seconds <= 14400 or not 1 <= build_timeout <= 3600 or not 1 <= extract_timeout <= 1200:
+    if not 1 <= wall_seconds <= 14400 or not 1 <= build_timeout <= 3600 or not 1 <= extract_timeout <= 900:
         raise ValueError('Invalid execution budget')
+    if type(max_heartbeats) is not int or not 1 <= max_heartbeats <= 20_000_000:
+        raise ValueError('Invalid heartbeat budget')
     rows = selected_targets(project, selections, shard, shards)
     output.mkdir(parents=True)
     started = time.monotonic()
@@ -51,7 +54,10 @@ def run(project: Path, output: Path, selections: list[dict], shard: int, shards:
         'shard': shard, 'shards': shards, 'selection_count': len(selections),
         'selection_sha256': sha256(json.dumps(selections, sort_keys=True).encode()).hexdigest(),
         'scope': 'explicit-retry-subset-unaltered-modules-upstream-shared-dependency-pins',
-        'whole_upstream_project_build': False, 'targets': rows, 'expected_targets': len(rows),
+        'whole_upstream_project_build': False,
+        'execution_limits': {'build_timeout': build_timeout, 'extract_timeout': extract_timeout,
+                             'max_heartbeats': max_heartbeats, 'wall_seconds': wall_seconds},
+        'targets': rows, 'expected_targets': len(rows),
         'expected_theorems': len(rows), 'all_targets_accounted': True,
         'english_formally_certified': False}
     def checkpoint():
@@ -94,7 +100,7 @@ def run(project: Path, output: Path, selections: list[dict], shard: int, shards:
         out=output/'targets'/row['id']; out.mkdir(parents=True)
         try:
             receipt=extract_narrative(row['name'],out,module=module,project=project,
-                version='4.34.1',trust_project=True,timeout=min(extract_timeout,remaining))
+                version='4.34.1',trust_project=True,timeout=min(extract_timeout,remaining),max_heartbeats=max_heartbeats)
             stable=sha256(source.read_bytes()).hexdigest()==row['source_sha256']
             if receipt['status']=='passed' and stable:
                 row.update(status='reading-generated',kernel_checked=True,
@@ -122,11 +128,12 @@ def main():
     p.add_argument('--wall-seconds',default=2400,type=int)
     p.add_argument('--build-timeout',default=900,type=int)
     p.add_argument('--extract-timeout',default=180,type=int)
+    p.add_argument('--max-heartbeats',default=200_000,type=int)
     p.add_argument('--trust-project',action='store_true')
     a=p.parse_args()
     report=run(a.project.resolve(),a.output.resolve(),json.loads(a.selection.read_text()),
         a.shard,a.shards,trust_project=a.trust_project,wall_seconds=a.wall_seconds,
-        build_timeout=a.build_timeout,extract_timeout=a.extract_timeout)
+        build_timeout=a.build_timeout,extract_timeout=a.extract_timeout,max_heartbeats=a.max_heartbeats)
     print(json.dumps({k:v for k,v in report.items() if k!='targets'},indent=2))
     return 0 if report['kernel_checked']==report['expected_theorems'] else 2
 if __name__=='__main__': raise SystemExit(main())

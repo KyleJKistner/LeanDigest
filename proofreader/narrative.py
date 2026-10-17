@@ -20,7 +20,7 @@ from .kernel_io import strict_json, STANDARD_AXIOMS
 from .polynomial import certify, verify as verify_polynomial, certificate_text
 
 SCHEMA = 'proofreader.narrative/v1'
-PRINTER_VERSION = 'source-math-en/0.3.0'
+PRINTER_VERSION = 'source-math-en/0.4.1'
 ROLES = {'introduce','assume','have','define','witness','choose','cases','combine','chain',
          'reflexivity','cancel','identity','given','named','application','ring','rewrite','unexpanded','induction','congruence','local-application','specialize'}
 _HEAD_ROLES = {'Exists.intro':'witness','Exists.casesOn':'choose','Exists.elim':'choose',
@@ -267,6 +267,34 @@ class Narrative:
             else:
                 s=self.step(i,f'Establish {domain}; call this fact {name}.',children=self.sequence(ch[0]))
             return [s]+self.sequence(ch[-1])
+        # Exact conjunction eliminator shape, not a guess from tactic text.
+        # The continuation's two binders are retained in the ownership ledger;
+        # their proofs and every step of the continuation remain inspectable.
+        if (role == 'application' and f['head'] == 'And.casesOn'
+                and not f['budget_cut'] and len(ch) == 2 and len(f['objects']) == 3
+                and [p['argument'] for p in f['premises']] == [3, 4]):
+            left = self.frames[ch[1]]
+            right = (self.frames[left['children'][0]]
+                     if left['role'] == 'assume' and len(left['children']) == 1 else {})
+            norm = lambda text: ' '.join(text.split())
+            if (right.get('role') == 'assume' and len(right['children']) == 1
+                    and not left['budget_cut'] and not right['budget_cut']
+                    and norm(left['domain']) == norm(f['objects'][0])
+                    and norm(right['domain']) == norm(f['objects'][1])):
+                text = ('From the conjunction, obtain ' + _name(left['binder']) + ': ' +
+                        math_text(left['domain']) + ' and ' + _name(right['binder']) + ': ' +
+                        math_text(right['domain']) + '.')
+                step = self.step(i, text, rule='unpack-conjunction',
+                    children=self.sequence(ch[0]), covered=[i, left['id'], right['id']])
+                return [step] + self.sequence(right['children'][0])
+        # id has exactly one type argument and one proof argument here. Other,
+        # oversaturated identity applications retain the existing explicit gap.
+        if (role == 'identity' and not f['budget_cut'] and len(ch) == 1
+                and len(f['objects']) == 1
+                and [p['argument'] for p in f['premises']] == [1]
+                and f['statement'] == self.frames[ch[0]]['statement']):
+            return [self.step(i, 'The supplied proof establishes ' + con + '.',
+                              rule='identity-proof', children=self.sequence(ch[0]))]
         if role=='specialize' and ch:
             claim=math_text(self.frames[ch[0]]['statement'])
             text='Use the intermediate claim '+claim+'.'

@@ -1,3 +1,71 @@
+# Leanglish breadth checkpoint — 0.4.1
+
+## Resume here, not from old toy examples
+
+The 0.4.0 all-documented-findings release is actually published on GitHub Releases;
+main before this work is e180315114e2571d8b0eb166bd97aa584d01baa2. Do not describe
+all 242 documentation pages as complete English proof translations.
+
+This branch adds the frozen breadth collection run **39076207515**, artifact
+leanglish-breadth-observations, containing 36 retained reports from native run
+**39067324637**. The collection is a fixed snapshot, not the full eventual run.
+Its 427-target queue is independently reconciled to the full 536-theorem universe
+minus the 109 prior validated readings. Of 223 targets with retained reports,
+107 new readings passed existing source/snapshot/driver/compiler-output consistency
+checks. The combined catalog now has **216 readings**, **9,272 checked frames**,
+**128 findings with any reading**, and **90 with all listed theorem readings**.
+The 204 targets without a retained report remain explicit. Other states: 61
+build-failed, 52 deadline-not-attempted, one deadline-not-extracted, two extraction
+failures. These counts do not establish that missing jobs ultimately failed.
+
+## Actual improvements in this branch
+
+- proofreader/breadth.py checks the full retry complement, shard identity, targets,
+  counters, receipts and source identity. Missing reports do not shrink coverage.
+- progress.html/breadth.json expose every queued target and retained outcome.
+- Supported conjunction elimination becomes obtaining both component facts, with
+  all original frame ownership preserved. Same 216 proofs: 3,242 -> 3,005 explicit
+  gaps, 237 passages improved across 70 readings. Identity wrapper handling has
+  independent shape/arity guards but no measured reduction in this snapshot.
+- Extraction has bounded max_heartbeats, preserved exact-driver mode, and saved
+  compiler stdout on failure. This is not an invented success for a slow proof.
+- .github/workflows/proof-budget-recovery.yml attempts the two known extraction
+  failures (RotationWeights and TreewidthL1), with 2M heartbeats and 900s. Check
+  real native results before including either in any released count.
+
+## Validation and release gate
+
+Local Python/browser regression run: 506 passed; native files excluded locally.
+The real offline file navigation gate runs in GitHub; local browser harness is
+explicitly not a substitute. .github/workflows/breadth-release.yml builds version
+0.4.1 from the frozen collection; it validates all source bytes and proof receipts,
+requires real file navigation and unchanged committed code, and publishes only
+on main after build. It never overwrites 0.4.0 or an existing 0.4.1 release.
+Inspect the current branch CI and actual release before claiming publication.
+
+The complete upstream source inventory was separately verified locally this turn:
+123,565 exact files, no missing/extra entries, all hashes matched. The upstream
+pin remains 1581d4cbdd69a0faf34b2089614fe2a814316a6a. Native Lean runs in Actions;
+there are no independent AI agents. Transport binary artifacts through the GitHub
+artifact action, never manually shuttle enormous raw-expression base64 strings.
+
+## Next work
+
+1. Inspect remaining native run 39067324637 and collect its eventual artifacts in
+   a new frozen snapshot; do not overwrite or mix the earlier 36-report snapshot.
+2. Reconcile further successes through load_proofs. Preserve all missing artifacts
+   and actual failures. Look at build logs and resource limits, not just job colors.
+3. Inspect the two targeted resource-recovery jobs; then integrate verified results.
+4. Continue deterministic, source-backed explanations of automation traces. All
+   320 still-unread theorem targets and 3,005 explanation gaps remain work.
+5. The complete original Lake project/Comparator, formal English semantics and
+   human readability evaluation remain unvalidated. A successful specification
+   with placeholders is not a successful solution proof.
+
+---
+
+## Historical 0.4.0 checkpoint (do not mistake it for current coverage)
+
 # Leanglish all-findings checkpoint — 0.4.0
 
 ## Goal and current product
