@@ -5,10 +5,11 @@ on:
     branches: [work/all-findings-delivery, main]
     paths:
       - '.github/workflows/all-findings-release.yml'
-      - 'proofreader/finding_catalog.py'
-      - 'proofreader/catalog_inputs.py'
-      - 'proofreader/catalog_audit.py'
-      - 'proofreader/catalog_web/**'
+      - 'proofreader/**'
+      - 'leanglish/**'
+      - 'lean/**'
+      - 'pyproject.toml'
+      - 'artifacts/openai-sample/**'
       - 'scripts/assemble_finding_release.py'
       - 'scripts/audit_finding_browser.py'
       - 'tests/test_finding_catalog.py'
