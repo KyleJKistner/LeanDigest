@@ -1,0 +1,98 @@
+name: All finding proof attempts
+on:
+  push:
+    branches: [work/finding-catalog]
+    paths:
+      - scripts/extract_finding_proofs.py
+      - .github/workflows/finding-proofs.yml
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+concurrency:
+  group: finding-proofs-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  proofs:
+    strategy:
+      fail-fast: false
+      max-parallel: 16
+      matrix:
+        shard: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]
+    runs-on: ubuntu-latest
+    timeout-minutes: 55
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: leanprover/lean-action@v1
+        with:
+          lake-package-directory: lean
+          auto-config: false
+          build: true
+          test: false
+          lint: false
+          use-mathlib-cache: false
+          use-github-cache: false
+      - name: Recover complete frozen source without executing it
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mkdir -p /tmp/source-artifact /tmp/upstream
+          gh run download 38822475057 -R "${GITHUB_REPOSITORY}" -n complete-openai-lean-source -D /tmp/source-artifact
+          python - <<'PY'
+          from pathlib import Path
+          import hashlib,json,tarfile,shutil
+          from proofreader.openai_acceptance import lake_config
+          root=Path('/tmp/source-artifact');archive=root/'openai-lean-source.tar.gz'
+          assert hashlib.sha256(archive.read_bytes()).hexdigest()==(root/'SHA256SUMS').read_text().split()[0]
+          summary=json.loads((root/'source-summary.json').read_text())
+          assert summary['commit']=='1581d4cbdd69a0faf34b2089614fe2a814316a6a' and summary['all_source_bytes_match_git']
+          with tarfile.open(archive) as t:t.extractall('/tmp/upstream',filter='data')
+          source=Path('/tmp/upstream/lean');project=Path('/tmp/finding-proof-project');project.mkdir()
+          manifest=json.loads((source/'lake-manifest.json').read_text())
+          shared={'mathlib','batteries','aesop','Qq','Cli','LeanSearchClient','importGraph','plausible','proofwidgets'}
+          pins=[{k:p[k] for k in ('name','url','rev')} for p in manifest['packages'] if p['name'] in shared]
+          assert len(pins)==9
+          for folder in ('ComparatorChallenges','OAI'):shutil.move(str(source/folder),str(project/folder))
+          shutil.copy2(source/'lean-toolchain',project/'lean-toolchain')
+          (project/'lakefile.toml').write_text(lake_config(pins))
+          (project/'selected-pins.json').write_text(json.dumps(pins,indent=2))
+          PY
+      - name: Resolve and verify exact upstream shared dependencies
+        run: |
+          cd /tmp/finding-proof-project
+          lake update
+          lake exe cache get
+          python - <<'PY'
+          import json,subprocess
+          from pathlib import Path
+          p=Path('.')
+          pins=json.loads((p/'selected-pins.json').read_text())
+          actual={x['name']:x for x in json.loads((p/'lake-manifest.json').read_text())['packages']}
+          assert set(actual)=={x['name'] for x in pins}
+          for x in pins:
+              assert actual[x['name']]['rev']==x['rev'] and actual[x['name']]['url']==x['url']
+              assert subprocess.check_output(['git','-C',str(p/'.lake/packages'/x['name']),'rev-parse','HEAD'],text=True).strip()==x['rev']
+          PY
+      - name: Attempt every assigned theorem without replacing failed selections
+        run: |
+          timeout 2500 python scripts/extract_finding_proofs.py --project /tmp/finding-proof-project \
+            --output /tmp/finding-proofs-${{ matrix.shard }} --shard ${{ matrix.shard }} --shards 16 \
+            --wall-seconds 2400 --trust-project
+      - name: Retain observations and source identity even after failures
+        if: always()
+        run: |
+          mkdir -p /tmp/finding-proofs-${{ matrix.shard }}
+          git rev-parse HEAD > /tmp/finding-proofs-${{ matrix.shard }}/application-commit.txt
+          cp /tmp/finding-proof-project/selected-pins.json /tmp/finding-proofs-${{ matrix.shard }}/ 2>/dev/null || true
+          cp /tmp/finding-proof-project/lake-manifest.json /tmp/finding-proofs-${{ matrix.shard }}/ 2>/dev/null || true
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: finding-proofs-${{ matrix.shard }}
+          path: /tmp/finding-proofs-${{ matrix.shard }}/
+          retention-days: 30

@@ -2,219 +2,116 @@
 
 **Lean proofs, in mathematical English.**
 
-## Research preview for mathematicians (October 2026)
+Leanglish connects the OpenAI mathematics findings to their formalization scope,
+explicit statements, original Lean source, and the structured proof readings
+available so far. The renderer is deterministic and makes no language-model API
+calls. Reading does not execute Lean or send source to a service.
 
-**[Download the Leanglish OpenAI proof gallery](https://github.com/KyleJKistner/LeanDigest/releases/tag/leanglish-research-preview-2026-10-15)**. Extract the ZIP and open `Leanglish/index.html`; the 14 source-linked proof readers work offline. Start with the Bézout-frame argument. [See the reading guide and limitations](docs/MATHEMATICIAN_PREVIEW.md).
+## All documented findings: version 0.4.0
 
-The frozen dependency-pinned slice yielded **14 kernel-checked and rendered declarations**, but **13 readings have 796 explicitly unexpanded steps**. Three selected modules completed; a fourth timed out, so its declaration denominator is **unknown**. A successful Lean checking observation **does not** certify the generated English, and there has been no human comprehension study. This release is a **research preview**, not whole-corpus coverage.
+The all-findings catalog indexes **all 242 findings with Lean scope documentation**
+in the pinned release. It retains the broader 372-finding table of contents,
+all 416 comparison configurations, and all **602 statement entries**. Those
+entries correspond to 601 distinct formal targets: 536 theorems and 65 definition
+references. It also includes the 413 directly referenced solution modules.
 
-For source-to-English accuracy problems, [open an issue](https://github.com/KyleJKistner/LeanDigest/issues/new) with the theorem, exact generated sentence, and source-frame information.
+**109 of the 536 theorem targets have structured proof readings** in this frozen
+release. Their retained native observations check 4,090 selected proof frames;
+the generated readings contain 1,357 explicitly unexpanded passages. All remaining
+targets stay visible, with recorded attempt status and original source access.
 
-Leanglish is the product name. The repository remains `KyleJKistner/LeanDigest`.
-Use `leanglish` or `python -m leanglish`; the existing `proofreader` command,
-Python package, installation name (`lean-proofreader`), and proof formats remain
-compatible. This is the v0.3.0 development snapshot, now with the new public name.
-See [naming and compatibility](docs/NAMING.md).
+This is complete **finding and statement access**, not complete English-proof
+coverage. Comparison specifications intentionally contain placeholders; an
+elaborated specification is never counted as a checked solution proof. The native
+solution runs used unchanged modules, Lean 4.34.1, and exact shared dependency pins,
+not a complete replay of the original Lake project or its Comparator checks.
 
-Read a formal argument as mathematical prose without starting in a Lean editor.
-The renderer is deterministic and makes no language-model API calls. Source
-outlines, typed evidence, successful checking observations, English fidelity and
-reader comprehension remain separate measurements.
+[Reading guide and exact limitations](docs/ALL_FINDINGS.md)
 
-## Version 0.3.0 — a retained substantial proof
+### Open the catalog
 
-The OpenAI Bézout-frame existence theorem now has a complete retained mathematical
-reading: two gcd cases, divisibility witnesses, a Bézout calculation, nonzero
-cancellation, and verification of the four final equalities. Lean **4.34.1**
-accepted **86 selected original-proof judgements** and their independent source
-paths. Repeated extraction was identical; altered paths, a false intermediate
-claim and an altered snapshot were rejected. The reader accounts for all 86
-exported frames in 59 displayed steps, with **16 independently replayable exact
-integer-polynomial certificates** and no budget cuts in this selected example.
+Use the `leanglish-all-findings.zip` asset from the
+[GitHub releases](https://github.com/KyleJKistner/LeanDigest/releases). Extract it
+and open `Leanglish/index.html`. No installation, account, API key, network
+connection, or Lean runtime is needed for the included material. External papers
+and upstream dependency-source links require a connection.
 
-The theorem body is unchanged; imports were adapted. This is **not** a build of
-the entire pinned OpenAI project, a whole-corpus translation, or a formal proof
-of English fidelity. Formula text uses Lean's pretty-printer. Imported lemma
-statements appear as mathematical dependencies; their proofs are not all expanded.
-No human comprehension study has run.
+The initial view shows all documented findings. Search by topic, title, finding
+number, or Lean declaration; open a finding to inspect its scope, assumptions,
+formal targets and proof-reading availability. `coverage.html` and the JSON
+records separate indexing, statement elaboration, native checking, and explanation
+coverage. The older 14-proof gallery remains a historical preview, not the current
+coverage denominator.
 
-See [executed validation](docs/VALIDATION_V0_3.md),
-[source-bound reading and trust boundaries](docs/NARRATIVE.md), and
-[the earlier exact-DAG contract](docs/KERNEL_IR.md).
+## Build from local observations
 
-## Open the reader
+Python 3.11 or newer:
 
-Python 3.11 or later. No runtime Python dependencies, API key, network connection
-or Lean installation is needed to read the bundled proofs.
+```sh
+python -m pip install .
+leanglish catalog --help
+leanglish audit-catalog /path/to/generated/site
+```
+
+The catalog builder reads the frozen upstream metadata, original source inventory,
+statement observations, and proof observations. It checks their identities and
+rejects missing inventory members, contradictory successful statements, changed
+source hashes, invalid proof paths, and mismatched receipts. It does not run Lean.
+
+`.github/workflows/all-findings-release.yml` retrieves the frozen input artifacts,
+rebuilds the catalog, audits every local link, and exercises real offline file
+navigation in Chromium before packaging. Packaging records the exact application
+commit and hashes. The separate release job publishes only after the build passes;
+it never overwrites an existing immutable version.
+
+## Read the bundled demonstration
 
 ```sh
 python -m leanglish narrative-demo -o reader.html
 python -m leanglish serve
 ```
 
-Open `http://127.0.0.1:8765`. The default library starts with the Bézout argument.
-It also retains five small constructor-DAG examples and eight source-only OpenAI
-declaration candidates. **Typed** includes the five DAG examples and the one
-source-bound snapshot; the evidence badge distinguishes the routes. Inspect an
-arithmetic step for its coefficient certificate; expand an intermediate fact for
-its supporting argument. The Evidence panel records limitations and exact hashes.
+Open `http://127.0.0.1:8765`. The bundled demonstration starts with the Bézout-frame
+argument. The full finding catalog is distributed separately; starting this demo
+server does not imply all findings are bundled in the installed Python package.
 
-The generated HTML is self-contained. Attachment viewers that disable JavaScript
-may need the local server. `kernel-demo` still opens the v0.2 small-proof library;
-`demo` still opens the source-only demonstration.
+## Verification model
 
-## Recheck the displayed argument without Lean
+The source-bound reading route records selected intermediate statements and their
+locations in the original proof. The Lean exporter kernel-checks the judgements
+and independently follows the recorded source-proof paths. The earlier exact-DAG
+route remains available. Arithmetic passages can include independently replayable
+integer-polynomial certificates.
 
-```sh
-python -m leanglish narrative-read proofreader/data/bezout-snapshot.json \
-  --source proofreader/data/bezout-original.lean \
-  --receipt proofreader/data/bezout-receipt.json -o output/bezout
-python -m leanglish check-narrative proofreader/data/bezout-snapshot.json \
-  output/bezout/reading.json --certificates output/bezout/polynomial-certificates.json
-```
+Neither route formally verifies the natural-language renderer. The compiler,
+source, pretty-printer, extraction implementation, transport, and terminology
+remain within the trust boundary. Saved execution observations are unsigned.
+There are **zero formally certified English proofs** and no completed controlled
+human-comprehension study. Upstream descriptions are presented as upstream claims,
+not independent assessments of the mathematical papers.
 
-This regenerates the reading and independently checks the polynomial identities.
-It does not authenticate the source snapshot. Actual Lean re-extraction is
-explicit opt-in:
+Actual Lean extraction is explicit opt-in with `--trust-project`; remote checking
+requires `--allow-remote`. Elaborating a Lean project may execute arbitrary code:
+consent is not a sandbox. The browser has no source-execution endpoint.
 
-```sh
-python -m leanglish verify-narrative proofreader/data/bezout-snapshot.json \
-  --driver proofreader/data/bezout-reproduce.lean \
-  --backend axle --allow-remote -o output/recheck
-```
-
-This sends the complete driver to AXLE. Native execution instead uses an existing
-trusted project and `--trust-project`. Elaborating Lean can run arbitrary code;
-consent is not a sandbox. The browser has no execution endpoint. The exact
-metaprograms ran remotely; native and installed-CLI transport integration remain
-separate gates, not implied by the local reader tests.
-
-## A typed export → a complete offline reading bundle
-
-```sh
-python -m pip install .
-leanglish kernel-read artifacts/v0.2/and_swap.kernel.json \
-  -o output/and-swap --context examples/kernel/Smoke.lean \
-  --receipt artifacts/v0.2/and_swap.receipt.json
-leanglish check-reading artifacts/v0.2/and_swap.kernel.json \
-  output/and-swap/reading.json
-```
-
-The output includes `reader.html`, `reading.json`, `proof.txt`, `argument.json`,
-`Check.lean`, and `coverage.json`. Without `--context` or `--module`, the
-generated checker still requires the original theorem environment before replay. Reading validates constructor shape, scope,
-original-proof paths and argument inventories. It does **not** execute Lean.
-`check-reading` detects any divergence from deterministic English regeneration;
-it is not an English parser or a formal semantic equivalence proof.
-
-## Extract and check a project module
-
-Use an already configured project's pinned Lean toolchain and dependencies:
-
-```sh
-leanglish extract-kernel --project lean --module ProofReader.Smoke \
-  --output output/native-smoke --trust-project --verify
-```
-
-The v2 extractor enumerates **theorem declarations** from Lean's environment,
-retains individual failures, emits the expected inventory, builds the reading
-library and optionally checks all intermediate judgements. Proof-valued `def`s
-and informal manuscripts are not yet part of this v2 theorem denominator.
-The combined native command is implemented and has a mandatory integration test;
-it has not run in this container because Lean/Lake is absent.
-
-**Lean elaboration can execute arbitrary code.** `--trust-project` is consent,
-not isolation. Use a trusted project or an independently secured disposable
-sandbox without credentials. The web reader has no execution endpoint.
-
-## Optional remote compilation
-
-The AXLE adapter is explicit opt-in. It sends the **entire provided source
-context and generated checking code** to the third-party service. It never sends
-anything during ordinary reading.
-
-```sh
-leanglish extract-kernel --backend axle --lean-version 4.34.0 \
-  --context examples/kernel/Showcase.lean --output output/remote \
-  --allow-remote --verify
-```
-
-Use a self-contained context with the necessary imports, including `Lean`.
-`ProofReaderKernel` is a reserved tool namespace excluded from local-source
-inventory. Native imported-module enumeration does not rely on that exclusion.
-All service responses, the exact request source, inventories and failures are
-saved. API authentication can be supplied via `AXLE_API_KEY`; tokens are not
-written to artifacts. Service availability/dependency caches are external.
-
-Do not change an exported argument's recorded Lean version to force replay.
-Re-extract on the desired version instead. Earlier remote environments had missing cached dependencies; availability changed during testing. The v0.3 substantial experiment succeeded on Lean 4.34.1 with minimal imports. The exact pinned OpenAI dependency environment remains unvalidated.
-
-## Complete OpenAI benchmark target
-
-Pinned repository `openai/math`, commit
-`1581d4cbdd69a0faf34b2089614fe2a814316a6a`.
-
-A fresh metadata traversal of all 23 `lean/OAI` domain subtrees counted
-**122,458 Lean files / 1,571,301,358 source bytes**. Every returned subtree was
-untruncated. This is a file inventory observation, **not a theorem count or a
-successful proof run**. The observation is saved under `artifacts/v0.2/`.
-
-```sh
-leanglish fetch-openai work/openai-math
-leanglish benchmark work/openai-math -o output/inventory
-leanglish extract-corpus work/openai-math -o output/shard-0 \
-  --trust-project --engine kernel --shard-count 16 --shard-index 0
-# Run the other shard indices, then reconcile every report.
-leanglish aggregate work/openai-math output/shard-*/extraction.json \
-  -o output/aggregate
-```
-
-The new kernel engine is the default for corpus extraction. Missing modules,
-export failures and failed checks stay in the denominator. Large source
-benchmarks use a ledger-only mode instead of retaining a multi-gigabyte proof
-book in memory. Per-module readers are produced during typed extraction.
-See [benchmark scope](docs/OPENAI_BENCHMARK.md).
-
-## Tests
+## Development
 
 ```sh
 python -m pip install '.[dev,webtest]'
 python -m playwright install chromium
-python scripts/build_demo.py
-python scripts/build_typed_demo.py
-python scripts/build_narrative_demo.py
 python -m pytest -q
-
-# These tests may not skip in the native CI job.
-PROOFREADER_REQUIRE_LEAN=1 python -m pytest \
-  tests/test_lean_integration.py tests/test_kernel_integration.py tests/test_narrative_integration.py -q
 ```
 
-Local results and exact successful/negative remote checking sources are included
-under `artifacts/v0.2/` and `artifacts/v0.3/`.
+Native integration requires the pinned Lean project in `lean/`. CI sets
+`PROOFREADER_REQUIRE_LEAN=1`, so the required export/replay/tamper tests cannot
+pass by silently skipping. A local run without Lean labels these tests as skipped.
 
-Both native Lean integration and Python/browser CI passed on commit `2d6b60f`
-([run 38667444089](https://github.com/KyleJKistner/LeanDigest/actions/runs/38667444089)).
-This is the observed pre-rebranding baseline, not an assertion about future
-commits. It does not establish the full pinned OpenAI dependency build.
+Further documentation: [architecture](docs/ARCHITECTURE.md),
+[narrative format](docs/NARRATIVE.md), [exact-DAG contract](docs/KERNEL_IR.md),
+[trust boundaries](docs/TRUST.md), [historical validation](docs/VALIDATION_V0_3.md),
+and [supervisor checkpoint](HANDOFF.md).
 
-## Repository and agent workflow
-
-This repository is `KyleJKistner/LeanDigest`. It contains the v0.3.0 development
-snapshot, including the application, Lean extraction/checking code, tests,
-examples and retained validation evidence. Historical reports describe the
-state at the time of each experiment; they are not claims that GitHub CI has
-subsequently passed. An offline public prerelease is available; GitHub Pages hosting is not yet enabled.
-
-The original creation helper, `scripts/publish.sh`, now targets `LeanDigest`.
-It fails rather than overwriting an existing repository; ordinary updates should
-use a normal commit and push. See `docs/IMPORT_V0_3.md` for snapshot scope.
-
-No independent coding agents were launched. `AGENTS.md`, `agents/tasks.json` and
-`scripts/team.py` provide bounded work packages and an optional external-agent
-launcher in separate worktrees. A work package is not evidence of agent execution.
-
-The ideas of deterministic verbalization and expandable proof displays have
-precedents in LeanInformal, Informath and Verbose Lean. This release makes no
-novelty or publication claim. New code is MIT; OpenAI source samples retain their
-Apache 2.0 license. See `THIRD_PARTY_NOTICES.md`.
+Leanglish is the product name; the repository remains `KyleJKistner/LeanDigest`.
+The `proofreader` Python package, legacy CLI, distribution name `lean-proofreader`,
+and historical proof-format identifiers remain compatible. New catalog commands
+are exposed through the public `leanglish` entry point.

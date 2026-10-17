@@ -1,0 +1,95 @@
+name: Leanglish finding catalog
+on:
+  push:
+    branches: [work/finding-catalog]
+    paths: [.github/workflows/finding-catalog.yml]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  acquire:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python -m pip install 'PyYAML>=6,<7'
+      - name: Archive application source
+        run: |
+          mkdir -p /tmp/delivery
+          git archive --format=zip --prefix=Leanglish/ -o /tmp/delivery/source.zip HEAD
+          git rev-parse HEAD > /tmp/delivery/application-commit.txt
+      - name: Acquire the entire documented finding catalog without executing upstream code
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          python - <<'PY'
+          from pathlib import Path,PurePosixPath
+          from concurrent.futures import ThreadPoolExecutor,as_completed
+          from urllib.request import Request,urlopen
+          from urllib.parse import quote
+          import json,hashlib,base64,os,time,yaml
+          pin='1581d4cbdd69a0faf34b2089614fe2a814316a6a'
+          base='https://api.github.com/repos/openai/math'
+          out=Path('/tmp/delivery/upstream');out.mkdir()
+          def get(url):
+              for attempt in range(4):
+                  try:
+                      req=Request(url,headers={'User-Agent':'Leanglish-finding-catalog','Authorization':'Bearer '+os.environ['GH_TOKEN']})
+                      with urlopen(req,timeout=60) as r: data=r.read(16_000_001)
+                      assert len(data)<=16_000_000,'Oversized metadata'
+                      return json.loads(data)
+                  except Exception:
+                      if attempt==3:raise
+                      time.sleep(2**attempt)
+          def fetch(path):
+              p=PurePosixPath(path)
+              assert not p.is_absolute() and '..' not in p.parts
+              row=get(base+'/contents/'+quote(path,safe='/')+'?ref='+pin)
+              assert row['type']=='file' and row['encoding']=='base64'
+              data=base64.b64decode(''.join(row['content'].split()),validate=True)
+              assert len(data)==row['size']
+              sha=hashlib.sha1(b'blob '+str(len(data)).encode()+b'\0'+data).hexdigest()
+              assert sha==row['sha']
+              dest=out/path;dest.parent.mkdir(parents=True,exist_ok=True);dest.write_bytes(data)
+              return {'path':path,'git_blob':sha,'sha256':hashlib.sha256(data).hexdigest(),'bytes':len(data)}
+          paths=['README.md','CONTENTS.md','history.md','LICENSE','lean/README.md','lean/formalization.yaml','lean/lean-toolchain','lean/lake-manifest.json']
+          fetched={};errors={}
+          for path in paths:
+              try:fetched[path]=fetch(path)
+              except Exception as e:errors[path]=str(e)
+          manifest=yaml.safe_load((out/'lean/formalization.yaml').read_text())
+          paths=set()
+          for folder in ['lean/docs','lean/ComparatorChallenges']:
+              listing=get(base+'/contents/'+folder+'?ref='+pin)
+              (out/(folder.replace('/','-')+'-listing.json')).write_text(json.dumps(listing,indent=2))
+              for row in listing:
+                  if row['type']=='file' and row['name'].endswith(('.md','.json','.lean')):paths.add(row['path'])
+          for row in manifest['status']['main_results']:
+              paths.add('lean/'+row['file']);paths.add('lean/'+row['comparator_config'])
+          for row in manifest.get('sources',[]):
+              p=row.get('id','')
+              if p.startswith('../preprints/'):
+                  paths.add(str(PurePosixPath(p[3:]).parent/'README.md'))
+          paths-=set(fetched)
+          with ThreadPoolExecutor(max_workers=6) as pool:
+              futures={pool.submit(fetch,p):p for p in sorted(paths)}
+              for f in as_completed(futures):
+                  p=futures[f]
+                  try:fetched[p]=f.result()
+                  except Exception as e:errors[p]=str(e)
+          result={'repository':'openai/math','commit':pin,'manifest_sources':len(manifest.get('sources',[])),'manifest_results':len(manifest['status']['main_results']),'fetched':sorted(fetched.values(),key=lambda r:r['path']),'errors':errors,'lean_executed':False}
+          (out/'acquisition.json').write_text(json.dumps(result,indent=2))
+          print(json.dumps({k:v for k,v in result.items() if k!='fetched'},indent=2))
+          assert 'lean/formalization.yaml' in fetched and 'CONTENTS.md' in fetched
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: leanglish-finding-inputs
+          path: /tmp/delivery/
+          retention-days: 30

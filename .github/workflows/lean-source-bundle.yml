@@ -1,0 +1,57 @@
+name: Complete pinned Lean source bundle
+on:
+  push:
+    branches: [work/finding-catalog]
+    paths: [.github/workflows/lean-source-bundle.yml]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  source:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Fetch exactly the published Lean subtree without executing it
+        env:
+          GIT_LFS_SKIP_SMUDGE: '1'
+        run: |
+          set -eu
+          git clone --filter=blob:none --no-checkout --depth=1 https://github.com/openai/math.git /tmp/openai-math
+          git -C /tmp/openai-math sparse-checkout init --no-cone
+          git -C /tmp/openai-math sparse-checkout set --no-cone '/lean/' '/CONTENTS.md' '/README.md' '/LICENSE'
+          git -C /tmp/openai-math fetch --depth=1 origin 1581d4cbdd69a0faf34b2089614fe2a814316a6a
+          git -C /tmp/openai-math checkout --detach 1581d4cbdd69a0faf34b2089614fe2a814316a6a
+          test "$(git -C /tmp/openai-math rev-parse HEAD)" = 1581d4cbdd69a0faf34b2089614fe2a814316a6a
+      - name: Verify every source byte against the pinned Git tree
+        run: |
+          mkdir -p /tmp/delivery
+          python - <<'PY'
+          from pathlib import Path
+          import subprocess,json,hashlib
+          root=Path('/tmp/openai-math');rows=[];errors=[]
+          tree=subprocess.check_output(['git','-C',str(root),'ls-tree','-rz','--full-tree','HEAD','lean/'])
+          for item in tree.split(b'\0'):
+              if not item:continue
+              meta,path=item.split(b'\t',1);mode,kind,sha=meta.decode().split();path=path.decode()
+              if kind!='blob':continue
+              p=root/path
+              if mode not in {'100644','100755'} or p.is_symlink():
+                  errors.append({'path':path,'error':'Unsupported nonregular source'});continue
+              data=p.read_bytes();actual=hashlib.sha1(b'blob '+str(len(data)).encode()+b'\0'+data).hexdigest()
+              if actual!=sha:errors.append({'path':path,'error':'Git blob mismatch'})
+              rows.append({'path':path,'git_blob':sha,'bytes':len(data),'sha256':hashlib.sha256(data).hexdigest()})
+          report={'schema':'leanglish.complete-lean-source/v1','repository':'openai/math','commit':'1581d4cbdd69a0faf34b2089614fe2a814316a6a','files':len(rows),'lean_files':sum(r['path'].endswith('.lean') for r in rows),'bytes':sum(r['bytes'] for r in rows),'errors':errors,'all_source_bytes_match_git':not errors,'lean_executed':False,'compiled':False}
+          out=Path('/tmp/delivery');(out/'source-summary.json').write_text(json.dumps(report,indent=2));(out/'source-inventory.json').write_text(json.dumps(rows,separators=(',',':')))
+          print(json.dumps(report,indent=2));assert not errors
+          PY
+          tar -czf /tmp/delivery/openai-lean-source.tar.gz -C /tmp/openai-math lean CONTENTS.md README.md LICENSE
+          sha256sum /tmp/delivery/openai-lean-source.tar.gz > /tmp/delivery/SHA256SUMS
+      - uses: actions/upload-artifact@v4
+        with:
+          name: complete-openai-lean-source
+          path: /tmp/delivery/
+          compression-level: 0
+          retention-days: 30
