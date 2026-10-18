@@ -31,6 +31,47 @@
     search.addEventListener('input', apply); coverage.addEventListener('change', apply); subject.addEventListener('change', apply);
     document.querySelector('form').addEventListener('submit', e => { e.preventDefault(); apply(); }); apply();
   }
+  const gapSearch = document.getElementById('gap-search');
+  const gapHead = document.getElementById('gap-head');
+  if (gapSearch && gapHead) {
+    const norm = s => s.normalize('NFKD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+    const rows = Array.from(document.querySelectorAll('.gap-reading')).map(row => ({
+      row, search: norm(row.dataset.search), groups: JSON.parse(row.dataset.groups),
+      count: Number(row.dataset.count), first: row.dataset.first
+    }));
+    const restore = () => {
+      const params = new URLSearchParams(location.search);
+      gapSearch.value = params.get('q') || '';
+      gapHead.value = Array.from(gapHead.options).some(x => x.value === params.get('head')) ? params.get('head') : '';
+    };
+    const apply = (persist = true) => {
+      const terms = norm(gapSearch.value).trim().split(/\s+/).filter(Boolean);
+      let proofs = 0, gaps = 0;
+      for (const item of rows) {
+        const group = gapHead.value && Object.prototype.hasOwnProperty.call(item.groups, gapHead.value)
+          ? item.groups[gapHead.value] : null;
+        const count = gapHead.value ? (group ? group.count : 0) : item.count;
+        const match = count > 0 && terms.every(t => item.search.includes(t));
+        item.row.hidden = !match;
+        if (match) { proofs++; gaps += count; }
+        item.row.querySelector('.gap-count').textContent = `${count} / ${item.count}`;
+        item.row.querySelector('.gap-review').href = group ? group.reader_link : item.first;
+      }
+      document.getElementById('gap-result-count').textContent = `${gaps} explanation gaps in ${proofs} of ${rows.length} readings with gaps`;
+      document.getElementById('gap-empty').hidden = proofs !== 0;
+      if (persist) {
+        const next = new URLSearchParams();
+        if (gapSearch.value) next.set('q', gapSearch.value);
+        if (gapHead.value) next.set('head', gapHead.value);
+        try { history.replaceState(null, '', location.pathname + (next.size ? '?' + next : '') + location.hash); } catch (_) {}
+      }
+    };
+    gapSearch.addEventListener('input', () => apply());
+    gapHead.addEventListener('change', () => apply());
+    document.getElementById('gap-filters').addEventListener('submit', e => { e.preventDefault(); apply(); });
+    window.addEventListener('popstate', () => { restore(); apply(false); });
+    restore(); apply(false);
+  }
   if (window.katex) {
     document.querySelectorAll('[data-tex]').forEach(node => {
       try {

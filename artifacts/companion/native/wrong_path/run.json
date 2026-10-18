@@ -1,0 +1,14 @@
+{
+  "command": [
+    "lake",
+    "env",
+    "lean",
+    "/workspace/scratch/fc6359c47bd2/leandigest-bezout-mathlib/_proofreader_cache/run_fm19ea40/Driver.lean"
+  ],
+  "elapsed_seconds": 7.395,
+  "exit_code": 1,
+  "reason": "",
+  "status": "failed",
+  "stderr": "",
+  "stdout": "/workspace/scratch/fc6359c47bd2/leandigest-bezout-mathlib/_proofreader_cache/run_fm19ea40/Driver.lean:218:13: warning: Variable name `a` is not explicitly referenced.\n\nHint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:\n  [apply] _a\n\nNote: This linter can be disabled with `set_option linter.unusedVariables false`\n/workspace/scratch/fc6359c47bd2/leandigest-bezout-mathlib/_proofreader_cache/run_fm19ea40/Driver.lean:219:11: warning: Variable name `f` is not explicitly referenced.\n\nHint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:\n  [apply] _f\n\nNote: This linter can be disabled with `set_option linter.unusedVariables false`\n/workspace/scratch/fc6359c47bd2/leandigest-bezout-mathlib/_proofreader_cache/run_fm19ea40/Driver.lean:269:0: error: Original source linkage mismatch at frame 40\n"
+}

@@ -1,4 +1,41 @@
-# Leanglish breadth checkpoint — 0.4.1
+# Current isolated reader and architecture checkpoint — 2026-10-18
+
+The immediate user goal is one presentation-quality proof for Sebastian Bubeck
+and an architecture for correct-by-construction, deterministic mathematical
+English. The reviewed [Bézout companion](docs/companion/index.html) is the first
+concrete example. It is curated prose for one supporting theorem; its complete
+English semantics are not yet formally certified.
+
+Read [the architecture](docs/CORRECT_BY_CONSTRUCTION.md),
+[the proved logical fragment](docs/CONTROLLED_ENGLISH_PROTOTYPE.md), and
+[the independent audit](docs/SWARM_READER_AUDIT.md). The core Lean module proves
+typed derivation soundness, controlled formula/sentence token roundtrips, rule
+meaning, and local node alignment. Arithmetic, full proof-tree prose, string/HTML
+serialization, and import of original proof occurrences still need integration.
+Do not promote the companion or corpus from that component proof alone.
+
+Fresh native evidence in `artifacts/companion/native` uses Lean 4.34.1 and the
+exact Mathlib revision pinned by OpenAI. The theorem body is unchanged under two
+explicitly substituted imports. All 86 selected judgements, exact repeat, and
+wrong-path/false-claim controls passed. The failed historical snapshot byte
+comparison remains recorded separately; its older exporter leaked macro-scoped
+display names. No full original-project or Comparator pass is claimed here.
+
+Four actual independent agents contributed implementation or review during this
+session, in isolated worktrees. This branch is
+`work/swarm-reader-completion-20261018`. The concurrent Pro session owns
+`work/full-original-project`; its exporter, runtime, campaign and existing CI
+files were left untouched. A separate `checked-companion.yml` gates this work.
+
+The published v0.4.1 archive stays frozen at 216 readings, 9,272 selected frames,
+and 3,005 gaps. The current printer version `source-math-en/0.4.2` reproduces
+those same snapshots with 3,001 gaps: 91 logical passages newly explained and 87
+previously unmarked projections correctly exposed. The following sections are
+historical checkpoints, including their environment and agent-provider limits.
+
+---
+
+# Historical Leanglish breadth checkpoint — 0.4.1
 
 ## Resume here, not from old toy examples
 

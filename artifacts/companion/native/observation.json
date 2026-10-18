@@ -1,0 +1,135 @@
+{
+  "axioms": [
+    "propext",
+    "Classical.choice",
+    "Quot.sound"
+  ],
+  "checker_script_sha256": "9487f4eaec553ce0a9c1ab958bb4765806340f9e321687602efbaf3b035bae98",
+  "checks": {
+    "current_export": "passed",
+    "repeat_snapshot_exact": "passed",
+    "wrong_claim_rejected": "passed",
+    "wrong_path_rejected": "passed"
+  },
+  "dependencies": [
+    {
+      "commit": "118aa17ee84656b8bd727fef7c458ee8c833385c",
+      "name": "plausible",
+      "url": "https://github.com/leanprover-community/plausible"
+    },
+    {
+      "commit": "ddf04cf3949fa556442341e87d47f9f6e6074707",
+      "name": "LeanSearchClient",
+      "url": "https://github.com/leanprover-community/LeanSearchClient"
+    },
+    {
+      "commit": "e928b72544873815af278d38681b31c0293588e3",
+      "name": "importGraph",
+      "url": "https://github.com/leanprover-community/import-graph"
+    },
+    {
+      "commit": "106ff4fafc74ef4ac99d81dbf3ab399118f497a5",
+      "name": "proofwidgets",
+      "url": "https://github.com/leanprover-community/ProofWidgets4"
+    },
+    {
+      "commit": "355695d523e41d0554926416cba2a2b3544fbbc9",
+      "name": "aesop",
+      "url": "https://github.com/leanprover-community/aesop"
+    },
+    {
+      "commit": "6a489d9af5d0c47e5b259e2e8bcdfc1811b5a259",
+      "name": "Qq",
+      "url": "https://github.com/leanprover-community/quote4"
+    },
+    {
+      "commit": "f2effa3d803fda822b1f97b806c47cf2adfbcbc2",
+      "name": "batteries",
+      "url": "https://github.com/leanprover-community/batteries"
+    },
+    {
+      "commit": "e92c9f15fdfacc8536f31cfb3b7ad26c3c8cd204",
+      "name": "Cli",
+      "url": "https://github.com/leanprover/lean4-cli"
+    }
+  ],
+  "english_formally_verified": false,
+  "exact_openai_project_replayed": false,
+  "exporter_sha256": "0e3186dc4a16cd63551373f5420ef1bdf41ad989f75ba86fea3ddb21d618c89f",
+  "files": {
+    "current/Context.lean": "2791fd12550b52248a6087d1c278f90f3804e63b21cd45150dc0c677d7015c2f",
+    "current/Extract.lean": "408694537d9423662943f6e46d1ef18a5a33f3a93ab4a353ba449c89df30dff2",
+    "current/actual-snapshot.json": "7f0e3b36ec46ec3b5cf7ec660a627fb0bb3020b096b984af2f433bf8ce43a69f",
+    "current/coverage.json": "3f07516ac6e9cbfcc4158ebdedec6f563e805e8bfbc3fa931e46017a3c9e6d70",
+    "current/polynomial-certificates.json": "e7062101ffed9f19ef4c92a0edaa99eadefd21a74bf257417942971098b124ea",
+    "current/proof.txt": "2cbaf947ba5bc628adb4bbdc0b4c7e123fe1f4ad36e7a4bc84b28c5eb481ceb1",
+    "current/reader.html": "81e8ba68116efe0d33585b1dd6b7305519c8ae4f52c96e866d08ecf6e01c7c92",
+    "current/reading.json": "d1f1c0db41b6d4c19e45f55412037934249fbc49f03af4556e741bc4021e6b1c",
+    "current/receipt.json": "1cdeb190274b4af735e048d83abb3b08695035ef07f680458ec0d1507920bb5f",
+    "current/run.json": "8f61475067e3f00fb8f0f7235e604d92d7960bbbfc4defb68955aa11e3b8d024",
+    "current/snapshot.json": "7f0e3b36ec46ec3b5cf7ec660a627fb0bb3020b096b984af2f433bf8ce43a69f",
+    "current/stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "current/stdout.txt": "5a3a4908324b6e1562f0003e61616d695a3f89557934d05028b09fe2e6fd9b2d",
+    "repeat/Context.lean": "2791fd12550b52248a6087d1c278f90f3804e63b21cd45150dc0c677d7015c2f",
+    "repeat/Extract.lean": "408694537d9423662943f6e46d1ef18a5a33f3a93ab4a353ba449c89df30dff2",
+    "repeat/actual-snapshot.json": "7f0e3b36ec46ec3b5cf7ec660a627fb0bb3020b096b984af2f433bf8ce43a69f",
+    "repeat/coverage.json": "3f07516ac6e9cbfcc4158ebdedec6f563e805e8bfbc3fa931e46017a3c9e6d70",
+    "repeat/polynomial-certificates.json": "e7062101ffed9f19ef4c92a0edaa99eadefd21a74bf257417942971098b124ea",
+    "repeat/proof.txt": "2cbaf947ba5bc628adb4bbdc0b4c7e123fe1f4ad36e7a4bc84b28c5eb481ceb1",
+    "repeat/reader.html": "81e8ba68116efe0d33585b1dd6b7305519c8ae4f52c96e866d08ecf6e01c7c92",
+    "repeat/reading.json": "d1f1c0db41b6d4c19e45f55412037934249fbc49f03af4556e741bc4021e6b1c",
+    "repeat/receipt.json": "1cdeb190274b4af735e048d83abb3b08695035ef07f680458ec0d1507920bb5f",
+    "repeat/run.json": "531dffeaf819a6679c95ec3e2b5070ece28ff68570c6e8edb8240153951f31ee",
+    "repeat/snapshot.json": "7f0e3b36ec46ec3b5cf7ec660a627fb0bb3020b096b984af2f433bf8ce43a69f",
+    "repeat/stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "repeat/stdout.txt": "318fa95f2bec66d87238e422a68928d798fda61c16cf9e46abfbbd10751aea70",
+    "retained-driver/Extract.lean": "41d829735d7bb0a20af6ffb61455623f7e64df5b8dff439b61f3fc4974025bfe",
+    "retained-driver/OriginalDriver.lean": "b7d4fa6cbc3c9aac0160bdfa31556d2fd5e0ad1adcc693d55e7a7670583ff066",
+    "retained-driver/actual-snapshot.json": "6c2f538c3ffd86c647c72b3b3d1cb8008494b4f3804c22d8d0f3474d76da8959",
+    "retained-driver/receipt.json": "4530ebf7e701c0b2f46ba20d2070d018e7008cfdfb8ebcd1ca6132b24b03eee0",
+    "retained-driver/run.json": "24d88794d7cd698e7718cc6f05ff890f5ece822203093a746526a73e69e92cb6",
+    "retained-driver/stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "retained-driver/stdout.txt": "77223443532e56a1ec10c4463d6d54079514ff92420b929b6748bc55af2b4115",
+    "wrong_claim/Probe.lean": "cf3e8488b59e55b823f10dcf0ee261f67c1ef7ca2b3595d52d5ea62941b566e1",
+    "wrong_claim/run.json": "e48efef9c4fe4eb45df050def7936a57db283c8a98c93c0e9d2d05ae6c718f78",
+    "wrong_claim/stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "wrong_claim/stdout.txt": "37d817935f85c652b70948743e28ef3b90e7847f41ed11cf0ffb02fdbef68bd7",
+    "wrong_path/Probe.lean": "a9b660f9e3aea324e7d4f92c3dd11586835aac5bd448d08e5f55ddcc5e8d5910",
+    "wrong_path/run.json": "71dbf1610fa82beaa7a1cd9bbe42fc84d8c06f4fc333ae02bb8b87b4e9c4742d",
+    "wrong_path/stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "wrong_path/stdout.txt": "39ad7e9202e484a0302af9bd349552cd2d5e96eb3283c8ea90772f7ebef753d1"
+  },
+  "historical_comparison": {
+    "errors": [
+      "Re-extracted snapshot differs from the supplied record"
+    ],
+    "expected_snapshot_sha256": "dad8ef23a231904f37b73979f8284ea3662ffe8f8cd30c79066856f2095b4dd7",
+    "internal_repeat_and_mutation_markers": true,
+    "native_exit_code": 0,
+    "note": "The older exporter retains macro-scoped instance names that depend on its module path. A failed historical byte comparison remains a failure; the fresh reading uses its own exact repeat.",
+    "snapshot_exact": "failed"
+  },
+  "import_adaptation": {
+    "added": [
+      "Mathlib.Algebra.EuclideanDomain.Basic",
+      "Mathlib.Tactic.Ring"
+    ],
+    "context_sha256": "2791fd12550b52248a6087d1c278f90f3804e63b21cd45150dc0c677d7015c2f",
+    "removed": [
+      "OAI.Algebra.AffineCancellation.Model"
+    ],
+    "scope": "Unchanged theorem body under explicitly substituted, pinned Mathlib imports.",
+    "theorem_body_bytes_unchanged": true
+  },
+  "lean_version": "4.34.1",
+  "mathlib_commit": "d13f23b723b8a846827a245b89c10fc7d3f11612",
+  "original_source_sha256": "d108afa98f200bfce183b8afc0af586b70734f7ad2cce1bc5e49853a2f555c6f",
+  "receipt_authenticated": false,
+  "schema": "leanglish.bezout-native-observation/v1",
+  "scope": "fresh-pinned-adapted-context",
+  "selected_judgements": 86,
+  "snapshot_sha256": "e93e0455259fc3283983f3a47f956cdac4b1a28869bc5027bcc694b4a124d8d0",
+  "status": "passed",
+  "theorem": "OAI.ComplexCancellation.BezoutFrame.exists_frame",
+  "upstream_commit": "1581d4cbdd69a0faf34b2089614fe2a814316a6a"
+}

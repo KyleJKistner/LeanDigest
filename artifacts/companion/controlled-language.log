@@ -1,0 +1,13 @@
+"From either ( claim[0] ) or ( claim[1] ) , together with if ( claim[0] ), then ( claim[0] ) , together with if ( claim[1] ), then ( claim[0] ) , infer claim[0] ."
+'ProofReader.ControlledEnglish.Derivation.sound' does not depend on any axioms
+'ProofReader.ControlledEnglish.SourceObligation.discharge' does not depend on any axioms
+'ProofReader.ControlledEnglish.parseFormula_render' depends on axioms: [propext, Classical.choice, Quot.sound]
+'ProofReader.ControlledEnglish.readFormula_render' depends on axioms: [propext, Classical.choice, Quot.sound]
+'ProofReader.ControlledEnglish.rendered_formula_meaning' depends on axioms: [propext, Classical.choice, Quot.sound]
+'ProofReader.ControlledEnglish.Rule.sound' does not depend on any axioms
+'ProofReader.ControlledEnglish.parseSentence_render' depends on axioms: [propext, Classical.choice, Quot.sound]
+'ProofReader.ControlledEnglish.readSentence_render' depends on axioms: [propext, Classical.choice, Quot.sound]
+'ProofReader.ControlledEnglish.rendered_sentence_meaning' depends on axioms: [propext, Classical.choice, Quot.sound]
+'ProofReader.ControlledEnglish.Rule.rendered_sound' depends on axioms: [propext, Classical.choice, Quot.sound]
+'ProofReader.ControlledEnglish.Derivation.rootRule?_aligned' does not depend on any axioms
+'ProofReader.ControlledEnglish.discharge_swap' does not depend on any axioms

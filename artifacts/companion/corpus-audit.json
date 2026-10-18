@@ -1,0 +1,30 @@
+{
+  "budget_cut_frames": 0,
+  "english_formally_verified": false,
+  "explanation_gaps": 3001,
+  "frames": 9272,
+  "native_lean_executed": false,
+  "oversaturated_projection_frames": 8,
+  "plain_text_marker_mismatches": 0,
+  "printer_version": "source-math-en/0.4.2",
+  "reader_sha256": "b4bbfc000c948802d0448574901b31725f9a9b81863332d6b97d1e2fb5511dc8",
+  "schema": "leanglish.independent-reader-audit/v1",
+  "snapshots": 216,
+  "source_inventory": {
+    "available_readings": 216,
+    "configurations": 416,
+    "expected_theorem_targets": 536,
+    "inventory_sha256": "807e661eb7d5e4c5f7fa67e1a6e6b3c18b401e16f8c48f3eb5a36c048f4564bc",
+    "manifest": {
+      "file": "SHA256SUMS.json",
+      "files_checked": 4809,
+      "publisher_authenticated": false,
+      "sha256": "597454c79f9a0caa4779e5303ca5266d6756e34914c46e451430688dd5903778",
+      "verified": true
+    },
+    "missing_theorem_readings": 320,
+    "saved_explanation_gaps": 3005,
+    "selected_frames": 9272
+  },
+  "unmarked_oversaturated_projections": 0
+}

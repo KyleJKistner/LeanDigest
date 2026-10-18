@@ -1,0 +1,42 @@
+{
+  "schema": "leanglish.independent-bezout-comparison/v1",
+  "theorem": "OAI.ComplexCancellation.BezoutFrame.exists_frame",
+  "historical_snapshot_sha256": "dad8ef23a231904f37b73979f8284ea3662ffe8f8cd30c79066856f2095b4dd7",
+  "fresh_snapshot_sha256": "e93e0455259fc3283983f3a47f956cdac4b1a28869bc5027bcc694b4a124d8d0",
+  "historical_file_sha256": "bd79f4f7e9d0081ad39c8289b1a05b90060e7a526e0681b1eba0ffd1d71c842a",
+  "fresh_file_sha256": "7f0e3b36ec46ec3b5cf7ec660a627fb0bb3020b096b984af2f433bf8ce43a69f",
+  "frames": 86,
+  "exact_after_only_recognized_display_renaming": true,
+  "different_frame_fields": {
+    "binder": 3,
+    "context": 84,
+    "objects": 6
+  },
+  "allowed_display_changes": [
+    "generated instance binder becomes inst",
+    "rebound ha becomes ha_1",
+    "rebound hd becomes hd_1",
+    "printed instance object inst✝ becomes inst"
+  ],
+  "identical_fields": [
+    "top-level metadata",
+    "frame IDs",
+    "paths",
+    "roles",
+    "heads",
+    "children",
+    "premises",
+    "statements",
+    "domains",
+    "values",
+    "budget flags",
+    "ordered context types"
+  ],
+  "general_semantic_equivalence_checker": false,
+  "native_extraction_executed_by_this_comparison": false,
+  "historical_exact_reextraction_status": "failed",
+  "fresh_observation_scope": "fresh-pinned-adapted-context",
+  "exact_openai_project_replayed": false,
+  "english_formally_verified": false,
+  "note": "The full records match after the listed display-only substitutions. Generated reader step IDs still use different snapshot-digest prefixes."
+}
