@@ -15,7 +15,7 @@ jobs:
         env: {GH_TOKEN: '${{ github.token }}'}
         run: |
           python - <<'PY'
-          import base64,gzip,hashlib,json,pathlib,subprocess
+          import base64,gzip,hashlib,json,pathlib,subprocess,os
           root=pathlib.Path.cwd();parent='36d1a72a18fb70eae37cd2c2926f0a1ad3d9bf0c'
           encoded=''.join((root/'transfer'/f'{i:02}.b64').read_text() for i in range(5))
           data=base64.b64decode(encoded,validate=True)
@@ -28,6 +28,10 @@ jobs:
           subprocess.run(['git','worktree','add','--detach','/tmp/candidate',parent],check=True)
           candidate=pathlib.Path('/tmp/candidate')
           def git(*args):return subprocess.check_output(['git',*args],cwd=candidate,text=True).strip()
+          def api(endpoint,value):
+              run=subprocess.run(['gh','api','repos/'+os.environ['GITHUB_REPOSITORY']+'/git/'+endpoint,'--input','-'],input=json.dumps(value),text=True,capture_output=True)
+              if run.returncode:raise RuntimeError(run.stderr+'\n'+run.stdout)
+              return json.loads(run.stdout)
           assert git('rev-parse','HEAD^{tree}')==payload['base_tree']
           subprocess.run(['git','apply','--index','-'],input=payload['patch'],cwd=candidate,text=True,check=True)
           for f in payload['files']:
@@ -37,11 +41,19 @@ jobs:
               p.parent.mkdir(parents=True,exist_ok=True);p.write_bytes(content)
               subprocess.run(['git','add','--',str(rel)],cwd=candidate,check=True)
           tree=git('write-tree');assert tree==payload['tree'],tree
+          changed=git('diff','--cached','--name-only').splitlines();entries=[]
+          assert len(changed)==14
+          for name in changed:
+              content=(candidate/name).read_text()
+              blob=api('blobs',{'content':content,'encoding':'utf-8'})
+              assert blob['sha']==git('rev-parse',':'+name)
+              entries.append({'path':name,'mode':'100644','type':'blob','sha':blob['sha']})
+          remote_tree=api('trees',{'base_tree':payload['base_tree'],'tree':entries})
+          assert remote_tree['sha']==tree
           message='Retain 388 original-source readings, expose complete verification status, and require Nanoda where configured\n\nSource tree matches the locally tested tree exactly. Recover a successful 37 MB native export using lossless bounded I/O, preserving all proof and scope checks. Add original-project status pages, frozen native-evidence delivery and a focused external-kernel recovery with negative controls. No original OpenAI source, explanation template or running campaign changed.'
-          result=subprocess.run(['gh','api','repos/'+__import__('os').environ['GITHUB_REPOSITORY']+'/git/commits','--input','-'],input=json.dumps({'message':message,'tree':tree,'parents':[parent]}),text=True,capture_output=True,check=True)
-          created=json.loads(result.stdout);assert created['tree']['sha']==tree
+          created=api('commits',{'message':message,'tree':tree,'parents':[parent]});assert created['tree']['sha']==tree
           out=pathlib.Path('/tmp/transfer-result');out.mkdir()
-          record={'commit':created['sha'],'tree':tree,'parent':parent,'changed_files':git('diff','--cached','--name-only').splitlines(),'source_tree_verified':True,'destination_branch_updated':False,'payload_sha256':hashlib.sha256(data).hexdigest()}
+          record={'commit':created['sha'],'tree':tree,'parent':parent,'changed_files':changed,'source_tree_verified':True,'destination_branch_updated':False,'payload_sha256':hashlib.sha256(data).hexdigest()}
           (out/'result.json').write_text(json.dumps(record,indent=2)+'\n');print(json.dumps(record,indent=2))
           subprocess.run(['git','archive','--format=zip','--prefix=Leanglish/','-o',str(out/'application.zip'),tree],cwd=candidate,check=True)
           PY
