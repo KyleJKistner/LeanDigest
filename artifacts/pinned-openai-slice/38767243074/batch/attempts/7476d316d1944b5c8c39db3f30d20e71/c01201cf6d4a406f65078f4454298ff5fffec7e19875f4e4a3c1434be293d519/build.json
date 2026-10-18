@@ -1,1 +1,0 @@
-{"command":["lake","build","OAI.LinearAlgebra.CirculantHadamard.AlternatingNorm"],"elapsed_seconds":3.044,"exit_code":0,"reason":"","status":"passed","stderr":"","stdout":"✔ [1894/1894] Built OAI.LinearAlgebra.CirculantHadamard.AlternatingNorm (1.7s)\nBuild completed successfully (1894 jobs).\n"}

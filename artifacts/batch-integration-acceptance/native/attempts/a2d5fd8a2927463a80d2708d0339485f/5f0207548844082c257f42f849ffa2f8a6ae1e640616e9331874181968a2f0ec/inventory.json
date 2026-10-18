@@ -1,1 +1,0 @@
-{"candidates":[{"kind":"theorem","name":"BatchAcceptance.Rejected.must_fail"},{"kind":"theorem","name":"BatchAcceptance.Rejected.still_runs"}],"excluded":[{"name":"BatchAcceptance.Rejected.untrusted","reason":"proposition-without-supported-proof-body"}],"lean_version":"4.34.1","schema":"leanglish.narrative-inventory/v1","scope":"module:ProofReader.Acceptance.Rejected"}

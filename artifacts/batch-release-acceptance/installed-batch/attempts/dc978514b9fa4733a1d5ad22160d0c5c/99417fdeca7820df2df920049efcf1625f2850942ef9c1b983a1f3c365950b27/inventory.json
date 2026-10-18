@@ -1,1 +1,0 @@
-{"candidates":[{"kind":"theorem","name":"BatchAcceptance.Lists.append_empty"},{"kind":"theorem","name":"BatchAcceptance.Lists.append_empty_recOn"},{"kind":"theorem","name":"BatchAcceptance.Lists.map_append"}],"excluded":[],"lean_version":"4.34.1","schema":"leanglish.narrative-inventory/v1","scope":"module:ProofReader.Acceptance.Lists"}

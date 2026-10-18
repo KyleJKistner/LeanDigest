@@ -1,0 +1,49 @@
+name: Verify and store the tested original-evidence source tree
+on:
+  push:
+    branches: [import/original-evidence-io]
+permissions:
+  contents: write
+jobs:
+  store:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with: {persist-credentials: false}
+      - name: Verify exact payload, apply to fixed parent, and store commit without advancing a branch
+        env: {GH_TOKEN: '${{ github.token }}'}
+        run: |
+          python - <<'PY'
+          import base64,gzip,hashlib,json,pathlib,subprocess
+          root=pathlib.Path.cwd();parent='36d1a72a18fb70eae37cd2c2926f0a1ad3d9bf0c'
+          encoded=''.join((root/'transfer'/f'{i:02}.b64').read_text() for i in range(5))
+          data=base64.b64decode(encoded,validate=True)
+          assert hashlib.sha256(data).hexdigest()=='94954344b610398637ccd643b8093254a8a688b141180ad51e74d1d14ce3a629'
+          payload=json.loads(gzip.decompress(data))
+          assert payload['parent']==parent
+          assert payload['base_tree']=='afaa1612dd85e9de0503a9d31ee16bc24239edf4'
+          assert payload['tree']=='9eda2c55f32a50268ee6f5074ea80ad1ceba42ae'
+          subprocess.run(['git','fetch','--depth=1','origin',parent],check=True)
+          subprocess.run(['git','worktree','add','--detach','/tmp/candidate',parent],check=True)
+          candidate=pathlib.Path('/tmp/candidate')
+          def git(*args):return subprocess.check_output(['git',*args],cwd=candidate,text=True).strip()
+          assert git('rev-parse','HEAD^{tree}')==payload['base_tree']
+          subprocess.run(['git','apply','--index','-'],input=payload['patch'],cwd=candidate,text=True,check=True)
+          for f in payload['files']:
+              rel=pathlib.PurePosixPath(f['path']);assert not rel.is_absolute() and '..' not in rel.parts
+              p=candidate/rel;assert not p.exists()
+              content=f['content'].encode('utf-8');assert hashlib.sha256(content).hexdigest()==f['sha256']
+              p.parent.mkdir(parents=True,exist_ok=True);p.write_bytes(content)
+              subprocess.run(['git','add','--',str(rel)],cwd=candidate,check=True)
+          tree=git('write-tree');assert tree==payload['tree'],tree
+          message='Retain 388 original-source readings, expose complete verification status, and require Nanoda where configured\n\nSource tree matches the locally tested tree exactly. Recover a successful 37 MB native export using lossless bounded I/O, preserving all proof and scope checks. Add original-project status pages, frozen native-evidence delivery and a focused external-kernel recovery with negative controls. No original OpenAI source, explanation template or running campaign changed.'
+          result=subprocess.run(['gh','api','repos/'+__import__('os').environ['GITHUB_REPOSITORY']+'/git/commits','--input','-'],input=json.dumps({'message':message,'tree':tree,'parents':[parent]}),text=True,capture_output=True,check=True)
+          created=json.loads(result.stdout);assert created['tree']['sha']==tree
+          out=pathlib.Path('/tmp/transfer-result');out.mkdir()
+          record={'commit':created['sha'],'tree':tree,'parent':parent,'changed_files':git('diff','--cached','--name-only').splitlines(),'source_tree_verified':True,'destination_branch_updated':False,'payload_sha256':hashlib.sha256(data).hexdigest()}
+          (out/'result.json').write_text(json.dumps(record,indent=2)+'\n');print(json.dumps(record,indent=2))
+          subprocess.run(['git','archive','--format=zip','--prefix=Leanglish/','-o',str(out/'application.zip'),tree],cwd=candidate,check=True)
+          PY
+      - uses: actions/upload-artifact@v4
+        with: {name: verified-original-evidence-source, path: /tmp/transfer-result/, if-no-files-found: error}

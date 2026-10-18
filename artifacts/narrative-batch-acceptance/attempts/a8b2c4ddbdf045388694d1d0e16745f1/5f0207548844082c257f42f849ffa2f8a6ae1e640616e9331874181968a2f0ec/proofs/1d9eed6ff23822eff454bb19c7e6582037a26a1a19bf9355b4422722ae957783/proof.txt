@@ -1,6 +1,0 @@
-Leanglish · BatchAcceptance.Rejected.still_runs
-
-Then True.
-
-Proof.
-Apply True.intro to the supplied arguments.

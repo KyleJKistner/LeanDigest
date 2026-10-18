@@ -1,1 +1,0 @@
-{"command":["lake","exe","cache","get"],"elapsed_seconds":4.528,"exit_code":0,"reason":"","status":"passed","stderr":"","stdout":"Current branch: HEAD\nUsing cache from origin: (some leanprover-community/mathlib4)\nNo files to download\nAlready decompressed 8908 file(s)\n"}

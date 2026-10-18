@@ -1,1 +1,0 @@
-{"command":["lake","build","OAI.Algebra.AffineCancellation.BezoutFrame"],"elapsed_seconds":13.575,"exit_code":0,"reason":"","status":"passed","stderr":"","stdout":"✔ [8924/8925] Built OAI.Algebra.AffineCancellation.Model (4.7s)\n✔ [8925/8925] Built OAI.Algebra.AffineCancellation.BezoutFrame (4.1s)\nBuild completed successfully (8925 jobs).\n"}

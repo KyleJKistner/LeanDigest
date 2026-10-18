@@ -1,6 +1,0 @@
-Leanglish · BatchAcceptance.Logic.opaque_proof
-
-Then True.
-
-Proof.
-The conclusion is the proposition True.

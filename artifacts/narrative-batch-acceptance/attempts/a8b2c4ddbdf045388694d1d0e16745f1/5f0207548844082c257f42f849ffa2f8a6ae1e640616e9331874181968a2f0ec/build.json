@@ -1,1 +1,0 @@
-{"command":["lake","build","ProofReader.Acceptance.Rejected"],"elapsed_seconds":0.855,"exit_code":0,"reason":"","status":"passed","stderr":"","stdout":"✔ [2/2] Built ProofReader.Acceptance.Rejected (758ms)\nBuild completed successfully (2 jobs).\n"}

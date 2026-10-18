@@ -1,1 +1,0 @@
-Wolfram ImportByteArray GZIP/Text strips the final newline. For byte-exact source hashing use GZIP/Byte then FromCharacterCode[...,"UTF8"]. This was verified on a 37-byte source: Text returned 36 characters whereas Byte returned all 37. After switching to Byte, the 7193-byte checker source SHA-256 matched and the compiler accepted it.

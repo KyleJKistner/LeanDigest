@@ -1,9 +1,0 @@
-{
-  "repository": "openai/math",
-  "commit": "1581d4cbdd69a0faf34b2089614fe2a814316a6a",
-  "file": "lean/OAI/Algebra/AffineCancellation/BezoutFrame.lean",
-  "original_sha256": "d108afa98f200bfce183b8afc0af586b70734f7ad2cce1bc5e49853a2f555c6f",
-  "adapted_context_sha256": "15c0587d16a3f4da8441a7c8de9a3c365233b4abb3b5a88811e64252cd7a3e3d",
-  "theorem_body_unchanged": true,
-  "exact_project_build": false
-}
