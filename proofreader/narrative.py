@@ -20,7 +20,7 @@ from .kernel_io import strict_json, STANDARD_AXIOMS
 from .polynomial import certify, verify as verify_polynomial, certificate_text
 
 SCHEMA = 'proofreader.narrative/v1'
-PRINTER_VERSION = 'source-math-en/0.4.1'
+PRINTER_VERSION = 'source-math-en/0.4.2'
 ROLES = {'introduce','assume','have','define','witness','choose','cases','combine','chain',
          'reflexivity','cancel','identity','given','named','application','ring','rewrite','unexpanded','induction','congruence','local-application','specialize'}
 _HEAD_ROLES = {'Exists.intro':'witness','Exists.casesOn':'choose','Exists.elim':'choose',
@@ -43,8 +43,6 @@ _LEMMAS = {
     'mul_one': 'Multiplication by one leaves the element unchanged.',
     'Eq.symm': 'Reverse the supplied equality.',
     'Iff.mp': 'Apply the forward direction of the stated equivalence to the supplied hypothesis.',
-    'And.left': 'Take the first conjunct.',
-    'And.right': 'Take the second conjunct.',
 }
 _BASE = {'id','path','statement','role','head','context','children','premises','objects','budget_cut'}
 _EXTRAS = {'binder','domain','value'}
@@ -202,6 +200,130 @@ def _name(s: str) -> str:
     return s.split('._@.',1)[0]
 
 
+_FORMULA_GROUPS = {'(':')', '[':']', '{':'}', '⟨':'⟩', '⦃':'⦄', '⟦':'⟧'}
+_LOGICAL_PRECEDENCE = {'↔':20, '→':25, '∨':30, '∧':35}
+_FORMULA_CONTROL = re.compile(r'(?:fun|let|have|show|match|if|then|else|by|do|calc)\b')
+
+
+def _formula_text(text: str) -> str | None:
+    """Compare recorded notation, without unfolding definitions or substituting.
+
+    Only whitespace and parentheses around the *whole* expression are ignored.
+    Quoted strings/names and comments are outside this tiny display grammar:
+    whitespace inside them can be meaningful. The additional grouping bound
+    keeps unusually nested notation outside these explanations.
+    """
+    if (len(text) > 20000 or any(c in text for c in ('"', '`', '«', '»'))
+            or any(c in text for c in ('--', '/-', '-/'))):
+        return None
+    text = ' '.join(text.split())
+    if not text:
+        return None
+    stack: list[tuple[str,int]] = []
+    pairs: dict[int,int] = {}
+    for i, c in enumerate(text):
+        if c in _FORMULA_GROUPS:
+            stack.append((c,i))
+            if len(stack) > 64:
+                return None
+        elif c in _FORMULA_GROUPS.values():
+            if not stack or _FORMULA_GROUPS[stack[-1][0]] != c:
+                return None
+            _, start = stack.pop()
+            pairs[start] = i
+    if stack:
+        return None
+    left, right = 0, len(text)-1
+    while left < right and text[left] == '(' and pairs.get(left) == right:
+        left += 1; right -= 1
+        while left < right and text[left] == ' ':
+            left += 1
+        while left < right and text[right] == ' ':
+            right -= 1
+    return text[left:right+1] or None
+
+
+def _same_formula(left: str, right: str) -> bool:
+    a, b = _formula_text(left), _formula_text(right)
+    return a is not None and b is not None and a == b
+
+
+def _logical_surface(text: str) -> tuple[str,list[tuple[int,str]]] | None:
+    """Find outer logical operators in a restricted Lean notation fragment.
+
+    This is not a Lean parser. In particular, unparenthesized binders, matches,
+    lets and big-operator binders are not split at a connective in their body.
+    A formula using one as an operand can still match when Lean parenthesizes it.
+    """
+    text = _formula_text(text)
+    if text is None:
+        return None
+    depth = 0
+    operators = []
+    for i, c in enumerate(text):
+        if c in _FORMULA_GROUPS:
+            depth += 1
+        elif c in _FORMULA_GROUPS.values():
+            depth -= 1
+        elif depth == 0:
+            if c in '∀∃∑∏⨅⨆⋂⋃,;':
+                return None
+            if ((i == 0 or not (text[i-1].isalnum() or text[i-1] in "_.'"))
+                    and _FORMULA_CONTROL.match(text, i)):
+                return None
+            # Compact connectives and decorated arrows are outside this grammar;
+            # silently treating ¬P∧Q as an atom would get negation scope wrong.
+            if c in _LOGICAL_PRECEDENCE:
+                if not (0 < i < len(text)-1 and text[i-1] == text[i+1] == ' '):
+                    return None
+                operators.append((i,c))
+    return text, operators
+
+
+def _logical_split(text: str, operator: str) -> tuple[str,str] | None:
+    surface = _logical_surface(text)
+    if surface is None:
+        return None
+    text, operators = surface
+    if not operators:
+        return None
+    precedence = min(_LOGICAL_PRECEDENCE[op] for _,op in operators)
+    roots = [(i,op) for i,op in operators if _LOGICAL_PRECEDENCE[op] == precedence]
+    if roots[0][1] != operator or (operator == '↔' and len(roots) != 1):
+        return None
+    # →, ∨ and ∧ associate to the right. Unparenthesized iterated ↔ is rejected.
+    i, _ = roots[0]
+    return text[:i].strip(), text[i+1:].strip()
+
+
+def _binary_formula(text: str, operator: str, left: str, right: str) -> bool:
+    parts = _logical_split(text, operator)
+    return parts is not None and _same_formula(parts[0], left) and _same_formula(parts[1], right)
+
+
+def _negated_operand(text: str) -> str | None:
+    surface = _logical_surface(text)
+    if surface is None:
+        return None
+    text, operators = surface
+    if text.startswith('¬') and not operators:
+        return _formula_text(text[1:])
+    parts = _logical_split(text, '→')
+    if parts is not None and _same_formula(parts[1], 'False'):
+        return _formula_text(parts[0])
+    return None
+
+
+def _negation_formula(text: str, proposition: str) -> bool:
+    operand = _negated_operand(text)
+    return operand is not None and _same_formula(operand, proposition)
+
+
+def _implication_formula(text: str, left: str, right: str) -> bool:
+    return (_binary_formula(text, '→', left, right)
+            or (_same_formula(right, 'False') and _negation_formula(text, left)))
+
+
 class Narrative:
     def __init__(self, record: dict):
         self.snapshot = Snapshot(record)
@@ -255,8 +377,134 @@ class Narrative:
         a,ai = self.flat_conjunction(f['children'][0]);b,bi = self.flat_conjunction(f['children'][1])
         return a+b,[i]+ai+bi
 
+    def logical_application(self, i: int, object_count: int, premise_slots: list[int]) -> bool:
+        """Recognize a fully applied rule at the exact original argument paths."""
+        f = self.frames[i]
+        arity = object_count + len(premise_slots)
+        return (f['role'] == 'application' and not f['budget_cut']
+                and len(f['objects']) == object_count
+                and [p['argument'] for p in f['premises']] == premise_slots
+                and f['children'] == [p['frame'] for p in f['premises']]
+                and all(0 <= p['argument'] < arity
+                        and self.frames[p['frame']]['path'] == f['path'] + [0]*(arity-p['argument']-1) + [1]
+                        and self.frames[p['frame']]['context'] == f['context']
+                        for p in f['premises']))
+
+    def implication_premise(self, i: int, left: str, right: str) -> bool:
+        f = self.frames[i]
+        if not _implication_formula(f['statement'], left, right):
+            return False
+        if f['role'] == 'assume':
+            return (_same_formula(f['domain'], left)
+                    and _same_formula(self.frames[f['children'][0]]['statement'], right))
+        return True
+
+    def implication_direction(self, i: int, label: str) -> Step:
+        """Keep each direction's assumption inside its own displayed subproof."""
+        f = self.frames[i]
+        if f['role'] == 'assume':
+            return self.step(i, label + ': assume ' + math_text(f['domain']) + '.',
+                             rule='implication-direction', children=self.sequence(f['children'][0]))
+        steps = self.sequence(i)
+        require(len(steps) == 1, 'Logical direction requires a single scoped source proof')
+        steps[0].text = label + '. ' + steps[0].text
+        return steps[0]
+
+    def logical_steps(self, i: int) -> list[Step] | None:
+        """Conservative explanations of small logical inferences, never new proofs.
+
+        The rule's argument inventory, context, paths and printed types must all
+        agree. No descendant is absorbed: unknown premises and budget cuts keep
+        their own steps. Definitionally equal but differently printed statements
+        deliberately remain outside these specializations.
+        """
+        f = self.frames[i]
+        head, ch, objects = f['head'], f['children'], f['objects']
+        con = math_text(f['statement'])
+        if head in {'And.left', 'And.right'} and self.logical_application(i, 2, [2]):
+            left, right = objects
+            component = left if head == 'And.left' else right
+            if (_binary_formula(self.frames[ch[0]]['statement'], '∧', left, right)
+                    and _same_formula(f['statement'], component)):
+                side = 'first' if head == 'And.left' else 'second'
+                return [self.step(i, 'Take the ' + side + ' conjunct, ' + con + '.',
+                                  rule='conjunction-projection', children=self.sequence(ch[0]))]
+        if head == 'Iff.mpr' and self.logical_application(i, 2, [2,3]):
+            left, right = objects
+            if (_binary_formula(self.frames[ch[0]]['statement'], '↔', left, right)
+                    and _same_formula(self.frames[ch[1]]['statement'], right)
+                    and _same_formula(f['statement'], left)):
+                text = ('Use the reverse direction of ' + math_text(self.frames[ch[0]]['statement'])
+                        + ': from ' + math_text(right) + ', obtain ' + con + '.')
+                return [self.step(i, text, rule='equivalence-reverse',
+                                  children=[s for j in ch for s in self.sequence(j)])]
+        if head == 'Iff.intro' and self.logical_application(i, 2, [2,3]):
+            left, right = objects
+            # These roles can emit a sequence spanning several scopes. They are
+            # kept as gaps until a source-bound direction wrapper is supported.
+            sequential = {'introduce','define','have','choose','identity','witness'}
+            if (_binary_formula(f['statement'], '↔', left, right)
+                    and self.implication_premise(ch[0], left, right)
+                    and self.implication_premise(ch[1], right, left)
+                    and all(self.frames[j]['role'] not in sequential
+                            and self.frames[j]['head'] != 'And.casesOn' for j in ch)):
+                return [self.step(i, 'Prove both directions of the equivalence.',
+                    rule='equivalence-introduction', conclusion=con,
+                    children=[self.implication_direction(ch[0], 'Forward direction'),
+                              self.implication_direction(ch[1], 'Reverse direction')])]
+        if head in {'Or.inl', 'Or.inr'} and self.logical_application(i, 2, [2]):
+            left, right = objects
+            chosen = left if head == 'Or.inl' else right
+            if (_binary_formula(f['statement'], '∨', left, right)
+                    and _same_formula(self.frames[ch[0]]['statement'], chosen)):
+                side = 'left' if head == 'Or.inl' else 'right'
+                return [self.step(i, 'Establish the ' + side + ' alternative, ' + math_text(chosen) + '.',
+                                  rule='disjunction-introduction', conclusion=con,
+                                  children=self.sequence(ch[0]))]
+        if head == 'False.elim' and self.logical_application(i, 1, [1]):
+            if (_same_formula(objects[0], f['statement'])
+                    and _same_formula(self.frames[ch[0]]['statement'], 'False')):
+                return [self.step(i, 'The contradiction False implies the required conclusion.',
+                                  rule='false-elimination', conclusion=con, children=self.sequence(ch[0]))]
+        if head == 'Not.intro' and self.logical_application(i, 1, [1]):
+            if (_negation_formula(f['statement'], objects[0])
+                    and self.implication_premise(ch[0], objects[0], 'False')):
+                return [self.step(i, 'To prove ' + con + ', derive False from ' + math_text(objects[0]) + '.',
+                                  rule='negation-introduction', children=self.sequence(ch[0]))]
+        if head in {'Decidable.byContradiction', 'Classical.byContradiction'}:
+            count = 2 if head == 'Decidable.byContradiction' else 1
+            if self.logical_application(i, count, [count]):
+                premise = self.frames[ch[0]]
+                negative = _negated_operand(premise['statement'])
+                if (negative is not None and _negation_formula(negative, objects[0])
+                        and _same_formula(f['statement'], objects[0])
+                        and self.implication_premise(ch[0], negative, 'False')):
+                    basis = ('the recorded decision instance' if count == 2 else 'classical logic')
+                    text = ('Prove ' + con + ' by contradiction, using ' + basis
+                            + '. Assuming its negation leads to False as follows.')
+                    return [self.step(i, text, rule='contradiction-proof', children=self.sequence(ch[0]))]
+        # These two rules currently have synthetic regression coverage only.
+        if head == 'Not.elim' and self.logical_application(i, 1, [1,2]):
+            if (_negation_formula(self.frames[ch[0]]['statement'], objects[0])
+                    and _same_formula(self.frames[ch[1]]['statement'], objects[0])
+                    and _same_formula(f['statement'], 'False')):
+                return [self.step(i, 'The supplied proposition and its negation contradict each other.',
+                                  rule='negation-elimination', conclusion=con,
+                                  children=[s for j in ch for s in self.sequence(j)])]
+        if head == 'absurd' and self.logical_application(i, 2, [2,3]):
+            if (_same_formula(self.frames[ch[0]]['statement'], objects[0])
+                    and _negation_formula(self.frames[ch[1]]['statement'], objects[0])
+                    and _same_formula(f['statement'], objects[1])):
+                return [self.step(i, 'The supplied proposition and its negation yield a contradiction, which implies the conclusion.',
+                                  rule='contradiction-elimination', conclusion=con,
+                                  children=[s for j in ch for s in self.sequence(j)])]
+        return None
+
     def sequence(self, i: int) -> list[Step]:
         f = self.frames[i]; ch=f['children']; role=f['role']; con=math_text(f['statement'])
+        logical = self.logical_steps(i)
+        if logical is not None:
+            return logical
         if role in {'define','have'}:
             name=_name(f['binder']); domain=math_text(f['domain'])
             if role=='define':
@@ -491,10 +739,12 @@ def check_reading(record: dict, document: Document) -> None:
 
 def prose(document: Document) -> str:
     d=document.declarations[0]
-    out=[document.title,'',*(p['text'] for p in d.parameters),'Then '+d.statement+'.','','Proof.']
+    out=[document.title,'',
+         'Source-bound reading; the English is not formally verified. Reading this text does not authenticate the Lean snapshot.',
+         '',*(p['text'] for p in d.parameters),'Then '+d.statement+'.','','Proof.']
     def emit(steps,depth=0):
         for s in steps:
-            out.append('  '*depth+s.text)
+            out.append('  '*depth+('[Explanation gap] ' if s.fallback else '')+s.text)
             if s.conclusion:
                 out.append('  '*(depth+1)+s.conclusion)
             emit(s.children,depth+1)

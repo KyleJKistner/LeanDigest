@@ -1,0 +1,26 @@
+{
+  "schema": "proofreader.narrative-receipt/v1",
+  "status": "passed",
+  "theorem": "OAI.ComplexCancellation.BezoutFrame.exists_frame",
+  "lean_version": "4.34.1",
+  "backend": "native",
+  "source_sha256": "408694537d9423662943f6e46d1ef18a5a33f3a93ab4a353ba449c89df30dff2",
+  "context_sha256": "2791fd12550b52248a6087d1c278f90f3804e63b21cd45150dc0c677d7015c2f",
+  "driver_sha256": null,
+  "module": null,
+  "receipt_authenticated": false,
+  "english_formally_verified": false,
+  "exact_openai_project_replayed": false,
+  "execution_limits": {
+    "wall_seconds": 180,
+    "max_heartbeats": 2000000
+  },
+  "errors": [],
+  "expected_snapshot_sha256": "e93e0455259fc3283983f3a47f956cdac4b1a28869bc5027bcc694b4a124d8d0",
+  "snapshot_sha256": "e93e0455259fc3283983f3a47f956cdac4b1a28869bc5027bcc694b4a124d8d0",
+  "selected_judgements": 86,
+  "snapshot_reextraction_matched": true,
+  "all_selected_judgements_kernel_checked": true,
+  "path_linkage_checked_in_lean": true,
+  "trust_boundary": "Trusted source, imports, Lean compiler, traversal, pretty-printer, renderer, and recorded transport. No formal English guarantee."
+}

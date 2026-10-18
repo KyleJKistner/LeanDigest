@@ -1,0 +1,9 @@
+'ProofReader.ControlledEnglish.Audit.local_assumption_cannot_escape' does not depend on any axioms
+'ProofReader.ControlledEnglish.Audit.implication_cannot_be_reversed' depends on axioms: [propext]
+'ProofReader.ControlledEnglish.Audit.a_disjunction_does_not_supply_one_selected_side' depends on axioms: [propext]
+'ProofReader.ControlledEnglish.Audit.an_unrelated_disjunction_cannot_replace_the_witness' depends on axioms: [propext,
+ Quot.sound]
+'ProofReader.ControlledEnglish.Audit.contradiction_requires_a_premise' does not depend on any axioms
+'ProofReader.ControlledEnglish.Audit.grammatical_inference_is_not_automatically_sound' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
