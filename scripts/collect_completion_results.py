@@ -9,17 +9,19 @@ import sys
 sys.path.insert(0,str(Path(__file__).resolve().parents[1]))
 from scripts.collect_original_evidence import api, stable_artifacts, retain
 from proofreader.original_project import read, write, digest
-from proofreader.completion_results import COLLECTION, check_collection
+from proofreader.completion_results import COLLECTION, check_collection, ORIGINAL_WORKFLOW, RESUME_WORKFLOW
 
 REPOSITORY='KyleJKistner/LeanDigest'
 
 
 def collect(run_id: int, expected_head: str, recovery: dict, output: Path,
-            *, allow_download: bool=False) -> dict:
+            *, allow_download: bool=False, workflow_path: str=ORIGINAL_WORKFLOW) -> dict:
     if not allow_download:
         raise PermissionError('Recovery acquisition requires --allow-download')
-    if type(run_id) is not int or run_id <= 0 or not re.fullmatch(r'[a-f0-9]{40}',expected_head):
-        raise ValueError('Explicit workflow execution identity is required')
+    if (type(run_id) is not int or run_id <= 0 or not isinstance(expected_head,str) or
+        not re.fullmatch(r'[a-f0-9]{40}',expected_head) or
+        workflow_path not in {ORIGINAL_WORKFLOW,RESUME_WORKFLOW}):
+        raise ValueError('Explicit supported workflow execution identity is required')
     if recovery.get('recovery_plan_sha256') != digest({k:v for k,v in recovery.items() if k!='recovery_plan_sha256'}):
         raise ValueError('Recovery plan digest mismatch')
     if output.exists():
@@ -27,13 +29,14 @@ def collect(run_id: int, expected_head: str, recovery: dict, output: Path,
     output.mkdir(parents=True)
     cutoff=datetime.now(timezone.utc).strftime('%Y-%m-%dT%H:%M:%SZ')
     result={'schema':COLLECTION,'repository':REPOSITORY,'run_id':run_id,
-            'source_commit':expected_head,'recovery_plan_sha256':recovery['recovery_plan_sha256'],
+            'source_commit':expected_head,'workflow_path':workflow_path,
+            'recovery_plan_sha256':recovery['recovery_plan_sha256'],
             'cutoff':cutoff,'outcomes':[],'errors':[],
             'native_execution_performed':False,'all_expected_work_complete':False,
             'observations_authenticated':False}
     try:
         run=api(REPOSITORY,f'actions/runs/{run_id}')
-        if run.get('head_sha')!=expected_head or run.get('path')!='.github/workflows/completion-recovery.yml':
+        if run.get('head_sha')!=expected_head or run.get('path')!=workflow_path:
             raise ValueError('Wrong recovery workflow or application revision')
         write(output/'run.json',run)
         prefixes=('completion-recovery-plan','completion-result-')
@@ -57,8 +60,10 @@ def collect(run_id: int, expected_head: str, recovery: dict, output: Path,
         write(output/'collection.json',result)
     if result['errors']:
         raise ValueError('Recovery collection failed; no reports are accepted: '+str(result['errors']))
-    validated=check_collection(output,recovery,expected_run=run_id,expected_head=expected_head)
-    summary={'run_id':run_id,'cutoff':cutoff,'retained_artifacts':len(result['outcomes']),
+    validated=check_collection(output,recovery,expected_run=run_id,expected_head=expected_head,
+                               expected_workflow=workflow_path)
+    summary={'run_id':run_id,'workflow_path':workflow_path,'cutoff':cutoff,
+             'retained_artifacts':len(result['outcomes']),
              'expected_workers':len(recovery['module_jobs'])+len(recovery['library_jobs']),
              'retained_workers':len(validated['workers']),
              'missing_workers':len(validated['missing_workers']),
@@ -74,11 +79,13 @@ def main() -> int:
     parser=argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--run-id',type=int,required=True)
     parser.add_argument('--expected-head',required=True)
+    parser.add_argument('--workflow-path',choices=[ORIGINAL_WORKFLOW,RESUME_WORKFLOW],default=ORIGINAL_WORKFLOW)
     parser.add_argument('--recovery',type=Path,required=True)
     parser.add_argument('--output',type=Path,required=True)
     parser.add_argument('--allow-download',action='store_true')
     a=parser.parse_args()
-    collect(a.run_id,a.expected_head,read(a.recovery),a.output,allow_download=a.allow_download)
+    collect(a.run_id,a.expected_head,read(a.recovery),a.output,
+            allow_download=a.allow_download,workflow_path=a.workflow_path)
     return 0
 
 if __name__=='__main__':raise SystemExit(main())
