@@ -1,3 +1,31 @@
+# Source-bound cancellation checkpoint — 2026-10-19
+
+The two cancellation sentences in the Bézout companion now have checked literal
+String/UTF-8 meanings in the original proof contexts, using the source's actual
+nonzero and equality proof arguments. Read `docs/SOURCE_BOUND_CANCELLATION.md`.
+The surrounding six-step prose is still not a fully certified English proof.
+Do not promote either whole proof section based on its one checked sentence.
+
+The implementation is isolated on `work/source-bound-cancellation-20261019`,
+based on editorial branch commit `8bcf42025179c05b9eb29f5088d4316a09061797`.
+No existing exporter/full-project code or original CI workflow was changed.
+The concurrent Pro session retains `work/full-original-project`.
+
+The final retained local native run passed nine required arithmetic contracts,
+32 executable parser guards, both original-source sentence checks, exact repeat,
+and 12 hostile native controls. It used the unchanged theorem body with explicitly
+adapted imports, Lean 4.34.1, and the pinned Mathlib environment. The observation
+is unsigned. Check the final-commit GitHub jobs separately before claiming CI.
+
+`proofreader/source_text.py` pins the native positive record and checks code,
+file, and command identities before the companion includes the two sentences.
+The generated page and native modules must not drift from the retained evidence.
+The next mathematical coverage gaps are the zero-gcd branch, gcd/Bézout facts,
+witness construction, and the remaining arithmetic calculations. Existing corpus
+and release counts are unchanged. No independent AI agents ran in this extension.
+
+---
+
 # Current isolated reader and architecture checkpoint — 2026-10-18
 
 The immediate user goal is one presentation-quality proof for Sebastian Bubeck

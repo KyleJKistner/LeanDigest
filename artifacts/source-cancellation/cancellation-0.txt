@@ -1,0 +1,1 @@
+Since g is nonzero and (g * ((a * r) + (d * s))) = (g * 1), cancel g to obtain ((a * r) + (d * s)) = 1.

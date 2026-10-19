@@ -1,0 +1,63 @@
+wrong-premise.lean:54:0: error: Application type mismatch: The last
+  hg
+argument has type
+  ¬g = 0
+but is expected to have type
+  { values := ProofReader.ArithmeticEnglish.assignment x y z g a d r s, zero := 0, one := 1, add := fun u v => u + v,
+          mul := fun u v => u * v, sub := fun u v => u - v }.mul
+      (ProofReader.ArithmeticEnglish.Term.eval
+        { values := ProofReader.ArithmeticEnglish.assignment x y z g a d r s, zero := 0, one := 1,
+          add := fun u v => u + v, mul := fun u v => u * v, sub := fun u v => u - v }
+        { factor := ProofReader.ArithmeticEnglish.Term.var ProofReader.ArithmeticEnglish.Variable.g,
+            left :=
+              ((ProofReader.ArithmeticEnglish.Term.var ProofReader.ArithmeticEnglish.Variable.a).mul
+                    (ProofReader.ArithmeticEnglish.Term.var ProofReader.ArithmeticEnglish.Variable.r)).add
+                ((ProofReader.ArithmeticEnglish.Term.var ProofReader.ArithmeticEnglish.Variable.d).mul
+                  (ProofReader.ArithmeticEnglish.Term.var ProofReader.ArithmeticEnglish.Variable.s)),
+            right := ProofReader.ArithmeticEnglish.Term.one }.factor)
+      (ProofReader.ArithmeticEnglish.Term.eval
+        { values := ProofReader.ArithmeticEnglish.assignment x y z g a d r s, zero := 0, one := 1,
+          add := fun u v => u + v, mul := fun u v => u * v, sub := fun u v => u - v }
+        { factor := ProofReader.ArithmeticEnglish.Term.var ProofReader.ArithmeticEnglish.Variable.g,
+            left :=
+              ((ProofReader.ArithmeticEnglish.Term.var ProofReader.ArithmeticEnglish.Variable.a).mul
+                    (ProofReader.ArithmeticEnglish.Term.var ProofReader.ArithmeticEnglish.Variable.r)).add
+                ((ProofReader.ArithmeticEnglish.Term.var ProofReader.ArithmeticEnglish.Variable.d).mul
+                  (ProofReader.ArithmeticEnglish.Term.var ProofReader.ArithmeticEnglish.Variable.s)),
+            right := ProofReader.ArithmeticEnglish.Term.one }.left) =
+    { values := ProofReader.ArithmeticEnglish.assignment x y z g a d r s, zero := 0, one := 1, add := fun u v => u + v,
+          mul := fun u v => u * v, sub := fun u v => u - v }.mul
+      (ProofReader.ArithmeticEnglish.Term.eval
+        { values := ProofReader.ArithmeticEnglish.assignment x y z g a d r s, zero := 0, one := 1,
+          add := fun u v => u + v, mul := fun u v => u * v, sub := fun u v => u - v }
+        { factor := ProofReader.ArithmeticEnglish.Term.var ProofReader.ArithmeticEnglish.Variable.g,
+            left :=
+              ((ProofReader.ArithmeticEnglish.Term.var ProofReader.ArithmeticEnglish.Variable.a).mul
+                    (ProofReader.ArithmeticEnglish.Term.var ProofReader.ArithmeticEnglish.Variable.r)).add
+                ((ProofReader.ArithmeticEnglish.Term.var ProofReader.ArithmeticEnglish.Variable.d).mul
+                  (ProofReader.ArithmeticEnglish.Term.var ProofReader.ArithmeticEnglish.Variable.s)),
+            right := ProofReader.ArithmeticEnglish.Term.one }.factor)
+      (ProofReader.ArithmeticEnglish.Term.eval
+        { values := ProofReader.ArithmeticEnglish.assignment x y z g a d r s, zero := 0, one := 1,
+          add := fun u v => u + v, mul := fun u v => u * v, sub := fun u v => u - v }
+        { factor := ProofReader.ArithmeticEnglish.Term.var ProofReader.ArithmeticEnglish.Variable.g,
+            left :=
+              ((ProofReader.ArithmeticEnglish.Term.var ProofReader.ArithmeticEnglish.Variable.a).mul
+                    (ProofReader.ArithmeticEnglish.Term.var ProofReader.ArithmeticEnglish.Variable.r)).add
+                ((ProofReader.ArithmeticEnglish.Term.var ProofReader.ArithmeticEnglish.Variable.d).mul
+                  (ProofReader.ArithmeticEnglish.Term.var ProofReader.ArithmeticEnglish.Variable.s)),
+            right := ProofReader.ArithmeticEnglish.Term.one }.right)
+in the application
+  ProofReader.ArithmeticEnglish.certify
+    { values := ProofReader.ArithmeticEnglish.assignment x y z g a d r s, zero := 0, one := 1, add := fun u v => u + v,
+      mul := fun u v => u * v, sub := fun u v => u - v }
+    { factor := ProofReader.ArithmeticEnglish.Term.var ProofReader.ArithmeticEnglish.Variable.g,
+      left :=
+        ((ProofReader.ArithmeticEnglish.Term.var ProofReader.ArithmeticEnglish.Variable.a).mul
+              (ProofReader.ArithmeticEnglish.Term.var ProofReader.ArithmeticEnglish.Variable.r)).add
+          ((ProofReader.ArithmeticEnglish.Term.var ProofReader.ArithmeticEnglish.Variable.d).mul
+            (ProofReader.ArithmeticEnglish.Term.var ProofReader.ArithmeticEnglish.Variable.s)),
+      right := ProofReader.ArithmeticEnglish.Term.one }
+    (@mul_left_cancel₀ R instDistribOfSemiring.toMul instMulZeroClassOfSemiring.toZero
+      (EuclideanDomain.instIsDomain R).toIsLeftCancelMulZero)
+    hg hg

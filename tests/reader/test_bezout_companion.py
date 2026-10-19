@@ -133,7 +133,8 @@ def test_math_statement_and_complete_six_step_argument(page):
     assert "Euclidean domain" in theorem
     assert "No assumption says" in theorem and "nonzero" in theorem
     assert page.locator('#step-1 [data-math="(a,d,b,c)=(1,y,0,1)."] math').count() == 1
-    assert "not been formally certified" in page.locator(".proof-intro").inner_text()
+    assert "remaining prose" in page.locator(".proof-intro").inner_text()
+    assert "not formally certified" in page.locator(".proof-intro").inner_text()
     assert "two explicitly substituted imports" in page.locator(".evidence-grid").inner_text()
     assert "full OAI" in page.locator(".scope-note").inner_text()
 
@@ -235,3 +236,20 @@ def test_heading_labels_match_the_editorial_inventory(page):
         page.locator(f'#{section} [data-section="{section}"]').click()
         assert page.locator("#evidence-dialog-title").inner_text() == headings[section]
         page.keyboard.press("Escape")
+
+
+def test_source_checked_sentence_text_matches_the_native_utf8_in_the_browser(page):
+    from proofreader.source_text import load_cancellations
+    records = load_cancellations()['sentences']
+    panels = page.locator('.checked-cancellation')
+    assert panels.count() == 2
+    for index, frame in enumerate([40, 53]):
+        panel = page.locator(f'.checked-cancellation[data-source-frame="{frame}"]')
+        panel.locator('summary').click()
+        paragraph = panel.locator('.checked-sentence')
+        assert paragraph.is_visible()
+        text = paragraph.text_content()
+        assert text == records[index]['text']
+        assert text.encode('utf-8') == bytes(records[index]['utf8'])
+    assert 'remaining prose' in page.locator('.proof-intro').inner_text()
+    assert 'not formally certified' in page.locator('.proof-intro').inner_text()

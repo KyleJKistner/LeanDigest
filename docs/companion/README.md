@@ -15,8 +15,11 @@ exact `BigInt` arithmetic and illustrate both branches and negative inputs.
 
 ## Scope and verification
 
-This is curated mathematical prose with reviewed source correspondence. Its
-English is not formally certified. The 86 frame IDs are grouped editorially;
+The two cancellation sentences in proof sections 2 and 3 have source-bound,
+kernel-checked text semantics. The surrounding mathematical prose has reviewed
+source correspondence but is not formally certified. See
+[Source-bound cancellation](../SOURCE_BOUND_CANCELLATION.md) for the exact
+semantic contracts, source binding, and native checks. The 86 frame IDs are grouped editorially;
 the group assignment does not establish formal semantics for the prose. This
 is one supporting theorem, not the affine-cancellation headline theorem and
 not a claim that the result is globally shortest.
@@ -45,7 +48,9 @@ python docs/companion/build.py
 ```
 
 The builder reads `artifacts/companion/native/observation.json` and its `current/`
-artifacts. It verifies the original source's pinned byte hash, the reviewed
+artifacts, plus the frozen source-text evidence in `artifacts/source-cancellation/`.
+The source-text loader checks all files and code hashes, the required native
+outcomes, and the reviewed record pin before including either checked sentence. It verifies the original source's pinned byte hash, the reviewed
 snapshot's canonical hash, the context and transport hashes, the observation's
 file identities, the unchanged theorem body, exact version/revision, and the four
 native check results. It also checks deterministic reading regeneration and
