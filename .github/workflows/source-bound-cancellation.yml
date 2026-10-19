@@ -47,7 +47,9 @@ jobs:
         run: lake exe cache get Mathlib/Algebra/EuclideanDomain/Basic.lean Mathlib/Tactic/Ring.lean
       - name: Check the text contracts, actual source sentences, and negative controls
         run: |
-          python scripts/check_source_cancellation.py --project cancellation-mathlib --output artifacts/ci-source-cancellation --trust-project
+          lean_binary="$(cd cancellation-mathlib && elan which lean)"
+          test -x "$lean_binary"
+          python scripts/check_source_cancellation.py --lean "$lean_binary" --project cancellation-mathlib --output artifacts/ci-source-cancellation --trust-project
       - name: Require the fresh source-bound output to equal the retained record
         run: |
           cmp artifacts/source-cancellation/positive.json artifacts/ci-source-cancellation/positive.json
