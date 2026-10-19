@@ -220,20 +220,27 @@ def audit_environment(project: Path, plan: dict, *, check_sources: bool = True) 
             'observations_authenticated':False}
 
 
-def selection(plan: dict, kind: str, shard: int, shards: int) -> list[dict]:
+def selection(plan: dict, kind: str, shard: int, shards: int, only: list[str] | None = None) -> list[dict]:
     validate_plan(plan)
     if kind not in {'library','comparator'} or type(shards) is not int or type(shard) is not int or not 0 <= shard < shards <= 256:
         raise ValueError('Invalid worker selection')
     tasks=[x for x in plan['tasks'] if x['kind']==kind]
-    return tasks[shard::shards]
+    selected = tasks[shard::shards]
+    if only is not None:
+        if (not isinstance(only,list) or not only or any(not isinstance(x,str) for x in only) or
+            only != sorted(set(only)) or not set(only) <= {t['id'] for t in selected}):
+            raise ValueError('Explicit retry targets must be unique sorted members of the original shard')
+        selected = [t for t in selected if t['id'] in only]
+    return selected
 
 
 def run_worker(project: Path, plan: dict, output: Path, *, kind: str, shard: int, shards: int,
                trust_project: bool = False, timeout: int = 1800, wall_seconds: int = 7200,
-               comparator: Path | None = None, tool_receipt: Path | None = None) -> dict:
+               comparator: Path | None = None, tool_receipt: Path | None = None,
+               only: list[str] | None = None) -> dict:
     if not trust_project:raise PermissionError('Execution requires --trust-project; this is not a sandbox')
     if not 1 <= timeout <= wall_seconds <= 20000:raise ValueError('Invalid bounded execution limits')
-    targets=selection(plan,kind,shard,shards)
+    targets=selection(plan,kind,shard,shards,only)
     output=output.resolve()
     if output.exists():raise ValueError('Use a fresh worker output; prior observations are immutable inputs')
     output.mkdir(parents=True)
@@ -241,6 +248,7 @@ def run_worker(project: Path, plan: dict, output: Path, *, kind: str, shard: int
             'expected_tasks':len(targets),'environment_before':None,'environment_after':None,
             'targets':[{'id':x['id'],'status':'not-run','log':None} for x in targets],
             'status':'preflight','complete':False,'english_fidelity_certified':False}
+    if only is not None:report['only']=only
     checkpoint=lambda:write(output/'worker.json',report)
     checkpoint();begin=time.monotonic()
     try:
@@ -253,6 +261,15 @@ def run_worker(project: Path, plan: dict, output: Path, *, kind: str, shard: int
             for name in ['comparator','lean4export','landrun']:
                 path=comparator.parent/name
                 if file_hash(path) != tools['binaries'][name]:raise ValueError('Comparator binary drift')
+            if any(t.get('enable_nanoda') for t in targets):
+                if (re.fullmatch(r'[a-f0-9]{40}', str(tools.get('nanoda_commit',''))) is None or
+                    tools.get('tests',{}).get('nanoda-positive',{}).get('passed') is not True or
+                    tools.get('tests',{}).get('nanoda-disallowed-axiom',{}).get('passed') is not True):
+                    raise ValueError('Original configuration requires validated nanoda; do not disable it')
+                nano=comparator.parent/'nanoda_bin'
+                if file_hash(nano) != tools['binaries'].get('nanoda_bin'):
+                    raise ValueError('Required nanoda binary drift')
+                os.environ['COMPARATOR_NANODA']=str(nano.resolve())
             report['toolchain']=tools
             os.environ['COMPARATOR_LEAN4EXPORT']=str((comparator.parent/'lean4export').resolve())
             os.environ['COMPARATOR_LANDRUN']=str((comparator.parent/'landrun').resolve())
@@ -269,7 +286,8 @@ def run_worker(project: Path, plan: dict, output: Path, *, kind: str, shard: int
             row.update(status='passed' if run.status=='passed' else ('timeout' if run.reason=='timeout' else 'failed'),
                        log='logs/'+name,log_sha256=file_hash(output/'logs'/name))
             if row['status']=='passed' and kind=='comparator':
-                if 'Your solution is okay!' not in run.stdout or 'Lean default kernel accepts the solution' not in run.stdout:
+                if ('Your solution is okay!' not in run.stdout or 'Lean default kernel accepts the solution' not in run.stdout
+                    or task.get('enable_nanoda') and 'nanoda kernel accepts the solution' not in run.stdout):
                     row.update(status='failed',reason='Missing successful comparison and kernel-replay markers')
             checkpoint()
         report['environment_after']=audit_environment(project,plan)
@@ -294,9 +312,11 @@ def reconcile(plan: dict, roots: list[Path]) -> dict:
         if report.get('schema')!=RUN_SCHEMA or report.get('plan_sha256')!=plan['plan_sha256']:
             raise ValueError('Worker source identity mismatch')
         key=(report['kind'],report['shard'],report['shards'])
-        if key in workers:raise ValueError('Duplicate worker report')
-        workers.add(key)
-        expected=selection(plan,*key)
+        only=report.get('only')
+        expected=selection(plan,*key,only=only)
+        worker_key=(*key,tuple(only) if only is not None else None)
+        if worker_key in workers:raise ValueError('Duplicate worker report')
+        workers.add(worker_key)
         rows=report['targets']
         if report['expected_tasks']!=len(expected) or [x['id'] for x in rows]!=[x['id'] for x in expected]:
             raise ValueError('Worker denominator mismatch')
@@ -325,6 +345,14 @@ def reconcile(plan: dict, roots: list[Path]) -> dict:
                     if len(command)!=4 or command[:2]!=['lake','env'] or command[-1]!=task['config'] or Path(command[2]).name!='comparator':raise ValueError('Wrong comparison target')
                     if report.get('toolchain',{}).get('passed') is not True:raise ValueError('Missing Comparator smoke evidence')
                     if not all(marker in log['stdout'] for marker in ['Your solution is okay!','Lean default kernel accepts the solution']):raise ValueError('Missing Comparator completion marker')
+                    if task.get('enable_nanoda'):
+                        tools=report['toolchain']
+                        if (re.fullmatch(r'[a-f0-9]{40}', str(tools.get('nanoda_commit',''))) is None or
+                            tools.get('tests',{}).get('nanoda-positive',{}).get('passed') is not True or
+                            tools.get('tests',{}).get('nanoda-disallowed-axiom',{}).get('passed') is not True or
+                            not HEX.fullmatch(tools.get('binaries',{}).get('nanoda_bin','')) or
+                            'nanoda kernel accepts the solution' not in log['stdout']):
+                            raise ValueError('Missing required external-kernel acceptance')
             observed[row['id']]=row
     result={'schema':'leanglish.original-project-summary/v1','plan_sha256':plan['plan_sha256'],
             'expected_tasks':len(tasks),'recorded_tasks':len(observed),'missing_tasks':sorted(set(tasks)-set(observed)),

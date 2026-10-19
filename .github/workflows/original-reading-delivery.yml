@@ -1,0 +1,64 @@
+name: Package readings with original-project verification evidence
+on:
+  push:
+    branches: [work/original-project-evidence]
+    paths: ['.github/workflows/original-reading-delivery.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+jobs:
+  package:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with: {persist-credentials: false}
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: python -m pip install '.[dev,webtest]'
+      - run: python -m playwright install --with-deps chromium
+      - name: Recover digest-bound frozen native observations and original source
+        env: {GH_TOKEN: '${{ github.token }}'}
+        run: |
+          gh api repos/$GITHUB_REPOSITORY/actions/artifacts/12150168878/zip > /tmp/original-evidence.zip
+          echo 'ca0353d174eceb0e9723f7947abfd43f75e9e20448458f075fcdba6d5ebc6fa5  /tmp/original-evidence.zip' | sha256sum -c -
+          python -c "from pathlib import Path;from scripts.collect_original_evidence import unpack;unpack(Path('/tmp/original-evidence.zip'),Path('/tmp/evidence'))"
+          mkdir -p /tmp/inputs/source
+          gh run download 38822475057 -R "$GITHUB_REPOSITORY" -n complete-openai-lean-source -D /tmp/inputs/source
+          gh run download 39049596449 -R "$GITHUB_REPOSITORY" -n leanglish-all-finding-observations -D /tmp/inputs/observations
+          gh run download 39050823104 -R "$GITHUB_REPOSITORY" -p 'finding-statement-retry-*' -D /tmp/inputs/statement-retries
+          python -c "from pathlib import Path;from scripts.assemble_finding_release import unpack_source;unpack_source(Path('/tmp/inputs'),Path('/tmp/original-project'))"
+      - name: Test collection, recovery, accounting and unchanged native interfaces
+        run: python -m pytest -q --ignore=tests/test_lean_integration.py --ignore=tests/test_narrative_integration.py --ignore=tests/test_narrative_batch_integration.py --ignore=tests/test_kernel_integration.py --ignore=tests/test_narrative_context_integration.py
+      - name: Build all available readings without rerunning the compiler
+        run: python scripts/assemble_original_readings.py --evidence /tmp/evidence --inputs /tmp/inputs --source /tmp/original-project/lean --inventory /tmp/inputs/source/source-inventory.json --output /tmp/delivery
+      - name: Check actual offline browser navigation
+        run: |
+          python scripts/audit_finding_browser.py /tmp/delivery/site --screenshots /tmp/delivery/screenshots > /tmp/delivery/browser-audit.json
+          python scripts/audit_original_browser.py /tmp/delivery/site > /tmp/delivery/original-browser-audit.json
+      - name: Package tested source and offline catalog
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          from scripts.assemble_finding_release import package
+          from proofreader.original_project import read,write
+          root=Path('/tmp/delivery')
+          r=read(root/'original-browser-audit.json');assert r['passed']
+          write(root/'site/original-browser-audit.json',r)
+          package(root)
+          PY
+          git archive --format=zip --prefix=Leanglish/ -o /tmp/delivery/dist/leanglish-application.zip HEAD
+          cp /tmp/delivery/site/original-verification.json /tmp/delivery/dist/
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: original-reading-delivery
+          path: |
+            /tmp/delivery/dist/
+            /tmp/delivery/screenshots/
+            /tmp/delivery/original-verification-*.png
+            /tmp/delivery/browser-audit.json
+            /tmp/delivery/original-browser-audit.json
+          retention-days: 90
+          if-no-files-found: error

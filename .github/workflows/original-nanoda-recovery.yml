@@ -1,0 +1,105 @@
+name: Restore the external kernel required by original configurations
+on:
+  pull_request:
+    branches: [work/full-original-project]
+    paths: ['.github/workflows/original-nanoda-recovery.yml', 'scripts/comparator_smoke.py', 'proofreader/original_project.py']
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+env:
+  GLIBC_TUNABLES: glibc.malloc.mmap_max=0:glibc.malloc.arena_max=1
+jobs:
+  checker:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+        with: {persist-credentials: false}
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - uses: leanprover/lean-action@v1
+        with: {lake-package-directory: lean, auto-config: false, build: false, test: false, lint: false, use-mathlib-cache: false, use-github-cache: false}
+      - name: Restore the exact previously tested verification binaries
+        env: {GH_TOKEN: '${{ github.token }}'}
+        run: |
+          gh api repos/$GITHUB_REPOSITORY/actions/artifacts/12141836995/zip > /tmp/tools.zip
+          echo 'da465dfe9c3bf2822540d2c1410132e871ad4ace18ececa05b85574b30a85d8c  /tmp/tools.zip' | sha256sum -c -
+          python - <<'PY'
+          from pathlib import Path
+          from scripts.collect_original_evidence import unpack
+          from proofreader.original_project import read,file_hash
+          import shutil
+          unpack(Path('/tmp/tools.zip'),Path('/tmp/old-tools'))
+          tools=read(Path('/tmp/old-tools/controls/toolchain.json'))
+          destination=Path('/tmp/nanoda-tools');destination.mkdir()
+          shutil.copytree('/tmp/old-tools/bin',destination/'bin')
+          for name,value in tools['binaries'].items():
+              assert file_hash(destination/'bin'/name)==value
+              (destination/'bin'/name).chmod(0o755)
+          shutil.copytree('/tmp/old-tools/controls',destination/'prior-controls')
+          PY
+      - name: Build pinned nanoda without weakening the original configuration
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/nanoda-tools/build-evidence
+          git clone https://github.com/ammkrn/nanoda_lib.git /tmp/nanoda-src
+          cd /tmp/nanoda-src
+          git checkout --detach f67473ba5f9397266f89c7852082c9c914b5d219
+          rustc --version > /tmp/nanoda-tools/build-evidence/rust-version.txt
+          cargo --version > /tmp/nanoda-tools/build-evidence/cargo-version.txt
+          cargo build --release --locked 2>&1 | tee /tmp/nanoda-tools/build-evidence/build.log
+          test -z "$(git status --porcelain --untracked-files=no)"
+          cp Cargo.lock /tmp/nanoda-tools/build-evidence/
+          git rev-parse HEAD > /tmp/nanoda-tools/build-evidence/source-commit.txt
+          cp target/release/nanoda_bin /tmp/nanoda-tools/bin/
+      - name: Require real positive and disallowed-axiom rejection controls
+        run: |
+          python scripts/comparator_smoke.py --bin /tmp/nanoda-tools/bin --output /tmp/nanoda-tools/controls --nanoda-commit f67473ba5f9397266f89c7852082c9c914b5d219
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with: {name: original-nanoda-toolchain, path: /tmp/nanoda-tools/, retention-days: 90, if-no-files-found: error}
+  retry:
+    needs: checker
+    runs-on: ubuntu-latest
+    timeout-minutes: 140
+    steps:
+      - uses: actions/checkout@v4
+        with: {persist-credentials: false}
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - uses: leanprover/lean-action@v1
+        with: {lake-package-directory: lean, auto-config: false, build: false, test: false, lint: false, use-mathlib-cache: false, use-github-cache: false}
+      - uses: actions/download-artifact@v4
+        with: {name: original-nanoda-toolchain, path: /tmp/nanoda-tools}
+      - name: Restore unchanged original source and its complete plan
+        env: {GH_TOKEN: '${{ github.token }}'}
+        run: |
+          mkdir -p /tmp/inputs/source
+          gh run download 38822475057 -R "$GITHUB_REPOSITORY" -n complete-openai-lean-source -D /tmp/inputs/source
+          gh run download 39141760623 -R "$GITHUB_REPOSITORY" -n original-project-seed -D /tmp/original-seed
+          python -c "from pathlib import Path;from scripts.assemble_finding_release import unpack_source;unpack_source(Path('/tmp/inputs'),Path('/tmp/original-project'))"
+      - uses: actions/cache/restore@v4
+        with:
+          path: /tmp/original-project/lean/.lake/packages
+          key: original-openai-deps-1581d4cb-4341-full-v1
+          fail-on-cache-miss: true
+      - name: Retry only the diagnosed original configuration
+        run: |
+          sudo sysctl -w vm.max_map_count=1048576
+          chmod +x /tmp/nanoda-tools/bin/*
+          python scripts/original_project.py run --project /tmp/original-project/lean --plan /tmp/original-seed/plan.json --output /tmp/nanoda-result --kind comparator --shard 0 --shards 1 --only compare:ComparatorChallenges/ArtinParabolicIntersections.json --timeout 7200 --wall-seconds 7800 --comparator /tmp/nanoda-tools/bin/comparator --tool-receipt /tmp/nanoda-tools/controls/toolchain.json --trust-project
+      - name: Reconcile the retry without claiming the other 440 tasks completed
+        if: always()
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          from proofreader.original_project import read,write,reconcile
+          root=Path('/tmp/nanoda-result')
+          if (root/'worker.json').is_file():
+              r=reconcile(read(Path('/tmp/original-seed/plan.json')),[root]);write(root/'summary.json',r)
+              print({k:v for k,v in r.items() if k!='missing_tasks'})
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with: {name: original-nanoda-retry, path: /tmp/nanoda-result/, retention-days: 90, if-no-files-found: error}

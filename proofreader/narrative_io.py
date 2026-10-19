@@ -21,6 +21,8 @@ from .render import write_html
 
 PREFIX = 'PR_NARRATIVE:'
 MAX_BYTES = 16_000_000
+# Output may repeat long local contexts. Keep source and output budgets separate.
+MAX_OUTPUT_BYTES = 64_000_000
 VERSION = re.compile(r'4\.\d+\.\d+')
 
 
@@ -59,13 +61,25 @@ def extraction_source(theorem: str, *, version: str, context: str | None = None,
     return prefix+gate+('' if driver is not None else budget+'#narrative '+lean_string(theorem)+'\n')
 
 
+def _share_strings(value: Any, pool: dict[str, str] | None = None) -> Any:
+    # Lossless, local deduplication only: do not share mutable frame/context objects
+    # or retain attacker-controlled strings in the interpreter's global intern pool.
+    if pool is None:pool = {}
+    if isinstance(value,str):return pool.setdefault(value,value)
+    if isinstance(value,list):
+        return [_share_strings(x,pool) for x in value]
+    if isinstance(value,dict):
+        return {k:_share_strings(v,pool) for k,v in value.items()}
+    return value
+
+
 def parse_stream(stdout: str, *, theorem: str, version: str) -> Snapshot:
-    require(isinstance(stdout,str) and len(stdout.encode('utf-8')) <= MAX_BYTES, 'Exporter output budget')
+    require(isinstance(stdout,str) and len(stdout.encode('utf-8')) <= MAX_OUTPUT_BYTES, 'Exporter output budget')
     records = []
     for line in stdout.splitlines():
         m = re.fullmatch(r'(?:[^\n]*?\binfo: )?'+PREFIX+r'(.*)', line)
         if m:
-            records.append(Snapshot(strict_json(m[1])))
+            records.append(Snapshot(_share_strings(strict_json(m[1]))))
     require(len(records) == 1, 'Expected exactly one complete narrative record')
     s = records[0]
     require(s.record['theorem'] == theorem, 'Unexpected exported theorem')
