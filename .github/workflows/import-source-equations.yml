@@ -20,7 +20,7 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          test "$(git rev-parse HEAD^)" = 38e5ebab45f5e8f081db223335ca59253eabcbc1
+          test "$(git rev-parse HEAD^)" = 09571649131489b85f20ef97c94eaf7383bc42e9
           python - <<'PY'
           import base64, hashlib, json, lzma, os, pathlib, time, urllib.request
           shas = [
@@ -69,7 +69,10 @@ jobs:
           python -m pip install '.[dev,webtest]'
           python docs/companion/build.py
           git add docs/companion/index.html docs/companion/build-manifest.json
-          test "$(git write-tree)" = d8b62c6ada2647ebbd065ff8d8dc22fc3f3a41d2
+          # The original scripts/publish.sh remains 100755. The local ZIP
+          # extraction lost that bit; its bytes and upstream mode are reconciled.
+          echo "Reproduced tree: $(git write-tree)"
+          test "$(git write-tree)" = fe082248b9fe66f5fb2fea4bc0f19e085c53125b
           git diff --check --cached
           git diff --exit-code
       - name: Run the reader and evidence tests in a real offline browser
@@ -81,7 +84,7 @@ jobs:
           python -m pytest tests/test_source_equations.py tests/test_source_text.py tests/test_source_cancellation_gate.py tests/test_editorial_style.py tests/reader/test_bezout_companion.py -q --junitxml=import-results/tests.xml
           python docs/companion/build.py
           git diff --exit-code
-          test "$(git write-tree)" = d8b62c6ada2647ebbd065ff8d8dc22fc3f3a41d2
+          test "$(git write-tree)" = fe082248b9fe66f5fb2fea4bc0f19e085c53125b
       - name: Publish only if the isolated branch has not moved
         run: |
           branch=work/source-bound-equations-20261019
@@ -90,7 +93,7 @@ jobs:
           git config user.name 'Kyle Kistner'
           git config user.email '14222111+KyleJKistner@users.noreply.github.com'
           git commit -m 'Check original Bezout equation chains and witness tuples in the reader'
-          test "$(git rev-parse HEAD^{tree})" = d8b62c6ada2647ebbd065ff8d8dc22fc3f3a41d2
+          test "$(git rev-parse HEAD^{tree})" = fe082248b9fe66f5fb2fea4bc0f19e085c53125b
           git push origin "HEAD:refs/heads/$branch"
           git rev-parse HEAD > import-results/commit.txt
           git rev-parse HEAD^{tree} > import-results/tree.txt
