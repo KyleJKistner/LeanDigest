@@ -106,3 +106,21 @@ navigation, the three integer cases, source/reader downloads, mobile layout,
 and absence of HTTP(S) requests. They do not replace the native gate or certify
 the English. An isolated worktree can set
 `LEANDIGEST_COMPANION_EVIDENCE_ROOT=/path/to/native` for this test command.
+
+## Checked equations and witnesses
+
+The checked-text panels now include ten equation chains and both original witness
+tuples, in addition to the two cancellation sentences. The ten chains retain 19
+adjacent source equalities. The source buttons select the exact claim and display
+the sentence certificate with indexed local binders and let values.
+
+The page uses `artifacts/source-equations/` and the pinned records checked by
+`proofreader/equation_text.py`. The builder requires this evidence; missing or
+changed records do not leave an old certification label in place. Pass
+`--equation-evidence-root` to select a separate copy of the same reviewed evidence.
+**Download checked text** includes all fourteen passages and their records.
+
+These are certificates for the defined mathematical meanings of specific
+passages, not for the six authored proof sections or the complete prose. See
+[`SOURCE_BOUND_EQUATIONS.md`](../SOURCE_BOUND_EQUATIONS.md) for the source binding,
+formal contracts, negative controls, exact limits, and native reproduction.

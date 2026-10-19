@@ -1,0 +1,9 @@
+'ProofReader.WitnessEnglish.parseFrame_chars' depends on axioms: [propext, Classical.choice, Quot.sound]
+'ProofReader.WitnessEnglish.read_render' depends on axioms: [propext, Classical.choice, Quot.sound]
+'ProofReader.WitnessEnglish.Frame.render_injective' depends on axioms: [propext, Classical.choice, Quot.sound]
+'ProofReader.WitnessEnglish.Frame.witnesses' does not depend on any axioms
+'ProofReader.WitnessEnglish.rendered_meaning' depends on axioms: [propext, Classical.choice, Quot.sound]
+'ProofReader.WitnessEnglish.certify' depends on axioms: [propext, Classical.choice, Quot.sound]
+'ProofReader.WitnessEnglish.readBytes_render' depends on axioms: [propext, Classical.choice, Quot.sound]
+'ProofReader.WitnessEnglish.rendered_bytes_meaning' depends on axioms: [propext, Classical.choice, Quot.sound]
+'ProofReader.WitnessEnglish.certifyBytes' depends on axioms: [propext, Classical.choice, Quot.sound]

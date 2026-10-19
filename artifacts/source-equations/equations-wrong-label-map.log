@@ -1,0 +1,16 @@
+equations-wrong-label-map.lean:54:0: error: (kernel) declaration type mismatch, 'OAI.ComplexCancellation.BezoutFrame.exists_frame.equationText.0.link.0.right' has type
+  ∀ {R : Type u_1} [inst : EuclideanDomain R] (x y z : R),
+    x * y = z * (z + 1) →
+      let g := EuclideanDomain.gcd x z;
+      g = 0 → x = 0 ∧ z = 0 → x = x
+but it is expected to have type
+  ∀ {R : Type u_1} [inst : EuclideanDomain R] (x y z : R),
+    x * y = z * (z + 1) →
+      let g := EuclideanDomain.gcd x z;
+      g = 0 →
+        x = 0 ∧ z = 0 →
+          ProofReader.ArithmeticEnglish.Term.eval
+              { values := ProofReader.ArithmeticEnglish.assignment y y z g 0 0 0 0, zero := 0, one := 1,
+                add := fun u v => u + v, mul := fun u v => u * v, sub := fun u v => u - v }
+              (ProofReader.ArithmeticEnglish.Term.var ProofReader.ArithmeticEnglish.Variable.x) =
+            x

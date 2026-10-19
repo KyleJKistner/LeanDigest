@@ -83,7 +83,8 @@ def test_page_embeds_only_the_two_checked_sentences_and_preserves_scope(tmp_path
     records = source.load_cancellations()['sentences']
     assert parser.frames == [40, 53]
     assert parser.sentences == [r['text'] for r in records]
-    assert manifest['certified_source_sentences'] == 2
+    assert manifest['certified_source_sentences'] == 14
+    assert manifest['certified_cancellation_sentences'] == 2
     assert manifest['curated_prose_formally_verified'] is False
     assert manifest['source_text_record_sha256'] == source.RECORD_HASH
     assert '__CANCELLATION_' not in path.read_text()

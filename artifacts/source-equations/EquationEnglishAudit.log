@@ -1,0 +1,2 @@
+'ProofReader.EquationEnglishAudit.equal_endpoints_false_middle' does not depend on any axioms
+'ProofReader.EquationEnglishAudit.parsed_false_chain' depends on axioms: [propext, Classical.choice, Quot.sound]
