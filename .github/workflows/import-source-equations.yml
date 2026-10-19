@@ -16,11 +16,11 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-      - name: Require the expected parent and recover the hash-bound patch
+      - name: Require the expected parent and recover the hash-bound patches
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          test "$(git rev-parse HEAD^)" = 09571649131489b85f20ef97c94eaf7383bc42e9
+          test "$(git rev-parse HEAD^)" = 448bd87ada8af3b82c690ca89558c6f0f027735c
           python - <<'PY'
           import base64, hashlib, json, lzma, os, pathlib, time, urllib.request
           shas = [
@@ -35,8 +35,7 @@ jobs:
               '50e1a82c3f01593f5058a28e00462bb850d0cc64',
               '04da25a5a7f8d62df7a76281b9abd519d4c1be3b',
           ]
-          parts = []
-          for sha in shas:
+          def fetch_blob(sha):
               request = urllib.request.Request(
                   f'https://api.github.com/repos/KyleJKistner/LeanDigest/git/blobs/{sha}',
                   headers={'Authorization': 'Bearer ' + os.environ['GH_TOKEN'],
@@ -53,12 +52,15 @@ jobs:
               assert record['sha'] == sha and record['encoding'] == 'base64'
               data = base64.b64decode(''.join(record['content'].split()), validate=True)
               assert hashlib.sha1(b'blob ' + str(len(data)).encode() + b'\0' + data).hexdigest() == sha
-              parts.append(data)
-          archive = b''.join(parts)
+              return data
+          archive = b''.join(fetch_blob(sha) for sha in shas)
           assert hashlib.sha256(archive).hexdigest() == '802d71344a25828b28bc727cffd39bf9fda4e9d418723e05c1a4fa0975b42aba'
           patch = lzma.decompress(archive)
           assert hashlib.sha256(patch).hexdigest() == '791415de005e880427cdf97803b6f0afe0aff1e168a585594b0047bfd6858fcb'
           pathlib.Path(os.environ['RUNNER_TEMP'], 'equations.patch').write_bytes(patch)
+          selector = fetch_blob('38267b6b7db1601982f75783585ab2ff9e60f6e2')
+          assert hashlib.sha256(selector).hexdigest() == 'ed2bd7cc89380a731844bf3e928dce312814b3b70258d5764fb6dec3a5bbd12f'
+          pathlib.Path(os.environ['RUNNER_TEMP'], 'selector.patch').write_bytes(selector)
           PY
       - name: Apply the tested tree and remove this one-off workflow
         run: |
@@ -66,13 +68,14 @@ jobs:
           test "$(git write-tree)" = eb749be7a3c4354b3d1478d2f80e7b197b1c4948
           git apply --index --check "$RUNNER_TEMP/equations.patch"
           git apply --index "$RUNNER_TEMP/equations.patch"
+          git apply --index --check "$RUNNER_TEMP/selector.patch"
+          git apply --index "$RUNNER_TEMP/selector.patch"
           python -m pip install '.[dev,webtest]'
           python docs/companion/build.py
           git add docs/companion/index.html docs/companion/build-manifest.json
-          # The original scripts/publish.sh remains 100755. The local ZIP
-          # extraction lost that bit; its bytes and upstream mode are reconciled.
+          # Preserve the upstream executable mode on scripts/publish.sh.
           echo "Reproduced tree: $(git write-tree)"
-          test "$(git write-tree)" = fe082248b9fe66f5fb2fea4bc0f19e085c53125b
+          test "$(git write-tree)" = 04d2d9501fe6a48321df2946967d12db884324da
           git diff --check --cached
           git diff --exit-code
       - name: Run the reader and evidence tests in a real offline browser
@@ -84,7 +87,7 @@ jobs:
           python -m pytest tests/test_source_equations.py tests/test_source_text.py tests/test_source_cancellation_gate.py tests/test_editorial_style.py tests/reader/test_bezout_companion.py -q --junitxml=import-results/tests.xml
           python docs/companion/build.py
           git diff --exit-code
-          test "$(git write-tree)" = fe082248b9fe66f5fb2fea4bc0f19e085c53125b
+          test "$(git write-tree)" = 04d2d9501fe6a48321df2946967d12db884324da
       - name: Publish only if the isolated branch has not moved
         run: |
           branch=work/source-bound-equations-20261019
@@ -93,7 +96,7 @@ jobs:
           git config user.name 'Kyle Kistner'
           git config user.email '14222111+KyleJKistner@users.noreply.github.com'
           git commit -m 'Check original Bezout equation chains and witness tuples in the reader'
-          test "$(git rev-parse HEAD^{tree})" = fe082248b9fe66f5fb2fea4bc0f19e085c53125b
+          test "$(git rev-parse HEAD^{tree})" = 04d2d9501fe6a48321df2946967d12db884324da
           git push origin "HEAD:refs/heads/$branch"
           git rev-parse HEAD > import-results/commit.txt
           git rev-parse HEAD^{tree} > import-results/tree.txt
