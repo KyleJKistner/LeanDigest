@@ -12,6 +12,11 @@ from test_original_project import fixture_project
 
 def setup_case(tmp_path):
     project, inventory, _ = fixture_project(tmp_path)
+    # Real Lean dependencies ignore generated .lake output. Match that fixture
+    # behavior without weakening the production dependency-source audit.
+    exclude = project / '.lake/packages/example/.git/info/exclude'
+    with exclude.open('a') as stream:
+        stream.write('\n.lake/\n')
     plan = make_plan(project, inventory)
     environment = audit_environment(project, plan)
     state = tmp_path / 'state'
