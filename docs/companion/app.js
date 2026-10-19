@@ -4,6 +4,14 @@
   const byId = id => document.getElementById(id);
   const sections = new Map(data.sections.map(section => [section.id, section]));
   const frames = new Map(data.snapshot.frames.map(frame => [frame.id, frame]));
+  const checkedPassages = new Map();
+  for (const kind of ["equations", "witnesses"]) {
+    for (const record of data.equation_text[kind]) {
+      const frame = data.snapshot.frames.find(item => JSON.stringify(item.path) === JSON.stringify(record.path));
+      if (!frame || checkedPassages.has(frame.id)) throw new Error("Ambiguous checked passage source");
+      checkedPassages.set(frame.id, record);
+    }
+  }
   const dialog = byId("evidence-dialog");
   let opener = null;
   let activeSection = sections.get("statement");
@@ -48,6 +56,13 @@
       ? frame.context.map(item => `${item.name} : ${item.type}`).join("\n")
       : "(empty local context)";
     byId("frame-raw").textContent = JSON.stringify(frame, null, 2);
+    const passage = checkedPassages.get(frame.id);
+    byId("frame-checked-passage").hidden = !passage;
+    byId("frame-checked-text").textContent = passage ? passage.text : "";
+    byId("frame-checked-context").textContent = passage ? passage.context.map(item =>
+      `[${item.binder_index}] ${item.name} : ${item.type}${item.value === null ? "" : ` := ${item.value}`}`
+    ).join("\n") : "";
+    byId("frame-checked-record").textContent = passage ? JSON.stringify(passage, null, 2) : "";
   }
 
   function setSource(section) {
@@ -101,7 +116,9 @@
       return option;
     });
     byId("frame-select").replaceChildren(...options);
-    setFrame(activeSection.focus);
+    const requested = Number(button?.dataset.sourceFrame);
+    setFrame(Number.isInteger(requested) && activeSection.frames.includes(requested)
+      ? requested : activeSection.focus);
     setEvidenceView(view);
     dialog.showModal();
     byId(`evidence-tab-${view || "source"}`).focus({preventScroll: true});
@@ -167,6 +184,7 @@
     receipt: ["BezoutFrame-receipt.json", "application/json", data.receipt],
     observation: ["BezoutFrame-native-observation.json", "application/json", data.native_record],
     certificates: ["BezoutFrame-polynomial-certificates.json", "application/json", data.certificates],
+    "checked-text": ["BezoutFrame-checked-text.json", "application/json", {cancellations: data.source_text, calculations: data.equation_text}],
     reader: ["BezoutFrame-deterministic-reader.html", "text/html", data.deterministic_reader_html],
   };
   document.querySelectorAll("[data-download]").forEach(button => {

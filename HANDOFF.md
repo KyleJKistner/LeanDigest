@@ -1,3 +1,32 @@
+# Equation and witness checkpoint — 2026-10-19
+
+The isolated branch `work/source-bound-equations-20261019` extends
+`0742966549cb4cc641d9799df365828baadc4cb4` on the cancellation branch. It does
+not change the concurrent Pro session's `work/full-original-project` branch.
+
+Read `docs/SOURCE_BOUND_EQUATIONS.md`. Six new Lean modules add equation-chain
+and witness-tuple languages, exact original-path importers, and adversarial
+controls. The final local native observation is `artifacts/source-equations/`:
+43 compiler invocations, 18 required universal contracts, 47 executable guards,
+28 rejected source mutations, ten equation chains containing 19 adjacent proofs,
+and both actual witness tuples. Both source runs repeat byte for byte.
+
+The companion now embeds 14 source-bound passages (12 new plus 2 cancellations).
+The authored proof bodies, formula inventory, and original source remain unchanged.
+Whole-proof English certification remains false: statement/introduction, gcd
+case-split structure, dependency exposition, and document assembly need their own
+checked rendering contract. Do not replace this with a statement that the entire
+proof or its English is certified. Do not substitute an unrelated proof with the
+same conclusion for original occurrence identity.
+
+Local file navigation is blocked by browser administrator policy. The memory
+preview is not offline acceptance. Inspect the final PR's native and real-browser
+CI and retained artifacts before reporting remote success. Existing native
+modules and the full-project workflows were not modified. The new workflow is
+`.github/workflows/source-bound-equations.yml`.
+
+---
+
 # Source-bound cancellation checkpoint — 2026-10-19
 
 The two cancellation sentences in the Bézout companion now have checked literal

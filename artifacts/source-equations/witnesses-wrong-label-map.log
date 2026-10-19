@@ -1,0 +1,17 @@
+witnesses-wrong-label-map.lean:54:0: error: (kernel) declaration type mismatch, 'OAI.ComplexCancellation.BezoutFrame.exists_frame.witnessText.0.existence' has type
+  ∀ {R : Type u_1} [inst : EuclideanDomain R] (x y z : R),
+    x * y = z * (z + 1) →
+      let g := EuclideanDomain.gcd x z;
+      g = 0 → x = 0 ∧ z = 0 → ∃ a d b c, a * b = x ∧ d * c = y ∧ d * b = z ∧ a * c - d * b = 1
+but it is expected to have type
+  ∀ {R : Type u_1} [inst : EuclideanDomain R] (x y z : R),
+    x * y = z * (z + 1) →
+      let g := EuclideanDomain.gcd x z;
+      g = 0 →
+        x = 0 ∧ z = 0 →
+          ProofReader.WitnessEnglish.Goal
+            { values := ProofReader.ArithmeticEnglish.assignment y y z g 0 0 0 0, zero := 0, one := 1,
+              add := fun u v => u + v, mul := fun u v => u * v, sub := fun u v => u - v }
+            (ProofReader.ArithmeticEnglish.Term.var ProofReader.ArithmeticEnglish.Variable.x)
+            (ProofReader.ArithmeticEnglish.Term.var ProofReader.ArithmeticEnglish.Variable.y)
+            (ProofReader.ArithmeticEnglish.Term.var ProofReader.ArithmeticEnglish.Variable.z)

@@ -133,8 +133,8 @@ def test_math_statement_and_complete_six_step_argument(page):
     assert "Euclidean domain" in theorem
     assert "No assumption says" in theorem and "nonzero" in theorem
     assert page.locator('#step-1 [data-math="(a,d,b,c)=(1,y,0,1)."] math').count() == 1
-    assert "remaining prose" in page.locator(".proof-intro").inner_text()
-    assert "not formally certified" in page.locator(".proof-intro").inner_text()
+    assert "surrounding explanation is not certified" in page.locator(".proof-intro").inner_text()
+    assert "Fourteen passages" in page.locator(".proof-intro").inner_text()
     assert "two explicitly substituted imports" in page.locator(".evidence-grid").inner_text()
     assert "full OAI" in page.locator(".scope-note").inner_text()
 
@@ -151,7 +151,7 @@ def test_every_source_button_selects_exact_lines_claim_and_context(page, section
     assert "\n".join(source_lines) == builder.SOURCE.read_text()
     page.locator("#evidence-tab-frames").click()
     assert page.locator("#frame-select").input_value() == str(section["focus"])
-    page.locator("#evidence-panel-frames details summary").click()
+    page.locator("#evidence-panel-frames > details > summary").click()
     frame = json.loads(page.locator("#frame-raw").inner_text())
     assert frame["id"] == section["focus"]
     assert page.locator("#frame-statement").inner_text() == frame["statement"]
@@ -251,5 +251,57 @@ def test_source_checked_sentence_text_matches_the_native_utf8_in_the_browser(pag
         text = paragraph.text_content()
         assert text == records[index]['text']
         assert text.encode('utf-8') == bytes(records[index]['utf8'])
-    assert 'remaining prose' in page.locator('.proof-intro').inner_text()
-    assert 'not formally certified' in page.locator('.proof-intro').inner_text()
+    assert 'surrounding explanation is not certified' in page.locator('.proof-intro').inner_text()
+    assert 'Fourteen passages' in page.locator('.proof-intro').inner_text()
+
+
+def test_equation_and_witness_text_and_exact_frame_selection(page):
+    from proofreader.equation_text import FRAMES, load_equations
+    records = load_equations()
+    panels = page.locator('.checked-equations')
+    assert panels.count() == 6
+    for panel in panels.all():
+        panel.locator('summary').click()
+    assert page.locator('.checked-calculation').count() == 12
+    for kind, frames in FRAMES.items():
+        for frame, record in zip(frames, records[kind]):
+            row = page.locator(f'.checked-calculation[data-kind="{kind}"][data-source-frame="{frame}"]')
+            assert row.locator('.checked-equation-text').text_content() == record['text']
+            assert row.locator('.checked-equation-text').text_content().encode('utf-8') == bytes(record['utf8'])
+            row.locator('button').click()
+            assert page.locator('#evidence-tab-frames').get_attribute('aria-selected') == 'true'
+            assert page.locator('#frame-select').input_value() == str(frame)
+            assert 'hg' in page.locator('#frame-context').inner_text()
+            assert page.locator('#frame-checked-text').text_content() == record['text']
+            expected_context = '\n'.join(f"[{c['binder_index']}] {c['name']} : {c['type']}" +
+                ('' if c['value'] is None else ' := '+c['value']) for c in record['context'])
+            assert page.locator('#frame-checked-context').text_content() == expected_context
+            assert json.loads(page.locator('#frame-checked-record').text_content()) == record
+            page.keyboard.press('Escape')
+    assert 'surrounding explanation is not certified' in page.locator('.proof-intro').inner_text()
+
+
+def test_expanded_calculations_fit_the_mobile_view(page):
+    page.set_viewport_size({'width':390,'height':844})
+    for panel in page.locator('.checked-equations').all():
+        panel.locator('summary').click()
+    assert page.evaluate('document.documentElement.scrollWidth <= document.documentElement.clientWidth')
+    last = page.locator('.checked-calculation[data-source-frame="79"]')
+    last.locator('button').click()
+    assert page.locator('#frame-select').input_value() == '79'
+    assert page.locator('#evidence-dialog').is_visible()
+    assert page.evaluate('document.documentElement.scrollWidth <= document.documentElement.clientWidth')
+
+
+def test_checked_text_download_retains_source_context_and_full_proof_limit(page, tmp_path):
+    page.locator('.provenance-details summary').click()
+    with page.expect_download() as pending:
+        page.locator('[data-download="checked-text"]').click()
+    output = tmp_path/pending.value.suggested_filename
+    pending.value.save_as(output)
+    data = json.loads(output.read_text())
+    assert len(data['cancellations']['sentences']) == 2
+    assert len(data['calculations']['equations']) == 10
+    assert len(data['calculations']['witnesses']) == 2
+    assert data['calculations']['observation']['complete_english_proof_certified'] is False
+    assert all(row['context'] for kind in ['equations','witnesses'] for row in data['calculations'][kind])

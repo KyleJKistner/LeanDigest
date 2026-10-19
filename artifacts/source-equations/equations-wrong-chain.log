@@ -1,0 +1,16 @@
+equations-wrong-chain.lean:54:0: error: (kernel) declaration type mismatch, 'OAI.ComplexCancellation.BezoutFrame.exists_frame.equationText.0.links' has type
+  ∀ {R : Type u_1} [inst : EuclideanDomain R] (x y z : R),
+    x * y = z * (z + 1) →
+      let g := EuclideanDomain.gcd x z;
+      g = 0 → x = 0 ∧ z = 0 → 1 * 0 = x
+but it is expected to have type
+  ∀ {R : Type u_1} [inst : EuclideanDomain R] (x y z : R),
+    x * y = z * (z + 1) →
+      let g := EuclideanDomain.gcd x z;
+      g = 0 →
+        x = 0 ∧ z = 0 →
+          ProofReader.EquationEnglish.Chain.Holds
+            { values := ProofReader.ArithmeticEnglish.assignment x y z g 0 0 0 0, zero := 0, one := 1,
+              add := fun u v => u + v, mul := fun u v => u * v, sub := fun u v => u - v }
+            (ProofReader.EquationEnglish.Chain.pair ProofReader.ArithmeticEnglish.Term.zero
+              ProofReader.ArithmeticEnglish.Term.one)

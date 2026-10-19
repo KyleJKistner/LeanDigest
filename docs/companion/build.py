@@ -13,6 +13,7 @@ HERE = Path(__file__).resolve().parent
 ROOT = HERE.parents[1]
 sys.path.insert(0, str(ROOT))
 
+from proofreader.equation_text import EVIDENCE as EQUATION_EVIDENCE, FRAMES as EQUATION_FRAMES, load_equations, calculation_panel
 from proofreader.source_text import EVIDENCE as TEXT_EVIDENCE, load_cancellations, cancellation_panel
 from proofreader.model import canonical_json
 from proofreader.narrative import Snapshot, check_reading
@@ -71,8 +72,9 @@ SECTIONS = [
 
 
 def build(output: Path = HERE / "index.html", evidence_root: Path = EVIDENCE,
-          text_evidence_root: Path = TEXT_EVIDENCE) -> dict:
+          text_evidence_root: Path = TEXT_EVIDENCE, equation_evidence_root: Path = EQUATION_EVIDENCE) -> dict:
     source_text = load_cancellations(text_evidence_root)
+    equation_text = load_equations(equation_evidence_root)
     headings = load_headings()
     sections = [{**section, "title": headings[section["id"]]} for section in SECTIONS]
     source_bytes = SOURCE.read_bytes()
@@ -144,6 +146,7 @@ def build(output: Path = HERE / "index.html", evidence_root: Path = EVIDENCE,
         "curated_prose_formally_verified": False,
         "source_line_mapping": "editorially reviewed",
         "source_text": source_text,
+        "equation_text": equation_text,
     }
     reader_html = html_document(reading)
     data["deterministic_reader_html"] = reader_html
@@ -155,6 +158,16 @@ def build(output: Path = HERE / "index.html", evidence_root: Path = EVIDENCE,
         "__CANCELLATION_0__": cancellation_panel(source_text["sentences"][0], 40),
         "__CANCELLATION_1__": cancellation_panel(source_text["sentences"][1], 53),
     }
+    # Assign each native passage to the existing source group, not by prose.
+    grouped_text = {f"step-{i}": [] for i in range(1, 7)}
+    for kind in ("witnesses", "equations"):
+        for row, frame in zip(equation_text[kind], EQUATION_FRAMES[kind], strict=True):
+            owners = [section for section in sections if frame in section["frames"]]
+            if len(owners) != 1 or owners[0]["id"] not in grouped_text:
+                raise ValueError("Checked equation has no unique proof section")
+            grouped_text[owners[0]["id"]].append((row, frame, kind))
+    for i in range(1, 7):
+        replacements[f"__CALCULATIONS_{i}__"] = calculation_panel(grouped_text[f"step-{i}"], f"step-{i}")
     replacements.update({
         "__HEADING_" + key.upper().replace("-", "_") + "__": escape(value)
         for key, value in headings.items()
@@ -182,7 +195,12 @@ def build(output: Path = HERE / "index.html", evidence_root: Path = EVIDENCE,
         "context_sha256": receipt["context_sha256"],
         "mathlib_commit": native["mathlib_commit"],
         "index_sha256": sha256(rendered.encode()).hexdigest(),
-        "certified_source_sentences": 2,
+        "certified_source_sentences": 14,
+        "certified_cancellation_sentences": 2,
+        "certified_equation_chains": 10,
+        "certified_witness_tuples": 2,
+        "equation_record_sha256": equation_text["record_sha256"],
+        "equation_observation_sha256": equation_text["observation_sha256"],
         "source_text_record_sha256": source_text["record_sha256"],
         "source_text_observation_sha256": source_text["observation_sha256"],
     }
@@ -196,5 +214,6 @@ if __name__ == "__main__":
     parser.add_argument("--evidence-root", type=Path, default=EVIDENCE,
                         help="Native observation directory containing observation.json and current/ artifacts")
     parser.add_argument("--text-evidence-root", type=Path, default=TEXT_EVIDENCE)
+    parser.add_argument("--equation-evidence-root", type=Path, default=EQUATION_EVIDENCE)
     args = parser.parse_args()
-    print(json.dumps(build(args.output, args.evidence_root, args.text_evidence_root), indent=2))
+    print(json.dumps(build(args.output, args.evidence_root, args.text_evidence_root, args.equation_evidence_root), indent=2))

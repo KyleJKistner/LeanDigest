@@ -285,3 +285,8 @@ dialog details summary { font-size: 11px; }
 }
 
 .checked-cancellation{margin:1rem 0;padding:.7rem 1rem;border:1px solid var(--line,#d8d5cf);border-radius:.3rem}.checked-cancellation summary{cursor:pointer;font-weight:600}.checked-sentence{white-space:pre-wrap;overflow-wrap:anywhere;line-height:1.8}
+
+.checked-equations { margin: 0 0 2rem; padding: .8rem 1rem; border: 1px solid var(--line, #d7d7d7); border-radius: .3rem; }
+.checked-equations summary { cursor: pointer; }
+.checked-equation-text { font-family: ui-monospace, SFMono-Regular, Consolas, monospace; font-size: .87rem; line-height: 1.65; overflow-wrap: anywhere; white-space: pre-wrap; }
+.checked-calculation + .checked-calculation { padding-top: .5rem; border-top: 1px solid var(--line, #d7d7d7); }
