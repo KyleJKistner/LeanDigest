@@ -1,0 +1,59 @@
+name: Checked text boundary
+on:
+  workflow_dispatch:
+  push:
+    branches: ['work/checked-text-boundary-20261019']
+  pull_request:
+    paths:
+      - 'lean/ControlledEnglish*.lean'
+      - 'docs/CHECKED_TEXT_BOUNDARY.md'
+      - '.github/workflows/checked-text-boundary.yml'
+permissions:
+  contents: read
+jobs:
+  checked-text:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: leanprover/lean-action@v1
+        with:
+          lake-package-directory: lean
+          auto-config: false
+          build: false
+          test: false
+          lint: false
+          use-mathlib-cache: false
+          use-github-cache: false
+      - name: Check the existing logical foundation
+        working-directory: lean
+        run: |
+          lake env lean -o ControlledEnglish.olean ControlledEnglish.lean
+          LEAN_PATH=. lake env lean ControlledEnglishAudit.lean
+      - name: Retain exact source for reproducible local development
+        run: |
+          mkdir -p boundary-evidence
+          git rev-parse HEAD > boundary-evidence/commit.txt
+          git archive --format=zip HEAD -o boundary-evidence/source.zip
+          sha256sum boundary-evidence/source.zip > boundary-evidence/SHA256SUMS
+      - uses: actions/upload-artifact@v4
+        with:
+          name: checked-text-source
+          path: boundary-evidence/
+          retention-days: 7
+          if-no-files-found: error
+      - name: Retain pinned compiler for isolated development
+        working-directory: lean
+        run: |
+          prefix="$(lake env lean --print-prefix)"
+          mkdir -p ../boundary-toolchain
+          lake env lean --version > ../boundary-toolchain/version.txt
+          tar -czf ../boundary-toolchain/lean-runtime.tar.gz --exclude='*.a' --exclude='*.ilean' --exclude='*.o' --exclude='*.c' -C "$prefix" bin/lean lib/lean
+          sha256sum ../boundary-toolchain/lean-runtime.tar.gz > ../boundary-toolchain/SHA256SUMS
+      - uses: actions/upload-artifact@v4
+        with:
+          name: checked-text-toolchain
+          path: boundary-toolchain/
+          retention-days: 1
+          compression-level: 0
+          if-no-files-found: error
