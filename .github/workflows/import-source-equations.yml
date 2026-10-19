@@ -1,0 +1,103 @@
+name: Import source-equation reader
+on:
+  push:
+    branches: ['work/source-bound-equations-20261019']
+    paths: ['.github/workflows/import-source-equations.yml']
+permissions:
+  contents: write
+jobs:
+  import:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Require the expected parent and recover the hash-bound patch
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          test "$(git rev-parse HEAD^)" = 38e5ebab45f5e8f081db223335ca59253eabcbc1
+          python - <<'PY'
+          import base64, hashlib, json, lzma, os, pathlib, time, urllib.request
+          shas = [
+              'b9f3cdc4ae152f83a61654ae913df9d78aef517c',
+              '7a27ebaf5f5bd38c38b879374350dca24aa46ac1',
+              '5f98771e5ff7abbb597df59638dd937e5d70eef7',
+              'c10c6cb84b51f803d3cbaf9fa7a5b9c8a2ce9b07',
+              '96ba439b14ea07657f5adfdce208fa7dc1cc14f2',
+              'c6f21fa16dbffc8543fc19d95581681077dae788',
+              '626ceb6da354c385c5f724fdde7e36813704a99c',
+              '5a449cb29e130eb31a48f416e450d725988b2ed0',
+              '50e1a82c3f01593f5058a28e00462bb850d0cc64',
+              '04da25a5a7f8d62df7a76281b9abd519d4c1be3b',
+          ]
+          parts = []
+          for sha in shas:
+              request = urllib.request.Request(
+                  f'https://api.github.com/repos/KyleJKistner/LeanDigest/git/blobs/{sha}',
+                  headers={'Authorization': 'Bearer ' + os.environ['GH_TOKEN'],
+                           'Accept': 'application/vnd.github+json'})
+              for attempt in range(4):
+                  try:
+                      with urllib.request.urlopen(request, timeout=60) as response:
+                          record = json.load(response)
+                      break
+                  except OSError:
+                      if attempt == 3:
+                          raise
+                      time.sleep(2 ** attempt)
+              assert record['sha'] == sha and record['encoding'] == 'base64'
+              data = base64.b64decode(''.join(record['content'].split()), validate=True)
+              assert hashlib.sha1(b'blob ' + str(len(data)).encode() + b'\0' + data).hexdigest() == sha
+              parts.append(data)
+          archive = b''.join(parts)
+          assert hashlib.sha256(archive).hexdigest() == '802d71344a25828b28bc727cffd39bf9fda4e9d418723e05c1a4fa0975b42aba'
+          patch = lzma.decompress(archive)
+          assert hashlib.sha256(patch).hexdigest() == '791415de005e880427cdf97803b6f0afe0aff1e168a585594b0047bfd6858fcb'
+          pathlib.Path(os.environ['RUNNER_TEMP'], 'equations.patch').write_bytes(patch)
+          PY
+      - name: Apply the tested tree and remove this one-off workflow
+        run: |
+          git rm .github/workflows/import-source-equations.yml
+          test "$(git write-tree)" = eb749be7a3c4354b3d1478d2f80e7b197b1c4948
+          git apply --index --check "$RUNNER_TEMP/equations.patch"
+          git apply --index "$RUNNER_TEMP/equations.patch"
+          python -m pip install '.[dev,webtest]'
+          python docs/companion/build.py
+          git add docs/companion/index.html docs/companion/build-manifest.json
+          test "$(git write-tree)" = d8b62c6ada2647ebbd065ff8d8dc22fc3f3a41d2
+          git diff --check --cached
+          git diff --exit-code
+      - name: Run the reader and evidence tests in a real offline browser
+        env:
+          PROOFREADER_REQUIRE_BROWSER: '1'
+        run: |
+          python -m playwright install --with-deps chromium
+          mkdir -p import-results
+          python -m pytest tests/test_source_equations.py tests/test_source_text.py tests/test_source_cancellation_gate.py tests/test_editorial_style.py tests/reader/test_bezout_companion.py -q --junitxml=import-results/tests.xml
+          python docs/companion/build.py
+          git diff --exit-code
+          test "$(git write-tree)" = d8b62c6ada2647ebbd065ff8d8dc22fc3f3a41d2
+      - name: Publish only if the isolated branch has not moved
+        run: |
+          branch=work/source-bound-equations-20261019
+          remote_head="$(git ls-remote origin "refs/heads/$branch" | cut -f1)"
+          test "$remote_head" = "$GITHUB_SHA"
+          git config user.name 'Kyle Kistner'
+          git config user.email '14222111+KyleJKistner@users.noreply.github.com'
+          git commit -m 'Check original Bezout equation chains and witness tuples in the reader'
+          test "$(git rev-parse HEAD^{tree})" = d8b62c6ada2647ebbd065ff8d8dc22fc3f3a41d2
+          git push origin "HEAD:refs/heads/$branch"
+          git rev-parse HEAD > import-results/commit.txt
+          git rev-parse HEAD^{tree} > import-results/tree.txt
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: equation-import-results
+          path: import-results/
+          retention-days: 30
+          if-no-files-found: warn
