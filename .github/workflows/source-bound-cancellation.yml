@@ -1,61 +1,96 @@
-name: Source-bound cancellation
+name: Import source-bound cancellation
 on:
-  workflow_dispatch:
   push:
     branches: ['work/source-bound-cancellation-20261019']
 permissions:
-  contents: read
+  contents: write
 jobs:
-  prepare:
+  import:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 15
+    env:
+      EXPECTED_BASE_TREE: 1e923b974556092a72d95fa1fa7aa4dfe31e6ad2
+      EXPECTED_FINAL_TREE: c608278728d4e42500ca2f16c2078d193adf61d5
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
         with:
-          repository: leanprover-community/mathlib4
-          ref: d13f23b723b8a846827a245b89c10fc7d3f11612
-          path: mathlib
-      - uses: leanprover/lean-action@v1
-        with:
-          lake-package-directory: mathlib
-          auto-config: false
-          build: false
-          test: false
-          lint: false
-          use-mathlib-cache: false
-          use-github-cache: false
-      - name: Retrieve the exact dependency closure
-        working-directory: mathlib
-        run: lake exe cache get Mathlib/Algebra/EuclideanDomain/Basic.lean Mathlib/Tactic/Ring.lean
-      - name: Retain minimal native development environment
+          python-version: '3.12'
+      - name: Recover the hash-pinned tested patch
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
-          mkdir -p environment
-          git -C mathlib rev-parse HEAD > environment/mathlib-commit.txt
-          tar -czf environment/mathlib.tar.gz --exclude='.git' --exclude='*.a' --exclude='*.c' --exclude='*.o' --exclude='*.ilean' --exclude='*.trace' --exclude='*.hash' --exclude='.lake/build/bin' mathlib
-          sha256sum environment/mathlib.tar.gz > environment/SHA256SUMS
-          split -b 250M environment/mathlib.tar.gz environment/part-
+          python - <<'PY'
+          import base64, hashlib, json, lzma, os, pathlib, urllib.request
+          parts = ['eb21f6ae1da615de8aa42593c03aae3e10c772da',
+                   'ff91eddcbf72d5dc3afd5858118a8258b59d4aef',
+                   '73fa2f7fcdfe90a3d9d6e62e9a2e9a19cf189f11',
+                   '01a1d2968c157e4cd94797d7b6b7448ed77b437f',
+                   '54a0966f58359ea66b635af2e13ae83959806ddc',
+                   'e7d0a9e937ba3c5894426495a215e93213c3843a']
+          chunks = []
+          for sha in parts:
+              url = 'https://api.github.com/repos/KyleJKistner/LeanDigest/git/blobs/' + sha
+              request = urllib.request.Request(url, headers={
+                  'Authorization': 'Bearer ' + os.environ['GH_TOKEN'],
+                  'Accept': 'application/vnd.github+json', 'User-Agent': 'Leanglish-import'})
+              with urllib.request.urlopen(request, timeout=30) as response:
+                  record = json.load(response)
+              assert record['encoding'] == 'base64'
+              data = base64.b64decode(record['content'])
+              assert hashlib.sha1(b'blob ' + str(len(data)).encode() + b'\0' + data).hexdigest() == sha
+              chunks.append(data)
+          archive = b''.join(chunks)
+          assert len(archive) == 34228
+          assert hashlib.sha256(archive).hexdigest() == '38422f5cf22b271a2e15184f25fe9dd3c7c1936dfe5a92d4433406dab3457254'
+          decoder = lzma.LZMADecompressor()
+          patch = decoder.decompress(archive, max_length=251214)
+          assert decoder.eof and not decoder.unused_data and len(patch) == 251213
+          assert hashlib.sha256(patch).hexdigest() == '05fcdfd9e4c2abbdeaa1d3dbd962b7b4cba10e046f0935a224f97524f4da38af'
+          (pathlib.Path(os.environ['RUNNER_TEMP']) / 'cancellation.patch').write_bytes(patch)
+          PY
+      - name: Apply only to the expected base
+        run: |
+          test "$GITHUB_REF_NAME" = work/source-bound-cancellation-20261019
+          git rm .github/workflows/source-bound-cancellation.yml
+          test "$(git write-tree)" = "$EXPECTED_BASE_TREE"
+          git apply --index "$RUNNER_TEMP/cancellation.patch"
+      - name: Install the existing test environment
+        run: |
+          python -m pip install '.[dev,webtest]'
+          python -m playwright install --with-deps chromium
+      - name: Regenerate the companion and require the exact tested tree
+        run: |
+          python docs/companion/build.py
+          git add docs/companion/index.html docs/companion/build-manifest.json
+          test "$(git write-tree)" = "$EXPECTED_FINAL_TREE"
+          git diff --exit-code
+      - name: Run evidence, editorial, and real offline browser tests
+        env:
+          PROOFREADER_REQUIRE_BROWSER: '1'
+        run: |
+          mkdir -p import-evidence
+          python -m pytest tests/test_source_text.py tests/test_source_cancellation_gate.py tests/test_editorial_style.py tests/test_packaging_team.py tests/reader/test_bezout_companion.py -q --junitxml=import-evidence/tests.xml
+          test "$(git write-tree)" = "$EXPECTED_FINAL_TREE"
+          git diff --exit-code
+      - name: Publish only this branch if its head has not moved
+        run: |
+          remote_head="$(git ls-remote origin refs/heads/work/source-bound-cancellation-20261019 | cut -f1)"
+          test "$remote_head" = "$GITHUB_SHA"
+          git config user.name 'Leanglish CI'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git commit -m 'Check the two Bezout cancellation sentences against their source proof'
+          test "$(git rev-parse HEAD^{tree})" = "$EXPECTED_FINAL_TREE"
+          git push origin HEAD:refs/heads/work/source-bound-cancellation-20261019
+          git rev-parse HEAD > import-evidence/commit.txt
+          git rev-parse HEAD^{tree} > import-evidence/tree.txt
+          git archive --format=zip HEAD -o import-evidence/source.zip
+          cp docs/companion/index.html import-evidence/companion.html
+          sha256sum import-evidence/source.zip import-evidence/companion.html > import-evidence/SHA256SUMS
       - uses: actions/upload-artifact@v4
+        if: always()
         with:
-          name: cancellation-env-a
-          path: |
-            environment/part-aa
-            environment/SHA256SUMS
-            environment/mathlib-commit.txt
-          retention-days: 1
-          compression-level: 0
+          name: source-cancellation-import
+          path: import-evidence/
+          retention-days: 30
           if-no-files-found: error
-      - uses: actions/upload-artifact@v4
-        with:
-          name: cancellation-env-b
-          path: environment/part-ab
-          retention-days: 1
-          compression-level: 0
-          if-no-files-found: ignore
-      - uses: actions/upload-artifact@v4
-        with:
-          name: cancellation-env-c
-          path: environment/part-ac
-          retention-days: 1
-          compression-level: 0
-          if-no-files-found: ignore
