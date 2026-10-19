@@ -1,0 +1,61 @@
+name: Source-bound cancellation
+on:
+  workflow_dispatch:
+  push:
+    branches: ['work/source-bound-cancellation-20261019']
+permissions:
+  contents: read
+jobs:
+  prepare:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with:
+          repository: leanprover-community/mathlib4
+          ref: d13f23b723b8a846827a245b89c10fc7d3f11612
+          path: mathlib
+      - uses: leanprover/lean-action@v1
+        with:
+          lake-package-directory: mathlib
+          auto-config: false
+          build: false
+          test: false
+          lint: false
+          use-mathlib-cache: false
+          use-github-cache: false
+      - name: Retrieve the exact dependency closure
+        working-directory: mathlib
+        run: lake exe cache get Mathlib/Algebra/EuclideanDomain/Basic.lean Mathlib/Tactic/Ring.lean
+      - name: Retain minimal native development environment
+        run: |
+          mkdir -p environment
+          git -C mathlib rev-parse HEAD > environment/mathlib-commit.txt
+          tar -czf environment/mathlib.tar.gz --exclude='.git' --exclude='*.a' --exclude='*.c' --exclude='*.o' --exclude='*.ilean' --exclude='*.trace' --exclude='*.hash' --exclude='.lake/build/bin' mathlib
+          sha256sum environment/mathlib.tar.gz > environment/SHA256SUMS
+          split -b 250M environment/mathlib.tar.gz environment/part-
+      - uses: actions/upload-artifact@v4
+        with:
+          name: cancellation-env-a
+          path: |
+            environment/part-aa
+            environment/SHA256SUMS
+            environment/mathlib-commit.txt
+          retention-days: 1
+          compression-level: 0
+          if-no-files-found: error
+      - uses: actions/upload-artifact@v4
+        with:
+          name: cancellation-env-b
+          path: environment/part-ab
+          retention-days: 1
+          compression-level: 0
+          if-no-files-found: ignore
+      - uses: actions/upload-artifact@v4
+        with:
+          name: cancellation-env-c
+          path: environment/part-ac
+          retention-days: 1
+          compression-level: 0
+          if-no-files-found: ignore
