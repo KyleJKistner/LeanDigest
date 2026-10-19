@@ -1,0 +1,35 @@
+name: Plan exact remaining original work
+on:
+  workflow_dispatch:
+  push:
+    branches: [work/completion-evidence-retries]
+    paths: ['.github/workflows/completion-plan.yml']
+permissions: {contents: read, actions: read}
+jobs:
+  plan:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with: {persist-credentials: false}
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: python -m pip install '.[dev]'
+      - run: python -m pytest -q tests/test_original_attempts.py tests/test_completion_recovery_plan.py
+      - name: Restore frozen completed campaigns and the exact OpenAI source
+        env: {GH_TOKEN: '${{ github.token }}'}
+        run: |
+          gh api repos/$GITHUB_REPOSITORY/actions/artifacts/12195158110/zip > /tmp/completed.zip
+          echo '4275b3fabc03eca1a4b7daa7a30121bf6b81ef1849f36f1a3392b755ad7cb5df  /tmp/completed.zip' | sha256sum -c -
+          python -c "from pathlib import Path;from scripts.collect_original_evidence import unpack;unpack(Path('/tmp/completed.zip'),Path('/tmp/evidence'))"
+          mkdir -p /tmp/inputs/source
+          gh run download 38822475057 -R "$GITHUB_REPOSITORY" -n complete-openai-lean-source -D /tmp/inputs/source
+          python -c "from pathlib import Path;from scripts.assemble_finding_release import unpack_source;unpack_source(Path('/tmp/inputs'),Path('/tmp/original-project'))"
+      - name: Independently validate retry acceptance and derive the exact remaining work
+        run: |
+          python scripts/prepare_completion_recovery.py --evidence /tmp/evidence --project /tmp/original-project/lean --output /tmp/recovery-plan
+          git rev-parse HEAD > /tmp/recovery-plan/application-commit.txt
+          git archive --format=zip --prefix=Leanglish/ -o /tmp/recovery-plan/application.zip HEAD
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with: {name: validated-completion-plan, path: /tmp/recovery-plan/, retention-days: 90, if-no-files-found: error}
