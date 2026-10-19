@@ -15,7 +15,7 @@ def main() -> int:
     p=argparse.ArgumentParser(description=__doc__)
     p.add_argument('phase',choices=['initialize','round','pack','verify'])
     p.add_argument('--kind',choices=['module','library'],required=True)
-    p.add_argument('--id',required=True)
+    p.add_argument('--id',required=True,help='Module task digest or original library name')
     for key in ('seed','project','state','output'):p.add_argument('--'+key,type=Path,required=True)
     p.add_argument('--round',type=int,default=1)
     p.add_argument('--seconds',type=int,default=1800)
@@ -31,7 +31,7 @@ def main() -> int:
         raise ValueError('Recovery worker plan identity mismatch')
     validate_campaign(plan,env,recovery['campaign'])
     jobs=recovery['module_jobs'] if a.kind=='module' else recovery['library_jobs']
-    matches=[j for j in jobs if j['id']==a.id]
+    matches=[j for j in jobs if (j['id'] if a.kind=='module' else j['library'])==a.id]
     if len(matches)!=1:raise ValueError('Worker is not in the preselected recovery inventory')
     job=matches[0];target=job['module'] if a.kind=='module' else job['library']
     a.project=a.project.resolve();a.state=a.state.resolve();a.output=a.output.resolve()
@@ -69,7 +69,7 @@ def main() -> int:
         if state['build_passed']:
             if a.kind=='library':
                 r=run_worker(a.project,plan,a.output/'library',kind='library',shard=0,shards=1,
-                             only=[a.id],trust_project=True,timeout=1800,wall_seconds=2100)
+                             only=[job['id']],trust_project=True,timeout=1800,wall_seconds=2100)
                 result['library']=r['status']
             else:
                 if job['proof_module_id'] is not None:
