@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import argparse
 from hashlib import sha256
+from html import escape
 import json
 from pathlib import Path
 import re
@@ -25,21 +26,52 @@ SNAPSHOT_SHA256 = "e93e0455259fc3283983f3a47f956cdac4b1a28869bc5027bcc694b4a124d
 LEAN_VERSION = "4.34.1"
 MATHLIB_COMMIT = "d13f23b723b8a846827a245b89c10fc7d3f11612"
 
+
+# Presentation headings are editorial data, not mathematical assertions. Shared
+# labels keep the page, contents, and evidence dialog consistent.
+HEADING_KEYS = frozenset({
+    "page", "statement", "definitions", "proof", "example", "why", "evidence",
+    *(f"step-{i}" for i in range(1, 7)),
+})
+
+
+def load_headings(path: Path = HERE / "headings.json") -> dict[str, str]:
+    def unique_keys(pairs):
+        result = {}
+        for key, value in pairs:
+            if key in result:
+                raise ValueError(f"Duplicate companion heading: {key}")
+            result[key] = value
+        return result
+
+    headings = json.loads(path.read_text(encoding="utf-8"), object_pairs_hook=unique_keys)
+    if not isinstance(headings, dict) or headings.keys() != HEADING_KEYS:
+        raise ValueError("Companion headings must include exactly the named page sections")
+    if any(not isinstance(value, str) or not value or value != value.strip()
+           or not value.isprintable() for value in headings.values()):
+        raise ValueError("Companion headings must be nonempty, single-line text")
+    return headings
+
+
+HEADINGS = load_headings()
+
 # Editorial correspondence, not a formal semantics for the curated English.
 # The groups include the structural introduction/And/Exists frames as well as
 # the displayed claims. Every retained frame belongs to exactly one group.
 SECTIONS = [
-    {"id": "statement", "title": "The theorem", "lines": [11, 13], "frames": list(range(6)), "focus": 0},
-    {"id": "step-1", "title": "1. Separate the zero case", "lines": [15, 18], "frames": list(range(6, 24)), "focus": 17},
-    {"id": "step-2", "title": "2. Normalize the Bézout identity", "lines": [19, 29], "frames": list(range(24, 52)) + [84, 85], "focus": 40},
-    {"id": "step-3", "title": "3. Transfer the original relation", "lines": [30, 34], "frames": list(range(52, 63)), "focus": 53},
-    {"id": "step-4", "title": "4. Choose the remaining entries", "lines": [35, 36], "frames": list(range(63, 70)), "focus": 67},
-    {"id": "step-5", "title": "5. Recover the other two products", "lines": [37, 41], "frames": list(range(70, 79)), "focus": 70},
-    {"id": "step-6", "title": "6. Check the determinant", "lines": [42, 44], "frames": list(range(79, 84)), "focus": 79},
+    {"id": "statement", "title": HEADINGS["statement"], "lines": [11, 13], "frames": list(range(6)), "focus": 0},
+    {"id": "step-1", "title": HEADINGS["step-1"], "lines": [15, 18], "frames": list(range(6, 24)), "focus": 17},
+    {"id": "step-2", "title": HEADINGS["step-2"], "lines": [19, 29], "frames": list(range(24, 52)) + [84, 85], "focus": 40},
+    {"id": "step-3", "title": HEADINGS["step-3"], "lines": [30, 34], "frames": list(range(52, 63)), "focus": 53},
+    {"id": "step-4", "title": HEADINGS["step-4"], "lines": [35, 36], "frames": list(range(63, 70)), "focus": 67},
+    {"id": "step-5", "title": HEADINGS["step-5"], "lines": [37, 41], "frames": list(range(70, 79)), "focus": 70},
+    {"id": "step-6", "title": HEADINGS["step-6"], "lines": [42, 44], "frames": list(range(79, 84)), "focus": 79},
 ]
 
 
 def build(output: Path = HERE / "index.html", evidence_root: Path = EVIDENCE) -> dict:
+    headings = load_headings()
+    sections = [{**section, "title": headings[section["id"]]} for section in SECTIONS]
     source_bytes = SOURCE.read_bytes()
     if sha256(source_bytes).hexdigest() != SOURCE_SHA256:
         raise ValueError("Original source changed: review the prose and source-line correspondence before rebuilding")
@@ -84,10 +116,10 @@ def build(output: Path = HERE / "index.html", evidence_root: Path = EVIDENCE) ->
             raise ValueError(f"Native observation file identity differs: {name}")
     check_reading(snapshot.record, reading)
     verify_certificates(snapshot.record, certificates)
-    grouped = [frame for section in SECTIONS for frame in section["frames"]]
+    grouped = [frame for section in sections for frame in section["frames"]]
     if sorted(grouped) != list(range(len(snapshot.frames))):
         raise ValueError("Editorial correspondence must account for each retained frame once")
-    for section in SECTIONS:
+    for section in sections:
         if section["focus"] not in section["frames"]:
             raise ValueError("Initial inspected claim is outside its section")
     data = {
@@ -104,7 +136,7 @@ def build(output: Path = HERE / "index.html", evidence_root: Path = EVIDENCE) ->
         "receipt": receipt,
         "certificates": certificates,
         "reading": reading.to_dict(),
-        "sections": SECTIONS,
+        "sections": sections,
         "native_record": native,
         "curated_prose_formally_verified": False,
         "source_line_mapping": "editorially reviewed",
@@ -117,10 +149,14 @@ def build(output: Path = HERE / "index.html", evidence_root: Path = EVIDENCE) ->
         "__KATEX__": (HERE / "assets/katex.min.js").read_text(),
         "__DATA__": embedded_json(data),
     }
+    replacements.update({
+        "__HEADING_" + key.upper().replace("-", "_") + "__": escape(value)
+        for key, value in headings.items()
+    })
     template = (HERE / "template.html").read_text()
     rendered = re.sub("|".join(re.escape(key) for key in replacements),
                       lambda match: replacements[match[0]], template)
-    if any(token in rendered for token in replacements):
+    if any(token in rendered for token in replacements) or re.search(r"__HEADING_[A-Z0-9_]+__", rendered):
         raise ValueError("Unreplaced companion template token")
     output.parent.mkdir(parents=True, exist_ok=True)
     output.write_text(rendered, encoding="utf-8")
@@ -131,7 +167,7 @@ def build(output: Path = HERE / "index.html", evidence_root: Path = EVIDENCE) ->
         "transport_sha256": receipt["source_sha256"],
         "snapshot_sha256": snapshot.sha256,
         "recorded_frames": len(snapshot.frames),
-        "editorial_sections": len(SECTIONS),
+        "editorial_sections": len(sections),
         "curated_prose_formally_verified": False,
         "lean_executed_by_build": False,
         "network_requests_by_build": False,

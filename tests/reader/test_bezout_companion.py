@@ -221,3 +221,17 @@ def test_mobile_does_not_overflow_and_can_inspect_final_claim(page):
     assert "= 1" in page.locator("#frame-statement").inner_text()
     assert page.locator("#frame-select").input_value() == "79"
     assert page.evaluate("document.documentElement.scrollWidth <= document.documentElement.clientWidth")
+
+
+def test_heading_labels_match_the_editorial_inventory(page):
+    headings = builder.load_headings()
+    assert page.locator("h1").inner_text() == headings["page"]
+    assert page.locator("#proof-title").inner_text() == headings["proof"]
+    assert page.locator("#evidence-title").inner_text() == headings["evidence"]
+    for number in range(1, 7):
+        section = f"step-{number}"
+        assert page.locator(f"#title-{section}").inner_text() == headings[section]
+        assert page.locator(f'.contents a[href="#{section}"]').inner_text() == headings[section]
+        page.locator(f'#{section} [data-section="{section}"]').click()
+        assert page.locator("#evidence-dialog-title").inner_text() == headings[section]
+        page.keyboard.press("Escape")

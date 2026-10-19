@@ -1,13 +1,11 @@
 # Leanglish
 
-**Lean proofs, in mathematical English.**
-
 Leanglish connects the OpenAI mathematics findings to their formalization scope,
 explicit statements, original Lean source, and the structured proof readings
 available so far. The renderer is deterministic and makes no language-model API
 calls. Reading does not execute Lean or send source to a service.
 
-## One complete mathematical argument to inspect
+## Bézout frame companion
 
 The [Bézout companion](docs/companion/index.html) presents a compact supporting
 theorem from the OpenAI source: an explicit determinant-one construction over
@@ -22,7 +20,7 @@ Lean-proved inference rules and a deterministic controlled renderer. See
 trust boundary, and implementation sequence. A proof of a restricted logical
 fragment does not certify the complete companion or the corpus.
 
-## All documented findings: published version 0.4.1
+## Finding catalog
 
 The all-findings catalog indexes **all 242 findings with Lean scope documentation**
 in the pinned release. It retains the broader 372-finding table of contents,

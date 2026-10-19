@@ -1,6 +1,6 @@
-# A checked explanation language alongside Lean
+# Explanation compiler architecture
 
-## Decision
+## Design
 
 Leanglish should compile Lean proofs into a small, typed mathematical explanation
 language and render that language deterministically. Mathematical statements and
@@ -24,7 +24,7 @@ architecture, not a claim that arbitrary English or the entire OpenAI result has
 been certified. See [the companion](companion/index.html) and
 [the independent audit](SWARM_READER_AUDIT.md).
 
-## Five different contracts
+## Correctness requirements
 
 | Contract | What an acceptance result must mean | What does not establish it |
 | --- | --- | --- |
@@ -38,9 +38,9 @@ been certified. See [the companion](companion/index.html) and
 language under a specified trust boundary. It cannot be an unqualified guarantee
 about whatever a person might infer from unrestricted English.
 
-## Representation: four layers with one semantic authority
+## Representation
 
-### 1. Original proof and environment
+### Original proof and environment
 
 Keep the fully elaborated declaration, its exact type, universe parameters,
 transitive axiom inventory, dependency lock, Lean version, and source identity.
@@ -58,7 +58,7 @@ replaying the original project. Record that distinction in machine-readable
 evidence. Pinning the substituted Mathlib revision makes the adaptation
 reproducible; it does not erase the adaptation.
 
-### 2. Typed mathematical explanation IR
+### Typed explanation representation
 
 An explanation judgement has the form `Γ ⊢ E : P`. Here Γ is a typed context with
 stable binder identities, P is a formal proposition, and E is an explanatory
@@ -93,7 +93,7 @@ The runtime may serialize untrusted candidate JSON. Acceptance elaborates it int
 the indexed datatype or checks a certificate that produces an inhabitant of that
 type. Do not trust a JSON field saying `verified: true`.
 
-### 3. Checked exposition plan
+### Exposition plan
 
 Mathematical proofs rarely become readable by exposing every kernel reduction.
 The plan chooses a dependency-closed slice, names intermediate results, and
@@ -121,7 +121,7 @@ erasure, or check a declared source-to-plan transformation relation. If the syst
 constructs a new proof, label it as an alternative proof instead of silently
 presenting it as a reading of the original.
 
-### 4. Canonical controlled mathematical English
+### Controlled mathematical English
 
 Render semantic constructors using a versioned grammar. The grammar controls
 negation scope, quantifiers, implication direction, witness conditions, and
@@ -157,7 +157,7 @@ regenerate or paraphrase claims. A machine-checkable canonical export must remai
 available. Browser and accessibility tests assess the presentation layer; they
 are not substitutes for the formal rendering theorem.
 
-## The proof obligations
+## Proof obligations
 
 The implementation should make each obligation a separate gate with its own
 version and evidence. The core soundness theorem is:
@@ -216,7 +216,7 @@ and the accepted object and policy become versioned inputs. The production
 rendering path needs no model call. A seed alone is not a guarantee of model
 determinism or semantic correctness.
 
-## Bézout as the first end-to-end case
+## Bézout implementation
 
 The theorem assumes a Euclidean domain R and elements x, y, z satisfying
 `x*y = z*(z+1)`. It constructs a, d, b, c with all four equations:
@@ -247,7 +247,7 @@ end-to-end target without requiring an immediate English explanation of all
 Mathlib. Do not label the companion formally certified until those features,
 source binding, and the concrete rendering contract are actually connected.
 
-## Relevance and usefulness as product requirements
+## Relevance and usability
 
 The opening screen should answer: what is proved, under what assumptions, why
 this result matters locally, and what construction or idea makes it work. The
@@ -269,7 +269,7 @@ record the participants' relevant background. This tests the intended value of
 the tool rather than its visual polish alone. No such human result is claimed
 by the current companion.
 
-## Implementation sequence and separation from concurrent work
+## Implementation plan
 
 1. Preserve the existing corpus and native pipeline evidence. Improve fail-closed
    source, scope, and missing-target checks without reclassifying English.

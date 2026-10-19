@@ -86,7 +86,6 @@ math { font-family: "STIX Two Math", "Cambria Math", "Latin Modern Math", math; 
 summary { cursor: pointer; font-family: var(--sans); }
 .definitions summary { padding: 14px 0; font-size: 13px; }
 .definitions summary > span:first-child { font-weight: 550; margin-left: 3px; }
-.definition-hint { float: right; color: var(--muted); font-size: 11px; }
 .definitions details p { font-size: 16px; padding: 0 22px; }
 .definitions .source-facts { color: var(--muted); font: 12px/1.7 var(--sans); }
 .proof-intro { padding-bottom: 17px; border-bottom: 1px solid var(--line); }
@@ -94,8 +93,7 @@ summary { cursor: pointer; font-family: var(--sans); }
 .proof-intro p { font: 13px/1.8 var(--sans); color: var(--muted); }
 .proof-step { padding: 36px 0 33px; border-bottom: 1px solid var(--line); scroll-margin-top: 24px; }
 .step-heading { display: flex; align-items: flex-start; gap: 17px; margin-bottom: 21px; }
-.step-n { flex: 0 0 36px; color: #7e9272; font: 20px/1.5 var(--serif); padding-top: 14px; }
-.step-kind { font: 600 9px/1.55 var(--sans); letter-spacing: .12em; color: var(--muted); margin-bottom: 6px; }
+.step-n { flex: 0 0 36px; color: #7e9272; font: 20px/1.5 var(--serif); padding-top: 2px; }
 .step-heading h3 { margin: 0; }
 .step-body { padding-left: 53px; }
 .step-body .evidence-button { margin-top: 3px; }
@@ -198,13 +196,11 @@ dialog details summary { font-size: 11px; }
   .contents { display: none; }
   .theorem-card { padding: 24px; }
   .definitions { margin: 39px 0 46px; }
-  .definition-hint { display: none; }
   .proof-intro h2, .evidence-section > h2 { font-size: 29px; }
   .step-body { padding-left: 0; }
   .step-heading { gap: 12px; }
   .step-n { flex-basis: 28px; }
   .step-heading h3 { font-size: 26px; }
-  .step-kind { font-size: 8px; }
   .math-display { font-size: .97em; }
   .large-math { font-size: 24px; }
   .example { padding: 25px 22px; }
@@ -233,7 +229,6 @@ dialog details summary { font-size: 11px; }
   .matrix-reading .math-display { font-size: 16px; }
   .section-top > .muted { display: none; }
   .step-heading h3 { font-size: 25px; }
-  .step-kind { font-size: 7.5px; }
   .key-equation { padding: 15px 17px; }
   .key-equation .math-display { font-size: 20px; }
   .equation-name { font-size: 9px; }
@@ -267,7 +262,6 @@ dialog details summary { font-size: 11px; }
   .definitions { margin: 28px 0; }
   .definitions details p { display: block !important; }
   .definitions summary { font-size: 10pt; }
-  .definition-hint { display: none; }
   .definitions details p { padding: 0 10px; font-size: 10pt; }
   .proof-intro { break-after: avoid; }
   .proof-intro h2, .evidence-section > h2 { font-size: 22pt; }

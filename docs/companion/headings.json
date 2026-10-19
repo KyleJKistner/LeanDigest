@@ -1,0 +1,15 @@
+{
+  "page": "Bézout frame theorem",
+  "statement": "Statement",
+  "definitions": "Definitions and lemmas",
+  "proof": "Proof",
+  "step-1": "Zero gcd",
+  "step-2": "Normalized Bézout identity",
+  "step-3": "Cancellation in the hypothesis",
+  "step-4": "Witnesses",
+  "step-5": "Product identities",
+  "step-6": "Determinant",
+  "example": "Integer examples",
+  "why": "Necessity of the hypothesis",
+  "evidence": "Verification"
+}

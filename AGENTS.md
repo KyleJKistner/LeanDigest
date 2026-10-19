@@ -4,6 +4,15 @@
 handoff packages for an environment with an actual agent provider. A file named
 AGENTS.md does not itself launch agents or establish independent review.
 
+## Editorial conventions
+
+Read `docs/STYLE.md` before writing headings, labels, documentation, or summaries.
+Use the Google developer documentation style guide as the general reference,
+with the mathematical conventions in that file taking precedence. Headings name
+content; they do not praise the explanation. Edit companion titles in
+`docs/companion/headings.json` and regenerate the page. Do not paraphrase
+certified mathematical text or alter source/evidence records for a style edit.
+
 ## Shared invariants
 
 Read `docs/TRUST.md` and `docs/ACCEPTANCE.md` first. Never equate source parsing,

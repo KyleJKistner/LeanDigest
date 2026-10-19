@@ -1,4 +1,4 @@
-# Checked English through exact text and UTF-8
+# String and UTF-8 serialization
 
 This extension closes a specific gap in the earlier logical prototype: the
 meaning-preservation theorem now reaches **actual Lean `String` values and their
@@ -11,7 +11,7 @@ intrinsically typed logical language and Lean's pinned string/decimal library.
 The new renderer is executable Lean code; the example files are emitted by that
 same code, not by an unverified implementation in another language.
 
-## The architectural contract
+## Correctness requirements
 
 For the supported local logical nodes, the chain is:
 
@@ -42,7 +42,7 @@ proofs or establish original proof-occurrence identity. A typed node deliberatel
 constructed in Lean is not, by itself, evidence that a corresponding node was
 extracted from the original OpenAI proof. That importer remains a separate gate.
 
-## What the native gate requires
+## Required Lean theorems
 
 Fourteen named theorem inventories must be present after compiling the module:
 
@@ -73,7 +73,7 @@ They are **not axiom-free**. No admission or `sorryAx` is permitted. These resul
 assume the pinned Lean kernel, standard library, and the explicit formal meaning
 of the grammar. They are not a theorem about unrestricted human interpretation.
 
-## Exact surface language
+## Grammar
 
 Atoms are canonical decimal references such as `@0` and `@17`. Their meaning is
 entry zero or seventeen in the **same typed environment** `Fin n → Prop` used by
@@ -121,7 +121,7 @@ successful result. External input-size and execution-resource limits still belon
 to the application hosting these functions; formal termination is not a denial-
 of-service guarantee.
 
-## Truth is not relevance
+## Inference alignment
 
 The following two sentences describe valid inferences, but only the first is the
 specified second-projection rule for `P ∧ Q`:
@@ -146,7 +146,7 @@ Those implications are established under separate branch scopes in the typed
 derivation. The text layer does not flatten one branch's local assumption into a
 fact available everywhere.
 
-## Validation, with different kinds of evidence kept separate
+## Validation
 
 `lean/ControlledEnglishTextAudit.lean` is a separately compiled adversarial suite.
 It is **not an independent human or separate-agent audit**. It contains 44 native
@@ -214,7 +214,7 @@ same command on a clean runner using the official Lean 4.34.1 archive pinned by
 SHA-256. It uploads source and checking evidence, including failure logs, and
 does not modify the existing full-project or exporter workflows.
 
-## What is still not certified
+## Limitations
 
 This component does not establish complete English proofs, arithmetic
 explanations, quantifiers, equality, induction, arbitrary dependent Lean terms,

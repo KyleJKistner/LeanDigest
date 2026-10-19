@@ -5,6 +5,7 @@
       "id": "extractor",
       "goal": "Run mandatory native integration and the exact OpenAI dependency pin; extend the source-bound narrative engine from one named theorem to honest module inventories. Preserve independent source paths and all selected judgement checking.",
       "context": [
+        "docs/STYLE.md",
         "docs/TRUST.md",
         "docs/KERNEL_IR.md",
         "HANDOFF.md",
@@ -43,6 +44,7 @@
       "id": "reader",
       "goal": "Turn complete typed proofs into mathematics that a mathematician can follow. Add recursor/case/induction and named-lemma statement expansion, preserving scope and checked source paths. Unknown references and capped branches must not become explanation passes.",
       "context": [
+        "docs/STYLE.md",
         "docs/TRUST.md",
         "docs/KERNEL_IR.md",
         "docs/ACCEPTANCE.md",
@@ -78,6 +80,7 @@
       "id": "corpus",
       "goal": "Acquire and run the complete pinned OpenAI corpus through the kernel engine in bounded shards. Reconcile expected files and actual theorem inventories, preserving every failure and unknown denominator. Extend resumability and scale without weakening gates.",
       "context": [
+        "docs/STYLE.md",
         "docs/OPENAI_BENCHMARK.md",
         "docs/TRUST.md",
         "proofreader/corpus.py",
@@ -101,6 +104,7 @@
       "id": "audit",
       "goal": "Independently attack source-path binding, judgement closures, display normalization, grammar assumptions, forged receipts, transport and corpus denominators. Produce executable falsifiers and a trust-boundary report without patching runtime code.",
       "context": [
+        "docs/STYLE.md",
         "README.md",
         "docs/TRUST.md",
         "docs/KERNEL_IR.md",

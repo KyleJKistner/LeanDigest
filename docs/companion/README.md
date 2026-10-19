@@ -1,11 +1,11 @@
-# Bézout-frame companion
+# Bézout frame companion
 
 Open [`index.html`](index.html) directly in a browser. It is a self-contained,
 offline reading of the supporting theorem
 `OAI.ComplexCancellation.BezoutFrame.exists_frame`. All mathematical prose,
 MathML rendering, source, selected claims, local contexts, proof paths, and
 recorded native evidence are embedded. It makes no network request and runs no
-Lean code. The browser's **Print / save PDF** action has a print layout.
+Lean code. The browser's **Print** action has a print layout.
 
 The page states all hypotheses and gives a six-step proof over an arbitrary
 Euclidean domain. It treats the zero gcd separately, justifies both nonzero
@@ -13,7 +13,7 @@ cancellations, constructs the witnesses, and checks all four equations.
 The matrix placement is explicitly `[[a,d],[b,c]]`. Three integer examples use
 exact `BigInt` arithmetic and illustrate both branches and negative inputs.
 
-## What kind of reading this is
+## Scope and verification
 
 This is curated mathematical prose with reviewed source correspondence. Its
 English is not formally certified. The 86 frame IDs are grouped editorially;
@@ -58,7 +58,10 @@ For an isolated checkout, `--evidence-root /path/to/native` can point to the sam
 native evidence directory, and `--output /path/to/index.html` changes the output
 destination. These options do not weaken the checks or execute the input.
 
-`template.html`, `style.css`, and `app.js` are the editable presentation sources.
+`headings.json` supplies the page title, section headings, contents labels, and
+evidence-dialog titles. Follow [the editorial conventions](../STYLE.md) when
+editing it. `template.html`, `style.css`, and `app.js` contain the other
+presentation sources. Rebuild the page after changing any of these files.
 The builder embeds the locally bundled KaTeX renderer with MathML output, so
 the page needs no font CDN or remote script. Its license is retained in
 `assets/KATEX-LICENSE`. The deterministic reader download is rendered from the

@@ -1,4 +1,4 @@
-# Controlled English: a proved logical fragment
+# Controlled English for propositional logic
 
 `lean/ControlledEnglish.lean` is an isolated, executable Lean 4.34.1 prototype.
 It establishes a semantic contract for a small controlled token language and
@@ -10,7 +10,7 @@ unambiguous inference sentence: its conclusion matches the node, its premises
 are justified in that node's context, and the emitted tokens have the declared
 logical meaning. Deterministic regeneration alone would not establish this.
 
-## What Lean proves
+## Lean theorems
 
 | Declaration | Checked claim |
 | --- | --- |
@@ -74,7 +74,7 @@ because such an explanation is not yet represented. Equality, quantifiers,
 gcds, ring certificates, induction, dependent types, and classical reasoning
 rules are also outside the grammar in this prototype.
 
-## The formal text boundary
+## Token semantics
 
 The proved text type is `List Token`. Formula tokens use an explicit finite
 grammar:
@@ -134,7 +134,7 @@ the words.** The roundtrip and text-meaning claims apply to the typed token
 sequence and its fixed formal grammar. Extending the checked boundary through
 string serialization is a separate remaining obligation.
 
-## What is and is not source-bound
+## Source correspondence
 
 `SourceObligation` contains a real Lean proposition, the atom environment, the
 represented context and goal, and a proof of their semantic correspondence.
@@ -190,7 +190,7 @@ inventory on every compile:
 No admission or `sorryAx` appears in that inventory. This is a core Lean
 prototype run, not an extraction or replay of the pinned OpenAI project.
 
-## Smallest next steps
+## Remaining work
 
 1. Preserve the token semantics through a proved string serializer and lexer.
 2. Represent assumption references and binder introductions in the text grammar,
