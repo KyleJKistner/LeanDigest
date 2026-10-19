@@ -16,20 +16,6 @@ jobs:
     timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
-      - uses: leanprover/lean-action@v1
-        with:
-          lake-package-directory: lean
-          auto-config: false
-          build: false
-          test: false
-          lint: false
-          use-mathlib-cache: false
-          use-github-cache: false
-      - name: Check the existing logical foundation
-        working-directory: lean
-        run: |
-          lake env lean -o ControlledEnglish.olean ControlledEnglish.lean
-          LEAN_PATH=. lake env lean ControlledEnglishAudit.lean
       - name: Retain exact source for reproducible local development
         run: |
           mkdir -p boundary-evidence
@@ -42,14 +28,25 @@ jobs:
           path: boundary-evidence/
           retention-days: 7
           if-no-files-found: error
-      - name: Retain pinned compiler for isolated development
+      - name: Install hash-pinned Lean without the release redirect service
+        run: |
+          curl --fail --location --retry 4 --retry-all-errors --connect-timeout 30 --max-time 300 \
+            https://github.com/leanprover/lean4/releases/download/v4.34.1/lean-4.34.1-linux.tar.zst -o "$RUNNER_TEMP/lean.tar.zst"
+          echo "47bf4bbd78f70c2e9670598ab7124d92b6efb7330ff33e5fbb4030f6fd72e4e4  $RUNNER_TEMP/lean.tar.zst" | sha256sum --check
+          tar --zstd -xf "$RUNNER_TEMP/lean.tar.zst" -C "$RUNNER_TEMP"
+          echo "$RUNNER_TEMP/lean-4.34.1-linux/bin" >> "$GITHUB_PATH"
+      - name: Check the existing logical foundation
         working-directory: lean
         run: |
-          prefix="$(lake env lean --print-prefix)"
-          mkdir -p ../boundary-toolchain
-          lake env lean --version > ../boundary-toolchain/version.txt
-          tar -czf ../boundary-toolchain/lean-runtime.tar.gz --exclude='*.a' --exclude='*.ilean' --exclude='*.o' --exclude='*.c' -C "$prefix" bin/lean lib/lean
-          sha256sum ../boundary-toolchain/lean-runtime.tar.gz > ../boundary-toolchain/SHA256SUMS
+          lean -o ControlledEnglish.olean ControlledEnglish.lean
+          LEAN_PATH=. lean ControlledEnglishAudit.lean
+      - name: Retain pinned compiler for isolated development
+        run: |
+          prefix="$(lean --print-prefix)"
+          mkdir -p boundary-toolchain
+          lean --version > boundary-toolchain/version.txt
+          tar -czf boundary-toolchain/lean-runtime.tar.gz --exclude='*.a' --exclude='*.ilean' --exclude='*.o' --exclude='*.c' -C "$prefix" bin/lean bin/lake lib/lean src/lean
+          sha256sum boundary-toolchain/lean-runtime.tar.gz > boundary-toolchain/SHA256SUMS
       - uses: actions/upload-artifact@v4
         with:
           name: checked-text-toolchain
