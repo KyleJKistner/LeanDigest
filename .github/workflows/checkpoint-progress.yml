@@ -1,0 +1,77 @@
+name: Inspect persisted checkpoint progress
+on:
+  workflow_dispatch:
+  push:
+    branches: [work/completion-evidence-retries]
+    paths: ['.github/workflows/checkpoint-progress.yml']
+permissions: {contents: read, actions: read}
+jobs:
+  diagnose:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+        with: {persist-credentials: false}
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - name: Acquire the two independently identified compilation checkpoints
+        env: {GH_TOKEN: '${{ github.token }}'}
+        run: |
+          mkdir -p /tmp/progress
+          python - <<'PY'
+          import hashlib,json,subprocess,tarfile,zipfile
+          from pathlib import Path
+          from scripts.collect_original_evidence import api,unpack
+          from proofreader.original_project import digest,write
+          repo='KyleJKistner/LeanDigest';root=Path('/tmp/progress')
+          inputs=[('initial',12217614568,39315174445,'4f9c1e823dd65023cfa7d8b9afe5e08390b8d2ad','f0cb3658f6edbffc2e62cd8f538ea9a7529a0e4cbe4e27286241030441003523'),
+                  ('resumed',12220293017,39321225048,'b717efc98e0cde96181c493b982814b2cdaa9394','e6eba5b35a31afc783775a503e2d89c9d74f60848ca1ac495626f7e652ae9110')]
+          records={};traces={};identities={}
+          for name,ident,run,head,expected in inputs:
+            a=api(repo,f'actions/artifacts/{ident}')
+            assert a['workflow_run']['id']==run and a['workflow_run']['head_sha']==head
+            assert a['digest']=='sha256:'+expected and a['size_in_bytes']<100_000_000
+            outer=root/(name+'.zip')
+            with outer.open('wb') as stream:
+              subprocess.run(['gh','api',f'repos/{repo}/actions/artifacts/{ident}/zip'],stdout=stream,check=True)
+            with outer.open('rb') as stream:assert hashlib.file_digest(stream,'sha256').hexdigest()==expected
+            unpack(outer,root/name)
+            meta=json.loads((root/name/'build.tar.gz.json').read_text())
+            archive=root/name/'build.tar.gz'
+            with archive.open('rb') as stream:assert hashlib.file_digest(stream,'sha256').hexdigest()==meta['archive_sha256']
+            with tarfile.open(archive,'r:gz') as tar:
+              first=next(iter(tar));assert first.name=='CHECKPOINT.json' and first.size<100_000_000
+              record=json.load(tar.extractfile(first))
+              assert record['checkpoint_sha256']==digest({k:v for k,v in record.items() if k!='checkpoint_sha256'})
+              assert record['target']=='OAI.Analysis.NuclearUltrapower.Main'
+              relevant=[]
+              for member in tar:
+                if member.name.startswith('.lake/build/') and member.name.endswith('.trace') and 0<member.size<200_000:
+                  relevant.append({'path':member.name,'text':tar.extractfile(member).read().decode('utf-8','replace')[:16000]})
+              traces[name]=relevant[-20:]
+            records[name]=record;identities[name]={'artifact_id':ident,'run_id':run,'head_sha':head,'sha256':expected}
+          old,new=records['initial'],records['resumed']
+          for key in ('plan_sha256','environment_sha256','baseline_sha256','target'):assert old[key]==new[key],key
+          before,after=old['files'],new['files']
+          changed=sorted(n for n in set(before)|set(after) if before.get(n)!=after.get(n))
+          source_outputs=[n for n in after if n.startswith('.lake/build/') and n.endswith('.olean')]
+          report={'schema':'leanglish.checkpoint-progress-diagnostic/v1','target':new['target'],
+              'acquisitions':identities,'initial_changed_files':len(before),'resumed_changed_files':len(after),
+              'different_persisted_files':len(changed),'changed_paths':changed,
+              'original_package_compiled_modules':source_outputs,
+              'initial_rounds':old['rounds'],'resumed_rounds':new['rounds'],
+              'manifest_only_diagnostic':True,'proof_acceptance_established':False,
+              'interpretation':'No persisted change means the stage did not finish another recorded output; it does not identify why.'}
+          write(root/'progress.json',report);write(root/'trace-details.json',traces)
+          print('PERSISTED_PROGRESS',json.dumps(report,sort_keys=True),flush=True)
+          print('RECORDED_TRACE_PATHS',{k:[x['path'] for x in v] for k,v in traces.items()},flush=True)
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: checkpoint-progress-diagnostic
+          path: |
+            /tmp/progress/progress.json
+            /tmp/progress/trace-details.json
+          retention-days: 90
+          if-no-files-found: error
