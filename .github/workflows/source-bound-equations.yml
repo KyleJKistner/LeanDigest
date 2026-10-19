@@ -1,0 +1,25 @@
+name: Source-bound equations
+on:
+  workflow_dispatch:
+  push:
+    branches: ['work/source-bound-equations-20261019']
+permissions:
+  contents: read
+jobs:
+  source:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - name: Retain the exact source checkout
+        run: |
+          mkdir -p equation-source
+          git rev-parse HEAD > equation-source/commit.txt
+          git archive --format=zip HEAD -o equation-source/source.zip
+          sha256sum equation-source/source.zip > equation-source/SHA256SUMS
+      - uses: actions/upload-artifact@v4
+        with:
+          name: equation-source
+          path: equation-source/
+          retention-days: 7
+          if-no-files-found: error
