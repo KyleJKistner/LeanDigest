@@ -1,4 +1,4 @@
-"""Build an offline catalog from original-project evidence and a frozen recovery run.
+"""Build an offline catalog from original evidence and explicit recovery attempts.
 
 No Lean code runs here. Only successfully replayed source-bound observations may
 add a reading or satisfy an original comparison. Missing workers remain explicit.
@@ -14,7 +14,8 @@ from proofreader.original_project import read, write, file_hash, child
 from proofreader.original_status import build_status, attach_status
 from proofreader.original_attempts import reconcile_attempts
 from proofreader.proof_campaign import reconcile as reconcile_proofs
-from proofreader.completion_results import check_collection, join_status
+from proofreader.completion_results import join_status, ORIGINAL_WORKFLOW
+from proofreader.completion_sets import gather
 from proofreader.catalog_inputs import config_inventory, load_proofs
 from proofreader.finding_catalog import build
 from proofreader.catalog_audit import audit
@@ -22,7 +23,7 @@ from scripts.prepare_completion_recovery import recovery_plan, checked_retry_roo
 
 
 def retain_worker_files(destination: Path, roots: list[Path], name: str) -> None:
-    """Keep result ledgers and the logs to which they refer; omit executable caches."""
+    """Keep result ledgers and their logs; omit executable compilation caches."""
     group=destination/name;group.mkdir(parents=True)
     for root in roots:
         report_path=root/'worker.json'
@@ -40,7 +41,9 @@ def retain_worker_files(destination: Path, roots: list[Path], name: str) -> None
 
 def assemble(evidence: Path, completion: Path, seed: Path, inputs: Path,
              source: Path, inventory: Path, output: Path, *, run_id: int,
-             expected_head: str) -> dict:
+             expected_head: str, continuations: list[dict] | None = None) -> dict:
+    if continuations is not None and not isinstance(continuations,list):
+        raise ValueError('Continuations must be explicit acquisition records')
     if output.exists():
         raise ValueError('Use a fresh completion delivery directory')
     output.mkdir(parents=True)
@@ -55,7 +58,9 @@ def assemble(evidence: Path, completion: Path, seed: Path, inputs: Path,
     recovery=read(seed/'recovery.json')
     if recovery!=recovery_plan(plan,env,base,prior_attempts):
         raise ValueError('Recovery work is not the exact complement of the verified baseline')
-    collected=check_collection(completion,recovery,expected_run=run_id,expected_head=expected_head)
+    requests=[{'root':str(completion),'run_id':run_id,'source_commit':expected_head,
+               'workflow_path':ORIGINAL_WORKFLOW}]+(continuations or [])
+    collected=gather(recovery,requests)
     proof_summary,new_roots=reconcile_proofs(source,plan,env,recovery['campaign'],
                                               baseline_roots,collected['proof_roots'])
     all_builds=prior_builds+collected['build_roots']
@@ -81,8 +86,20 @@ def assemble(evidence: Path, completion: Path, seed: Path, inputs: Path,
     for n,value in [('plan',plan),('environment',env),('baseline-status',base),
                     ('recovery-plan',recovery),('attempts',attempts),
                     ('completion-proofs',proof_summary)]:write(dest/(n+'.json'),value)
-    for label,root in [('original',evidence),('completion',completion)]:
-        shutil.copy2(root/'collection.json',dest/(label+'-collection.json'))
+    shutil.copy2(evidence/'collection.json',dest/'original-collection.json')
+    # Keep every execution's acquisition separately. Never relabel a resumed
+    # worker as if it had executed on the original matrix application's head.
+    for request in requests:
+        acquisition=Path(request['root'])
+        target=dest/'completion-acquisitions'/str(request['run_id'])
+        target.mkdir(parents=True)
+        for filename in ('collection.json','run.json','frozen-artifacts.json'):
+            shutil.copy2(acquisition/filename,target/filename)
+        for worker in collected['workers']:
+            if worker['run_id']!=request['run_id'] or worker['resumed_from_checkpoint'] is None:
+                continue
+            parent=child(acquisition,'completion-result-'+worker['id'])/'resume.json'
+            shutil.copy2(parent,target/(worker['id']+'-resume.json'))
     proof_workers=[p.parent for p in sorted((evidence/'original-proofs').rglob('original-proof-worker.json'))]
     proof_workers+=collected['proof_roots']
     for root in proof_workers:
@@ -138,9 +155,12 @@ def main() -> int:
         parser.add_argument('--'+name,type=Path,required=True)
     parser.add_argument('--run-id',type=int,required=True)
     parser.add_argument('--expected-head',required=True)
+    parser.add_argument('--continuations',type=Path,
+                        help='JSON list of explicit root/run_id/source_commit/workflow_path records')
     a=parser.parse_args()
     assemble(a.evidence,a.completion,a.seed,a.inputs,a.source,a.inventory,a.output,
-             run_id=a.run_id,expected_head=a.expected_head)
+             run_id=a.run_id,expected_head=a.expected_head,
+             continuations=read(a.continuations) if a.continuations else None)
     return 0
 
 if __name__=='__main__':raise SystemExit(main())
