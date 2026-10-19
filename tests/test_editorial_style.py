@@ -119,7 +119,10 @@ def test_formula_inventory_is_unchanged(built):
 def test_all_six_proof_bodies_are_unchanged():
     text = (HERE / "template.html").read_text()
     bodies = re.findall(r'<section class="proof-step".*?<div class="step-body">(.*?)</div></section>', text, re.S)
-    # Only source-button wording changed within these blocks.
+    # Editorial proof text is unchanged. Certified sentences are inserted in
+    # two separate slots and tested in test_source_text.py.
+    bodies = [re.sub(r"__CANCELLATION_[01]__", "", body) for body in bodies]
+    # Only source-button wording changed within the remaining blocks.
     bodies = [re.sub(r'<button\b[^>]*>.*?</button>', '', body, flags=re.S) for body in bodies]
     assert len(bodies) == 6
     assert digest(bodies) == "f032dad160f38eb099dd0be3c2ffd0fbe50bb3954619b709eaed594832ef30d8"

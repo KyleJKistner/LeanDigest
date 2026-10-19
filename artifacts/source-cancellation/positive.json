@@ -1,0 +1,429 @@
+[
+  {
+    "axioms": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "bytes_theorem": "OAI.ComplexCancellation.BezoutFrame.exists_frame.sourceText.0.utf8",
+    "context": [
+      {
+        "name": "R",
+        "type": "Type u_1"
+      },
+      {
+        "name": "inst",
+        "type": "EuclideanDomain R"
+      },
+      {
+        "name": "x",
+        "type": "R"
+      },
+      {
+        "name": "y",
+        "type": "R"
+      },
+      {
+        "name": "z",
+        "type": "R"
+      },
+      {
+        "name": "h",
+        "type": "x * y = z * (z + 1)"
+      },
+      {
+        "name": "g",
+        "type": "R"
+      },
+      {
+        "name": "hg",
+        "type": "¬g = 0"
+      },
+      {
+        "name": "a",
+        "type": "R"
+      },
+      {
+        "name": "ha",
+        "type": "x = EuclideanDomain.gcd x z * a"
+      },
+      {
+        "name": "d",
+        "type": "R"
+      },
+      {
+        "name": "hd",
+        "type": "z = EuclideanDomain.gcd x z * d"
+      },
+      {
+        "name": "ha",
+        "type": "x = g * a"
+      },
+      {
+        "name": "hd",
+        "type": "z = g * d"
+      },
+      {
+        "name": "r",
+        "type": "R"
+      },
+      {
+        "name": "s",
+        "type": "R"
+      }
+    ],
+    "index": 0,
+    "literal_string_kernel_checked": true,
+    "path": [
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      2,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      0,
+      1,
+      1,
+      0,
+      1,
+      1,
+      2,
+      2,
+      1
+    ],
+    "source_ast_identity_checked": true,
+    "statement": "a * r + d * s = 1",
+    "text": "Since g is nonzero and (g * ((a * r) + (d * s))) = (g * 1), cancel g to obtain ((a * r) + (d * s)) = 1.",
+    "text_theorem": "OAI.ComplexCancellation.BezoutFrame.exists_frame.sourceText.0.english",
+    "utf8": [
+      83,
+      105,
+      110,
+      99,
+      101,
+      32,
+      103,
+      32,
+      105,
+      115,
+      32,
+      110,
+      111,
+      110,
+      122,
+      101,
+      114,
+      111,
+      32,
+      97,
+      110,
+      100,
+      32,
+      40,
+      103,
+      32,
+      42,
+      32,
+      40,
+      40,
+      97,
+      32,
+      42,
+      32,
+      114,
+      41,
+      32,
+      43,
+      32,
+      40,
+      100,
+      32,
+      42,
+      32,
+      115,
+      41,
+      41,
+      41,
+      32,
+      61,
+      32,
+      40,
+      103,
+      32,
+      42,
+      32,
+      49,
+      41,
+      44,
+      32,
+      99,
+      97,
+      110,
+      99,
+      101,
+      108,
+      32,
+      103,
+      32,
+      116,
+      111,
+      32,
+      111,
+      98,
+      116,
+      97,
+      105,
+      110,
+      32,
+      40,
+      40,
+      97,
+      32,
+      42,
+      32,
+      114,
+      41,
+      32,
+      43,
+      32,
+      40,
+      100,
+      32,
+      42,
+      32,
+      115,
+      41,
+      41,
+      32,
+      61,
+      32,
+      49,
+      46
+    ]
+  },
+  {
+    "axioms": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "bytes_theorem": "OAI.ComplexCancellation.BezoutFrame.exists_frame.sourceText.1.utf8",
+    "context": [
+      {
+        "name": "R",
+        "type": "Type u_1"
+      },
+      {
+        "name": "inst",
+        "type": "EuclideanDomain R"
+      },
+      {
+        "name": "x",
+        "type": "R"
+      },
+      {
+        "name": "y",
+        "type": "R"
+      },
+      {
+        "name": "z",
+        "type": "R"
+      },
+      {
+        "name": "h",
+        "type": "x * y = z * (z + 1)"
+      },
+      {
+        "name": "g",
+        "type": "R"
+      },
+      {
+        "name": "hg",
+        "type": "¬g = 0"
+      },
+      {
+        "name": "a",
+        "type": "R"
+      },
+      {
+        "name": "ha",
+        "type": "x = EuclideanDomain.gcd x z * a"
+      },
+      {
+        "name": "d",
+        "type": "R"
+      },
+      {
+        "name": "hd",
+        "type": "z = EuclideanDomain.gcd x z * d"
+      },
+      {
+        "name": "ha",
+        "type": "x = g * a"
+      },
+      {
+        "name": "hd",
+        "type": "z = g * d"
+      },
+      {
+        "name": "r",
+        "type": "R"
+      },
+      {
+        "name": "s",
+        "type": "R"
+      },
+      {
+        "name": "hbez",
+        "type": "a * r + d * s = 1"
+      }
+    ],
+    "index": 1,
+    "literal_string_kernel_checked": true,
+    "path": [
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      2,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      0,
+      1,
+      1,
+      0,
+      1,
+      1,
+      2,
+      2,
+      2,
+      1
+    ],
+    "source_ast_identity_checked": true,
+    "statement": "a * y = d * (z + 1)",
+    "text": "Since g is nonzero and (g * (a * y)) = (g * (d * (z + 1))), cancel g to obtain (a * y) = (d * (z + 1)).",
+    "text_theorem": "OAI.ComplexCancellation.BezoutFrame.exists_frame.sourceText.1.english",
+    "utf8": [
+      83,
+      105,
+      110,
+      99,
+      101,
+      32,
+      103,
+      32,
+      105,
+      115,
+      32,
+      110,
+      111,
+      110,
+      122,
+      101,
+      114,
+      111,
+      32,
+      97,
+      110,
+      100,
+      32,
+      40,
+      103,
+      32,
+      42,
+      32,
+      40,
+      97,
+      32,
+      42,
+      32,
+      121,
+      41,
+      41,
+      32,
+      61,
+      32,
+      40,
+      103,
+      32,
+      42,
+      32,
+      40,
+      100,
+      32,
+      42,
+      32,
+      40,
+      122,
+      32,
+      43,
+      32,
+      49,
+      41,
+      41,
+      41,
+      44,
+      32,
+      99,
+      97,
+      110,
+      99,
+      101,
+      108,
+      32,
+      103,
+      32,
+      116,
+      111,
+      32,
+      111,
+      98,
+      116,
+      97,
+      105,
+      110,
+      32,
+      40,
+      97,
+      32,
+      42,
+      32,
+      121,
+      41,
+      32,
+      61,
+      32,
+      40,
+      100,
+      32,
+      42,
+      32,
+      40,
+      122,
+      32,
+      43,
+      32,
+      49,
+      41,
+      41,
+      46
+    ]
+  }
+]

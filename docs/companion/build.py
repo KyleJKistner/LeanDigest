@@ -13,6 +13,7 @@ HERE = Path(__file__).resolve().parent
 ROOT = HERE.parents[1]
 sys.path.insert(0, str(ROOT))
 
+from proofreader.source_text import EVIDENCE as TEXT_EVIDENCE, load_cancellations, cancellation_panel
 from proofreader.model import canonical_json
 from proofreader.narrative import Snapshot, check_reading
 from proofreader.narrative_io import verify_certificates
@@ -69,7 +70,9 @@ SECTIONS = [
 ]
 
 
-def build(output: Path = HERE / "index.html", evidence_root: Path = EVIDENCE) -> dict:
+def build(output: Path = HERE / "index.html", evidence_root: Path = EVIDENCE,
+          text_evidence_root: Path = TEXT_EVIDENCE) -> dict:
+    source_text = load_cancellations(text_evidence_root)
     headings = load_headings()
     sections = [{**section, "title": headings[section["id"]]} for section in SECTIONS]
     source_bytes = SOURCE.read_bytes()
@@ -140,6 +143,7 @@ def build(output: Path = HERE / "index.html", evidence_root: Path = EVIDENCE) ->
         "native_record": native,
         "curated_prose_formally_verified": False,
         "source_line_mapping": "editorially reviewed",
+        "source_text": source_text,
     }
     reader_html = html_document(reading)
     data["deterministic_reader_html"] = reader_html
@@ -148,6 +152,8 @@ def build(output: Path = HERE / "index.html", evidence_root: Path = EVIDENCE) ->
         "__APP__": (HERE / "app.js").read_text(),
         "__KATEX__": (HERE / "assets/katex.min.js").read_text(),
         "__DATA__": embedded_json(data),
+        "__CANCELLATION_0__": cancellation_panel(source_text["sentences"][0], 40),
+        "__CANCELLATION_1__": cancellation_panel(source_text["sentences"][1], 53),
     }
     replacements.update({
         "__HEADING_" + key.upper().replace("-", "_") + "__": escape(value)
@@ -176,6 +182,9 @@ def build(output: Path = HERE / "index.html", evidence_root: Path = EVIDENCE) ->
         "context_sha256": receipt["context_sha256"],
         "mathlib_commit": native["mathlib_commit"],
         "index_sha256": sha256(rendered.encode()).hexdigest(),
+        "certified_source_sentences": 2,
+        "source_text_record_sha256": source_text["record_sha256"],
+        "source_text_observation_sha256": source_text["observation_sha256"],
     }
     output.with_name("build-manifest.json").write_text(canonical_json(manifest) + "\n")
     return manifest
@@ -186,5 +195,6 @@ if __name__ == "__main__":
     parser.add_argument("--output", type=Path, default=HERE / "index.html")
     parser.add_argument("--evidence-root", type=Path, default=EVIDENCE,
                         help="Native observation directory containing observation.json and current/ artifacts")
+    parser.add_argument("--text-evidence-root", type=Path, default=TEXT_EVIDENCE)
     args = parser.parse_args()
-    print(json.dumps(build(args.output, args.evidence_root), indent=2))
+    print(json.dumps(build(args.output, args.evidence_root, args.text_evidence_root), indent=2))

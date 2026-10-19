@@ -1,0 +1,4 @@
+'ProofReader.ArithmeticEnglishAudit.zero_cancellation_rejected' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'ProofReader.ArithmeticEnglishAudit.nonzero_is_asserted' depends on axioms: [propext, Classical.choice, Quot.sound]

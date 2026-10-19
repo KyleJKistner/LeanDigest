@@ -283,3 +283,5 @@ dialog details summary { font-size: 11px; }
   .full-source-details, .provenance-details, #native-record-section { display: none; }
   .footer { margin-top: 30px; }
 }
+
+.checked-cancellation{margin:1rem 0;padding:.7rem 1rem;border:1px solid var(--line,#d8d5cf);border-radius:.3rem}.checked-cancellation summary{cursor:pointer;font-weight:600}.checked-sentence{white-space:pre-wrap;overflow-wrap:anywhere;line-height:1.8}
