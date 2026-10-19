@@ -47,10 +47,28 @@ jobs:
           lean --version > boundary-toolchain/version.txt
           tar -czf boundary-toolchain/lean-runtime.tar.gz --exclude='*.a' --exclude='*.ilean' --exclude='*.o' --exclude='*.c' -C "$prefix" bin/lean bin/lake lib/lean src/lean
           sha256sum boundary-toolchain/lean-runtime.tar.gz > boundary-toolchain/SHA256SUMS
+          split -b 300M boundary-toolchain/lean-runtime.tar.gz boundary-toolchain/runtime-part-
       - uses: actions/upload-artifact@v4
         with:
-          name: checked-text-toolchain
-          path: boundary-toolchain/
+          name: checked-text-toolchain-a
+          path: |
+            boundary-toolchain/runtime-part-aa
+            boundary-toolchain/SHA256SUMS
+            boundary-toolchain/version.txt
+          retention-days: 1
+          compression-level: 0
+          if-no-files-found: error
+      - uses: actions/upload-artifact@v4
+        with:
+          name: checked-text-toolchain-b
+          path: boundary-toolchain/runtime-part-ab
+          retention-days: 1
+          compression-level: 0
+          if-no-files-found: error
+      - uses: actions/upload-artifact@v4
+        with:
+          name: checked-text-toolchain-c
+          path: boundary-toolchain/runtime-part-ac
           retention-days: 1
           compression-level: 0
           if-no-files-found: error
