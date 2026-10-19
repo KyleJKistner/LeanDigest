@@ -1,0 +1,101 @@
+name: Import editorial revision
+on:
+  push:
+    branches: ['work/editorial-style-20261019']
+    paths: ['.github/workflows/import-editorial-style.yml']
+permissions:
+  contents: write
+jobs:
+  import:
+    if: github.ref == 'refs/heads/work/editorial-style-20261019'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Apply the source revision to its exact baseline
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import base64, hashlib, json, os, subprocess, urllib.request
+          root = Path.cwd()
+          temp = Path(os.environ['RUNNER_TEMP'])
+          base = '5c2070494814f109038f3d589807443725b1f4f6'
+          parent = subprocess.check_output(['git', 'rev-parse', 'HEAD^']).decode().strip()
+          if parent != base:
+              raise SystemExit('Unexpected import baseline; no changes applied')
+          entries = [
+              ('cf7343e722bf62515b4ceb1252db251a6a053fc0', temp / 'editorial-import.py'),
+              ('0a2d4104d5bb1127a81bc51ccfe8565cec261edc', root / 'docs/STYLE.md'),
+              ('99b09eaf828812cebab317bea912dac0a9f0d419', root / 'tests/test_editorial_style.py'),
+          ]
+          for identity, path in entries:
+              request = urllib.request.Request(
+                  'https://api.github.com/repos/KyleJKistner/LeanDigest/git/blobs/' + identity,
+                  headers={'Authorization': 'Bearer ' + os.environ['GH_TOKEN'], 'Accept': 'application/vnd.github+json'})
+              with urllib.request.urlopen(request, timeout=30) as response:
+                  record = json.load(response)
+              content = base64.b64decode(record['content'])
+              digest = hashlib.sha1(b'blob ' + str(len(content)).encode() + b'\0' + content).hexdigest()
+              if digest != identity:
+                  raise SystemExit('Import blob identity mismatch')
+              path.write_bytes(content)
+          subprocess.run(['python', str(temp / 'editorial-import.py')], check=True)
+          # Normalize the appended test's separator to the locally tested bytes.
+          path = root / 'tests/reader/test_bezout_companion.py'
+          source = path.read_text()
+          source = source.replace('\n\n\n\ndef test_heading_labels_match_the_editorial_inventory',
+                                  '\n\n\ndef test_heading_labels_match_the_editorial_inventory')
+          path.write_text(source)
+          PY
+      - name: Rebuild and require the locally tested complete tree
+        run: |
+          python docs/companion/build.py > "$RUNNER_TEMP/editorial-build.json"
+          echo '99fc67e80ee77bf23948661168bc450957f56839001ff22191ebcdedf9b3ff3c  docs/companion/index.html' | sha256sum --check
+          git add AGENTS.md README.md agents/tasks.json docs/STYLE.md \
+            docs/CHECKED_TEXT_BOUNDARY.md docs/CONTROLLED_ENGLISH_PROTOTYPE.md \
+            docs/CORRECT_BY_CONSTRUCTION.md docs/companion/README.md \
+            docs/companion/build-manifest.json docs/companion/build.py \
+            docs/companion/headings.json docs/companion/index.html \
+            docs/companion/style.css docs/companion/template.html \
+            tests/reader/test_bezout_companion.py tests/test_editorial_style.py
+          git rm .github/workflows/import-editorial-style.yml
+          git diff --cached --check
+          test "$(git write-tree)" = '1e923b974556092a72d95fa1fa7aa4dfe31e6ad2'
+          git diff --exit-code
+      - run: python -m pip install '.[dev,webtest]'
+      - run: python -m playwright install --with-deps chromium
+      - name: Test headings, proof preservation, and offline navigation
+        env:
+          PROOFREADER_REQUIRE_BROWSER: '1'
+        run: python -m pytest tests/test_editorial_style.py tests/test_packaging_team.py tests/reader/test_bezout_companion.py -q --junitxml="$RUNNER_TEMP/editorial-tests.xml"
+      - name: Publish only to the isolated editorial branch
+        run: |
+          test "$(git ls-remote origin refs/heads/work/editorial-style-20261019 | cut -f1)" = "$GITHUB_SHA"
+          test "$(git write-tree)" = '1e923b974556092a72d95fa1fa7aa4dfe31e6ad2'
+          git diff --exit-code
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git commit -m 'Use descriptive headings and add editorial conventions'
+          git push origin HEAD:refs/heads/work/editorial-style-20261019
+          git rev-parse HEAD > "$RUNNER_TEMP/editorial-commit.txt"
+          git archive --format=zip HEAD -o "$RUNNER_TEMP/editorial-source.zip"
+          git diff --stat 5c2070494814f109038f3d589807443725b1f4f6 HEAD > "$RUNNER_TEMP/editorial-diff.txt"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: editorial-import-results
+          path: |
+            ${{ runner.temp }}/editorial-build.json
+            ${{ runner.temp }}/editorial-tests.xml
+            ${{ runner.temp }}/editorial-commit.txt
+            ${{ runner.temp }}/editorial-source.zip
+            ${{ runner.temp }}/editorial-diff.txt
+          retention-days: 30
+          if-no-files-found: error
