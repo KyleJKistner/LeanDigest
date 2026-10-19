@@ -13,22 +13,52 @@ from .original_project import child, digest, file_hash, read
 from .original_status import SCHEMA as STATUS_SCHEMA, check_archive
 
 COLLECTION = 'leanglish.completion-collection/v1'
+ORIGINAL_WORKFLOW = '.github/workflows/completion-recovery.yml'
+RESUME_WORKFLOW = '.github/workflows/completion-resume.yml'
 HEAD = re.compile(r'[a-f0-9]{40}')
 HASH = re.compile(r'[a-f0-9]{64}')
 
 
+def check_resume_parent(directory: Path, recovery: dict, target: str, ident: str) -> str:
+    """Validate this explicitly selected continuation; not arbitrary cache input."""
+    record = read(directory/'resume.json')
+    parent = record.get('parent_checkpoint', {})
+    acquisition = parent.get('checkpoint_acquisition', {})
+    previous = record.get('previous_worker', {})
+    if (ident != '142c3d0f555a25666bb36dd1' or target != 'OAI.Analysis.NuclearUltrapower.Main' or
+        record.get('proof_acceptance_from_checkpoint') is not False or
+        parent.get('schema') != 'leanglish.original-checkpoint-cold-restore/v1' or
+        parent.get('status') != 'passed' or parent.get('target') != target or
+        parent.get('plan_sha256') != recovery['original_plan_sha256'] or
+        parent.get('environment_sha256') != recovery['environment_sha256'] or
+        parent.get('proof_verified') is not False or
+        parent.get('original_source_audit_passed') is not True or
+        parent.get('exact_resulting_build_inventory_verified') is not True or
+        parent.get('checkpoint_sha256') != '87f52a446dfcdf14117bc864299782ccda1d81945483b5b6c3037cb8b76d8eb9' or
+        acquisition != {'artifact_id':12217614568, 'run_id':39315174445,
+            'source_commit':'4f9c1e823dd65023cfa7d8b9afe5e08390b8d2ad',
+            'archive_sha256':'f0cb3658f6edbffc2e62cd8f538ea9a7529a0e4cbe4e27286241030441003523'} or
+        previous.get('id') != 118274980446 or previous.get('run_id') != 39315174445 or
+        previous.get('status') != 'completed' or previous.get('conclusion') != 'failure'):
+        raise ValueError('Resumed worker is not bound to the verified interrupted checkpoint')
+    return parent['checkpoint_sha256']
+
+
 def check_collection(root: Path, recovery: dict, *, expected_run: int,
-                     expected_head: str) -> dict:
+                     expected_head: str, expected_workflow: str = ORIGINAL_WORKFLOW) -> dict:
     """Return only explicitly inventoried workers from one frozen acquisition."""
-    if type(expected_run) is not int or expected_run <= 0 or not HEAD.fullmatch(expected_head):
-        raise ValueError('Explicit recovery execution identity is required')
+    if (type(expected_run) is not int or expected_run <= 0 or
+        not isinstance(expected_head,str) or not HEAD.fullmatch(expected_head) or
+        expected_workflow not in {ORIGINAL_WORKFLOW, RESUME_WORKFLOW}):
+        raise ValueError('Explicit supported recovery execution identity is required')
     record = read(root/'collection.json')
     run = read(root/'run.json')
     artifacts = read(root/'frozen-artifacts.json')
     if (record.get('schema') != COLLECTION or record.get('repository') != 'KyleJKistner/LeanDigest' or
         record.get('errors') != [] or record.get('run_id') != expected_run or
         record.get('source_commit') != expected_head or run.get('id') != expected_run or
-        run.get('head_sha') != expected_head or run.get('path') != '.github/workflows/completion-recovery.yml' or
+        run.get('head_sha') != expected_head or run.get('path') != expected_workflow or
+        record.get('workflow_path',expected_workflow) != expected_workflow or
         record.get('recovery_plan_sha256') != recovery.get('recovery_plan_sha256')):
         raise ValueError('Recovery collection execution/plan identity mismatch')
     outcomes = record.get('outcomes')
@@ -76,6 +106,9 @@ def check_collection(root: Path, recovery: dict, *, expected_run: int,
         if identity != {'recovery_plan_sha256': recovery['recovery_plan_sha256'],
                         'worker_id': ident, 'kind': kind, 'target': target, 'native_lean_verified': False}:
             raise ValueError('Recovery worker assignment changed')
+        resumed_from = None
+        if expected_workflow == RESUME_WORKFLOW:
+            resumed_from = check_resume_parent(directory,recovery,target,ident)
         proof = directory/'proofs/original-proof-worker.json'
         comparisons = directory/'comparisons/worker.json'
         library = directory/'library/worker.json'
@@ -103,7 +136,7 @@ def check_collection(root: Path, recovery: dict, *, expected_run: int,
                 raise ValueError('Recovery library target changed')
             build_roots.append(library.parent)
         workers.append({'id': ident, 'kind': kind, 'target': target,
-                        'artifact_sha256': outcome['sha256'],
+                        'artifact_sha256': outcome['sha256'], 'resumed_from_checkpoint':resumed_from,
                         'proof_report_retained': proof.exists(),
                         'comparison_report_retained': comparisons.exists(),
                         'library_report_retained': library.exists()})
@@ -112,6 +145,7 @@ def check_collection(root: Path, recovery: dict, *, expected_run: int,
     return {'proof_roots': proof_roots, 'build_roots': build_roots,
             'workers': workers, 'missing_workers': sorted(set(jobs)-{a['name'] for a in artifacts}),
             'collection': {'run_id': expected_run, 'source_commit': expected_head,
+                           'workflow_path':expected_workflow,
                            'cutoff': record['cutoff'], 'collection_sha256': file_hash(root/'collection.json'),
                            'artifacts': len(artifacts)}}
 
@@ -183,7 +217,6 @@ def join_status(base: dict, attempts: dict, proof_summary: dict,
              original_environment_new_readings=p['original_environment_new_readings']+new_count,
              theorems_without_reading=expected-len(selected), all_theorems_have_readings=len(selected)==expected,
              completion_campaign=proof_summary)
-    # Preserve original outcomes rather than rewriting the preceding campaign.
     p['prior_outcomes_retained'] = True
     result['build_summary'] = attempts
     result['completion'] = {'prior_status_sha256': base['status_sha256'],
