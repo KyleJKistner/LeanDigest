@@ -1,0 +1,117 @@
+name: Publish original-project reading checkpoint
+on:
+  workflow_dispatch:
+  push:
+    branches: [work/completion-evidence-retries]
+    paths: ['.github/workflows/publish-completion.yml']
+permissions: {contents: write, actions: read}
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with: {persist-credentials: false}
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - name: Require the exact successful delivery run and source CI gates
+        env: {GH_TOKEN: '${{ github.token }}'}
+        run: |
+          python - <<'PY'
+          from scripts.collect_original_evidence import api
+          from proofreader.original_project import write
+          from pathlib import Path
+          repo='KyleJKistner/LeanDigest';commit='317dc31dddd3b34a1eb56aabb786da1fa8465450'
+          run=api(repo,'actions/runs/39316344259')
+          artifact=api(repo,'actions/artifacts/12217842952')
+          assert run['status']=='completed' and run['conclusion']=='success' and run['head_sha']==commit
+          assert artifact['workflow_run']['id']==run['id'] and artifact['workflow_run']['head_sha']==commit
+          assert artifact['digest']=='sha256:919003d51135808245dae1459fc6a09ce05b9727cb24be802bc244d61d87687b'
+          checks=api(repo,f'commits/{commit}/check-runs?per_page=100')['check_runs']
+          for name in ('python-and-browser','lean-integration'):
+            assert any(c['name']==name and c['head_sha']==commit and c['status']=='completed' and c['conclusion']=='success' for c in checks),name
+          out=Path('/tmp/publication');out.mkdir()
+          write(out/'gates.json',{'application_commit':commit,'delivery_run':run['id'],
+               'artifact_id':artifact['id'],'artifact_sha256':artifact['digest'],
+               'ci_gates':['python-and-browser','lean-integration']})
+          PY
+          gh api repos/$GITHUB_REPOSITORY/actions/artifacts/12217842952/zip > /tmp/delivery.zip
+          echo '919003d51135808245dae1459fc6a09ce05b9727cb24be802bc244d61d87687b  /tmp/delivery.zip' | sha256sum -c -
+          python -c "from pathlib import Path;from scripts.collect_original_evidence import unpack;unpack(Path('/tmp/delivery.zip'),Path('/tmp/frozen'))"
+      - name: Verify the site manifest and generate coverage notes from retained results
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import hashlib,json,shutil,zipfile
+          from proofreader.original_project import read,write,digest
+          frozen=Path('/tmp/frozen');dist=frozen/'dist';out=Path('/tmp/publication')
+          release=read(dist/'release.json');status=read(dist/'original-verification.json');coverage=read(dist/'coverage.json')
+          archive=dist/'leanglish-all-findings.zip'
+          checksum=hashlib.sha256(archive.read_bytes()).hexdigest()
+          assert (dist/'SHA256SUMS').read_text().split()[0]==checksum
+          assert release['application_commit']=='317dc31dddd3b34a1eb56aabb786da1fa8465450'
+          assert release['application_tracked_tree_clean'] is True and release['coverage']==coverage
+          assert status['status_sha256']==digest({k:v for k,v in status.items() if k!='status_sha256'})
+          assert release['status_sha256']==status['status_sha256']
+          assert release['static_audit']['passed'] and release['browser_audit']['passed']
+          assert release['browser_audit']['navigation_backend']=='real-offline-file-navigation'
+          assert coverage['documented_findings']==242 and coverage['expected_theorem_targets']==536
+          assert coverage['all_documented_findings_indexed'] and coverage['all_specification_entries_accessible']
+          assert coverage['proof_readings']==status['proof_summary']['total_readings']
+          with zipfile.ZipFile(archive) as z:
+            infos=z.infolist();names=[i.filename for i in infos]
+            assert len(names)==len(set(names)) and all(n.startswith('Leanglish/') for n in names)
+            manifest=json.loads(z.read('Leanglish/SHA256SUMS.json'))
+            expected={'Leanglish/'+n for n in manifest}|{'Leanglish/SHA256SUMS.json'}
+            assert set(names)==expected
+            for name,h in manifest.items():
+              assert Path(name).suffix.lower() not in {'.ttf','.otf','.woff','.woff2'}
+              with z.open('Leanglish/'+name) as stream:actual=hashlib.file_digest(stream,'sha256').hexdigest()
+              assert actual==h,name
+            assert json.loads(z.read('Leanglish/release.json'))==release
+          b=status['build_summary'];p=status['proof_summary']
+          title='# Original-project proof readings\n\n'
+          notes=title+'Extract `leanglish-all-findings.zip` and open `Leanglish/index.html`. No Lean installation or network connection is required for reading.\n\n'
+          notes+='| Coverage | Retained result |\n|---|---:|\n'
+          notes+=f"| Documented findings accessible | {coverage['documented_findings']} / 242 |\n"
+          notes+=f"| Formal statement entries accessible | {coverage['elaborated_statement_entries']} / {coverage['expected_statement_entries']} |\n"
+          notes+=f"| Theorem readings | {p['total_readings']} / {p['expected_theorem_targets']} |\n"
+          notes+=f"| Original statement comparisons passed | {b['comparator_passed']} / {b['comparator_expected']} |\n"
+          notes+=f"| Original libraries built | {b['library_passed']} / {b['library_expected']} |\n"
+          notes+=f"| Selected checked proof judgements | {coverage['selected_checked_frames']} |\n"
+          notes+=f"| Explicit explanation gaps | {coverage['explicit_explanation_gaps']} |\n\n"
+          notes+='This is a research checkpoint, not a claim that the full project or English translation is complete. The original comparison and reading statuses are separate. Earlier proof receipts retain their recorded environment; no baseline is relabeled. Failed or missing work remains in the ledger, including the history before successful retries.\n\n'
+          notes+='Python/browser and native Lean CI passed on the application commit. Real offline navigation and every site-manifest entry were checked before publication. See `original-verification.html` and the JSON evidence for per-target status. Hashes check consistency, not authenticity; the English is not formally verified.\n\n'
+          notes+=f"Application commit: `{release['application_commit']}`. Upstream commit: `{release['upstream_commit']}`.\n\nOffline archive SHA-256: `{checksum}`.\n"
+          (out/'notes.md').write_text(notes)
+          for name in ('leanglish-all-findings.zip','leanglish-application.zip','SHA256SUMS','coverage.json','release.json','original-verification.json'):
+            shutil.copy2(dist/name,out/name)
+          summary=read(dist/'summary.json');summary['manifest_entries_verified']=len(manifest)
+          write(out/'summary.json',summary)
+          print('PUBLICATION_COVERAGE',summary,flush=True)
+          PY
+      - name: Create an immutable prerelease only; never replace a tag or asset
+        env: {GH_TOKEN: '${{ github.token }}'}
+        run: |
+          tag=leanglish-original-project-317dc31
+          if gh release view "$tag" -R "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+            echo 'The release already exists; refusing to replace it.' >&2
+            exit 1
+          fi
+          gh release create "$tag" -R "$GITHUB_REPOSITORY" --target 317dc31dddd3b34a1eb56aabb786da1fa8465450 --prerelease \
+            --title 'Leanglish — original-project proof readings' --notes-file /tmp/publication/notes.md \
+            /tmp/publication/leanglish-all-findings.zip /tmp/publication/leanglish-application.zip \
+            /tmp/publication/SHA256SUMS /tmp/publication/coverage.json /tmp/publication/release.json \
+            /tmp/publication/original-verification.json /tmp/publication/summary.json
+          gh release view "$tag" -R "$GITHUB_REPOSITORY" --json url,tagName,isPrerelease,assets > /tmp/publication/published.json
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: original-project-publication
+          path: |
+            /tmp/publication/gates.json
+            /tmp/publication/notes.md
+            /tmp/publication/summary.json
+            /tmp/publication/published.json
+          retention-days: 90
+          if-no-files-found: error
