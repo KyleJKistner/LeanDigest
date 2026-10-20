@@ -36,7 +36,7 @@ STATUSES = ('proposed', 'reviewed')
 PROPOSERS = ('model', 'human')
 REVIEWED_RULE = 'reviewed-gloss'
 PATH = Path(__file__).parent/'data'/'glossary.json'
-AXES_NOTE = ('Glosses marked [unreviewed gloss] were proposed by a model and have not been reviewed; '
+AXES_NOTE = ('Glosses marked [unreviewed gloss] are proposals that no reviewer has accepted; '
              'their steps remain explanation gaps.')
 _TOP = {'schema', 'description', 'sources', 'entries'}
 _SOURCE = {'repository', 'revision'}
@@ -49,6 +49,8 @@ _NAME = re.compile(r"[^\W\d][\w'!?]*(?:\.[^\W\d][\w'!?]*)*")
 # generates the auxiliary names, so there is no declaration to quote.
 _RESERVED = frozenset({'Subtype.property', 'cast', 'id'})
 _GENERATED = re.compile(r'.*\._(?:simp|proof)_\d+(?:_\d+)*')
+_REPOSITORY = re.compile(r'https://[A-Za-z0-9.-]+(?:/[A-Za-z0-9._-]+)+')
+_REVISION = re.compile(r'[A-Za-z0-9][A-Za-z0-9._-]*')
 
 
 def _text(value: Any, limit: int, what: str, *, empty: bool = False) -> None:
@@ -85,7 +87,8 @@ def _entry(e: Any, sources: dict) -> None:
     require(e['status'] in STATUSES, 'Unknown glossary status: '+name)
     require(e['proposed_by'] in PROPOSERS, 'Unknown glossary proposer: '+name)
     if e['status'] == 'reviewed':
-        require(isinstance(e['reviewed_by'], str) and e['reviewed_by'].strip() != '' and len(e['reviewed_by']) <= 200,
+        require(isinstance(e['reviewed_by'], str) and e['reviewed_by'].strip() != '' and len(e['reviewed_by']) <= 200
+                and e['reviewed_by'] == e['reviewed_by'].strip() and '\n' not in e['reviewed_by'] and '\x00' not in e['reviewed_by'],
                 'A reviewed glossary entry needs a named reviewer: '+name)
     else:
         require(e['reviewed_by'] is None, 'A proposed glossary entry cannot name a reviewer: '+name)
@@ -103,6 +106,9 @@ def validate(data: Any) -> dict:
         require(isinstance(s, dict) and set(s) == _SOURCE, 'Unknown or missing glossary source fields')
         for v in s.values():
             _text(v, 400, 'source field')
+        # The review document links each statement through this URL.
+        require(_REPOSITORY.fullmatch(s['repository']) is not None and _REVISION.fullmatch(s['revision']) is not None,
+                'Glossary source must name an https repository URL and a plain revision')
     require(isinstance(data['entries'], list), 'Invalid glossary entries')
     seen: set[str] = set()
     for e in data['entries']:
@@ -113,7 +119,7 @@ def validate(data: Any) -> dict:
 
 
 class Glossary:
-    """A validated, immutable glossary."""
+    """A validated glossary. Treat it as read-only: ``sha256`` is computed once."""
 
     def __init__(self, data: Any):
         validate(data)

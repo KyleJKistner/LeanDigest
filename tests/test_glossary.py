@@ -227,6 +227,9 @@ MUTATIONS = {
     'unhashable source': lambda d, e: e['statement'].update(source=['mathlib4']),
     'trailing newline': lambda d, e: e['statement'].update(text=e['statement']['text']+'\n'),
     'unknown source field': lambda d, e: d['sources']['mathlib4'].update(branch='master'),
+    'non-https repository': lambda d, e: d['sources']['mathlib4'].update(repository='javascript:alert(1)//github.com/x/y'),
+    'revision with a fragment': lambda d, e: d['sources']['mathlib4'].update(revision='master#L1'),
+    'reviewer on two lines': lambda d, e: e.update(status='reviewed', reviewed_by='Synthetic\nReviewer'),
 }
 
 
@@ -313,10 +316,26 @@ def test_review_document_lists_statement_instances_and_checkboxes(tmp_path):
     assert 'Coverage: 1 citation gap step in 1 reading' in section
 
 
+def test_review_document_counts_the_steps_of_a_reviewed_entry(tmp_path):
+    """Synthetic reviewed entry: after a review, its steps are still listed as coverage."""
+    root = corpus(tmp_path)
+    text = review_script.review(synthetic({"Nat.cast_nonneg'"}), root)
+    section = text.split("### `Nat.cast_nonneg'`", 1)[1].split('\n### ', 1)[0]
+    assert 'Status: reviewed' in section and 'Coverage: 1 reviewed-gloss step in 1 reading' in section
+    assert 'No corpus step shows this gloss.' not in section
+    plain = review_script.review(G.packaged(), root)
+    assert plain.count('\n### ') == text.count('\n### ')
+
+
 def test_committed_review_document_matches_the_glossary():
     text = (ROOT/'docs/glossary-review/README.md').read_text(encoding='utf-8')
     assert G.packaged().sha256 in text
     assert all(f"### `{name}`" in text for name in G.packaged().entries)
+
+
+def test_committed_preview_measurement_matches_the_glossary():
+    data = json.loads((ROOT/'docs/glossary-review/preview-kpis.json').read_text(encoding='utf-8'))
+    assert data['glossary']['mode'] == 'preview' and data['glossary']['glossary_sha256'] == G.packaged().sha256
 
 
 def test_mark_and_remove(tmp_path):
@@ -329,6 +348,8 @@ def test_mark_and_remove(tmp_path):
     assert run('mark', 'le_trans', '--reviewer', SYNTHETIC_REVIEWER, '--confirm', '--gloss', 'transitivity of the order ≤') == 0
     e = G.Glossary.read(path).entries['le_trans']
     assert (e['status'], e['reviewed_by'], e['gloss']) == ('reviewed', SYNTHETIC_REVIEWER, 'transitivity of the order ≤')
+    proposal = G.packaged().entries['le_trans']['gloss']
+    assert e['proposed_by'] == 'model' and e['notes'].endswith('Gloss revised at review; proposed: '+proposal+'.')
     assert run('remove', 'le_rfl') == 0 and 'le_rfl' not in G.Glossary.read(path).entries
     assert run('remove', 'le_rfl') == 2
     assert G.PATH.read_bytes() != path.read_bytes()

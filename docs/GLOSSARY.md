@@ -22,7 +22,7 @@ regenerates byte for byte, and so does every per-reading row.
 | Field | Meaning |
 |---|---|
 | `schema`, `description` | Schema name and a description of the file. |
-| `sources` | Each quoted repository with its revision: `mathlib4` at `d13f23b723b8a846827a245b89c10fc7d3f11612` (the corpus pin) and `lean4` at tag `v4.34.1` (the Lean version recorded in every corpus snapshot). |
+| `sources` | Each quoted repository (an https URL) with its revision: `mathlib4` at `d13f23b723b8a846827a245b89c10fc7d3f11612` (the corpus pin) and `lean4` at tag `v4.34.1`. That tag is the toolchain that Mathlib's `lean-toolchain` file names at the pin, and the Lean version recorded in every corpus snapshot. |
 | `entries[].name` | The exact Lean constant, as it appears as a frame head. |
 | `entries[].gloss` | A phrase of at most 80 characters that reads after "By". |
 | `entries[].statement` | `source`, `path`, `line` and `text`: the exact source lines of the declaration, from the line given. `context` lists further exact excerpts needed to read it: the target of an alias and the `variable` lines in scope. |
@@ -36,9 +36,9 @@ entries, a reviewed entry without a reviewer, a proposed entry that names one,
 glosses that are empty, longer than 80 characters, on several lines, end in a
 period or colon, or contain the preview marker, project constants (`OAI.*`),
 Lean-generated names (`X._simp_n`, `X._proof_n`), constants the renderer words
-itself (`Subtype.property`, `cast`, `id`), and source paths that are absolute
-or leave the repository. The glossary digest is the SHA-256 of its canonical
-JSON.
+itself (`Subtype.property`, `cast`, `id`), source paths that are absolute or
+leave the repository, and source repositories that are not https URLs. The
+glossary digest is the SHA-256 of its canonical JSON.
 
 ## Rendering modes
 
@@ -78,9 +78,9 @@ steps; the remainder is:
 
 | Excluded group | Steps | Constants | Reason |
 |---|---:|---:|---|
-| Logical primitives (`And.*`, `Iff.*`, `Classical.*`, `Nonempty.*`, `Decidable.*`) | 76 | 17 | Logical rules belong in the renderer, not in a dictionary of lemmas |
+| Logical primitives (`And.*`, `Iff.*`, `Or.*`, `Eq.*`, `Classical.*`, `Nonempty.*`, `Decidable.*`) | 76 | 17 | Logical rules belong in the renderer, not in a dictionary of lemmas; the group includes the one-step `Eq.trans_le` |
 | Equational forms generated for simp (`X._simp_n`) | 52 | 7 | No declaration in source states them |
-| Instance constructors, parent projections and instance declarations | 42 | 9 | Typeclass plumbing, such as `Fact.mk` and `Filter.atTop_neBot` |
+| Instance constructors, parent projections and instance declarations | 42 | 9 | Structure and typeclass plumbing, such as `Fact.mk`, `Filter.atTop_neBot` and the structure projection `Ergodic.toMeasurePreserving` |
 | Constants worded by the renderer, and eliminators of empty types | 38 | 5 | `Subtype.property`, `cast`, `Fin.elim0`, `isEmptyElim`, `of_decide_eq_true` |
 | Recursors (`Nat.casesAuxOn`) | 11 | 5 | Case analysis, not a lemma |
 | Constants cited at most twice | 324 | 257 | Not proposed |
@@ -90,8 +90,8 @@ entries (`funext`, `Function.Injective.comp`, `Nat.exists_eq_add_of_le`,
 `Nat.mul_le_mul_right`, `Subsingleton.elim`, `Subtype.ext`) in Lean core at
 `v4.34.1`, because they are not in the Mathlib tree. The declaration lines
 were copied, not retyped. `scripts/glossary_review.py verify` compares every
-excerpt with the source lines: all 289 excerpts matched the pinned Mathlib
-tree and the `v4.34.1` Lean sources.
+excerpt with the source lines: all 287 excerpts matched the pinned Mathlib
+tree and the `v4.34.1` Lean sources, downloaded from raw.githubusercontent.com.
 
 Eight entries are aliases, quoted with their target as context. For eight
 more, Mathlib generates the declaration, so its statement is not written in
@@ -188,8 +188,17 @@ has other gaps.
   extracted against other versions would need new excerpts.
 - The `verify` check and the variable context come from a line-based reading
   of the source files. The check confirms that the quoted lines exist at the
-  stated positions; it does not confirm that the context is complete.
+  stated positions; it does not confirm that the context is complete or that
+  every listed line is used.
 - The review document's coverage counts and instances depend on the renderer
   and corpus; regenerate it when either changes.
+- A reviewed-gloss step does not name its reviewer, its quoted statement or
+  the glossary digest; the glossary file records them. `check_reading` refuses
+  a saved default reading whose glosses differ from the packaged glossary, but
+  the printer version does not change when an entry is reviewed.
+- Two renderer rules that shorten citation steps do not apply to a
+  reviewed-gloss step. Under a `have`, it repeats the claim that the `have`
+  states, and when it proves the theorem itself it is not reworded to "The
+  statement follows from …".
 - No reviewer exists yet. Until one reviews entries, the glossary changes no
   default reading and explains nothing.

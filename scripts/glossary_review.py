@@ -49,7 +49,11 @@ def save(data: dict, path: Path) -> None:
 
 
 def corpus_instances(corpus: Path, glossary: G.Glossary) -> tuple[dict, str, int]:
-    """Steps in the preview rendering that show each proposed gloss, in snapshot order."""
+    """Steps in the preview rendering that show each gloss, in snapshot order.
+
+    A proposed gloss shows on a citation gap step with the marker; a reviewed
+    one on a reviewed-gloss step, which is explained unless it is a budget cut.
+    """
     selection = glossary.select('preview')
     found: dict[str, list[dict]] = defaultdict(list); hashes = []
     for p in snapshot_paths(corpus):
@@ -58,7 +62,8 @@ def corpus_instances(corpus: Path, glossary: G.Glossary) -> tuple[dict, str, int
         d = n.document(title=record['theorem']).declarations[0]
         for s in walk_steps(d.steps):
             f = n.frames[int(s.id.rsplit(':', 1)[1])]
-            if s.rule == 'citation' and G.MARKER in s.text and f['head'] in selection:
+            shown = s.rule == G.REVIEWED_RULE or (s.rule == 'citation' and G.MARKER in s.text)
+            if shown and f['head'] in selection:
                 found[f['head']].append({'theorem': record['theorem'], 'snapshot': p.parent.relative_to(corpus).as_posix(),
                                          'frame': f['id'], 'conclusion': f['statement'],
                                          'premises': [q['statement'] for q in f['premises']]})
@@ -103,9 +108,9 @@ def review(glossary: G.Glossary, corpus: Path) -> str:
            f'{by_model} were proposed by a model. A proposed gloss never changes a default reading; in the preview mode '
            'it is shown with the marker "'+G.MARKER+'" and the step remains an explanation gap. In a reading, the '
            'constant\'s name may be shortened as the notation legend states.', '',
-           f'Coverage counts library-citation gap steps in the preview rendering of the corpus that show the gloss: '
-           f'{total} steps in total. Reviewing an entry makes those steps explained, except where the cited frame is a '
-           'budget cut.', '',
+           f'Coverage counts the steps of the preview rendering of the corpus that show the gloss: {total} steps in '
+           'total. For a proposed entry these are library-citation gap steps; reviewing the entry makes them explained, '
+           'except where the cited frame is a budget cut. For a reviewed entry they are reviewed-gloss steps.', '',
            '## Review procedure', '',
            'For each entry, compare the gloss with the quoted statement and its context, and with the recorded corpus '
            'instances. The gloss must describe what the declaration proves and claim nothing more; it may leave '
@@ -115,7 +120,7 @@ def review(glossary: G.Glossary, corpus: Path) -> str:
            '- Accept with a revised gloss: add `--gloss "revised phrase"` to the same command.',
            '- Reject: `python scripts/glossary_review.py remove NAME`', '',
            'Accepting changes default readings, so the reading-KPI baseline must be regenerated in the same change.', '',
-           '## Summary', '', '| Constant | Gloss | Status | Gap steps | Readings |', '|---|---|---|---:|---:|']
+           '## Summary', '', '| Constant | Gloss | Status | Steps | Readings |', '|---|---|---|---:|---:|']
     for e in entries:
         x = found[e['name']]
         cell = e['gloss'].replace('|', '\\|')
@@ -126,7 +131,8 @@ def review(glossary: G.Glossary, corpus: Path) -> str:
         link = src['repository']+'/blob/'+src['revision']+'/'+st['path']+'#L'+str(st['line'])
         out += ['### `'+e['name']+'`', '', '- Gloss: '+e['gloss'], '- Step text once reviewed: By '+e['gloss']+' ('+e['name']+'):',
                 f"- Status: {e['status']}; proposed by {e['proposed_by']}; reviewer: {e['reviewed_by'] or 'none'}",
-                '- Coverage: '+_count(len(x), 'citation gap step')+' in '+_count(len({i['theorem'] for i in x}), 'reading'),
+                '- Coverage: '+_count(len(x), 'citation gap step' if e['status'] == 'proposed' else 'reviewed-gloss step')
+                +' in '+_count(len({i['theorem'] for i in x}), 'reading'),
                 f"- Statement: {st['source']} `{st['path']}:{st['line']}` ([source]({link}))", '']
         out += _fence(st['text'], 'lean')
         if st['context']:
@@ -175,7 +181,9 @@ def mark(data: dict, name: str, reviewer: str, gloss: str | None = None) -> dict
     if not reviewer.strip():
         raise InvalidExport('A review needs the reviewer\'s name')
     entry['status'] = 'reviewed'; entry['reviewed_by'] = reviewer.strip()
-    if gloss is not None:
+    if gloss is not None and gloss != entry['gloss']:
+        # proposed_by names who proposed the entry; keep the wording the reviewer replaced.
+        entry['notes'] = (entry['notes']+' ' if entry['notes'] else '')+'Gloss revised at review; proposed: '+entry['gloss']+'.'
         entry['gloss'] = gloss
     G.validate(data)
     return data

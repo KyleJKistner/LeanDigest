@@ -1,6 +1,6 @@
 {
  "schema": "leanglish.glossary/v1",
- "description": "One-line glosses for frequently cited library lemmas, frozen for deterministic rendering. Every entry with status proposed was proposed by a model and has not been reviewed; only entries with status reviewed and a named reviewer change a default reading. Statements are quoted exactly from the listed sources; see docs/GLOSSARY.md.",
+ "description": "One-line glosses for frequently cited library lemmas, frozen for deterministic rendering. Each entry records who proposed it. An entry with status proposed has not been reviewed; only entries with status reviewed and a named reviewer change a default reading. Statements are quoted exactly from the listed sources; see docs/GLOSSARY.md.",
  "sources": {
   "mathlib4": {
    "repository": "https://github.com/leanprover-community/mathlib4",
@@ -908,7 +908,7 @@
     "source": "mathlib4",
     "path": "Mathlib/MeasureTheory/Measure/Real.lean",
     "line": 88,
-    "text": "@[gcongr] theorem measureReal_mono (h : s₁ ⊆ s₂) (h₂ : μ s₂ ≠ ∞ := by finiteness) :",
+    "text": "@[gcongr] theorem measureReal_mono (h : s₁ ⊆ s₂) (h₂ : μ s₂ ≠ ∞ := by finiteness) :\n    μ.real s₁ ≤ μ.real s₂ :=",
     "context": [
      {
       "source": "mathlib4",
@@ -921,7 +921,7 @@
    "status": "proposed",
    "proposed_by": "model",
    "reviewed_by": null,
-   "notes": "The finiteness hypothesis has a default proof by finiteness."
+   "notes": "Conclusion μ.real s₁ ≤ μ.real s₂. The finiteness hypothesis has a default proof by finiteness."
   },
   {
    "name": "MeasureTheory.measure_ne_top",
@@ -1437,19 +1437,12 @@
     "path": "src/Init/Core.lean",
     "line": 1272,
     "text": "protected theorem Subsingleton.elim {α : Sort u} [h : Subsingleton α] : (a b : α) → a = b :=",
-    "context": [
-     {
-      "source": "lean4",
-      "path": "src/Init/Core.lean",
-      "line": 1028,
-      "text": "variable {a b c d : Prop}"
-     }
-    ]
+    "context": []
    },
    "status": "proposed",
    "proposed_by": "model",
    "reviewed_by": null,
-   "notes": "Lean core, not in the pinned Mathlib tree."
+   "notes": "Lean core, not in the pinned Mathlib tree. The statement binds a and b itself; the file-level variable {a b c d : Prop} is not used."
   },
   {
    "name": "Subtype.ext",
@@ -1463,12 +1456,6 @@
      {
       "source": "lean4",
       "path": "src/Init/Core.lean",
-      "line": 1028,
-      "text": "variable {a b c d : Prop}"
-     },
-     {
-      "source": "lean4",
-      "path": "src/Init/Core.lean",
       "line": 1378,
       "text": "variable {α : Sort u} {p : α → Prop}"
      }
@@ -1477,7 +1464,7 @@
    "status": "proposed",
    "proposed_by": "model",
    "reviewed_by": null,
-   "notes": "Lean core, not in the pinned Mathlib tree."
+   "notes": "Lean core, not in the pinned Mathlib tree. α and p come from the quoted variable line; the file-level variable {a b c d : Prop} is not used."
   },
   {
    "name": "add_le_add",
