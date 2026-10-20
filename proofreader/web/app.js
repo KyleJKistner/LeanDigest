@@ -128,6 +128,7 @@
       } $("parameters").append(row);
     }
     $("statement").textContent=d.statement || "No explicit statement recovered. Inspect the source or export from Lean.";
+    renderNotation(d);
     $("context-box").hidden=!(d.context||[]).length;clear($("context"));
     for(const c of d.context||[])$("context").append(text("pre",c));
     $("argument-label").textContent=typed?"Proof":"Proof outline";
@@ -291,6 +292,21 @@
     const target=stepElement(selectedStep)?.querySelector(".step-inspect");
     if(tab==="reading")target?.focus({preventScroll:true});
     else $("tab-"+tab).focus({preventScroll:true});
+  }
+  // The display-notation legend of the checked reading (axes.notation), shown beside the statement;
+  // the same entries are the declaration's last warning on the Evidence tab.
+  function renderNotation(d) {
+    const box=$("notation-legend"), n=d.axes?.notation;clear(box);
+    const strings=v=>Array.isArray(v) && v.every(x=>typeof x==="string");
+    const namespaces=strings(n?.omitted_namespaces)?n.omitted_namespaces:[];
+    const symbols=Array.isArray(n?.symbols)?n.symbols.filter(p=>strings(p) && p.length===2):[];
+    box.hidden=!namespaces.length && !symbols.length;
+    if(box.hidden)return;
+    box.append(text("p","Notation (display only; the recorded Lean formulas are unchanged):","notation-title"));
+    const list=text("ul","");
+    if(namespaces.length)list.append(text("li","Namespace prefixes not written: "+namespaces.join(", ")+"."));
+    for(const [shown,lean] of symbols){const item=text("li","");item.append(text("code",shown)," stands for ",text("code",lean),".");list.append(item);}
+    box.append(list);
   }
   function auditRow(title,value) {const d=text("div","","audit-row");d.append(text("b",title),text("span",value));return d;}
   function renderAudit(d) {

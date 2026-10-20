@@ -537,7 +537,8 @@ def test_adjacent_hypotheses_are_one_step_in_their_original_order():
     assert not group.fallback and owned(group) == [2, 3]
     assert group.text == 'Use the hypotheses hv: Geometry.JointSmooth v; hc: Geometry.TimeCollars v.'
     assert 'hv : OAI.BalancedTransport.Geometry.JointSmooth v' in group.detail
-    assert root.children[3].text == 'Use the hypothesis hd: ∀ (t : ℝ) (x : Space), div v t x = 0.'
+    # OAI.BalancedTransport.div keeps a prefix: the display writes Mathlib's Set.div as div.
+    assert root.children[3].text == 'Use the hypothesis hd: ∀ (t : ℝ) (x : Space), BalancedTransport.div v t x = 0.'
 
 
 @pytest.mark.parametrize('name', ['hypotheses_mixed', 'project_citation', 'applied_projection', 'unpack_existential',
@@ -635,7 +636,8 @@ def test_projection_reads_a_premise_with_a_binder_conjunct():
     n, d = rendered(real('binder_conjunct_projection'))
     step = owner(n, d, 0)
     assert step.rule == 'conjunction-projection' and not step.fallback
-    assert step.text == 'Take the first conjunct, ↑(n t) / ↑g → ∞ as t → ∞.'
+    # The snapshot prints no binder type, so the limit keeps its Lean form (docs/NOTATION.md).
+    assert step.text == 'Take the first conjunct, Tendsto (t ↦ ↑(n t) / ↑g) atTop atTop.'
     # A binder as the right conjunct takes the rest of the formula (A ∧ ∀ G, … → …).
     n, d = rendered(real('binder_right_projection'))
     assert owner(n, d, 0).rule == 'conjunction-projection' and not owner(n, d, 0).fallback

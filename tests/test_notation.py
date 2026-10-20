@@ -36,7 +36,7 @@ def shown(text, *extra, theorem='OAI.BinPackingGap.main_results', local=()):
 
 def test_own_enclosing_and_library_namespaces():
     assert shown('OAI.BinPackingGap.opt I ≤ 2 * OAI.BinPackingGap.lb I') == 'opt I ≤ 2 * lb I'
-    assert shown('OAI.A.foo x = OAI.C.bar', theorem='OAI.A.B.thm') == 'foo x = C.bar'
+    assert shown('OAI.A.foo x = OAI.Cx.bar', theorem='OAI.A.B.thm') == 'foo x = Cx.bar'
     assert shown('OAI.A.B.Sub.f = 0', theorem='OAI.A.B.thm') == 'Sub.f = 0'
     assert shown('MeasureTheory.volume (Set.Icc 0 1) = 1 ∧ Filter.atTop ≤ Filter.atTop') == 'volume (Icc 0 1) = 1 ∧ atTop ≤ atTop'
 
@@ -47,10 +47,42 @@ def test_unopened_library_namespaces_stay_qualified():
 
 
 def test_two_full_names_never_share_a_shown_name():
-    r = reading('OAI.BinPackingGap.map f = Filter.map f')
-    assert display('OAI.BinPackingGap.map f = Filter.map f', r) == 'BinPackingGap.map f = Filter.map f'
+    r = reading('OAI.BinPackingGap.fold f = Filter.fold f')
+    assert display('OAI.BinPackingGap.fold f = Filter.fold f', r) == 'BinPackingGap.fold f = Filter.fold f'
     values = list(r.names.values())
     assert len(values) == len(set(values))
+
+
+@pytest.mark.parametrize('text,expected', [
+    # Mathlib root definitions at the pin (N5): the reading need not contain the library name.
+    ('OAI.BinPackingGap.LocallyFinite G', 'BinPackingGap.LocallyFinite G'),
+    ('OAI.BinPackingGap.IsIntegral (n + 1) S', 'BinPackingGap.IsIntegral (n + 1) S'),
+    ('OAI.BinPackingGap.multiplicity D ≤ OAI.BinPackingGap.slope v', 'BinPackingGap.multiplicity D ≤ BinPackingGap.slope v'),
+    ('OAI.BinPackingGap.Path.length p', 'BinPackingGap.Path.length p'),
+    # Names that the display writes without an opened library prefix.
+    ('OAI.BinPackingGap.Integrable X ∧ OAI.BinPackingGap.lpNorm p f', 'BinPackingGap.Integrable X ∧ BinPackingGap.lpNorm p f'),
+    ('OAI.BinPackingGap.map f', 'BinPackingGap.map f'),
+    # The library constants themselves keep their short forms.
+    ('MeasureTheory.Integrable f ∧ Filter.map f = Set.Icc 0 1', 'Integrable f ∧ map f = Icc 0 1'),
+    # Set.Finite would read as the root class Finite.
+    ('Set.Finite s', 'Set.Finite s'),
+])
+def test_mathlib_names_at_the_pin_block_shortening(text, expected):
+    assert shown(text) == expected
+
+
+@pytest.mark.parametrize('text,expected', [
+    # A project constant shown as a lone letter reads as a variable (N6).
+    ('Real.exp (OAI.CoordinateSweeps.e G.size)', 'exp (CoordinateSweeps.e G.size)'),
+    ('f x ∂OAI.CoordinateSweeps.μ', 'f x ∂CoordinateSweeps.μ'),
+    ('∀ a ∈ OAI.CoordinateSweeps.A, a ≠ 0', '∀ a ∈ CoordinateSweeps.A, a ≠ 0'),
+    ("OAI.CoordinateSweeps.I3 + OAI.CoordinateSweeps.c₀ + OAI.CoordinateSweeps.x'", "CoordinateSweeps.I3 + CoordinateSweeps.c₀ + CoordinateSweeps.x'"),
+    ('OAI.CoordinateSweeps.F.mul_apply', 'CoordinateSweeps.F.mul_apply'),
+    # Longer names are unaffected.
+    ('OAI.CoordinateSweeps.cost G', 'cost G'),
+])
+def test_project_constants_are_not_shown_as_a_single_letter(text, expected):
+    assert shown(text, theorem='OAI.CoordinateSweeps.conditional_main') == expected
 
 
 def test_local_binder_and_bound_variable_block_shortening():
@@ -84,8 +116,8 @@ def test_words_of_the_narrative_dictionary_block_shortening():
 
 
 def test_names_in_string_literals_and_fields_are_untouched():
-    assert shown('OAI.BinPackingGap.f "OAI.BinPackingGap.f" = 1') == 'f "OAI.BinPackingGap.f" = 1'
-    assert shown("OAI.BinPackingGap.f 'a' = nhds 0") == "f 'a' = 𝓝 0"
+    assert shown('OAI.BinPackingGap.opt "OAI.BinPackingGap.opt" = 1') == 'opt "OAI.BinPackingGap.opt" = 1'
+    assert shown("OAI.BinPackingGap.opt 'a' = nhds 0") == "opt 'a' = 𝓝 0"
     assert shown('(g x).nhds = nhds x') == '(g x).nhds = 𝓝 x'
 
 
@@ -112,19 +144,19 @@ def test_shortening_is_order_independent():
 # --- structural notation (synthetic strings) ---------------------------------
 
 def test_tendsto_lambda_at_top_to_a_limit():
-    text = 'Filter.Tendsto (fun x => OAI.TotientAsymptotic.V x / OAI.TotientAsymptotic.mainTerm x) Filter.atTop (nhds 1)'
-    assert shown(text, theorem='OAI.TotientAsymptotic.formula') == 'V x / mainTerm x → 1 as x → ∞'
+    text = 'Filter.Tendsto (fun (x : ℝ) => OAI.TotientAsymptotic.Vol x / OAI.TotientAsymptotic.mainTerm x) Filter.atTop (nhds 1)'
+    assert shown(text, theorem='OAI.TotientAsymptotic.formula') == 'Vol x / mainTerm x → 1 as x → ∞'
 
 
 def test_tendsto_variants():
-    assert shown('Filter.Tendsto (fun n => f n) Filter.atTop Filter.atTop') == 'f n → ∞ as n → ∞'
-    assert shown('Filter.Tendsto (fun n => f n) Filter.atTop Filter.atBot') == 'f n → −∞ as n → ∞'
-    assert shown('Filter.Tendsto (fun n => f n) Filter.atTop (nhds (g 0))') == 'f n → g 0 as n → ∞'
-    assert shown('Filter.Tendsto (fun n => f n) Filter.atTop (nhds (a, b))') == 'f n → (a, b) as n → ∞'
+    assert shown('Filter.Tendsto (fun (n : ℕ) => (f n : ℝ)) Filter.atTop Filter.atTop') == '(f n : ℝ) → ∞ as n → ∞'
+    assert shown('Filter.Tendsto (fun (n : ℤ) => (f n : ℚ)) Filter.atTop Filter.atBot') == '(f n : ℚ) → −∞ as n → ∞'
+    assert shown('Filter.Tendsto (fun (n : ℕ) => f n) Filter.atTop (nhds (g 0))') == 'f n → g 0 as n → ∞'
+    assert shown('Filter.Tendsto (fun (n : ℕ) => f n) Filter.atTop (nhds (a, b))') == 'f n → (a, b) as n → ∞'
     # A low-precedence body is parenthesized; the whole form is when it is an operand.
-    assert (shown('0 < c ∧ Filter.Tendsto (fun N => ∑ k ∈ s N, f k) Filter.atTop (nhds c)')
+    assert (shown('0 < c ∧ Filter.Tendsto (fun (N : ℕ) => ∑ k ∈ s N, f k) Filter.atTop (nhds c)')
             == '0 < c ∧ ((∑ k ∈ s N, f k) → c as N → ∞)')
-    assert shown('¬Filter.Tendsto (fun n => |f n|) Filter.atTop (nhds 0)') == '¬(|f n| → 0 as n → ∞)'
+    assert shown('¬Filter.Tendsto (fun (n : ℕ) => |f n|) Filter.atTop (nhds 0)') == '¬(|f n| → 0 as n → ∞)'
 
 
 @pytest.mark.parametrize('text,expected', [
@@ -132,38 +164,65 @@ def test_tendsto_variants():
     ('Filter.Tendsto f Filter.atTop (nhds 0)', 'Tendsto f atTop (𝓝 0)'),
     # Another source filter.
     ('Filter.Tendsto (fun x => f x) (nhds 0) (nhds 0)', 'Tendsto (x ↦ f x) (𝓝 0) (𝓝 0)'),
-    # Two binders, a typed binder, a pattern.
+    ('Filter.Tendsto (fun (x : ℕ) => f x) (nhds 0) (nhds 0)', 'Tendsto (fun (x : ℕ) => f x) (𝓝 0) (𝓝 0)'),
+    # Two binders, a pattern.
     ('Filter.Tendsto (fun x y => f x) Filter.atTop (nhds 0)', 'Tendsto (fun x y => f x) atTop (𝓝 0)'),
-    ('Filter.Tendsto (fun (x : ℕ) => f x) Filter.atTop (nhds 0)', 'Tendsto (fun (x : ℕ) => f x) atTop (𝓝 0)'),
     ('Filter.Tendsto (fun ⟨a, b⟩ => f a) Filter.atTop (nhds 0)', 'Tendsto (fun ⟨a, b⟩ => f a) atTop (𝓝 0)'),
     # Partial and over-applied.
-    ('Filter.Tendsto (fun x => f x) Filter.atTop', 'Tendsto (x ↦ f x) atTop'),
-    ('Filter.Tendsto (fun x => f x) Filter.atTop (nhds 0) y', 'Tendsto (x ↦ f x) atTop (𝓝 0) y'),
+    ('Filter.Tendsto (fun (x : ℕ) => f x) Filter.atTop', 'Tendsto (fun (x : ℕ) => f x) atTop'),
+    ('Filter.Tendsto (fun (x : ℕ) => f x) Filter.atTop (nhds 0) y', 'Tendsto (fun (x : ℕ) => f x) atTop (𝓝 0) y'),
     # As an argument of another function.
-    ('P Filter.Tendsto (fun x => f x) Filter.atTop (nhds 0)', 'P Tendsto (x ↦ f x) atTop (𝓝 0)'),
+    ('P Filter.Tendsto (fun (x : ℕ) => f x) Filter.atTop (nhds 0)', 'P Tendsto (fun (x : ℕ) => f x) atTop (𝓝 0)'),
     # The limit is not a single atom.
-    ('Filter.Tendsto (fun x => f x) Filter.atTop (nhds a b)', 'Tendsto (x ↦ f x) atTop (𝓝 a b)'),
-    ('Filter.Tendsto (fun x => f x) Filter.atTop (nhds x⁻¹)', 'Tendsto (x ↦ f x) atTop (𝓝 x⁻¹)'),
+    ('Filter.Tendsto (fun (x : ℕ) => f x) Filter.atTop (nhds a b)', 'Tendsto (fun (x : ℕ) => f x) atTop (𝓝 a b)'),
+    ('Filter.Tendsto (fun (x : ℕ) => f x) Filter.atTop (nhds x⁻¹)', 'Tendsto (fun (x : ℕ) => f x) atTop (𝓝 x⁻¹)'),
 ])
 def test_tendsto_bails_out(text, expected):
     assert shown(text) == expected
 
 
+@pytest.mark.parametrize('text,expected', [
+    # N2/N8: x → ∞ needs the printed binder type to be ℕ, ℤ, ℚ or ℝ. An untyped
+    # binder might range over a Finset (∑ i ∈ s) or another directed type.
+    ('Filter.Tendsto (fun s => ∑ i ∈ s, f i) Filter.atTop (nhds a)', 'Tendsto (s ↦ ∑ i ∈ s, f i) atTop (𝓝 a)'),
+    ('Filter.Tendsto (fun x => OAI.TotientAsymptotic.Vol x) Filter.atTop (nhds 1)', 'Tendsto (x ↦ Vol x) atTop (𝓝 1)'),
+    ('Filter.Tendsto (fun (s : Finset ℕ) => ∑ i ∈ s, f i) Filter.atTop (nhds a)',
+     'Tendsto (fun (s : Finset ℕ) => ∑ i ∈ s, f i) atTop (𝓝 a)'),
+    ('Filter.Tendsto (fun (x : ℝ≥0) => f x) Filter.atTop (nhds a)', 'Tendsto (fun (x : ℝ≥0) => f x) atTop (𝓝 a)'),
+    ('Filter.Tendsto (fun (x : EReal) => f x) Filter.atTop (nhds a)', 'Tendsto (fun (x : EReal) => f x) atTop (𝓝 a)'),
+    # A target atTop or atBot also needs the value's printed type: on ENNReal,
+    # EReal or a measure's values, atTop means "eventually equal to ⊤".
+    ("Filter.Tendsto (fun n => μ (s ∩ (⇑T)^[n] ⁻¹' t)) Filter.atTop Filter.atTop",
+     "Tendsto (n ↦ μ (s ∩ (⇑T)^[n] ⁻¹' t)) atTop atTop"),
+    ('Filter.Tendsto (fun (n : ℕ) => μ (s n)) Filter.atTop Filter.atTop', 'Tendsto (fun (n : ℕ) => μ (s n)) atTop atTop'),
+    ('Filter.Tendsto (fun (n : ℕ) => (f n : ENNReal)) Filter.atTop Filter.atTop',
+     'Tendsto (fun (n : ℕ) => (f n : ENNReal)) atTop atTop'),
+    ('Filter.Tendsto (fun x => x) Filter.atTop Filter.atBot', 'Tendsto (x ↦ x) atTop atBot'),
+    # ℕ has a least element: atBot there means "eventually equal to 0", not "→ −∞".
+    ('Filter.Tendsto (fun (x : ℝ) => (f x : ℕ)) Filter.atTop Filter.atBot',
+     'Tendsto (fun (x : ℝ) => (f x : ℕ)) atTop atBot'),
+    ('Filter.Tendsto (fun (n : ℕ) => (f n : ℕ)) Filter.atTop Filter.atTop', '(f n : ℕ) → ∞ as n → ∞'),
+    ('Filter.Tendsto (fun (x : ℝ) => (f x : ℤ)) Filter.atTop Filter.atBot', '(f x : ℤ) → −∞ as x → ∞'),
+])
+def test_tendsto_needs_printed_number_types(text, expected):
+    assert shown(text, theorem='OAI.TotientAsymptotic.formula') == expected
+
+
 def test_string_literals_are_atoms_for_structural_rules():
-    assert (shown('Filter.Tendsto (fun x => g x "fun y => y") Filter.atTop (nhds "Real.pi")')
+    assert (shown('Filter.Tendsto (fun (x : ℕ) => g x "fun y => y") Filter.atTop (nhds "Real.pi")')
             == 'g x "fun y => y" → "Real.pi" as x → ∞')
     assert shown('P "fun x => Real.sqrt x" ∧ Real.sqrt "s"') == 'P "fun x => Real.sqrt x" ∧ √"s"'
 
 
 def test_tendsto_word_collision_bails_out():
-    text = 'Filter.Tendsto (fun x => f x) Filter.atTop (nhds as)'
-    assert shown(text) == 'Tendsto (x ↦ f x) atTop (𝓝 as)'
+    text = 'Filter.Tendsto (fun (x : ℕ) => f x) Filter.atTop (nhds as)'
+    assert shown(text) == 'Tendsto (fun (x : ℕ) => f x) atTop (𝓝 as)'
 
 
 @pytest.mark.parametrize('text,expected', [
     # The limit's n is free; "as n → ∞" would bind it.
-    ('Filter.Tendsto (fun n => f n) Filter.atTop (nhds n)', 'Tendsto (n ↦ f n) atTop (𝓝 n)'),
-    ('Filter.Tendsto (fun n => f n) Filter.atTop (nhds (g n.1))', 'Tendsto (n ↦ f n) atTop (𝓝 (g n.1))'),
+    ('Filter.Tendsto (fun (n : ℕ) => f n) Filter.atTop (nhds n)', 'Tendsto (fun (n : ℕ) => f n) atTop (𝓝 n)'),
+    ('Filter.Tendsto (fun (n : ℕ) => f n) Filter.atTop (nhds (g n.1))', 'Tendsto (fun (n : ℕ) => f n) atTop (𝓝 (g n.1))'),
 ])
 def test_tendsto_limit_mentioning_the_bound_variable_bails_out(text, expected):
     assert shown(text) == expected
@@ -171,9 +230,45 @@ def test_tendsto_limit_mentioning_the_bound_variable_bails_out(text, expected):
 
 def test_tendsto_bails_out_when_the_reading_prints_infinity():
     # In ENNReal, atTop is the filter at ⊤ and differs from 𝓝 ∞.
-    text = 'Filter.Tendsto (fun n => f n) Filter.atTop Filter.atTop'
-    assert shown(text, 'f 0 < ∞') == 'Tendsto (n ↦ f n) atTop atTop'
-    assert shown(text) == 'f n → ∞ as n → ∞'
+    text = 'Filter.Tendsto (fun (n : ℕ) => (f n : ℝ)) Filter.atTop Filter.atTop'
+    assert shown(text, 'f 0 < ∞') == 'Tendsto (fun (n : ℕ) => (f n : ℝ)) atTop atTop'
+    assert shown(text) == '(f n : ℝ) → ∞ as n → ∞'
+
+
+@pytest.mark.parametrize('text,expected', [
+    # N3: as the body of a lambda the limit form is parenthesized, so that it
+    # does not read as "the function ε ↦ f n ε tends to 0".
+    ('fun ε => Filter.Tendsto (fun (n : ℕ) => f n ε) Filter.atTop (nhds 0)', 'ε ↦ (f n ε → 0 as n → ∞)'),
+    ('(fun ε => Filter.Tendsto (fun (n : ℕ) => f n ε) Filter.atTop (nhds 0)) = p', '(ε ↦ (f n ε → 0 as n → ∞)) = p'),
+    ('Set.indicator s (fun x => 1) = fun y => Filter.Tendsto (fun (n : ℕ) => (g n y : ℝ)) Filter.atTop Filter.atTop',
+     'indicator s (x ↦ 1) = (y ↦ ((g n y : ℝ) → ∞ as n → ∞))'),
+    ('fun ε => Filter.Tendsto (fun (n : ℕ) => f n ε) Filter.atTop (nhds 0) ∧ q', 'ε ↦ (f n ε → 0 as n → ∞) ∧ q'),
+    # A whole formula or bracket group needs no parentheses.
+    ('fun ε => (Filter.Tendsto (fun (n : ℕ) => f n ε) Filter.atTop (nhds 0))', 'ε ↦ (f n ε → 0 as n → ∞)'),
+    ('∀ ε, Filter.Tendsto (fun (n : ℕ) => f n ε) Filter.atTop (nhds 0)', '∀ ε, (f n ε → 0 as n → ∞)'),
+    ('Filter.Tendsto (fun (n : ℕ) => f n) Filter.atTop (nhds 0)', 'f n → 0 as n → ∞'),
+])
+def test_tendsto_form_is_parenthesized_inside_a_lambda_body(text, expected):
+    assert shown(text) == expected
+
+
+@pytest.mark.parametrize('text,expected', [
+    # N1: brackets the parser does not pair hold commas that do not end a
+    # lambda body, so the lambda is left as printed.
+    ('g = fun x => ⟪f x, v⟫_ℝ', 'g = fun x => ⟪f x, v⟫_ℝ'),
+    ('Filter.Tendsto (fun x => ⟪f x, v⟫_ℝ) Filter.atTop (nhds 0)', 'Tendsto (fun x => ⟪f x, v⟫_ℝ) atTop (𝓝 0)'),
+    ('Measurable fun x => ⁅f x, g⁆', 'Measurable fun x => ⁅f x, g⁆'),
+    ('S = fun x => F⟮x, y⟯', 'S = fun x => F⟮x, y⟯'),
+    ('T = fun x => Π₀ i, β i x', 'T = fun x => Π₀ i, β i x'),
+    ('g = fun x => ‹Fact p›', 'g = fun x => ‹Fact p›'),
+    # Modelled brackets, binders, and floor and ceiling (one term each).
+    ('g = fun x => ⟨f x, v⟩', 'g = (x ↦ ⟨f x, v⟩)'),
+    ('T = fun x => Σ i, β i x', 'T = (x ↦ Σ i, β i x)'),
+    ('h = fun n => p n 3 ⌊c * ↑n⌋₊ + ⌈↑n⌉₊', 'h = (n ↦ p n 3 ⌊c * ↑n⌋₊ + ⌈↑n⌉₊)'),
+    ('g = (fun x => ⟪f x, v⟫_ℝ)', 'g = (fun x => ⟪f x, v⟫_ℝ)'),
+])
+def test_unpaired_brackets_and_pi_sigma_notations_stop_the_lambda_rule(text, expected):
+    assert shown(text) == expected
 
 
 def test_n_ary_binder_commas_stay_inside_a_lambda_body():
@@ -240,6 +335,8 @@ def test_symbol_bail_outs(text, local, expected):
 
 IDEMPOTENT = ['OAI.BinPackingGap.opt I ≤ 2 * OAI.BinPackingGap.lb I',
               'Filter.Tendsto (fun x => OAI.BinPackingGap.V x / x) Filter.atTop (nhds 1) ∧ P',
+              'Filter.Tendsto (fun (x : ℝ) => OAI.BinPackingGap.opt x / x) Filter.atTop (nhds 1) ∧ P',
+              'fun ε => Filter.Tendsto (fun (n : ℕ) => f n ε) Filter.atTop (nhds 0)',
               'Finset.sum s fun i => Real.log (f i)', 'nhdsWithin 0 (Set.Ioi 0)', 'Nat.choose n 2 + Finset.card s',
               '⟨fun x => e x, h⟩', 'Real.sqrt (x + 1) = 2 * Real.pi']
 
@@ -319,6 +416,117 @@ def test_cited_names_use_the_same_map_and_reach_the_legend():
     assert notation.name('Nat.succ_le', r) == 'Nat.succ_le'
     assert notation.summary(r, 'Apply opt_le.')['omitted_namespaces'] == ['OAI.BinPackingGap']
     assert notation.summary(r, 'Apply opt_lemma.')['omitted_namespaces'] == []
+
+
+def test_step_details_reach_the_legend():
+    # Synthetic declaration (N7): display notation that occurs only in a step
+    # detail, which the reader's step inspector shows.
+    from types import SimpleNamespace
+    from proofreader.model import Step
+    raw = 'CompleteSpace (PiLp 2 fun x => MeasureTheory.Lp ℂ 2 μ)'
+    r = reading(raw)
+    detail = 'Typeclass derivations (not expanded):\n'+display(raw, r)+' — PiLp.completeSpace'
+    step = Step('s', 'instance-facts', 'Standard instance fact used: CompleteSpace E.', detail=detail)
+    d = SimpleNamespace(parameters=[], statement='True', steps=[step])
+    assert 'PiLp 2 (x ↦ Lp ℂ 2 μ)' in notation.displayed_text(d)
+    legend = notation.summary(r, notation.displayed_text(d))
+    assert legend['omitted_namespaces'] == ['MeasureTheory'] and ['x ↦ e', 'fun x => e'] in legend['symbols']
+
+
+def test_reserved_data_records_the_pinned_mathlib_and_known_names():
+    data = json.loads(notation.RESERVED_DATA.read_text(encoding='utf-8'))
+    glossary = json.loads((ROOT/'proofreader/data/glossary.json').read_text(encoding='utf-8'))
+    assert data['schema'] == 'leanglish.notation-reserved/v1'
+    assert data['source'] == glossary['sources']['mathlib4']  # the corpus pin
+    assert data['root'] == sorted(set(data['root'])) and set(data['library']) == set(notation.LIBRARY)
+    # The root names that corpus project constants repeat (N5).
+    assert {'LocallyFinite', 'IsIntegral', 'IsIrreducible', 'Poly', 'Reflexive', 'Sym', 'Congruent', 'multiplicity',
+            'slope', 'Path'} <= set(data['root'])
+    assert {'Integrable', 'lpNorm', 'Measure'} <= set(data['library']['MeasureTheory'])
+    assert 'Tendsto' in data['library']['Filter'] and 'Icc' in data['library']['Set']
+
+
+def derivation():
+    import importlib.util
+    spec = importlib.util.spec_from_file_location('derive_notation_reserved', ROOT/'scripts/derive_notation_reserved.py')
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
+
+
+def test_derive_reserved_reads_declarations_lexically(tmp_path):
+    # Synthetic source tree, not Mathlib.
+    src = tmp_path/'Mathlib'/'A'
+    src.mkdir(parents=True)
+    (src/'B.lean').write_text('\n'.join([
+        '/-! # Header', 'def InComment := 1', '-/',
+        '@[expose] public section',
+        'def RootDef : Nat := 1',
+        'structure RootStructure where', '  x : Nat',
+        'theorem root_theorem : True := trivial',
+        'private def Hidden := 1',
+        'instance instRoot : Inhabited Nat := ⟨0⟩',
+        'namespace MeasureTheory',
+        'noncomputable def Integrable := 1 /- def InlineComment := 1 -/',
+        'def Nested.inner := 1',
+        'section', '@[simp] lemma integrable_x : True := trivial', 'end',
+        'def _root_.EscapedRoot := 1',
+        'end MeasureTheory',
+        'namespace Other', 'class Inner', 'end Other',
+        'abbrev Spaced := "def NotInString := 1" -- def NotInLineComment := 1',
+        'end']), encoding='utf-8')
+    data = derivation().derive(tmp_path, 'synthetic')
+    assert data['root'] == ['EscapedRoot', 'RootDef', 'RootStructure', 'Spaced']
+    assert data['library'] == {'Filter': [], 'MeasureTheory': ['Integrable'], 'Set': []}
+    assert data['source']['revision'] == 'synthetic'
+
+
+@pytest.mark.skipif(not os.environ.get('LEANGLISH_MATHLIB_SRC'), reason='set LEANGLISH_MATHLIB_SRC to a Mathlib checkout at the pin')
+def test_reserved_data_reproduces_from_the_pinned_checkout(tmp_path):
+    data = json.loads(notation.RESERVED_DATA.read_text(encoding='utf-8'))
+    out = tmp_path/'reserved.json'
+    assert derivation().main([os.environ['LEANGLISH_MATHLIB_SRC'], '--revision', data['source']['revision'], '-o', str(out)]) == 0
+    assert out.read_bytes() == notation.RESERVED_DATA.read_bytes()
+
+
+def test_reader_shows_the_legend_beside_the_statement():
+    """Real Chromium on a retained fixture: the default Argument view shows the legend (N4)."""
+    pw = pytest.importorskip('playwright.sync_api')
+    import shutil
+    from proofreader.render import html_document
+    d = Narrative(json.loads((FIXTURES/'infinite_matroid.snapshot.json').read_text())).document(source='retained separately')
+    legend = d.declarations[0].axes['notation']
+    plain = Narrative(json.loads(BEZOUT.read_text())).document()
+    executable = shutil.which('chromium') or shutil.which('google-chrome')
+    with pw.sync_playwright() as p:
+        try:
+            browser = (p.chromium.launch(executable_path=executable, headless=True, args=['--no-sandbox'])
+                       if executable else p.chromium.launch(headless=True))
+        except Exception as exc:
+            if os.environ.get('PROOFREADER_REQUIRE_BROWSER') == '1':
+                pytest.fail(f'Browser CI requires Chromium: {exc}')
+            pytest.skip(f'Browser unavailable: {exc}')
+        try:
+            page = browser.new_page()
+            errors = []
+            page.on('pageerror', lambda e: errors.append(str(e)))
+            page.set_content(html_document(d))
+            assert page.get_attribute('#tab-reading', 'aria-selected') == 'true'
+            box = page.locator('.statement-card #notation-legend')
+            assert box.is_visible()
+            text = box.inner_text()
+            assert text.startswith(notation.LEGEND_TITLE)
+            assert 'Namespace prefixes not written: '+', '.join(legend['omitted_namespaces'])+'.' in text
+            assert all(f'{s} stands for {lean}.' in text for s, lean in legend['symbols'])
+            # The Evidence tab keeps the same legend as the last warning.
+            page.locator('#tab-audit').click()
+            assert not box.is_visible() and notation.LEGEND_TITLE in page.locator('#audit').inner_text()
+            # A reading without display notation shows no legend.
+            page.set_content(html_document(plain))
+            assert page.locator('#notation-legend').is_hidden()
+            assert not errors, errors
+        finally:
+            browser.close()
 
 
 def test_changed_legend_is_rejected():
