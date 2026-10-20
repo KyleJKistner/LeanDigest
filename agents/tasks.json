@@ -56,7 +56,8 @@
         "proofreader/polynomial.py",
         "docs/NARRATIVE.md",
         "proofreader/formula_surface.py",
-        "proofreader/notation.py"
+        "proofreader/notation.py",
+        "proofreader/narrative_rules.py"
       ],
       "allowed_paths": [
         "proofreader/english.py",

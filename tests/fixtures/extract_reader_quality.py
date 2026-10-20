@@ -8,12 +8,14 @@ fixture keeps the recorded frames of one subtree unchanged except for
 re-indexing, the path prefix and the enclosing local context, which every
 frame of the subtree shares and which is removed. Extraction fails unless each
 recorded frame is displayed with the same text, gap flag and rule as in the
-full snapshot (only the root step's conclusion may differ, because a parent
-that states the claim suppresses it there).
+full snapshot. Only the root step may differ: its conclusion, because a parent
+that states the claim suppresses it there, and the wording of a citation that
+proves the subtree's own statement ("The statement follows from X" for "By X").
 """
 import hashlib
 import json
 from pathlib import Path
+import re
 import sys
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
@@ -40,6 +42,18 @@ FIXTURES = [
     ('rcases_chain', '8593c0757421b0bc36918c20', 8),
     ('instance_from_project_lemma', '4a72a3f89a6e3a114dd76c34', 25),
     ('substitution_specialized', '130628592a176216f3d3f4e9', 33),
+    # Added for source-math-en/0.6.0.
+    ('hypotheses_mixed', '065eddd53975720f9d443d63', 105),
+    ('binder_conjunct_projection', '041ad1b2c7d69a9a62c10c7f', 121),
+    ('binder_right_projection', '2e1f01c9a8dfcfd39dc1eeba', 31),
+    ('equivalence_binder', '151b0da1c1708a5b462d03ba', 46),
+    ('witness_proof_named', 'eb2434f6266b34e6ae633b10', 16),
+    ('witness_proof_anonymous', 'a9b0f23c43ac9dd9608b9e80', 16),
+    ('unpack_existential', '4c998ca1a32a284762ae3319', 20),
+    ('unchecked_application', '6bfcd5b628744719dae2584a', 41),
+    ('applied_projection', '380d53f06e20517c2d1f4c4b', 10),
+    ('local_instance', '3a43803ef4ef28944eac9eb2', 44),
+    ('nonempty_construction', '9d371e576d1c015cba0577cc', 2),
 ]
 
 
@@ -68,11 +82,17 @@ def extract(rec, root):
     return out, order
 
 
+def root_wording(text):
+    m = re.fullmatch(r'The statement follows from (.+?)(?:, applied to the facts below)?\.', text)
+    return 'By '+m[1] if m else text
+
+
 def displayed(record, ids):
     n = Narrative(record); d = n.document().declarations[0]
     by = {s.id: s for s in walk_steps(d.steps)}
-    return [(by[n.owners[i]].text.rstrip(':.'), by[n.owners[i]].conclusion if k else None,
-             by[n.owners[i]].fallback, by[n.owners[i]].rule) for k, i in enumerate(ids)]
+    return [((by[n.owners[i]].text if k else root_wording(by[n.owners[i]].text)).rstrip(':.'),
+             by[n.owners[i]].conclusion if k else None, by[n.owners[i]].fallback, by[n.owners[i]].rule)
+            for k, i in enumerate(ids)]
 
 
 def main(corpus, dest):
