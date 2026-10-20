@@ -57,9 +57,11 @@ expires 17:06). The recorded source digests are of the artifact ZIP
 | 2027-01-15 to 2027-01-17 | The `expiring-2027-01` set | Their consumers can no longer download them. |
 
 Whether `completion-resume.yml` needs to run again is the owner's decision. It
-resumes one stopped worker of recovery run 39315174445. Two earlier runs of
-`completion-resume.yml` are recorded: 39321225048 (success) and 39352981910
-(failure).
+resumes one stopped worker of recovery run 39315174445. The Actions API lists
+five runs of `completion-resume.yml`, all on the PR #8 branch and all created
+before 2026-10-20 02:01 UTC: 39321225048 (pull request, success), 39352981910
+(push, failure), 39354068802 (pull request, failure), and 39354572672 and
+39356534222 (pull request, skipped). Three ran, and two of those failed.
 
 ## Inputs this workflow does not copy
 
@@ -100,6 +102,13 @@ resumes one stopped worker of recovery run 39315174445. Two earlier runs of
 - **Acceptance run 38792262410** (2 artifacts, expiring on 2027-01-13).
   `docs/MATHEMATICIAN_PREVIEW.md` cites it, and only archived workflows
   download it.
+- **Dependency-cone pilot run 39373979494** (11 artifacts, all expiring on
+  2027-01-18 at 05:16, read on 2026-10-20 at about 16:40 UTC). They hold the
+  only copy of the 151 pilot readings (`docs/DEPENDENCY_CONE.md`).
+  `catalog-preview.yml` downloads 10 of them through
+  `scripts/download_cone_artifacts.py` and builds the preview without the
+  supporting lemma readings when they are missing. The registry of
+  `scripts/preserve_inputs.py` does not include them.
 
 ## Copies as new artifacts
 

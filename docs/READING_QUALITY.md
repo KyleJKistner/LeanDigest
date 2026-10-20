@@ -40,11 +40,15 @@ switchable change disabled.
 | Steps reading "Apply X to the supplied arguments." (wording) | 7,616 | 37 | 7 | 7 |
 | Readings with more than half gap steps | 225 | 191 | 193 | 188 |
 | Readings without gaps | 0 | 0 | 0 | 0 |
-| Words | 393,664 | 307,735 | 301,158 | 321,205 |
-| Qualified names per 1,000 characters | 15.48 | 7.78 | 7.87 | 7.83 |
-| `fun`, `=>`, `↑` per 1,000 characters | 3.91 | 4.22 | 4.28 | 4.29 |
+| Words | 393,664 | 307,735 | 301,158 | 321,137 |
+| Qualified names per 1,000 characters | 15.48 | 7.78 | 7.87 | 8.08 |
+| `fun`, `=>`, `↑` per 1,000 characters | 3.91 | 4.22 | 4.28 | 4.26 |
 
-The 0.5.0 column is the committed `current.json` before 0.6.0, which includes
+The 0.7.0 column is `benchmarks/reading-kpis/current.json` at commit
+`bbc90ac`, which regenerates byte for byte there. That commit also contains the
+notation refusals described in `docs/NOTATION.md`, which change the displayed
+words and rates of the 0.7.0 readings but no step or gap count. The 0.5.0
+column is the committed `current.json` before 0.6.0, which includes
 the notation layer described in `docs/NOTATION.md`. Before that layer was
 integrated, the same version measured 311,412 words, 15.19 qualified names and
 4.48 Lean markers per 1,000 characters; the step and gap counts are the same.
@@ -100,29 +104,30 @@ the 520 nesting steps enlarge the denominator; the number of gap steps rose by
 
 Cumulative, in table order. Δ is the change from the row above (the first row
 is compared with 0.4.2). Rows 1–7 are 0.5.0, rows 8–15 are 0.6.0 and rows
-16–26 are 0.7.0. The word column of rows 1–7 now includes the notation layer,
-so it differs from the values first recorded for 0.5.0; the other columns are
-unchanged.
+16–26 are 0.7.0. The table is the output of `stage_effects.py` at commit
+`bbc90ac`; its last row equals `current.json`. The word column includes the
+notation layer and its later refusals, so it differs from the values first
+recorded for 0.5.0 and 0.6.0; the other columns are unchanged.
 
 | Change | Δ displayed steps | Δ gap steps | Δ gap frames | Citation gap steps | Instance frames | Δ words |
 |---|---:|---:|---:|---:|---:|---:|
-| Changes without a switch point: Nonempty elimination, unfolded projections, substitution, restatement, named-goal witness, anonymous `have`, `Subtype.property`, `ring` wording; in 0.6.0, the wording of `Nonempty.intro` with a constructed element | −28 | −28 | −28 | — | — | +7,097 |
+| Changes without a switch point: Nonempty elimination, unfolded projections, substitution, restatement, named-goal witness, anonymous `have`, `Subtype.property`, `ring` wording; in 0.6.0, the wording of `Nonempty.intro` with a constructed element | −28 | −28 | −28 | — | — | +7,022 |
 | 1. Typeclass side conditions grouped | −1,888 | −1,588 | +166 | — | 2,791 | −16,106 |
 | 2. norm_num, positivity and linarith certificates collapsed | −1,319 | −879 | +440 | — | 2,791 | −9,807 |
 | 3. Rewrite frontiers described by their head | 0 | 0 | 0 | — | 2,791 | +4,081 |
 | 4. Citations reworded and tagged | 0 | 0 | 0 | 3,550 | 2,791 | −9,128 |
 | 5. `cast` along a recorded equation explained | 0 | −42 | −42 | 3,508 | 2,791 | +570 |
-| 6. A claim stated by `have` or `choose` is not repeated under its sole unexplained proof | 0 | 0 | 0 | 3,508 | 2,791 | −13,647 |
+| 6. A claim stated by `have` or `choose` is not repeated under its sole unexplained proof | 0 | 0 | 0 | 3,508 | 2,791 | −13,644 |
 | 7. A destructured hypothesis is named, and nested destructuring is one step | −610 | 0 | 0 | 3,508 | 2,791 | −48,728 |
 | 8. Adjacent hypotheses are one line | −1,300 | 0 | 0 | 3,508 | 2,791 | −3,900 |
-| 9. A conjunction premise is read with Lean's precedence, binder conjuncts included | 0 | −97 | −97 | 3,508 | 2,791 | −3,354 |
+| 9. A conjunction premise is read with Lean's precedence, binder conjuncts included | 0 | −97 | −97 | 3,508 | 2,791 | −3,349 |
 | 10. An equivalence premise is read with Lean's precedence | 0 | −7 | −7 | 3,501 | 2,791 | +500 |
 | 11. An existential over a proposition is proved from a proof of it | −6 | −18 | −18 | 3,501 | 2,791 | −86 |
 | 12. An existential over a proposition is unpacked | −36 | −12 | −12 | 3,501 | 2,791 | −808 |
 | 13. A conjunct applied to further arguments is described | 0 | −1 | −1 | 3,490 | 2,791 | +533 |
 | 14. A nonempty type with an element in the local context | 0 | −2 | −2 | 3,488 | 2,791 | −14 |
 | 15. Local instance hypotheses are named in instance steps | 0 | 0 | 0 | 3,488 | 2,791 | +291 |
-| 16. A proof of several steps that shares its list with other premises, conjuncts, links or cases is nested under "Prove S." | +520 | 0 | 0 | 3,488 | 2,791 | +18,638 |
+| 16. A proof of several steps that shares its list with other premises, conjuncts, links or cases is nested under "Prove S." | +520 | 0 | 0 | 3,488 | 2,791 | +18,637 |
 | 17. A binary `*` or `-` at a line break of the pretty-printer is shown as `·` or `−` | 0 | 0 | 0 | 3,488 | 2,791 | 0 |
 | 18. A linarith certificate is named as the procedure's, which nlinarith also uses | 0 | 0 | 0 | 3,488 | 2,791 | +801 |
 | 19. `Iff.mp` is explained only when its premises and conclusion print as the two sides | 0 | +12 | +12 | 3,488 | 2,791 | +216 |
@@ -135,8 +140,11 @@ unchanged.
 | 26. Wording: structure constructors, definitions with automatic names, type, proposition and instance binders, partially applied relations, instance lists | 0 | 0 | 0 | 3,488 | 2,791 | +126 |
 
 Changes 3, 4 and 15 only reword or tag steps; they do not explain anything, and
-the gap counts show that. Change 4 is why `opaque_apply_steps` fell from 7,616
-to 37: that measure is kept only as a wording measure. `citation_gap_steps`
+the gap counts show that. `opaque_apply_steps` fell from 7,616 at 0.4.2 to 7.
+The changes without a switch point remove 492 of these steps, grouping
+(change 1) absorbs 2,304, collapsing (change 2) absorbs 944, change 3 rewords
+346, change 4 rewords the remaining 3,493 (from 3,530 to 37), and changes 11
+and 12 remove the last 30. That measure is kept only as a wording measure. `citation_gap_steps`
 counts the rule tag, so rewording a citation cannot change it (see
 `tests/test_reader_quality.py::test_citation_count_does_not_depend_on_wording`).
 Change 8 only regroups non-gap lines; its row and

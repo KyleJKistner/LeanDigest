@@ -493,16 +493,20 @@ the links of the supporting readings themselves.
 
 ### Pilot readings in the preview
 
-A local preview of the pinned release `leanglish-original-project-317dc31` with
-renderer `source-math-en/0.6.0` and the artifacts of run 39373979494, downloaded
-with `scripts/download_cone_artifacts.py` (all 10 digests matched the API),
-gave the following.
+The catalog-preview workflow run
+[39456773394](https://github.com/KyleJKistner/LeanDigest/actions/runs/39456773394)
+at commit `bbc90ac` (renderer `source-math-en/0.7.0`, clean tracked tree)
+built a preview of the pinned release `leanglish-original-project-317dc31` with
+the artifacts of run 39373979494, which `scripts/download_cone_artifacts.py`
+downloaded with matching digests. Its `catalog-preview-diagnostics` artifact
+(SHA-256 `3878dc00…`, matching the API) records the following. A local build of
+the same application code with the same inputs gave the same counts.
 
 | Measure | Count |
 | --- | ---: |
 | Supporting lemma readings bundled | 151 of 1,722 planned (pilot scope) |
 | Checked frames | 9,310 |
-| Explicit explanation gaps | 2,649 |
+| Explicit explanation gaps | 2,754 |
 | Readings without explanation gaps | 0 |
 | Citations in target readings newly linked to a supporting lemma reading | 153 |
 | … distinct cited names | 151 |
@@ -517,21 +521,24 @@ Every one of the 153 citing pairs is in the environment module of the cited
 lemma, so the `same-module` rule decides all of them. No citation in a
 supporting reading links to a target reading, and 6 link only to a source line.
 
-The run used application commit `171ab5e` with a clean tracked tree. The
-reconciled outcomes equal the campaign summary. The static audit passed and
+The reconciled outcomes equal the campaign summary. The static audit passed and
 checked 1,433 pages, including the 151 supporting lemma pages and 202
-supporting lemma links. Real Chromium file navigation passed, including a finding
-page's supporting lemma list, a supporting lemma reader page and a target
-reader's link to it. The target readings' gap steps, frames inside gaps and gap
-counts by rule still equal `benchmarks/reading-kpis/current.json`.
+supporting lemma links. Real Chromium file navigation passed in the workflow
+run, including a finding page's supporting lemma list, a supporting lemma
+reader page and a target reader's link to it. The target readings' gap steps,
+frames inside gaps and gap counts by rule equal
+`benchmarks/reading-kpis/current.json`. The first local measurement, at commit
+`171ab5e` with renderer 0.6.0, gave the same link counts and 2,649 explicit
+explanation gaps.
 
-The supporting readings add 1,662 files to the site, which grows from 624.2 MB
-to 731.4 MB; the preview zip grows from 52.1 MB to 60.0 MB. Compared with a
-preview of the same application code without them, every other difference is in
-the 492 target `links.json` files and their reader pages, `coverage.json`,
-`coverage.html`, the pages that carry the preview notice, and the preview
-records. In `links.json` only the 153 newly linked entries change, and the
-per-reading `counts` gain a `cone-reading` key.
+Two local builds of the `bbc90ac` application code, with and without the
+supporting readings, compare as follows. The supporting readings add 1,662
+files to the site, which grows from 629.8 MB to 738.3 MB; the preview zip grows
+from 52.6 MB to 60.6 MB (the workflow run's site has 738.3 MB and its zip
+60.6 MB). Every other difference is in the 492 target `links.json` files and
+their reader pages, `coverage.json`, `coverage.html`, the pages that carry the
+preview notice, and the preview records. In `links.json` only the 153 newly
+linked entries change, and the per-reading `counts` gain a `cone-reading` key.
 
 These readings are unsigned observations from one CI run. A link to a
 supporting lemma reading does not mean that the citation is explained or
