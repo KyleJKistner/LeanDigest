@@ -68,7 +68,8 @@ def test_each_citation_resolves_to_a_reading_a_source_line_or_a_stated_reason():
     assert names['OAI.Beta.target'] == {
         'status': 'reading', 'href': f'../{ident(BETA)}/reader.html', 'module': BETA,
         'basis': 'imported-bundled-module',
-        'source': {'href': f'../../sources/{source_name(BETA)}#L5', 'module': BETA, 'line': 5}}
+        'source': {'href': f'../../sources/{source_name(BETA)}#L5', 'module': BETA, 'line': 5,
+                   'basis': 'imported-bundled-module'}}
     assert names['OAI.Alpha.helper'] == {'status': 'source', 'href': f'../../sources/{source_name(ALPHA)}#L5',
                                          'module': ALPHA, 'line': 5, 'basis': 'same-module'}
     # Declared in a bundled module the citing module does not visibly import: not guessed.
@@ -103,6 +104,18 @@ def test_a_duplicate_the_citing_module_cannot_see_does_not_block_the_visible_dec
     both = {**sources, ALPHA: 'import ' + delta + '\n' + SOURCES[ALPHA]}
     assert alpha_links(alpha_document(), both, readings={})['names']['OAI.Beta.target'] == {
         'status': 'unresolved', 'reason': 'ambiguous-in-bundled-source'}
+
+
+def test_a_reading_link_basis_names_the_reading_module_and_its_source_line_the_declaring_module():
+    """A reading of an imported constant, kept under the citing module, as in five readings of the full build."""
+    readings = {(ALPHA, THEOREMS[ALPHA]): ident(ALPHA), (ALPHA, 'OAI.Beta.target'): ident(BETA)}
+    entry = alpha_links(alpha_document(), readings=readings)['names']['OAI.Beta.target']
+    assert entry == {'status': 'reading', 'href': f'../{ident(BETA)}/reader.html', 'module': ALPHA, 'basis': 'same-module',
+                     'source': {'href': f'../../sources/{source_name(BETA)}#L5', 'module': BETA, 'line': 5,
+                                'basis': 'imported-bundled-module'}}
+    # Without that reading the same citation links to the declaration line, with the same declaring-module basis.
+    plain = alpha_links(alpha_document(), readings={(ALPHA, THEOREMS[ALPHA]): ident(ALPHA)})['names']['OAI.Beta.target']
+    assert plain == {'status': 'source', **entry['source']}
 
 
 def test_a_reading_never_links_to_itself():

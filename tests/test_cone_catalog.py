@@ -186,7 +186,7 @@ def test_catalog_links_supporting_readings_as_a_separate_denominator(campaign, t
     names = json.loads((site/'proofs'/ident(ALPHA)/'links.json').read_text())['names']
     assert names['OAI.Alpha.helper'] == {'status': 'reading', 'href': f'../../cone/{HELPER}/reader.html', 'module': ALPHA,
         'basis': 'same-module', 'denominator': CONE_DENOMINATOR,
-        'source': {'href': f'../../sources/{source_name(ALPHA)}#L5', 'module': ALPHA, 'line': 5}}
+        'source': {'href': f'../../sources/{source_name(ALPHA)}#L5', 'module': ALPHA, 'line': 5, 'basis': 'same-module'}}
     assert names['OAI.Beta.target']['href'] == f'../{ident(BETA)}/reader.html' and 'denominator' not in names['OAI.Beta.target']
     assert json.loads((plain/'proofs'/ident(ALPHA)/'links.json').read_text())['names']['OAI.Alpha.lemma']['status'] == 'unresolved'
     # A supporting reading links another supporting reading and a target reading, from cone/.
