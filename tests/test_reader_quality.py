@@ -604,6 +604,23 @@ def test_fact_from_an_anonymous_have_is_not_merged():
     check_reading(record, d)
 
 
+@pytest.mark.parametrize('node,labels', [
+    # Synthetic: both directions of an equivalence, and both branches of an
+    # induction, are hypotheses in the same context. Each line keeps its label.
+    (app('Iff.intro', 'A ↔ B', (2, given('h1', 'A → B')), (3, given('h2', 'B → A')), objects=['A', 'B']),
+     ['Forward direction. Use the hypothesis h1: A → B.', 'Reverse direction. Use the hypothesis h2: B → A.']),
+    (app('Nat.rec', 'P n', (1, given('h0', 'P 0')), (2, given('hs', '∀ (n : ℕ), P n → P (n + 1)')),
+         objects=['fun n => P n', 'n'], role='induction'),
+     ['Base case (zero). Use the hypothesis h0: P 0.', 'Successor step. Use the hypothesis hs: ∀ (n : ℕ), P n → P (n + 1).']),
+])
+def test_labelled_hypothesis_lines_are_not_merged(node, labels):
+    record = synthetic(node)
+    n, d = rendered(record)
+    [step] = d.declarations[0].steps
+    assert [c.text for c in step.children] == labels and [c.rule for c in step.children] == ['given', 'given']
+    check_reading(record, d)
+
+
 def test_hypotheses_printed_over_several_lines_get_one_line_each():
     # Synthetic: a statement that Lean's pretty-printer broke across lines.
     record = synthetic(app('Foo.lemma', 'P x', (1, given('h1', '∀ (k : ℕ),\n  f k ≤ g k')), (2, given('h2', 'A')), objects=['x']))
@@ -720,11 +737,8 @@ def test_chain_of_proof_witnesses_is_one_step():
     ('Main', '∃ (_ : B), C'),
 ])
 def test_proof_witness_with_mismatched_printing_keeps_the_gap(statement, inner):
-    record = proof_witness(statement, inner)
-    try:
-        n, d = rendered(record)
-    except InvalidExport:
-        return
+    # The synthetic record is valid, so the rule itself must decline it.
+    n, d = rendered(proof_witness(statement, inner))
     step = owner(n, d, 0)
     assert step.fallback and step.rule == 'witness'
 
@@ -761,13 +775,12 @@ def test_unpack_existential_on_synthetic_frames():
     ('Q′', ('h', '∃ (_ : A), B')),
     ('Q', ('h', 'Main')),
     ('Q', ('h', '∃ (_ : A′), B')),
+    # The rest of the major premise is printed differently from the second binder's domain.
+    ('Q', ('h', '∃ (_ : A), B′')),
 ])
 def test_unpack_existential_keeps_the_gap_without_exact_printing(body, major):
-    record = proof_cases(body, major)
-    try:
-        n, d = rendered(record)
-    except InvalidExport:
-        return
+    # The synthetic record is valid, so the rule itself must decline it.
+    n, d = rendered(proof_cases(body, major))
     step = owner(n, d, 0)
     assert step.fallback and step.rule == 'choose'
 

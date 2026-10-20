@@ -153,14 +153,17 @@ class ReadingRules:
         """The frame of a displayed one-frame hypothesis line, else None.
 
         Facts from an anonymous `have` ("Use the fact … established above"),
-        budget cuts and anything else that owns other frames are left alone.
+        budget cuts and anything else that owns other frames are left alone,
+        and so is a line whose sentence carries a label ("Forward direction. ",
+        "Base case (zero). "): merging it would drop the label.
         """
-        from .narrative import _ANONYMOUS, _name
+        from .narrative import _ANONYMOUS, _name, math_text
         if s.rule != 'given' or s.fallback or s.children or not s.term_id or ',' in s.term_id:
             return None
         i = int(s.term_id[1:]); f = self.frames[i]
         if (f['role'] != 'given' or f['budget_cut']
-                or (_ANONYMOUS.fullmatch(_name(f['binder'])) and self.introducer(i) == 'have')):
+                or (_ANONYMOUS.fullmatch(_name(f['binder'])) and self.introducer(i) == 'have')
+                or s.text != 'Use the hypothesis '+_name(f['binder'])+': '+math_text(f['statement'])+'.'):
             return None
         return i
 
@@ -253,9 +256,11 @@ class ReadingRules:
 
         The two binders are assumptions: a proof of α and a proof of p of it.
         Required: exact argument slots and paths, the first binder's domain and
-        the major premise's leading binder both printed as the object α, and a
+        the major premise's leading binder both printed as the object α, the
+        rest of the major premise printed as the second binder's domain, and a
         constant motive (the body proves the printed conclusion). A hypothesis
-        as major premise is named and owned by this step, as for a conjunction.
+        as major premise is then named and owned by this step, as for a
+        conjunction: its statement is the two displayed parts.
         """
         from .narrative import _ANONYMOUS, _name, math_text
         f = self.frames[i]
@@ -267,6 +272,7 @@ class ReadingRules:
         if not (second.get('role') == 'assume' and len(second['children']) == 1 and not first['budget_cut']
                 and not second['budget_cut'] and _same_formula(first['domain'], f['objects'][0])
                 and binder is not None and _same_formula(binder[1], f['objects'][0])
+                and _same_formula(binder[2], second['domain'])
                 and _same_formula(self.frames[second['children'][0]]['statement'], f['statement'])):
             return None
         parts = (_name(first['binder'])+': '+math_text(first['domain'])+' and '
