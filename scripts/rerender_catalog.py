@@ -552,7 +552,7 @@ def main(argv: list[str] | None = None) -> int:
     except ValueError as exc:
         print('Preview failed: '+str(exc),file=sys.stderr);return 2
     g=s['explanation_gaps']
-    print(json.dumps({'readings':s['readings'],'explicit_explanation_gaps':{k:v['explicit_explanation_gaps'] for k,v in g.items() if isinstance(v,dict)},
+    print(json.dumps({'readings':s['readings'],'explicit_explanation_gaps':{k:g[k]['explicit_explanation_gaps'] for k in ('published','preview')},
         'static_audit_passed':s['static_audit']['passed'],'browser_audit':s['browser_audit'].get('navigation_backend') if s['browser_audit'].get('passed') else 'not run',
         'site':s['site'],'archive':s.get('archive')},indent=2))
     print(f'Elapsed: {time.monotonic()-started:.1f} s',file=sys.stderr)

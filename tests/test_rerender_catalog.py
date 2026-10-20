@@ -288,6 +288,13 @@ def test_a_current_catalog_is_updated_in_place_without_duplicates(tmp_path):
     assert s['pages']['navigation_updated'] == 0 and s['files']['sources/*.html'] == {'unchanged': 2}
 
 
+def test_cli_prints_the_counts(published, tmp_path, capsys):
+    assert preview.main([str(published), str(tmp_path / 'out'), '--no-archive']) == 0
+    printed = json.loads(capsys.readouterr().out)
+    assert printed['explicit_explanation_gaps'] == {'published': 5, 'preview': 4} and printed['archive'] is None
+    assert not (tmp_path / 'out' / preview.ARCHIVE).exists()
+
+
 def test_cli_reports_failures_without_a_traceback(published, tmp_path, capsys):
     (published / 'catalog.json').write_text('[]')
     assert preview.main([str(published), str(tmp_path / 'out')]) == 2
