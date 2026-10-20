@@ -7,6 +7,11 @@ and each reading's snapshot, receipt, run record, compiler output and extraction
 driver stay byte-identical. The output is a preview, not a release. release.json
 and the original-project ledger still describe the published release; the
 preview's own identity, counts and audits are in preview.json.
+
+With --cone-shards, the preview also adds the supporting lemma readings of a
+dependency-cone campaign under cone/, validated by the campaign loader and bound
+to the published readings. They are a separate denominator: the 492 target
+readings, their gap counts and the theorem-target coverage are unchanged.
 """
 from __future__ import annotations
 import argparse
@@ -22,10 +27,10 @@ import subprocess
 import sys
 import time
 sys.path.insert(0,str(Path(__file__).resolve().parents[1]))
-from proofreader import __version__
+from proofreader import __version__, cone_catalog
 from proofreader.catalog_audit import audit as static_audit
 from proofreader.catalog_inputs import read_json, write_json, safe_child
-from proofreader.declaration_index import build_index, citation_links, reading_map, summarize
+from proofreader.declaration_index import build_index, citation_links, link_kind, reading_map, summarize
 from proofreader.explanation_gaps import write_report
 from proofreader.finding_catalog import ASSETS, shell, source_name
 from proofreader.kernel_io import strict_json
@@ -60,6 +65,13 @@ CITATION_NOTE=('<p>Citation links are navigation aids outside each checked readi
 INDEX_LINK=' · <a href="evidence/declaration-index.json">Declaration index for citation links</a>'
 # Every builder version opens its citation note with this sentence; a page that has one keeps it.
 NOTE_PREFIX='<p>Citation links are navigation aids outside each checked reading.'
+# Anchors of the builder's coverage and finding pages where supporting lemma readings are added.
+TABLE_END='</tbody></table><section><h2>Interpretation</h2>'
+EVIDENCE_LINKS='</section><p><a href="coverage.json">'
+MANUSCRIPTS='<section><h2>Manuscripts</h2>'
+NO_CONE='No dependency-cone shards were supplied to this preview build.'
+# Written by scripts/download_cone_artifacts.py beside the downloaded artifacts.
+ARTIFACTS='cone-artifacts.json'
 
 
 def require(condition, message: str) -> None:
@@ -139,12 +151,14 @@ def application() -> dict:
         return {'commit':None,'tree':None,'tracked_tree_clean':None,**identity}
 
 
-def rerender(site: Path) -> dict:
-    """Regenerate every reading in place with citation links built as finding_catalog.build builds them."""
+def solution_sources(site: Path) -> dict[str,str]:
     originals=safe_child(site,'originals')
     modules=sorted({read_json(p)['solution_module'] for p in (originals/'ComparatorChallenges').glob('*.json')})
-    sources={m:safe_child(originals,m.replace('.','/')+'.lean').read_text(encoding='utf-8') for m in modules}
-    index=build_index(sources)
+    return {m:safe_child(originals,m.replace('.','/')+'.lean').read_text(encoding='utf-8') for m in modules}
+
+
+def reading_keys(site: Path, sources: dict[str,str]) -> dict[tuple[str,str],str]:
+    """(solution module, theorem) -> proof identifier of every published reading."""
     keys={}
     for d in sorted((site/'proofs').iterdir()):
         require(d.is_dir() and re.fullmatch(r'[a-f0-9]{24}',d.name),'Unexpected proof directory: '+d.name)
@@ -154,6 +168,25 @@ def rerender(site: Path) -> dict:
         key=(file[5:-5].replace('/','.'),dec['name'])
         require(key[0] in sources and sha256('\0'.join(key).encode()).hexdigest()[:24]==d.name,'Mismatched proof identity: '+d.name)
         keys[key]=d.name
+    return keys
+
+
+def load_cone(site: Path, directory: Path, *, scope: str, summary: Path | None) -> dict:
+    """Validate a campaign directory and bind it to the published readings and original-project records."""
+    sources=solution_sources(site);keys=reading_keys(site,sources)
+    # A receipt that names another snapshot stops the re-rendering, so the plan binds the published snapshots.
+    readings={ident:(m,n,read_json(site/'proofs'/ident/'receipt.json').get('snapshot_sha256')) for (m,n),ident in keys.items()}
+    bundled=lambda n:read_json(site/'original-evidence'/n) if (site/'original-evidence'/n).is_file() else None
+    return cone_catalog.load(directory,readings,sources,scope=scope,summary=summary,
+                             original=bundled('plan.json'),environment=bundled('environment.json'))
+
+
+def rerender(site: Path, cone: dict | None = None) -> dict:
+    """Regenerate every reading in place with citation links built as finding_catalog.build builds them."""
+    sources=solution_sources(site)
+    index=build_index(sources)
+    keys=reading_keys(site,sources)
+    supporting=None if cone is None else cone_catalog.supporting_map(cone)
     names=reading_map(keys);made={};rows={};failures=[]
     for key,ident in sorted(keys.items()):
         dest=site/'proofs'/ident
@@ -170,7 +203,7 @@ def rerender(site: Path) -> dict:
             before_rules,before_frames=gap_profile(base)
             require(before==sum(before_rules.values()),'Published reading and coverage gap counts differ')
             coverage=write_bundle(record,dest,source=sources[key[0]],file=dec['file'],receipt=receipt,title=base['title'],
-                provenance_note=note,links=lambda d,key=key:made.setdefault(key,citation_links(d,key[0],index,names,source_name)))
+                provenance_note=note,links=lambda d,key=key:made.setdefault(key,citation_links(d,key[0],index,names,source_name,supporting=supporting)))
             for n,data in kept.items():
                 if (dest/n).read_bytes()!=data:
                     require(not n.endswith('.json') or strict_json((dest/n).read_bytes())==strict_json(data),'Rewritten evidence differs: '+n)
@@ -188,7 +221,13 @@ def rerender(site: Path) -> dict:
             failures.append({'proof_id':ident,'module':key[0],'name':key[1],'error':str(exc)[:500]})
     # Unlike a fresh build, a preview never drops a published reading: any failure stops it.
     require(not failures,'Re-rendering failed for '+str(len(failures))+' readings: '+json.dumps(failures[:5]))
-    return {'index':index,'rows':rows,'payloads':[made[k] for k in sorted(rows)]}
+    lemma_rows={}
+    if cone is not None:  # Supporting lemma readings: the same visibility rule, from cone/<id>/.
+        lemma_rows,lemma_failures=cone_catalog.write_readings(site,cone,
+            link=lambda d,m:citation_links(d,m,index,names,source_name,supporting=supporting,here='cone'))
+        require(not lemma_failures,'Supporting lemma readings failed to render: '+json.dumps(lemma_failures[:5]))
+    return {'index':index,'rows':rows,'payloads':[made[k] for k in sorted(rows)],
+            'links':{rows[k]['id']:(k[1],made[k]) for k in sorted(rows)},'lemma_rows':lemma_rows}
 
 
 def update_finding_pages(site: Path, rows: dict) -> int:
@@ -207,14 +246,28 @@ def update_finding_pages(site: Path, rows: dict) -> int:
     return count
 
 
+def add_supporting_sections(site: Path, links: dict, lemma_rows: dict, scope: str) -> int:
+    """List on each finding page the supporting lemma readings its target readings cite."""
+    count=0
+    for page in sorted((site/'findings').glob('*.html')):
+        text=page.read_text(encoding='utf-8')
+        ids=sorted({m[2] for m in READING_LINK.finditer(text)})
+        section=cone_catalog.finding_section(cone_catalog.finding_items([links[i] for i in ids],lemma_rows),scope)
+        if not section:continue
+        require(text.count(MANUSCRIPTS)==1,'Finding page manuscripts section not found: '+page.name)
+        page.write_text(text.replace(MANUSCRIPTS,section+MANUSCRIPTS,1),encoding='utf-8');count+=1
+    return count
+
+
 def update_coverage_page(site: Path, before: dict, after: dict) -> None:
     path=site/'coverage.html';text=path.read_text(encoding='utf-8')
     old=GAP_ROW.format(before['explicit_explanation_gaps'])
     require(text.count(old)==1,'Published coverage page gap row not found')
     text=text.replace(old,GAP_ROW.format(after['explicit_explanation_gaps']))
-    pn=after['citation_links']['project_names']
-    values=(pn['cited'],pn['linked_to_reading'],pn['linked_to_source'],pn['unresolved'])
-    rows=''.join('<tr><td>'+label+'</td><td>'+str(v)+'</td></tr>' for label,v in zip(CITATION_ROWS,values))
+    pn=after['citation_links']['project_names'];cone=after.get('dependency_cone')
+    labels=[*CITATION_ROWS[:2],*([cone_catalog.LINK_ROW] if cone else []),*CITATION_ROWS[2:]]
+    values=(pn['cited'],pn['linked_to_reading'],*((pn['linked_to_cone_reading'],) if cone else ()),pn['linked_to_source'],pn['unresolved'])
+    rows=''.join('<tr><td>'+label+'</td><td>'+str(v)+'</td></tr>' for label,v in zip(labels,values))
     present=re.compile('<tr><td>'+re.escape(CITATION_ROWS[0])+r'</td>.*?'+re.escape(CITATION_ROWS[3])+r'</td><td>\d+</td></tr>')
     if present.search(text):text=present.sub(lambda m:rows,text,count=1)
     else:text=text.replace(GAP_ROW.format(after['explicit_explanation_gaps']),GAP_ROW.format(after['explicit_explanation_gaps'])+rows,1)
@@ -224,6 +277,10 @@ def update_coverage_page(site: Path, before: dict, after: dict) -> None:
     if INDEX_LINK not in text:
         anchor='<a href="catalog.json">Finding inventory</a>'
         require(text.count(anchor)==1,'Coverage evidence links not found');text=text.replace(anchor,anchor+INDEX_LINK,1)
+    if cone:  # A separate table body, interpretation paragraph and outcome record.
+        require(text.count(TABLE_END)==1 and text.count(EVIDENCE_LINKS)==1 and text.count(INDEX_LINK)==1,'Coverage page anchors not found')
+        text=text.replace(TABLE_END,cone_catalog.coverage_rows(cone)+TABLE_END,1).replace(EVIDENCE_LINKS,cone_catalog.NOTE+EVIDENCE_LINKS,1)
+        text=text.replace(INDEX_LINK,INDEX_LINK+cone_catalog.EVIDENCE_LINK,1)
     path.write_text(text,encoding='utf-8')
 
 
@@ -241,25 +298,27 @@ def update_navigation(site: Path) -> int:
     return count
 
 
-def notice(root: str, readings: int) -> str:
+def notice(root: str, readings: int, lemmas: int | None = None) -> str:
     return ('<p class="notice">Catalog preview, not a release. The '+str(readings)+' published proof readings were re-rendered with renderer <code>'
             +html.escape(PRINTER_VERSION)+'</code>. No Lean ran; snapshots, receipts and run records are unchanged. '
-            '<a href="'+root+'preview.html">Changes in this preview</a></p>')
+            +('' if lemmas is None else 'The preview adds '+str(lemmas)+' supporting lemma readings from retained dependency-cone '
+              'shard artifacts, a separate denominator. ')
+            +'<a href="'+root+'preview.html">Changes in this preview</a></p>')
 
 
-def add_notices(site: Path, readings: int) -> int:
+def add_notices(site: Path, readings: int, lemmas: int | None = None) -> int:
     # Every top-level catalog page (catalog, coverage, explanation gaps, original verification, progress) and finding page.
     pages=sorted(site.glob('*.html'))+sorted((site/'findings').glob('*.html'))
     for page in pages:
         text=page.read_text(encoding='utf-8');root='../'*(len(page.relative_to(site).parts)-1)
         require(text.count('<main id="content">')==1,'Preview notice location is missing')
-        page.write_text(text.replace('<main id="content">','<main id="content">'+notice(root,readings),1),encoding='utf-8')
+        page.write_text(text.replace('<main id="content">','<main id="content">'+notice(root,readings,lemmas),1),encoding='utf-8')
     return len(pages)
 
 
 def category(path: str) -> str:
     parts=path.split('/')
-    if parts[0]=='proofs' and len(parts)==3:return 'proofs/*/'+parts[2]
+    if parts[0] in {'proofs',cone_catalog.DIRECTORY} and len(parts)==3:return parts[0]+'/*/'+parts[2]
     if parts[0] in {'findings','sources'} and len(parts)==2:return parts[0]+'/*.html'
     if parts[:2]==['evidence','statements']:return 'evidence/statements/*.json'
     if parts[0] in {'originals','original-evidence'}:return parts[0]+'/**'
@@ -303,6 +362,21 @@ def evidence_note(record: dict, code: str, item: str) -> str:
                        +' are unchanged, including any gap counts the original workers recorded.')
 
 
+def cone_sentences(c: dict) -> list[str]:
+    """What the preview says about supporting lemma readings: included, with counts, or why not."""
+    if not c['included']:
+        return ['Supporting lemma readings (dependency cone) are not included in this preview. '+c['reason']]
+    n=lambda x:f'{x:,}';s=c['section'];f=s['from_target_readings']
+    return [f"Supporting lemma readings (dependency cone, level 1): {n(s['readings'])} of {n(s['planned_lemmas'])} planned; "
+            f"{cone_catalog.scope_label(s['scope'])}. They are under cone/ and are a separate denominator: they do not count toward the "
+            f"{n(c['expected_theorem_targets'])} theorem targets.",
+            f"{n(f['citations_linked'])} citations in {n(f['readings_linking'])} target readings link to them ({n(f['names_linked'])} cited names). "
+            'A link does not mean that the citation is explained or checked.',
+            'Every shard was validated by the dependency-cone loader against the plan and the original environment audit'
+            +(', and the reconciled outcomes equal the campaign summary' if s['campaign_summary_matched'] else '')
+            +f". The {n(s['evidence_files'])} evidence files in cone/ are byte-identical to the shard artifacts, which are unsigned observations."]
+
+
 def preview_page(record: dict) -> str:
     esc=html.escape;p=record['published'];b,a=record['explanation_gaps']['published'],record['explanation_gaps']['preview']
     cl=record['citation_links']['preview']['project_names'];old=(record['citation_links']['published'] or {}).get('project_names')
@@ -344,6 +418,7 @@ def preview_page(record: dict) -> str:
     body+='<p class="small">Grouped by path pattern and compared with the published manifest.</p><table><thead><tr><th>Path</th><th>Added</th><th>Replaced</th><th>Unchanged</th></tr></thead><tbody>'
     body+=''.join('<tr><td><code>'+esc(k)+'</code></td><td>'+str(v.get('added',0))+'</td><td>'+str(v.get('replaced',0))+'</td><td>'+str(v.get('unchanged',0))+'</td></tr>'
                   for k,v in record['files'].items())+'</tbody></table></section>'
+    body+='<section><h2>'+cone_catalog.HEADING+'</h2>'+''.join('<p>'+esc(x)+'</p>' for x in cone_sentences(record['dependency_cone']))+'</section>'
     body+=('<section><h2>Unchanged</h2><ul><li>No Lean ran. Each reading was regenerated from its retained snapshot and the bundled solution module.</li>'
            '<li>The '+str(record['evidence']['files'])+' files '+', '.join('<code>'+n+'</code>' for n in EVIDENCE)+' in the reading directories are byte-identical to the published manifest.</li>'
            '<li>No reading was added or removed: '+str(record['readings']['re_rendered'])+' of '+str(record['readings']['expected_theorem_targets'])+' theorem targets have readings.</li>'
@@ -379,11 +454,14 @@ def release_notes(record: dict, published: str) -> str:
         f"- Per reading: {pr['gap_steps']['fewer']} fewer, {pr['gap_steps']['same']} the same and {pr['gap_steps']['more']} more gap steps; "
         f"{pr['frames_in_gaps']['fewer']} fewer, {pr['frames_in_gaps']['same']} the same and {pr['frames_in_gaps']['more']} more checked frames inside gaps.",
         f"- Citation links: of {cl['cited']} cited project names, {cl['linked_to_reading']} link to a proof reading, "
-        f"{cl['linked_to_source']} only to a bundled source line, and {cl['unresolved']} stay unresolved.",
+        +(f"{cl['linked_to_cone_reading']} to a supporting lemma reading, " if 'linked_to_cone_reading' in cl else '')
+        +f"{cl['linked_to_source']} only to a bundled source line, and {cl['unresolved']} stay unresolved.",
+        '- '+' '.join(cone_sentences(record['dependency_cone'])),
         f"- Explanation-gap inventory: `explanations.html` {made('explanations.html')}, `explanation-gaps.json` {made('explanation-gaps.json')}.",
         f"- Updated the gap counts in `coverage.json`, `coverage.html` and the {pg['finding_reading_links_updated']} reading links on finding pages.",
         *([f"- Gave {pg['navigation_updated']} pages the current main navigation, which links the explanation-gap inventory."] if pg['navigation_updated'] else []),
         f"- Added a preview notice to {pg['preview_notices']} pages.",
+        *([f"- Listed the cited supporting lemma readings on {pg['finding_supporting_sections']} finding pages."] if pg.get('finding_supporting_sections') else []),
         *(['- Replaced '+' and '.join('`'+n+'`' for n in assets)+' with the current catalog assets.'] if assets else []),
         '- `preview.html` and `preview.json` list every changed file group and the gap counts by rule.','',
         '## Unchanged','',
@@ -456,31 +534,77 @@ def preview_browser_checks(site: Path, harness: bool, expect: dict, shots: Path 
         load(expect['reader'])
         cited=page.locator('#dependencies a[data-citation="'+expect['citation']+'"]')
         assert cited.count()>=1 and cited.first.get_attribute('href')==expect['href'],'Citation link missing in the reader'
+        c=expect.get('cone')
+        if c:  # Supporting lemma readings: listed on a finding page, linked from a target reader, opened from both.
+            load(c['finding'])
+            item=page.locator('#supporting-lemmas a[href="'+c['finding_href']+'"]')
+            assert item.count()==1 and item.is_visible(),'Supporting lemma reading missing from the finding page'
+            page.set_viewport_size({'width':390,'height':844})
+            assert page.evaluate('document.documentElement.scrollWidth <= innerWidth'),'The supporting lemma list overflows on mobile'
+            page.set_viewport_size({'width':1440,'height':1000})
+            if harness:load(c['page'])
+            else:item.click()
+            assert c['citation'] in page.title() and 'import '+c['module'] in page.locator('#exact-source').text_content(),'Supporting lemma reader did not open'
+            if shots:page.screenshot(path=str(shots/'supporting-lemma-reader.png'))
+            load(c['reader'])
+            cited=page.locator('#dependencies a[data-citation="'+c['citation']+'"]')
+            assert cited.count()>=1 and cited.first.get_attribute('href')==c['href'],'Supporting lemma link missing in the reader'
+            assert 'Supporting lemma reading' in (cited.first.get_attribute('title') or ''),'Supporting lemma link is not labelled'
+            if not harness:
+                cited.first.click()
+                assert c['citation'] in page.title(),'Supporting lemma link did not navigate'
         browser.close()
     assert not errors,errors
     assert not external,external
     return {'navigation_backend':'direct-document-test-harness' if harness else 'real-offline-file-navigation',
             'preview_notice':True,'preview_page':True,'preview_page_mobile_overflow':False,'explanation_gap_filters':True,'reader_citation_link':True,
-            'page_errors':errors,'external_requests':external,'passed':True}
+            'supporting_lemma_readings':bool(c),'page_errors':errors,'external_requests':external,'passed':True}
 
 
 def browser_expectations(site: Path) -> dict:
     """Values the browser must show, read from the site's own records."""
     gaps=read_json(site/'explanation-gaps.json')
     require(gaps['by_head'],'The explanation-gap inventory is empty; its filters cannot be exercised')
+    expect=None;cone=None;pages={p:p.read_text(encoding='utf-8') for p in sorted((site/'findings').glob('*.html'))}
     for links in sorted((site/'proofs').glob('*/links.json')):
-        names=read_json(links)['names']
-        reading=next((n for n in sorted(names) if names[n]['status']=='reading'),None)
-        if reading:
-            return {'reader':links.parent.relative_to(site).as_posix()+'/reader.html','citation':reading,'href':names[reading]['href'],
+        names=read_json(links)['names'];reader=links.parent.relative_to(site).as_posix()+'/reader.html'
+        reading=next((n for n in sorted(names) if link_kind(names[n])=='reading'),None)
+        if reading and expect is None:
+            expect={'reader':reader,'citation':reading,'href':names[reading]['href'],
                     'gaps':gaps['explicit_explanation_gaps'],'readings_with_gaps':gaps['readings_with_gaps'],
                     'head':min(gaps['by_head'].items(),key=lambda x:(-x[1],x[0]))}  # the filter's first, most frequent option
-    raise ValueError('No reading links to another proof reading; the reader link check cannot run')
+        lemma=next((n for n in sorted(names) if link_kind(names[n])=='cone-reading'),None)
+        if lemma and cone is None:
+            page=cone_catalog.DIRECTORY+'/'+names[lemma]['href'].split('/')[-2]+'/reader.html'
+            finding=next(p for p,text in pages.items() if '../'+reader+'"' in text and '../'+page+'"' in text)
+            cone={'reader':reader,'citation':lemma,'href':names[lemma]['href'],'module':names[lemma]['module'],'page':page,
+                  'finding':finding.relative_to(site).as_posix(),'finding_href':'../'+page}
+    require(expect is not None,'No reading links to another proof reading; the reader link check cannot run')
+    if (site/cone_catalog.DIRECTORY).is_dir():
+        require(cone is not None,'No target reading links to a supporting lemma reading; the browser check cannot run')
+        expect['cone']=cone
+    return expect
+
+
+def artifact_record(directory: Path) -> dict | None:
+    """The download record of scripts/download_cone_artifacts.py, if present: provenance, not acceptance."""
+    path=directory/ARTIFACTS
+    if not path.is_file():return None
+    data=read_json(path)
+    require(isinstance(data,dict) and data.get('schema')=='leanglish.cone-artifact-download/v1' and data.get('digests_matched') is True
+            and isinstance(data.get('artifacts'),list),'Malformed dependency-cone artifact download record')
+    return data
 
 
 def build_preview(published: Path, output: Path, *, archive_sha256: str = CORPUS['sha256'],
-                  browser: str = 'none', archive: bool = True) -> dict:
+                  browser: str = 'none', archive: bool = True, cone: Path | None = None, cone_scope: str = 'pilot',
+                  cone_summary: Path | None = None, cone_unavailable: str | None = None) -> dict:
+    """``cone`` is a dependency-cone campaign directory (cone_catalog.load). ``cone_unavailable``
+    states why no campaign was supplied; the preview records and shows it."""
     require(browser in {'none','real','document-harness'},'Unknown browser route')
+    require(cone is None or cone_unavailable is None,'Supply dependency-cone shards or the reason they are unavailable, not both')
+    require(cone_summary is None or cone is not None,'A campaign summary needs its dependency-cone shards')
+    require(cone_unavailable is None or (isinstance(cone_unavailable,str) and cone_unavailable.strip()),'State why the dependency-cone shards are unavailable')
     # The browser audits check with assert statements, which python -O removes.
     require(browser=='none' or not sys.flags.optimize,'Run browser audits without python -O')
     require(not output.exists(),'Use a new output directory')
@@ -494,25 +618,42 @@ def build_preview(published: Path, output: Path, *, archive_sha256: str = CORPUS
     require(not identity or identity.get('coverage')==before,'Published release identity and coverage differ')
     previous={n:(site/n).read_text(encoding='utf-8') if (site/n).is_file() else None for n in ('RELEASE-NOTES.md','START-HERE.txt')}
     audits={n:read_json(site/n) if (site/n).is_file() else None for n in ('static-audit.json','browser-audit.json','original-browser-audit.json')}
-    built=rerender(site);rows=built['rows']
+    require(not (site/cone_catalog.DIRECTORY).exists() and 'dependency_cone' not in before,
+            'The published catalog already has supporting lemma readings; this preview builder does not re-render them')
+    loaded=None if cone is None else load_cone(site,cone,scope=cone_scope,summary=cone_summary)
+    built=rerender(site,loaded);rows=built['rows'];lemma_rows=built['lemma_rows']
     frames=sum(r['frames'] for r in rows.values())
     require(len(rows)==before['proof_readings'] and frames==before['selected_checked_frames'],'Published reading inventory differs from coverage')
     require(sum(r['before']['gaps'] for r in rows.values())==before['explicit_explanation_gaps'],'Published gap counts differ from coverage')
     after=dict(before,explicit_explanation_gaps=sum(r['after']['gaps'] for r in rows.values()),
-               citation_links=summarize(built['payloads'],built['index']))
+               citation_links=summarize(built['payloads'],built['index'],supporting=loaded is not None))
+    if loaded is not None:  # A separate coverage section; the theorem-target counts above are untouched.
+        after['dependency_cone']=cone_catalog.section(loaded,lemma_rows,[],built['payloads'],
+            summarize([r['links'] for _,r in sorted(lemma_rows.items())],built['index'],supporting=True))
+        write_json(site/cone_catalog.SUMMARY_RECORD,loaded['summary'])
     write_json(site/'coverage.json',after);write_json(site/'evidence/declaration-index.json',built['index'])
     for p in sorted(ASSETS.iterdir()):
         if p.is_file():shutil.copy2(p,site/'assets'/p.name)
     linked=update_finding_pages(site,rows)
+    supporting_pages=0 if loaded is None else add_supporting_sections(site,built['links'],lemma_rows,cone_scope)
     update_coverage_page(site,before,after)
     gaps=write_report(site)
     navigation=update_navigation(site)
-    noticed=add_notices(site,len(rows))
+    noticed=add_notices(site,len(rows),None if loaded is None else len(lemma_rows))
     start=(previous['START-HERE.txt'] or '')
     (site/'START-HERE.txt').write_text('This is a catalog preview, not a release: the published proof readings were re-rendered without running Lean. '
         'See preview.html for what changed.\n'+start,encoding='utf-8')
     evidence=[f'proofs/{r["id"]}/{n}' for r in rows.values() for n in EVIDENCE]
     require(all(base.get(p)==file_digest(site/p) for p in evidence),'Retained evidence changed')
+    shard_evidence={f"{cone_catalog.DIRECTORY}/{r['id']}/{n}":file_digest(loaded['accepted'][name]['directory']/n)
+                    for name,r in lemma_rows.items() for n in cone_catalog.EVIDENCE}
+    require(all(file_digest(site/p)==h for p,h in shard_evidence.items()),'Supporting lemma evidence differs from the shard artifacts')
+    if loaded is None:
+        cone_record={'included':False,'reason':cone_unavailable or NO_CONE,'counts_toward_documented_target_coverage':False}
+    else:
+        cone_record={'included':True,'scope':cone_scope,'readings':len(lemma_rows),'planned_lemmas':loaded['summary']['planned_lemmas'],
+                     'expected_theorem_targets':before['expected_theorem_targets'],'section':after['dependency_cone'],
+                     'artifacts':artifact_record(cone),'counts_toward_documented_target_coverage':False}
     printers=Counter(r['before']['printer'] for r in rows.values())
     record={'schema':SCHEMA,'is_release':False,
         'published':{'release':PUBLISHED_MANIFESTS.get(manifest_sha256),
@@ -529,7 +670,9 @@ def build_preview(published: Path, output: Path, *, archive_sha256: str = CORPUS
         'explanation_gaps':{'published':profile(rows,'before'),'preview':profile(rows,'after'),
                             'readings_with_gaps':gaps['readings_with_gaps'],'per_reading':per_reading(rows)},
         'citation_links':{'published':before.get('citation_links'),'preview':after['citation_links']},
-        'pages':{'finding_reading_links_updated':linked,'navigation_updated':navigation,'preview_notices':noticed}}
+        'dependency_cone':cone_record,
+        'pages':{'finding_reading_links_updated':linked,'navigation_updated':navigation,'preview_notices':noticed,
+                 'finding_supporting_sections':supporting_pages}}
     require(record['explanation_gaps']['preview']['explicit_explanation_gaps']==gaps['explicit_explanation_gaps'],'Gap inventory differs')
     declared={n:('added' if n not in base else 'replaced') for n in LATE+('preview.html',)}
     record['files']=changes(base,site_files(site),declared)
@@ -559,6 +702,7 @@ def build_preview(published: Path, output: Path, *, archive_sha256: str = CORPUS
     current=site_files(site)
     require(changes(base,current)==record['files'],'The preview page misstates the changed files')
     require(all(base.get(p)==current[p] for p in evidence),'Retained evidence changed')
+    require(all(current[p]==h for p,h in shard_evidence.items()),'Supporting lemma evidence differs from the shard artifacts')
     write_json(site/'SHA256SUMS.json',current)
     require(static_audit(site)==checks,'The static audit changed after the final records were written')
     summary=dict(record,site={'files':len(current)+1,'bytes':sum((site/p).stat().st_size for p in current)+(site/'SHA256SUMS.json').stat().st_size,
@@ -579,13 +723,20 @@ def main(argv: list[str] | None = None) -> int:
     p.add_argument('--browser',choices=['none','real','document-harness'],default='none',
                    help='real: Chromium file:// navigation; document-harness: inlined local documents (labelled)')
     p.add_argument('--no-archive',action='store_true',help='Do not write the deterministic zip')
+    cone=p.add_mutually_exclusive_group()
+    cone.add_argument('--cone-shards',type=Path,help='Dependency-cone campaign directory: dependency-cone-plan/ and the shard directories')
+    cone.add_argument('--cone-unavailable',metavar='REASON',help='Build without supporting lemma readings and state this reason in the preview')
+    p.add_argument('--cone-scope',default='pilot',help='Dispatch scope of the cone shards (default: pilot)')
+    p.add_argument('--cone-summary',type=Path,help='Campaign summary that the reconciled outcomes must equal')
     a=p.parse_args(argv);started=time.monotonic()
     try:
-        s=build_preview(a.published,a.output,archive_sha256=a.archive_sha256,browser=a.browser,archive=not a.no_archive)
+        s=build_preview(a.published,a.output,archive_sha256=a.archive_sha256,browser=a.browser,archive=not a.no_archive,
+                        cone=a.cone_shards,cone_scope=a.cone_scope,cone_summary=a.cone_summary,cone_unavailable=a.cone_unavailable)
     except ValueError as exc:
         print('Preview failed: '+str(exc),file=sys.stderr);return 2
-    g=s['explanation_gaps']
+    g=s['explanation_gaps'];c=s['dependency_cone']
     print(json.dumps({'readings':s['readings'],'explicit_explanation_gaps':{k:g[k]['explicit_explanation_gaps'] for k in ('published','preview')},
+        'supporting_lemma_readings':c['readings'] if c['included'] else 'not included: '+c['reason'],
         'static_audit_passed':s['static_audit']['passed'],'browser_audit':s['browser_audit'].get('navigation_backend') if s['browser_audit'].get('passed') else 'not run',
         'site':s['site'],'archive':s.get('archive')},indent=2))
     print(f'Elapsed: {time.monotonic()-started:.1f} s',file=sys.stderr)

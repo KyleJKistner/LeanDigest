@@ -15,6 +15,15 @@ fixes the constant. A link is a navigation aid outside the deterministic
 reading; it is not evidence that a citation was checked, explained, or
 faithfully rendered.
 
+A supporting lemma reading (dependency cone, level 1) was extracted after
+importing an environment module. It is linked from a reading only when that
+environment module is the citing module or is reachable from it through
+recorded import headers: the citing environment then contains the environment
+in which the lemma was read, so the cited name is the same constant. Such a
+link carries ``denominator: dependency-cone-level-1`` and always points into
+``cone/``. A documented-target reading of the same name, when one is visible,
+takes precedence; the cone plan never plans a name that has a target reading.
+
 The catalog can also bundle cited dependency modules. ``walk_imports`` follows
 import headers from the solution modules through the project tree, and
 ``select_dependencies`` keeps only modules that declare a cited name and are
@@ -55,8 +64,18 @@ KEEP_BREAKS = re.compile('[^'+re.escape(LINE_BREAKS)+']')
 # A declaration name must end at a binder, a colon, a universe list or whitespace.
 NAME_END = re.compile(r'(?:\s|[(\[{⦃:]|\.\{|\Z)')
 READING_HREF, SOURCE_HREF = '../{}/reader.html', '../../sources/{}#L{}'
-SAFE_HREF = re.compile(r'\.\./(?:[a-f0-9]{24}/reader\.html|\.\./sources/[a-f0-9]{24}\.html#L[1-9][0-9]*)')
+# Reader pages live in proofs/<id>/ (documented targets) or cone/<id>/ (supporting
+# lemmas). A target link from a target page keeps its published form; every other
+# reading link names its directory, so a link's kind never depends on the page.
+TARGET_HREF_FROM_CONE, CONE_HREF = '../../proofs/{}/reader.html', '../../cone/{}/reader.html'
+SAFE_HREF = re.compile(r'\.\./(?:[a-f0-9]{24}/reader\.html|\.\./(?:proofs|cone)/[a-f0-9]{24}/reader\.html|'
+                       r'\.\./sources/[a-f0-9]{24}\.html#L[1-9][0-9]*)')
+CONE_LINK = re.compile(r'\.\./\.\./cone/[a-f0-9]{24}/reader\.html')
+CONE_DENOMINATOR = 'dependency-cone-level-1'  # dependency_cone.DENOMINATOR; checked by the tests
+READING_DIRECTORIES = ('proofs', 'cone')
 STATUSES = ('reading', 'source', 'unresolved')
+# Catalog accounting separates the two reading denominators; best link first.
+LINK_KINDS = ('reading', 'cone-reading', 'source', 'unresolved')
 REASONS = ('ambiguous-in-bundled-source', 'not-visibly-imported', 'this-reading',
            'compiler-generated-auxiliary', 'not-in-declaration-index')
 # Lean-generated auxiliaries (abstracted proofs, matchers) have no source declaration.
@@ -340,7 +359,8 @@ def reading_map(readings: dict[tuple[str, str], str]) -> dict[str, list[tuple[st
 
 
 def citation_links(document, module: str, index: dict, readings: dict[str, list[tuple[str, str]]],
-                   source_page: Callable[[str], str]) -> dict:
+                   source_page: Callable[[str], str], *, supporting: dict[str, list[tuple[str, str]]] | None = None,
+                   here: str = 'proofs') -> dict:
     """Resolve each cited name of one reading in ``module``.
 
     ``readings`` comes from reading_map. A bundled reading of the same constant
@@ -349,42 +369,64 @@ def citation_links(document, module: str, index: dict, readings: dict[str, list[
     reading, else the first module name, is chosen deterministically. A source
     line is used only when it is the one indexed declaration of the name that
     the citing module can see; two visible declarations make it ambiguous.
+
+    ``supporting`` maps a lemma name to (environment module, identifier) pairs
+    of supporting lemma readings (dependency cone). Precedence: a visible
+    documented-target reading, then a visible supporting lemma reading, then a
+    source line. ``here`` is the directory of the citing page: ``proofs`` or
+    ``cone`` (a supporting lemma reading, whose ``module`` is its environment).
     """
+    if here not in READING_DIRECTORIES: raise ValueError('Unknown reading directory')
     reach = closure(index, module); own = {d.name for d in document.declarations}
-    names = {}; bundled = None
+    names = {}; bundled = None; target_href = READING_HREF if here == 'proofs' else TARGET_HREF_FROM_CONE
     def basis(m: str) -> str:
         nonlocal bundled
         if m == module: return 'same-module'
         bundled = closure(index, module, recorded=False) if bundled is None else bundled
         return 'imported-bundled-module' if m in bundled else 'imported-via-recorded-headers'
+    def visible_readings(name, pairs):
+        return sorted((m != module, m, ident) for m, ident in pairs if m in reach and not (m == module and name in own))
     for name in cited_names(document):
-        here = sorted((m != module, m, ident) for m, ident in readings.get(name, [])
-                      if m in reach and not (m == module and name in own))
+        targets = visible_readings(name, readings.get(name, []))
+        lemmas = visible_readings(name, (supporting or {}).get(name, []))
         entries = [index['names'][name]] if name in index['names'] else index['ambiguous'].get(name, [])
         visible = [e for e in entries if e['module'] in reach]
         source = ({'href': SOURCE_HREF.format(source_page(visible[0]['module']), visible[0]['line']),
                    'module': visible[0]['module'], 'line': visible[0]['line']}
                   if len(visible) == 1 else None)
-        if here:
-            _, m, ident = here[0]
-            names[name] = {'status': 'reading', 'href': READING_HREF.format(ident), 'module': m,
+        if targets:
+            _, m, ident = targets[0]
+            names[name] = {'status': 'reading', 'href': target_href.format(ident), 'module': m,
                            'basis': basis(m), **({'source': source} if source else {})}
+        elif lemmas:
+            _, m, ident = lemmas[0]
+            names[name] = {'status': 'reading', 'href': CONE_HREF.format(ident), 'module': m,
+                           'basis': basis(m), 'denominator': CONE_DENOMINATOR, **({'source': source} if source else {})}
         elif source:
             names[name] = {'status': 'source', **source, 'basis': basis(source['module'])}
         else:
             # State only what the bundle shows: a known but unreachable target comes
             # before name-shape guesses, and "not indexed" is not "not declared".
-            others = [m for m, _ in readings.get(name, []) if not (m == module and name in own)]
+            others = [m for m, _ in [*readings.get(name, []), *(supporting or {}).get(name, [])]
+                      if not (m == module and name in own)]
             reason = ('ambiguous-in-bundled-source' if len(visible) > 1 else
                       'not-visibly-imported' if entries or others else
                       'this-reading' if name in own else
                       'compiler-generated-auxiliary' if AUXILIARY.search(name) else
                       'not-in-declaration-index')
             names[name] = {'status': 'unresolved', 'reason': reason}
-    counts = {s: sum(v['status'] == s for v in names.values()) for s in STATUSES}
+    # Without supporting readings the counts keep their published form; with them,
+    # 'reading' counts documented-target readings only.
+    counts = {s: sum(link_kind(v) == s for v in names.values())
+              for s in (LINK_KINDS if supporting is not None else STATUSES)}
     return {'schema': LINKS_SCHEMA, 'module': module, 'names': names, 'counts': counts,
             'scope': 'Navigation aid outside the checked reading. A link identifies the exact Lean name in a '
                      'bundled reading or source line; it does not certify that the citation was explained.'}
+
+
+def link_kind(v: dict) -> str:
+    """'reading' (a documented target), 'cone-reading' (a supporting lemma), 'source' or 'unresolved'."""
+    return 'cone-reading' if v.get('status') == 'reading' and 'denominator' in v else v['status']
 
 
 def validate_links(links: Any) -> dict:
@@ -396,7 +438,7 @@ def validate_links(links: Any) -> dict:
         if not isinstance(name, str) or not name or not isinstance(v, dict) or v.get('status') not in STATUSES:
             raise ValueError('Invalid citation link entry')
         if v['status'] == 'unresolved':
-            if 'href' in v or 'source' in v: raise ValueError('An unresolved citation cannot carry a link')
+            if 'href' in v or 'source' in v or 'denominator' in v: raise ValueError('An unresolved citation cannot carry a link')
             if v.get('reason') not in REASONS: raise ValueError('An unresolved citation needs a stated reason')
             continue
         source = v.get('source', {})
@@ -406,27 +448,39 @@ def validate_links(links: Any) -> dict:
                 raise ValueError('Citation link is not a relative catalog target')
         if not isinstance(v.get('href'), str):
             raise ValueError('A resolved citation needs a link')
+        # A supporting lemma link is marked and points into cone/; nothing else does.
+        cone = CONE_LINK.fullmatch(v['href']) is not None
+        if ('denominator' in v) != cone or v.get('denominator', CONE_DENOMINATOR) != CONE_DENOMINATOR or (cone and v['status'] != 'reading'):
+            raise ValueError('A supporting lemma link must be marked and point into cone/')
     return links
 
 
-def summarize(payloads: list[dict], index: dict) -> dict:
-    """Catalog-wide citation accounting; every cited name keeps its denominator."""
-    pairs = {s: 0 for s in STATUSES}; reasons: dict[str, int] = {}; best: dict[str, int] = {}; bases: dict[str, int] = {}
+def summarize(payloads: list[dict], index: dict, *, supporting: bool = False) -> dict:
+    """Catalog-wide citation accounting; every cited name keeps its denominator.
+
+    With ``supporting``, links to supporting lemma readings (dependency cone) are
+    counted under their own keys, never as links to documented-target readings.
+    """
+    kinds = LINK_KINDS if supporting else STATUSES
+    key = lambda kind: kind if kind == 'unresolved' else 'linked_to_'+kind.replace('-', '_')
+    pairs = {s: 0 for s in kinds}; reasons: dict[str, int] = {}; best: dict[str, int] = {}; bases: dict[str, int] = {}
     for p in payloads:
         for name, v in p['names'].items():
-            pairs[v['status']] += 1
+            kind = link_kind(v)
+            if kind not in kinds: raise ValueError('Supporting lemma links need supporting-reading accounting')
+            pairs[kind] += 1
             if v['status'] == 'unresolved': reasons[v['reason']] = reasons.get(v['reason'], 0)+1
             else: bases[v.get('basis', 'unrecorded')] = bases.get(v.get('basis', 'unrecorded'), 0)+1
-            best[name] = min(best.get(name, 2), STATUSES.index(v['status']))
+            best[name] = min(best.get(name, len(kinds)-1), kinds.index(kind))
     def names(selected):
-        return {'cited': len(selected), **{'linked_to_'+s if s != 'unresolved' else s: sum(best[n] == k for n in selected)
-                                            for k, s in enumerate(STATUSES)}}
+        return {'cited': len(selected), **{key(s): sum(best[n] == k for n in selected) for k, s in enumerate(kinds)}}
+    linking = lambda kind: sum(any(link_kind(v) == kind for v in p['names'].values()) for p in payloads)
     return {'schema': 'leanglish.citation-links-summary/v1', 'readings': len(payloads),
-            'readings_linking_another_reading': sum(p['counts']['reading'] > 0 for p in payloads),
+            'readings_linking_another_reading': linking('reading'),
+            **({'readings_linking_a_supporting_lemma_reading': linking('cone-reading')} if supporting else {}),
             'names': names(list(best)), 'project_names': names([n for n in best if n.startswith('OAI.')]),
             'name_status_rule': 'best link from any citing reading; a name can stay unresolved in a reading that cannot see its declaration',
-            'citations': {'total': sum(pairs.values()), 'linked_to_reading': pairs['reading'],
-                          'linked_to_source': pairs['source'], 'unresolved': pairs['unresolved'],
+            'citations': {'total': sum(pairs.values()), **{key(s): pairs[s] for s in kinds},
                           'unresolved_by_reason': dict(sorted(reasons.items())),
                           'linked_by_import_basis': dict(sorted(bases.items()))},
             'index': {k: index[k] for k in ('method', 'elaborated', 'modules', 'modules_indexed', 'skipped_declarations')} |
@@ -662,9 +716,9 @@ def dependency_report(walk: dict, selection: dict, payloads: list[dict], index: 
                 if any(e['kind'] in TYPE_KINDS for e in entries):
                     seen = reach.setdefault(p['module'], closure(index, p['module']))
                     if any(e['kind'] in TYPE_KINDS and e['module'] in seen for e in entries): typed.add(name)
-            rank = STATUSES.index(v['status'])
+            rank = LINK_KINDS.index(link_kind(v))
             if name not in best or rank < best[name][0]:
-                best[name] = (rank, {'link': v['status'], **({'reason': v['reason']} if v['status'] == 'unresolved'
+                best[name] = (rank, {'link': link_kind(v), **({'reason': v['reason']} if v['status'] == 'unresolved'
                                                              else {'module': v['module'], 'basis': v['basis']})})
     searched = selection['names']
     names = {n: {**v, **searched.get(n, {'search': 'not-searched'})} for n, (_, v) in sorted(best.items())}
