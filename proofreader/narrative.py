@@ -18,6 +18,7 @@ from .model import Declaration, Document, Span, Step, canonical_json, digest, wa
 from .kernel import InvalidExport, require
 from .kernel_io import strict_json, STANDARD_AXIOMS
 from .polynomial import certify, verify as verify_polynomial, certificate_text
+from . import notation
 
 SCHEMA = 'proofreader.narrative/v1'
 PRINTER_VERSION = 'source-math-en/0.5.0'
@@ -223,6 +224,12 @@ class Snapshot:
 
 
 def math_text(s: str) -> str:
+    # Display only: inside a reading, notation.py then shortens names and
+    # rewrites a few recognized library forms. Checks never read this text.
+    return notation.display(_math_dictionary(s))
+
+
+def _math_dictionary(s: str) -> str:
     """A small notation dictionary, not a free-form algebra simplifier.
 
     The exact Lean strings remain in every source-bound frame. Only recognized
@@ -1055,6 +1062,7 @@ class Narrative:
             return [s]+child_steps
         return [s]
 
+    @notation.reading
     def document(self, *, source: str = '', file: str = 'Original.lean', receipt: dict | None = None, title: str | None = None, provenance_note: str | None = None) -> Document:
         self.owners={};self.heads=set();s=self.snapshot
         require(receipt is None or receipt.get('snapshot_sha256') == s.sha256, 'Receipt belongs to another snapshot')
@@ -1131,7 +1139,7 @@ def prose(document: Document) -> str:
     d=document.declarations[0]
     out=[document.title,'',
          'Source-bound reading; the English is not formally verified. Reading this text does not authenticate the Lean snapshot.',
-         '',*(p['text'] for p in d.parameters),'Then '+d.statement+'.','','Proof.']
+         '',*notation.legend(d),*(p['text'] for p in d.parameters),'Then '+d.statement+'.','','Proof.']
     def emit(steps,depth=0):
         for s in steps:
             out.append('  '*depth+('[Explanation gap] ' if s.fallback else '')+s.text)
