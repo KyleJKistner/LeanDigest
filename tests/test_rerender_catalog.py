@@ -165,6 +165,9 @@ def test_preview_rerenders_readings_and_updates_every_count(published, tmp_path)
     gaps = s['explanation_gaps']
     assert gaps['published']['explicit_explanation_gaps'] == gaps['preview']['explicit_explanation_gaps'] + 1 == 5
     assert gaps['published']['frames_in_explanation_gaps'] == 5 and gaps['preview']['frames_in_explanation_gaps'] == 4
+    for side in ('published', 'preview'):
+        assert sum(gaps[side]['frames_in_gaps_by_rule'].values()) == gaps[side]['frames_in_explanation_gaps']
+        assert set(gaps[side]['frames_in_gaps_by_rule']) == set(gaps[side]['gaps_by_rule'])
     assert gaps['per_reading'] == {'gap_steps': {'fewer': 1, 'same': 1, 'more': 0},
                                    'frames_in_gaps': {'fewer': 1, 'same': 1, 'more': 0}}
     assert s['published']['printer_versions'] == {'source-math-en/0.4.1': 2} and s['published']['release'] is None
@@ -191,6 +194,9 @@ def test_preview_rerenders_readings_and_updates_every_count(published, tmp_path)
     notes = (site / 'RELEASE-NOTES.md').read_text()
     assert notes.startswith('# Catalog preview\n') and notes.endswith('# Synthetic published notes\n\nUnchanged text.\n')
     assert 'Explicit explanation gaps: 5 published, 4 in this preview.' in notes and 'Browser audit: not run.' in notes
+    assert 'fewer gap steps do not mean fewer checked frames inside gaps' in notes
+    assert '`explanations.html` added, `explanation-gaps.json` added.' in notes and 'pages the current main navigation' in notes
+    assert '<th>Preview frames inside</th>' in (site / 'preview.html').read_text()
     assert (site / 'START-HERE.txt').read_text().endswith('Open index.html in a browser.\n')
     assert s['files']['proofs/*/snapshot.json'] == {'unchanged': 2} and s['files']['proofs/*/links.json'] == {'added': 2}
     assert s['files']['preview.html'] == {'added': 1} and s['files']['release.json'] == {'unchanged': 1}
@@ -273,6 +279,29 @@ def test_a_rendering_failure_never_drops_a_published_reading(published, tmp_path
         run(published, tmp_path / 'out')
 
 
+def test_inputs_that_are_not_a_published_catalog_are_rejected(published, tmp_path):
+    run(published, tmp_path / 'out', archive=False)
+    with pytest.raises(ValueError, match='already a catalog preview'):
+        run(tmp_path / 'out/Leanglish', tmp_path / 'again')
+    with pytest.raises(ValueError, match='outside the published site'):
+        run(published, published / 'nested')
+    assert not (published / 'nested').exists()
+
+
+def test_an_unrecognized_reading_link_stops_the_preview(published, tmp_path):
+    rewrite_consistently(published, 'findings/001.html',
+                         lambda t: t.replace(' explicit explanation gaps</span>', ' explanation gaps</span>', 1))
+    with pytest.raises(ValueError, match='Unrecognized reading link'):
+        run(published, tmp_path / 'out')
+
+
+def test_bundled_original_html_is_never_rewritten(published, tmp_path):
+    page = '<!doctype html><title>Synthetic bundled original</title><p>Kept byte for byte.</p>\n'
+    write(published / 'originals/notes.html', page); manifest(published)
+    s = run(published, tmp_path / 'out')
+    assert (tmp_path / 'out/Leanglish/originals/notes.html').read_text() == page and s['files']['originals/**'].keys() == {'unchanged'}
+
+
 def test_coverage_page_text_matches_the_current_builder(tmp_path):
     page = (current_catalog(tmp_path) / 'coverage.html').read_text()
     assert preview.CITATION_NOTE in page and preview.INDEX_LINK in page
@@ -286,6 +315,8 @@ def test_a_current_catalog_is_updated_in_place_without_duplicates(tmp_path):
     page = (tmp_path / 'out/Leanglish/coverage.html').read_text()
     assert page.count(preview.CITATION_ROWS[0]) == 1 and page.count(preview.CITATION_NOTE) == 1
     assert s['pages']['navigation_updated'] == 0 and s['files']['sources/*.html'] == {'unchanged': 2}
+    notes = (tmp_path / 'out/Leanglish/RELEASE-NOTES.md').read_text()
+    assert '`explanations.html` replaced, `explanation-gaps.json` unchanged.' in notes and 'main navigation' not in notes
 
 
 def test_cli_prints_the_counts(published, tmp_path, capsys):
@@ -307,7 +338,11 @@ def test_workflow_rerenders_the_pinned_release_and_never_publishes():
     flow = yaml.safe_load(text)
     triggers = flow[True]
     assert triggers['push']['branches'] == ['claude/keen-archimedes-ihorkq'] and 'workflow_dispatch' in triggers
-    assert sorted(triggers['push']['paths']) == ['.github/workflows/catalog-preview.yml', 'proofreader/**', 'scripts/rerender_catalog.py']
+    # Everything the preview job imports or compares with triggers it.
+    assert {'proofreader/**', 'scripts/rerender_catalog.py', 'scripts/assemble_finding_release.py', 'scripts/collect_original_evidence.py',
+            'scripts/fetch_reading_corpus.py', 'scripts/audit_finding_browser.py', 'scripts/audit_original_browser.py',
+            'benchmarks/reading-kpis/**'} <= set(triggers['push']['paths'])
+    assert set(triggers) == {'push', 'workflow_dispatch'}
     assert flow['permissions'] == {'contents': 'read'}
     assert flow['env']['RELEASE_URL'] == CORPUS['url'] and flow['env']['RELEASE_SHA256'] == CORPUS['sha256']
     job = flow['jobs']['preview']
@@ -315,6 +350,9 @@ def test_workflow_rerenders_the_pinned_release_and_never_publishes():
     assert 'sha256sum -c' in runs and 'scripts/rerender_catalog.py' in runs and '--browser real' in runs
     uploads = [s for s in job['steps'] if s.get('uses', '').startswith('actions/upload-artifact')]
     assert uploads and all(s['with']['retention-days'] == 30 for s in uploads)
+    # Only a successful run uploads the preview zip; a failed one uploads diagnostics.
+    assert [s.get('if') for s in uploads if 'leanglish-catalog-preview.zip' in s['with']['path']] == [None]
+    assert 'verify_manifest' in runs and 'benchmarks/reading-kpis/current.json' in runs
     assert 'git push' not in text and 'gh release' not in text and 'contents: write' not in text
 
 

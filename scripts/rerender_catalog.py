@@ -115,12 +115,12 @@ def walk(steps: list[dict]):
         yield s;yield from walk(s.get('children',[]))
 
 
-def gap_profile(reading: dict) -> tuple[Counter,int]:
-    """Gap steps by rule, and the checked frames owned by gap steps."""
-    d=reading['declarations'][0];rules=Counter();gaps=set()
+def gap_profile(reading: dict) -> tuple[Counter,Counter]:
+    """Gap steps by rule, and the checked frames owned by gap steps by the owning step's rule."""
+    d=reading['declarations'][0];rules=Counter();gaps={}
     for s in walk(d['steps']):
-        if s.get('fallback'):rules[s['rule']]+=1;gaps.add(s['id'])
-    return rules,sum(owner in gaps for owner in d['axes']['frame_owners'].values())
+        if s.get('fallback'):rules[s['rule']]+=1;gaps[s['id']]=s['rule']
+    return rules,Counter(gaps[owner] for owner in d['axes']['frame_owners'].values() if owner in gaps)
 
 
 def application() -> dict:
@@ -178,8 +178,10 @@ def rerender(site: Path) -> dict:
             require(after['title']==base['title'] and len(set(warnings))==len(warnings) and (note is None or warnings[2]==note),
                     'Reading title or provenance note changed')
             rows[key]={'id':ident,'frames':record['judgements_checked'],
-                'before':{'gaps':before,'gap_frames':before_frames,'rules':before_rules,'printer':dec['axes'].get('printer_version')},
-                'after':{'gaps':coverage['source_bound_unexpanded_steps'],'gap_frames':after_frames,'rules':after_rules}}
+                'before':{'gaps':before,'gap_frames':before_frames.total(),'rules':before_rules,'frame_rules':before_frames,
+                          'printer':dec['axes'].get('printer_version')},
+                'after':{'gaps':coverage['source_bound_unexpanded_steps'],'gap_frames':after_frames.total(),'rules':after_rules,
+                         'frame_rules':after_frames}}
         except (ValueError,KeyError,OSError,RuntimeError,RecursionError) as exc:
             failures.append({'proof_id':ident,'module':key[0],'name':key[1],'error':str(exc)[:500]})
     # Unlike a fresh build, a preview never drops a published reading: any failure stops it.
@@ -196,7 +198,10 @@ def update_finding_pages(site: Path, rows: dict) -> int:
             r=by_id.get(m[2]);require(r is not None,'A finding page links to an unknown reading: '+m[2])
             require(int(m[3])==r['frames'] and int(m[4])==r['before']['gaps'],'Published finding-page counts differ for '+m[2])
             count+=1;return m[1]+m[3]+' checked frames · '+str(r['after']['gaps'])+m[5]
-        page.write_text(READING_LINK.sub(replace,text),encoding='utf-8')
+        text,n=READING_LINK.subn(replace,text)
+        # A reading link in any other form would keep a stale published count.
+        require(n==text.count('Open structured proof reading →</a>'),'Unrecognized reading link on '+page.name)
+        page.write_text(text,encoding='utf-8')
     return count
 
 
@@ -222,9 +227,9 @@ def update_coverage_page(site: Path, before: dict, after: dict) -> None:
 
 def update_navigation(site: Path) -> int:
     """Give every catalog page the current main navigation; links are only ever added."""
+    # Only the builder's own pages: bundled originals and evidence keep their bytes.
     count=0
-    for page in sorted(site.rglob('*.html')):
-        if page.relative_to(site).parts[0]=='proofs':continue
+    for page in sorted([*site.glob('*.html'),*(site/'findings').glob('*.html'),*(site/'sources').glob('*.html')]):
         text=page.read_text(encoding='utf-8');brand=BRAND.search(text);navs=NAV.findall(text)
         require(brand is not None and len(navs)==1,'Not a catalog page: '+page.relative_to(site).as_posix())
         current=NAV.search(shell('','',root=brand[1]))[0]
@@ -241,8 +246,8 @@ def notice(root: str, readings: int) -> str:
 
 
 def add_notices(site: Path, readings: int) -> int:
-    pages=[site/n for n in ('index.html','coverage.html','explanations.html','original-verification.html') if (site/n).is_file()]
-    pages+=sorted((site/'findings').glob('*.html'))
+    # Every top-level catalog page (catalog, coverage, explanation gaps, original verification, progress) and finding page.
+    pages=sorted(site.glob('*.html'))+sorted((site/'findings').glob('*.html'))
     for page in pages:
         text=page.read_text(encoding='utf-8');root='../'*(len(page.relative_to(site).parts)-1)
         require(text.count('<main id="content">')==1,'Preview notice location is missing')
@@ -278,12 +283,22 @@ def per_reading(rows: dict) -> dict:
 
 
 def profile(rows: dict, side: str) -> dict:
-    rules=Counter()
-    for r in rows.values():rules.update(r[side]['rules'])
+    rules=Counter();frames=Counter()
+    for r in rows.values():rules.update(r[side]['rules']);frames.update(r[side]['frame_rules'])
+    ranked=lambda c:dict(sorted(c.items(),key=lambda x:(-x[1],x[0])))
     return {'explicit_explanation_gaps':sum(r[side]['gaps'] for r in rows.values()),
             'frames_in_explanation_gaps':sum(r[side]['gap_frames'] for r in rows.values()),
             'readings_without_gaps':sum(r[side]['gaps']==0 for r in rows.values()),
-            'gaps_by_rule':dict(sorted(rules.items(),key=lambda x:(-x[1],x[0])))}
+            'gaps_by_rule':ranked(rules),'frames_in_gaps_by_rule':ranked(frames)}
+
+
+def evidence_note(record: dict, code: str, item: str) -> str:
+    """The unchanged original-project evidence, when the catalog bundles it."""
+    group=record['files'].get('original-evidence/**')
+    if not group:return ''
+    require(set(group)=={'unchanged'},'Original-project evidence changed')
+    return item.format('The '+str(group['unchanged'])+' files in '+code.format('original-evidence/')
+                       +' are unchanged, including any gap counts the original workers recorded.')
 
 
 def preview_page(record: dict) -> str:
@@ -296,7 +311,8 @@ def preview_page(record: dict) -> str:
           +'</code>. No Lean ran. It is not a release.</p>')
     body+='<div class="stats">'+''.join('<div><strong>'+str(n)+'</strong><span>'+label+'</span></div>' for n,label in [
         (a['explicit_explanation_gaps'],'explicit explanation gaps (published: '+str(b['explicit_explanation_gaps'])+')'),
-        (record['readings']['re_rendered'],'proof readings re-rendered'),(record['readings']['added'],'readings added'),
+        (a['frames_in_explanation_gaps'],'checked frames inside gaps (published: '+str(b['frames_in_explanation_gaps'])+')'),
+        (record['readings']['re_rendered'],'proof readings re-rendered'),
         (record['evidence']['files'],'evidence files byte-identical to the published manifest')])+'</div>'
     printers=', '.join(esc(k)+' ('+str(v)+')' for k,v in sorted(p['printer_versions'].items()))
     cells=[('Renderer',printers,esc(record['renderer']['printer_version'])),
@@ -315,11 +331,14 @@ def preview_page(record: dict) -> str:
     for label,key in [('Gap steps','gap_steps'),('Checked frames inside gaps','frames_in_gaps')]:
         c=record['explanation_gaps']['per_reading'][key]
         body+='<tr><td>'+label+'</td><td>'+str(c['fewer'])+'</td><td>'+str(c['same'])+'</td><td>'+str(c['more'])+'</td></tr>'
-    body+=('</tbody></table><h3>Explanation gaps by rule</h3><table><thead><tr><th>Rule</th><th>Published</th><th>Preview</th></tr></thead><tbody>')
+    body+=('</tbody></table><h3>Explanation gaps by rule</h3><table><thead><tr><th>Rule</th><th>Published gap steps</th>'
+           '<th>Published frames inside</th><th>Preview gap steps</th><th>Preview frames inside</th></tr></thead><tbody>')
     rules=sorted(set(b['gaps_by_rule'])|set(a['gaps_by_rule']),key=lambda r:(-a['gaps_by_rule'].get(r,0),-b['gaps_by_rule'].get(r,0),r))
-    body+=''.join('<tr><td><code>'+esc(r)+'</code></td><td>'+str(b['gaps_by_rule'].get(r,0))+'</td><td>'+str(a['gaps_by_rule'].get(r,0))+'</td></tr>' for r in rules)
+    body+=''.join('<tr><td><code>'+esc(r)+'</code></td>'+''.join('<td>'+str(side[field].get(r,0))+'</td>' for side in (b,a)
+                  for field in ('gaps_by_rule','frames_in_gaps_by_rule'))+'</tr>' for r in rules)
     body+=('</tbody></table><p class="small">Rule tags come from each renderer version. A later version can split one earlier tag '
-           'into several, so the rows are not a one-to-one mapping between versions.</p><h3>Files</h3>')
+           'into several, so the rows are not a one-to-one mapping between versions. Frames inside a gap step are counted '
+           'under the rule of that step.</p><h3>Files</h3>')
     body+='<p class="small">Grouped by path pattern and compared with the published manifest.</p><table><thead><tr><th>Path</th><th>Added</th><th>Replaced</th><th>Unchanged</th></tr></thead><tbody>'
     body+=''.join('<tr><td><code>'+esc(k)+'</code></td><td>'+str(v.get('added',0))+'</td><td>'+str(v.get('replaced',0))+'</td><td>'+str(v.get('unchanged',0))+'</td></tr>'
                   for k,v in record['files'].items())+'</tbody></table></section>'
@@ -327,7 +346,8 @@ def preview_page(record: dict) -> str:
            '<li>The '+str(record['evidence']['files'])+' files '+', '.join('<code>'+n+'</code>' for n in EVIDENCE)+' in the reading directories are byte-identical to the published manifest.</li>'
            '<li>No reading was added or removed: '+str(record['readings']['re_rendered'])+' of '+str(record['readings']['expected_theorem_targets'])+' theorem targets have readings.</li>'
            '<li>Receipts and observations are the published ones. They are unsigned and not authenticated.</li>'
-           '<li><code>release.json</code> and <code>original-verification.json</code> describe the published release, not this preview.</li></ul></section>')
+           '<li><code>release.json</code> and <code>original-verification.json</code> describe the published release, not this preview.</li>'
+           +(evidence_note(record,'<code>{}</code>','<li>{}</li>'))+'</ul></section>')
     body+=('<section><h2>Verification</h2><p>Every saved reading was compared with deterministic regeneration from its snapshot, and every reader page '
            'with its reading and citation links. The static audit checked local links, anchors, citation targets and the catalog inventories. '
            'Results and the browser route are recorded in <a href="static-audit.json">static-audit.json</a> and <a href="browser-audit.json">browser-audit.json</a>. '
@@ -342,7 +362,8 @@ def release_notes(record: dict, published: str) -> str:
     state=lambda r:'passed, route `'+r['navigation_backend']+'`' if r.get('passed') else 'not run' if r.get('not_run') else 'failed'
     browser=state(w)+('' if w.get('not_run') else '; original-verification pages '+state(record['original_browser_audit']))
     assets=[k for k,v in record['files'].items() if k.startswith('assets/') and v.get('replaced')]
-    pr=record['explanation_gaps']['per_reading']
+    pr=record['explanation_gaps']['per_reading'];pg=record['pages']
+    made=lambda n:next(iter(record['files'][n]))  # added, replaced or unchanged, as in the file table
     lines=['# Catalog preview','',
         'This catalog is '+(f"the published release `{p['release']}`" if p['release'] else f"a published catalog with manifest SHA-256 `{p['manifest_sha256']}`")
         +f" with its {record['readings']['re_rendered']} proof readings "
@@ -351,20 +372,23 @@ def release_notes(record: dict, published: str) -> str:
         '## Changes','',
         f"- Explicit explanation gaps: {b['explicit_explanation_gaps']} published, {a['explicit_explanation_gaps']} in this preview. "
         f"Checked frames inside gaps: {b['frames_in_explanation_gaps']} published, {a['frames_in_explanation_gaps']} here."
-        +(' One displayed gap step can group several checked frames, so the step count fell while more frames sit inside gaps.'
-          if a['explicit_explanation_gaps']<b['explicit_explanation_gaps'] and a['frames_in_explanation_gaps']>b['frames_in_explanation_gaps'] else ''),
+        +(' One displayed gap step can group several checked frames, so fewer gap steps do not mean fewer checked frames inside gaps.'
+          if a['explicit_explanation_gaps']<b['explicit_explanation_gaps'] else ''),
         f"- Per reading: {pr['gap_steps']['fewer']} fewer, {pr['gap_steps']['same']} the same and {pr['gap_steps']['more']} more gap steps; "
         f"{pr['frames_in_gaps']['fewer']} fewer, {pr['frames_in_gaps']['same']} the same and {pr['frames_in_gaps']['more']} more checked frames inside gaps.",
         f"- Citation links: of {cl['cited']} cited project names, {cl['linked_to_reading']} link to a proof reading, "
         f"{cl['linked_to_source']} only to a bundled source line, and {cl['unresolved']} stay unresolved.",
-        '- Added `explanations.html` and `explanation-gaps.json`, the inventory of every explanation gap.',
-        '- Updated gap counts on finding pages, `coverage.json` and `coverage.html`; added the explanation-gap link to the main navigation and a preview notice.',
+        f"- Explanation-gap inventory: `explanations.html` {made('explanations.html')}, `explanation-gaps.json` {made('explanation-gaps.json')}.",
+        f"- Updated the gap counts in `coverage.json`, `coverage.html` and the {pg['finding_reading_links_updated']} reading links on finding pages.",
+        *([f"- Gave {pg['navigation_updated']} pages the current main navigation, which links the explanation-gap inventory."] if pg['navigation_updated'] else []),
+        f"- Added a preview notice to {pg['preview_notices']} pages.",
         *(['- Replaced '+' and '.join('`'+n+'`' for n in assets)+' with the current catalog assets.'] if assets else []),
         '- `preview.html` and `preview.json` list every changed file group and the gap counts by rule.','',
         '## Unchanged','',
         f"- No Lean ran. No reading was added or removed: {record['readings']['re_rendered']} of {record['readings']['expected_theorem_targets']} theorem targets.",
         f"- {record['evidence']['files']} files ({', '.join('`'+n+'`' for n in EVIDENCE)} in each reading directory) are byte-identical to the published manifest.",
         '- Receipts and observations are the published, unsigned ones. `release.json` and `original-verification.json` describe the published release.',
+        *filter(None,[evidence_note(record,'`{}`','- {}')]),
         '- The English is not formally verified.','',
         '## Verification','',
         f"- Static audit: {'passed' if s['passed'] else 'failed'}; {s['pages']} pages, {s['local_links_checked']} local links, "
@@ -445,17 +469,21 @@ def browser_expectations(site: Path) -> dict:
         if reading:
             return {'reader':links.parent.relative_to(site).as_posix()+'/reader.html','citation':reading,'href':names[reading]['href'],
                     'gaps':gaps['explicit_explanation_gaps'],'readings_with_gaps':gaps['readings_with_gaps'],
-                    'head':next(iter(gaps['by_head'].items()))}
+                    'head':min(gaps['by_head'].items(),key=lambda x:(-x[1],x[0]))}  # the filter's first, most frequent option
     raise ValueError('No reading links to another proof reading; the reader link check cannot run')
 
 
 def build_preview(published: Path, output: Path, *, archive_sha256: str = CORPUS['sha256'],
                   browser: str = 'none', archive: bool = True) -> dict:
     require(browser in {'none','real','document-harness'},'Unknown browser route')
+    # The browser audits check with assert statements, which python -O removes.
+    require(browser=='none' or not sys.flags.optimize,'Run browser audits without python -O')
     require(not output.exists(),'Use a new output directory')
+    require(not output.resolve().is_relative_to(published.resolve()),'The output directory must be outside the published site')
     output.mkdir(parents=True);site=output/'Leanglish'
     source=materialize(published,site,archive_sha256)
     base=verify_manifest(site)
+    require('preview.json' not in base,'The input is already a catalog preview; use the published release')
     manifest_sha256=file_digest(site/'SHA256SUMS.json')
     before=read_json(site/'coverage.json');identity=read_json(site/'release.json') if (site/'release.json').is_file() else {}
     require(not identity or identity.get('coverage')==before,'Published release identity and coverage differ')

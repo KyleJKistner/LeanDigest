@@ -37,8 +37,8 @@ site records `not_run`.
 1. Copy the published site, or extract the zip after rejecting unsafe paths,
    links and oversized archives.
 2. Check every file against the published `SHA256SUMS.json`, including the exact
-   file inventory. Check that `coverage.json` equals the coverage in
-   `release.json`.
+   file inventory. Reject a site that is already a preview. Check that
+   `coverage.json` equals the coverage in `release.json`.
 3. Index the bundled solution modules in `originals/` once, as the catalog
    builder does, and re-render each reading with `narrative_io.write_bundle`.
    The published title and provenance note are kept. Citation links are built
@@ -50,14 +50,17 @@ site records `not_run`.
 5. Update the counts that depend on the readings: the gap count beside each
    reading link on the finding pages, `explicit_explanation_gaps` and
    `citation_links` in `coverage.json`, and the matching rows of `coverage.html`.
-   Each published count must equal the published readings before it is replaced.
+   Each published count must equal the published readings before it is replaced,
+   and every reading link on a finding page must have the recognized form.
 6. Write `evidence/declaration-index.json` and the explanation-gap inventory
    (`explanations.html`, `explanation-gaps.json`). Writing the inventory compares
    every saved reading with deterministic regeneration from its snapshot and
    every reader page with its reading and links.
 7. Copy the current catalog assets (`assets/catalog.css`, `assets/catalog.js`),
    which the explanation-gap filters need. Add the explanation-gap link to the
-   main navigation. A page's navigation may only gain links.
+   main navigation of the catalog's own pages (top level, `findings/` and
+   `sources/`). A page's navigation may only gain links. Bundled originals and
+   evidence are never rewritten.
 8. Add a preview notice to the catalog, coverage, explanation-gap,
    original-verification and finding pages, and write `preview.html`,
    `preview.json`, a preview section at the top of `RELEASE-NOTES.md`, and a
@@ -87,7 +90,8 @@ untracked files.
   `lean_executed: false`, `observations_authenticated: false` and
   `english_formally_verified: false`.
 - Explanation gaps before and after: gap steps, checked frames inside gap steps,
-  readings without gaps, and gap steps by rule.
+  readings without gaps, gap steps by rule, and checked frames inside gap steps
+  by the rule of the step.
 - Citation-link summaries before (if any) and after.
 - Every file group with its added, replaced and unchanged counts.
 - The static audit, the catalog browser audit with the preview-page checks, and
@@ -103,8 +107,10 @@ release. Their coverage no longer equals the preview's `coverage.json`, so
 `scripts/audit_finding_browser.py` and `scripts/audit_original_browser.py`, then
 checks the pages the preview adds or changes: the notice links to
 `preview.html`; the preview page shows the gap count; the explanation-gap table
-lists every reading with gaps and its reference filter shows the inventory's
-count; and a reader page links a cited name to another proof reading.
+lists every reading with gaps and its filter for the most frequent reference
+shows the inventory's count; and a reader page links a cited name to another
+proof reading. The audits use Python assertions, so the script refuses a browser
+route under `python -O`.
 
 `--browser document-harness` loads each document with its local styles and
 scripts inlined. Use it only where browser policy blocks `file://` navigation.
@@ -114,12 +120,19 @@ navigation between files.
 ## Workflow
 
 `catalog-preview.yml` runs on pushes to `claude/keen-archimedes-ihorkq` that
-change `proofreader/**`, the script or the workflow, and on manual dispatch. It
-runs the preview tests, downloads the pinned release zip, checks its SHA-256,
-builds the preview with `--browser real`, re-audits the extracted zip, and
-uploads the zip, its digest, `summary.json` and screenshots as the
-`leanglish-catalog-preview` artifact for 30 days. It has read-only repository
-permission. It never creates a release and never pushes.
+change `proofreader/**`, the script, the scripts it imports, its tests,
+`benchmarks/reading-kpis/**` or the workflow, and on manual dispatch. It has no
+schedule. It runs the preview tests, downloads the pinned release zip, checks
+its SHA-256, and builds the preview with `--browser real`. It then extracts the
+zip, checks every file against the packaged `SHA256SUMS.json`, runs the static
+audit again, and requires the preview's gap steps and frames inside gaps, in
+total and by rule, to equal `benchmarks/reading-kpis/current.json`.
+
+Only a successful run uploads the zip, its digest and `summary.json` as the
+`leanglish-catalog-preview` artifact. Every run uploads `summary.json`, audit
+records and screenshots as `catalog-preview-diagnostics`. Both artifacts are kept
+for 30 days. The workflow has read-only repository permission. It never creates
+a release and never pushes.
 
 ## Pinned release with renderer 0.5.0
 
