@@ -51,13 +51,12 @@
         "proofreader/english.py",
         "proofreader/normalization.py",
         "proofreader/model.py",
-        "tests/test_browser.py",
         "proofreader/narrative.py",
-        "proofreader/polynomial.py",
         "docs/NARRATIVE.md",
         "proofreader/formula_surface.py",
         "proofreader/notation.py",
         "proofreader/narrative_rules.py",
+        "proofreader/narrative_checks.py",
         "proofreader/glossary.py"
       ],
       "allowed_paths": [
@@ -122,6 +121,7 @@
         "proofreader/kernel_io.py",
         "docs/NARRATIVE.md",
         "proofreader/narrative.py",
+        "proofreader/narrative_checks.py",
         "proofreader/polynomial.py",
         "proofreader/narrative_io.py",
         "artifacts/v0.3/live-4.34.1-observations.json"

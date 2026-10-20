@@ -10,6 +10,7 @@ from __future__ import annotations
 import re
 
 from .formula_surface import _FORMULA_GROUPS, _binary_formula, _formula_text, _joins_conjunction, _outer, _same_formula
+from .narrative_checks import _closing
 from .model import Step
 
 
@@ -24,16 +25,35 @@ def _plain_left(left: str, excluded: str) -> list[str]:
     return ['('+left+')'] + ([left] if a is not None and not a[1] & (set(excluded+'∀∃∑∏,:') | {'keyword'}) else [])
 
 
+def _bare_conjunct(right: str) -> bool:
+    """right can follow ∧ without parentheses: it has no outer ∨, → or ↔, begins with a
+    binder, or (since 0.7.0) is B ∧ C with B plain and C such a conjunct (∧ is right-associative)."""
+    b = _outer(right)
+    if b is None:
+        return False
+    if not b[1] & set('∨→↔') or _BINDER_LEAD.match(b[0]):
+        return True
+    depth = 0
+    for k, c in enumerate(b[0]):
+        depth += (c in _FORMULA_GROUPS) - (c in _FORMULA_GROUPS.values())
+        if depth == 0 and b[0][k:k+3] == ' ∧ ':
+            first = b[0][:k]
+            grouped = first[0] in _FORMULA_GROUPS and _closing(first, 0) == len(first)-1
+            return (grouped or len(_plain_left(first, '∧∨→↔')) == 2) and _bare_conjunct(b[0][k+3:])
+    return False
+
+
 def joins_conjunction(text: str, left: str, right: str) -> bool:
     """text is left ∧ right with Lean's precedence; extends _joins_conjunction to a binder on the right.
 
     A ∧ ∀ x, P x → Q is A ∧ (∀ x, (P x → Q)): the binder's body takes the
     rest of the formula, so its outer → or ∨ cannot bind outside the conjunct.
+    The same holds for A ∧ B ∧ ∀ x, P x → Q, read as A ∧ (B ∧ ∀ x, P x → Q).
     """
     if _joins_conjunction(text, left, right):
         return True
     r = _formula_text(right)
-    return (r is not None and _BINDER_LEAD.match(r) is not None
+    return (r is not None and _bare_conjunct(r)
             and any(_same_formula(text, x+' ∧ '+r) for x in _plain_left(left, '∧∨→↔')))
 
 
@@ -133,7 +153,7 @@ class ReadingRules:
                 + (named[0] if len(named) == 1 else ', '.join(named[:-1])+' and '+named[-1])
                 + ('.' if exact else '; that this gives the statement shown is not checked here.'))
         return [self.step(i, text, rule='applied-projection' if exact else 'unchecked-application', fallback=not exact,
-                          conclusion=math_text(f['statement']), children=[s for j in f['children'] for s in self.sequence(j)])]
+                          conclusion=math_text(f['statement']), children=self.proofs(f['children']))]
 
     def nonempty_element(self, i: int) -> list[Step] | None:
         """Nonempty.intro {α} (v : α) with v a variable of the local context whose type is printed as α."""
@@ -249,7 +269,7 @@ class ReadingRules:
             text += (', which may depend on the proof'+('s ' if len(used) > 1 else ' ')
                      + (used[0] if len(used) == 1 else ', '.join(used[:-1])+' and '+used[-1]))
         return [self.step(i, text+'.', rule='witness-proof', conclusion=math_text(self.frames[i]['statement']),
-                          covered=chain, children=[s for k in proofs+[j] for s in self.sequence(k)])]
+                          covered=chain, children=self.proofs(proofs+[j]))]
 
     def proof_cases(self, i: int) -> list[Step] | None:
         """Exists.casesOn {α} {p} {motive} (t : ∃ x, p x) (h : ∀ w (h : p w), …) with α a proposition.

@@ -22,9 +22,10 @@ from .formula_surface import (_same_formula, _plain_proposition, _joins_conjunct
 from . import notation
 from . import glossary as _glossary
 from .narrative_rules import ReadingRules
+from .narrative_checks import ReadingChecks
 
 SCHEMA = 'proofreader.narrative/v1'
-PRINTER_VERSION = 'source-math-en/0.6.0'
+PRINTER_VERSION = 'source-math-en/0.7.0'
 # Earlier labels, each with the only snapshots whose retained reading under it
 # this renderer reproduces exactly (the Bézout demo and native companion).
 EARLIER_PRINTERS = {'source-math-en/0.4.2': frozenset({
@@ -77,12 +78,14 @@ _INSTANCE_CLASSES = frozenset('''AddLeftMono AddLeftReflectLE AddLeftStrictMono 
 _INSTANCE_BINDER = re.compile(r'inst(?:_\d+)?(?:✝[⁰¹²³⁴⁵⁶⁷⁸⁹]*)?')
 # Lean's names for an unlabelled `have`: this, this_1, …
 _ANONYMOUS = re.compile(r'this(?:_\d+)?')
-# Certificate lemmas of three Mathlib decision procedures, recognized by namespace.
+# Certificate lemmas of three Mathlib procedures, recognized by namespace. The
+# namespace names the procedure, not the tactic in the source: nlinarith also
+# closes goals with linarith's certificate, and other tactics call norm_num.
 _AUTOMATION = {'Mathlib.Meta.NormNum.':'norm_num', 'Mathlib.Meta.Positivity.':'positivity',
                'Mathlib.Tactic.Linarith.':'linarith'}
 _AUTOMATION_TEXT = {'norm_num':'Numerical evaluation (norm_num) verifies this; the computation is not expanded.',
                     'positivity':'Sign analysis (positivity) proves this; the certificate is not expanded.',
-                    'linarith':'Linear arithmetic (linarith) proves this; the certificate is not expanded.'}
+                    'linarith':'Linear arithmetic (a certificate of Mathlib’s linarith procedure, which nlinarith also uses) proves this; the certificate is not expanded.'}
 # Numeral-cast facts that norm_num's numeral recognizers take as premises.
 _NUMERAL_CASTS = {'Nat.cast_zero','Nat.cast_one'}
 # Frontier rewrites export no equations; the text names only what the head itself does.
@@ -96,6 +99,10 @@ _REWRITE_TEXT = {
     'congr': 'This equation follows by congruence from equations between the functions and between the arguments; they are not expanded.'}
 # Unexplained steps whose conclusion a parent `have` or `choose` already states.
 _RESTATED = {'citation','project-citation','automation','restatement','rewrite','ring'}
+# What follows a binary * or - shown as · or − (until 0.6.0 a space only, not a line break).
+_SPACED = r'(?=\s)'
+# Cited project constants named by Lean's convention: X.mk is a structure constructor.
+_KINDS = {'mk': 'structure constructor'}
 _CLASS_HEAD = re.compile(r"[A-Z][\w'₀-₉]*(?:\.[A-Za-z][\w'₀-₉]*)*")
 _BASE = {'id','path','statement','role','head','context','children','premises','objects','budget_cut'}
 _EXTRAS = {'binder','domain','value'}
@@ -226,17 +233,18 @@ class Snapshot:
                 'source_replayed_by_loading':False}
 
 
-def math_text(s: str) -> str:
+def math_text(s: str, gloss: bool = True) -> str:
     # Display only: inside a reading, notation.py then shortens names and
     # rewrites a few recognized library forms. Checks never read this text.
-    return notation.display(_math_dictionary(s))
+    return notation.display(_math_dictionary(s, gloss))
 
 
-def _math_dictionary(s: str) -> str:
+def _math_dictionary(s: str, gloss: bool = True) -> str:
     """A small notation dictionary, not a free-form algebra simplifier.
 
     The exact Lean strings remain in every source-bound frame. Only recognized
     fully qualified gcd symbols with atomic arguments receive ordinary notation.
+    A class statement such as IsDomain R is read as a sentence only with gloss.
     """
     atom = r'([^\W\d]\w*|[0-9]+)'
     for constant, shown in [('gcdA','gcdA'),('gcdB','gcdB'),('gcd','gcd')]:
@@ -246,9 +254,10 @@ def _math_dictionary(s: str) -> str:
                                  ('IsCancelMulZero', 'a ring with cancellation away from zero'),
                                  ('IsLeftCancelMulZero', 'a ring with left cancellation away from zero')]:
         m = re.fullmatch(symbol+r' ([^\W\d]\w*)', s, flags=re.UNICODE)
-        if m:
+        if m and gloss:
             return m[1]+' is '+explanation
-    s = s.replace(' * ',' · ').replace(' - ',' − ')
+    # Binary * and - are spaced; at a line break of the pretty-printer the space after is a newline.
+    s = re.sub(r' -'+_SPACED, ' −', re.sub(r' \*'+_SPACED, ' ·', s))
     m = re.fullmatch(r'¬([^\W\d]\w*) = 0',s.strip(),re.UNICODE)
     if m:
         return m[1]+' ≠ 0'
@@ -281,7 +290,8 @@ def _citation(head: str) -> tuple[str,str]:
 
     The rule (project-citation for OAI.*, otherwise citation), not this
     wording, is what corpus measurements count. Lean-generated auxiliary
-    names are described from their recorded suffix.
+    names are described from their recorded suffix; X.mk, Lean's name for a
+    structure constructor, is not called a lemma.
     """
     rule = 'project-citation' if _project(head) else 'citation'
     m = re.fullmatch(r'(.+)\._simp_\d+', head)
@@ -291,14 +301,15 @@ def _citation(head: str) -> tuple[str,str]:
     if m:
         return 'By an auxiliary proof that Lean extracted while elaborating '+notation.name(m[1])+':', rule
     if _project(head):
-        kind = 'instance' if re.match(r'inst[A-Z]', head.rsplit('.',1)[-1]) else 'lemma'
+        last = head.rsplit('.',1)[-1]
+        kind = 'instance' if re.match(r'inst[A-Z]', last) else _KINDS.get(last, 'lemma')
         return 'By the project '+kind+' '+notation.name(head)+':', rule
     return 'By '+notation.name(head)+':', rule
 
 
 
 
-class Narrative(ReadingRules):
+class Narrative(ReadingChecks, ReadingRules):
     def __init__(self, record: dict, glossary: str | _glossary.Selection = _glossary.DEFAULT):
         self.snapshot = Snapshot(record)
         # Reviewed glosses only, unless a reviewer opts in to the marked preview.
@@ -389,7 +400,7 @@ class Narrative(ReadingRules):
         """One line for a parent's typeclass side conditions; not "Standard" if a premise stays visible."""
         covered, visible = self.instance_parts(roots)
         assumed = all(self.frames[r]['role'] == 'given' for r in roots)
-        facts = list(dict.fromkeys(math_text(self.frames[r]['statement']) for r in roots))
+        facts = list(dict.fromkeys(math_text(self.frames[r]['statement'], self.instance_gloss) for r in roots))
         plural = 's' if len(facts) > 1 else ''
         # A derivation through a local instance hypothesis is not called standard.
         local = [] if assumed else self.local_instances(covered)
@@ -399,13 +410,13 @@ class Narrative(ReadingRules):
                  'Standard instance fact'+plural+' used: ')
         note = (' The derivation '+('also ' if visible else '')+'uses the local instance hypothes'+('es ' if len(local) > 1 else 'is ')
                 +'; '.join(local)+'.' if local else '')
-        lines = [math_text(self.frames[j]['statement'])+' — '+(self.frames[j]['head'] or
+        lines = [math_text(self.frames[j]['statement'], self.instance_gloss)+' — '+(self.frames[j]['head'] or
                  ('hypothesis '+_name(self.frames[j]['binder']) if self.frames[j]['role'] == 'given' else 'for each '+_name(self.frames[j]['binder'])))
                  for j in covered]
         heads = list(dict.fromkeys(self.frames[j]['head'] for j in covered if self.frames[j]['head']))
         return self.step(roots[0], label+'; '.join(facts)+'.'+note, rule='instance-assumptions' if assumed else 'instance-facts',
                          covered=covered, fallback=not assumed, references=heads,
-                         children=[s for j in visible for s in self.sequence(j)],
+                         children=self.proofs(visible),
                          detail='Typeclass derivations (not expanded):\n'+'\n'.join(lines))
 
     def descendants(self, i: int) -> list[int]:
@@ -458,12 +469,9 @@ class Narrative(ReadingRules):
     def subproofs(self, ids: list[int]) -> list[Step]:
         """Displayed child proofs; typeclass side conditions follow the mathematical premises."""
         instances = [j for j in ids if self.instance(j)]
-        steps = [s for j in ids if j not in instances for s in self.sequence(j)]
-        for assumed in (False, True):
-            group = [j for j in instances if (self.frames[j]['role'] == 'given') == assumed]
-            if group:
-                steps.append(self.instance_step(group))
-        return steps
+        proofs = [(j, self.sequence(j)) for j in ids if j not in instances]
+        groups = [[j for j in instances if (self.frames[j]['role'] == 'given') == assumed] for assumed in (False, True)]
+        return self.joined(proofs, [self.instance_step(g) for g in groups if g])
 
     def automation_step(self, i: int, family: str) -> Step:
         """Collapse a decision procedure's certificate into one unexplained step.
@@ -492,11 +500,11 @@ class Narrative(ReadingRules):
         visit(i, '')
         f = self.frames[i]
         contradiction = family == 'linarith' and _same_formula(f['statement'], 'False')
-        text = ('Linear arithmetic (linarith) derives a contradiction; the certificate is not expanded.'
+        text = (_AUTOMATION_TEXT[family].replace(' proves this;', ' derives a contradiction;')
                 if contradiction else _AUTOMATION_TEXT[family])
         heads = list(dict.fromkeys(self.frames[j]['head'] for j in covered if self.frames[j]['head']))
         return self.step(i, text, rule='automation', conclusion=None if contradiction else math_text(f['statement']),
-                         children=[s for j in visible for s in self.sequence(j)], covered=covered, fallback=True,
+                         children=self.proofs(visible), covered=covered, fallback=True,
                          references=heads, detail='Automation family: '+family+'; '+str(len(covered))+' certificate frames absorbed.')
 
     def flat_chain(self, i: int) -> tuple[list[int],list[int]]:
@@ -580,7 +588,7 @@ class Narrative(ReadingRules):
                 text = ('Use the reverse direction of ' + math_text(self.frames[ch[0]]['statement'])
                         + ': from ' + math_text(right) + ', obtain ' + con + '.')
                 return [self.step(i, text, rule='equivalence-reverse',
-                                  children=[s for j in ch for s in self.sequence(j)])]
+                                  children=self.proofs(ch))]
         if head == 'Iff.intro' and self.logical_application(i, 2, [2,3]):
             left, right = objects
             # These roles can emit a sequence spanning several scopes. They are
@@ -634,7 +642,7 @@ class Narrative(ReadingRules):
                     and _same_formula(f['statement'], objects[1])):
                 return [self.step(i, 'From ' + math_text(objects[0]) + ', obtain ' + con
                                   + ' by rewriting with the equation of propositions below.', rule='transport',
-                                  children=[s for j in ch for s in self.sequence(j)])]
+                                  children=self.proofs(ch))]
         # These two rules currently have synthetic regression coverage only.
         if head == 'Not.elim' and self.logical_application(i, 1, [1,2]):
             if (_negation_formula(self.frames[ch[0]]['statement'], objects[0])
@@ -642,14 +650,14 @@ class Narrative(ReadingRules):
                     and _same_formula(f['statement'], 'False')):
                 return [self.step(i, 'The supplied proposition and its negation contradict each other.',
                                   rule='negation-elimination', conclusion=con,
-                                  children=[s for j in ch for s in self.sequence(j)])]
+                                  children=self.proofs(ch))]
         if head == 'absurd' and self.logical_application(i, 2, [2,3]):
             if (_same_formula(self.frames[ch[0]]['statement'], objects[0])
                     and _negation_formula(self.frames[ch[1]]['statement'], objects[0])
                     and _same_formula(f['statement'], objects[1])):
                 return [self.step(i, 'The supplied proposition and its negation yield a contradiction, which implies the conclusion.',
                                   rule='contradiction-elimination', conclusion=con,
-                                  children=[s for j in ch for s in self.sequence(j)])]
+                                  children=self.proofs(ch))]
         return None
 
     def sequence(self, i: int) -> list[Step]:
@@ -659,7 +667,7 @@ class Narrative(ReadingRules):
         family = _automation(f['head'])
         if family and role == 'application':
             return [self.automation_step(i, family)]
-        logical = self.logical_steps(i)
+        logical = self.logical_steps(i) or (self.forward_equivalence(i) if f['head'] == 'Iff.mp' else None)
         if logical is None and role in {'witness', 'choose', 'application'}:
             logical = (self.proof_witness(i) if role == 'witness' else self.proof_cases(i) if role == 'choose'
                        else self.applied_projection(i) or self.nonempty_element(i))
@@ -671,7 +679,7 @@ class Narrative(ReadingRules):
                 value=math_text(f['value'])
                 note = (' This is the first Bézout coefficient.' if f['value'].startswith('EuclideanDomain.gcdA ') else
                         ' This is the second Bézout coefficient.' if f['value'].startswith('EuclideanDomain.gcdB ') else '')
-                s=self.step(i,f'Set {name} = {value}.'+note,conclusion=None)
+                s=self.step(i,f'Set {name} = {value}{self.definition_type(name,domain)}.'+note,conclusion=None)
             else:
                 label='.' if _ANONYMOUS.fullmatch(name) else f'; call this fact {name}.'
                 s=self.step(i,f'Establish {domain}'+label,children=self.stated(self.sequence(ch[0]),f['domain']))
@@ -686,7 +694,9 @@ class Narrative(ReadingRules):
                     math_text(left['domain']) + ' and ' + _name(right['binder']) + ': ' +
                     math_text(right['domain']) + '.')
             if not self.named_conjunction(i):
-                step = self.step(i, text, rule='unpack-conjunction',
+                ok = self.conjunction_premise(i)
+                step = self.step(i, text+('' if ok else ' That the premise below has this form is not checked here.'),
+                    rule='unpack-conjunction' if ok else 'unchecked-conjunction', fallback=not ok,
                     children=self.sequence(ch[0]), covered=[i, left['id'], right['id']])
                 return [step] + self.sequence(right['children'][0])
             # A hypothesis printed exactly as the displayed parts joined by ∧ is
@@ -771,23 +781,29 @@ class Narrative(ReadingRules):
             major_slot={'Nat.rec':3,'Nat.recAux':3,'Nat.recOn':1,'List.rec':4,'List.recOn':2}[f['head']]
             object_slots=[k for k in range(len(f['objects'])+len(f['premises']))
                           if k not in recursor_proofs[f['head']]]
-            branches=[self.sequence(j) for j in ch]
             labels=('Base case (zero). ', 'Successor step. ') if f['head'].startswith('Nat.') else ('Empty-list case. ', 'Constructor step. ')
-            for branch,label in zip(branches,labels):
-                if branch:
-                    branch[0].text=label+branch[0].text
-            return [self.step(i,'Proceed by induction on '+math_text(f['objects'][object_slots.index(major_slot)])+'.',
-                              conclusion=con,children=[s for branch in branches for s in branch])]
+            branches=[]
+            for j,label in zip(ch,labels):
+                steps=self.case_proof(j,self.sequence(j))
+                steps[0].text=label+steps[0].text; branches+=steps
+            # Each case is compared with the recorded motive at that constructor.
+            text='Proceed by induction on '+math_text(f['objects'][object_slots.index(major_slot)])+'.'
+            cases=self.motive_cases(i,recursor_proofs[f['head']])
+            for name,claim,ok in cases:
+                if not ok:
+                    text+=(f' The {name} must prove {math_text(claim)}; the proof below establishes a definitionally equal form, whose unfolding is not expanded.'
+                           if claim else f' That the {name} below is the instance of the induction claim is not checked here.')
+            unchecked=not all(ok for _,_,ok in cases)
+            return [self.step(i,text,conclusion=con,children=branches,fallback=unchecked,rule='unchecked-induction' if unchecked else None)]
         if role=='congruence' and f['head']=='congrArg' and len(ch)==1 and len(f['objects'])==5 and [p['argument'] for p in f['premises']]==[5]:
-            return [self.step(i,'Apply '+math_text(f['objects'][-1])+' to both sides of the supplied equality.',
+            return [self.step(i,'Apply '+self.function_text(i)+' to both sides of the supplied equality.',
                               conclusion=con,children=self.sequence(ch[0]))]
         if role=='cases' and f['head'] in {'Or.elim','Or.casesOn'} and len(ch)==3 and all(self.frames[j]['role']=='assume' for j in ch[1:]):
-            branches=self.sequence(ch[0])
-            for j in ch[1:]:
-                b=self.frames[j]
-                branches.append(self.step(j,'Case '+math_text(b['domain'])+'.',rule='case',
-                                          children=self.sequence(b['children'][0])))
-            return [self.step(i,'Reason by cases from '+math_text(self.frames[ch[0]]['statement'])+'.',children=branches)]
+            major=self.sequence(ch[0])
+            branches=[self.step(j,'Case '+math_text(self.frames[j]['domain'])+'.',rule='case',
+                                children=self.sequence(self.frames[j]['children'][0])) for j in ch[1:]]
+            return [self.step(i,'Reason by cases from '+math_text(self.frames[ch[0]]['statement'])+'.',
+                              children=self.joined([(ch[0],major)],branches))]
         if role=='cases' and len(ch)==2 and all(self.frames[j]['role']=='assume' for j in ch):
             branches=[]
             for j in ch:
@@ -803,14 +819,19 @@ class Narrative(ReadingRules):
             if assumption.get('role')=='assume':
                 fact=math_text(self.frames[ch[0]]['statement'])
                 name=_name(intro['binder']);typ=math_text(intro['domain']); prop=math_text(assumption['domain'])
-                s=self.step(i,f'Since {fact}, choose {name} ∈ {typ} with {prop}.',
+                ok=self.existential(i)
+                s=self.step(i,f'Since {fact}, choose {name} ∈ {typ} with {prop}.'+('' if ok else
+                            ' That the premise unfolds to an existential statement is not checked here.'),
+                            rule=None if ok else 'unchecked-choice',fallback=not ok,
                             children=self.stated(self.sequence(ch[0]),self.frames[ch[0]]['statement']),
                             covered=[i,intro['id'],assumption['id']])
                 return [s]+self.sequence(assumption['children'][0])
         if role=='identity' and len(ch)==2 and self.frames[ch[0]]['role']=='assume':
             binder=self.frames[ch[0]]
-            s=self.step(i,'Use the same hypothesis in the form '+math_text(binder['domain'])+'.',
-                        rule='equivalent-assumption',children=self.sequence(ch[1]),covered=[i,binder['id']])
+            same=self.same_assumption(i)
+            s=self.step(i,'Use the same hypothesis in the '+('' if same else 'definitionally equal ')+'form '+math_text(binder['domain'])
+                        +('.' if same else '; the unfolding is not expanded.'),rule='equivalent-assumption' if same else 'assumption-restatement',
+                        fallback=not same,children=self.sequence(ch[1]),covered=[i,binder['id']])
             return [s]+self.sequence(binder['children'][0])
         if role=='witness':
             ids=[]; names=[]; values=[]; j=i
@@ -835,11 +856,12 @@ class Narrative(ReadingRules):
         if role=='combine' and len(ch)==2:
             leaves,parents=self.flat_conjunction(i)
             return [self.step(i,'Verify the '+str(len(leaves))+' required conclusions.',rule='verify-conclusions',
-                              covered=parents,children=[s for j in leaves for s in self.sequence(j)])]
+                              covered=parents,children=self.proofs(leaves))]
         if role=='chain' and len(ch)==2:
             leaves,parents=self.flat_chain(i)
-            return [self.step(i,'The following calculation gives '+con+'.',rule='calculation',covered=parents,
-                              children=[s for j in leaves for s in self.sequence(j)])]
+            ok=self.chained(i,leaves)
+            return [self.step(i,'The following calculation gives '+con+('.' if ok else '; that the printed steps below chain to it is not checked here.'),
+                              rule='calculation' if ok else 'unchecked-calculation',fallback=not ok,covered=parents,children=self.proofs(leaves))]
         if i in self.certificates:
             c=self.certificates[i]
             assumptions=c['assumptions']
@@ -866,7 +888,7 @@ class Narrative(ReadingRules):
         elif role=='assume':
             text='Assume '+math_text(f['domain'])+'.'
         elif role=='introduce':
-            text='Let '+_name(f['binder'])+' ∈ '+math_text(f['domain'])+' be arbitrary.'
+            text=self.introduction(f)
         elif role=='reflexivity':
             text='By reflexivity, '+con+'.'
         elif f['head'] in _LEMMAS:
@@ -929,6 +951,7 @@ class Narrative(ReadingRules):
             self.owners[j]='statement'
         steps=self.grouped(self.sequence(i))
         require(set(self.owners)==set(range(len(self.frames))), 'Display omitted an exported frame')
+        self.require_scopes(steps)
         statement=math_text(self.frames[i]['statement'])
         for st in steps:
             # A citation that proves the theorem itself need not reprint the statement shown above.

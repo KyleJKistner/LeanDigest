@@ -281,6 +281,646 @@
     "theorem": "OAI.Problem315.switch_chain_tv_bound"
    }
   },
+  "assumption_restatement": {
+   "provenance": {
+    "corpus_snapshot": "3812a4e0fc0b0ca282d9fcd5",
+    "recorded_frames": [
+     8,
+     9,
+     10,
+     11,
+     12,
+     13,
+     14,
+     15,
+     16,
+     17,
+     18,
+     19,
+     20,
+     21,
+     22,
+     23,
+     24
+    ],
+    "root_frame": 8,
+    "snapshot_file_sha256": "0cf068f6719deda6a9918d9c6179d9f07d5c3dfa0cb4f583c79ca601d2403725",
+    "snapshot_sha256": "4771356dceaddf77140bdca7627c2046d174fb21bda4892274b0bf6ce0195108",
+    "theorem": "OAI.TraceConeClassification.ExtendedTrace.mul_mem_finiteIdeal_left"
+   },
+   "record": {
+    "axioms": [
+     "propext",
+     "Classical.choice",
+     "Quot.sound"
+    ],
+    "formula_backend": "Lean pretty-printer",
+    "frames": [
+     {
+      "budget_cut": false,
+      "children": [
+       1,
+       16
+      ],
+      "context": [],
+      "head": "id",
+      "id": 0,
+      "objects": [
+       "y ∈ τ.finiteIdeal → x * y ∈ τ.finiteIdeal"
+      ],
+      "path": [],
+      "premises": [
+       {
+        "argument": 1,
+        "frame": 1,
+        "statement": "y ∈ closure ↑τ.finiteSquareAlgebra → x * y ∈ τ.finiteIdeal"
+       },
+       {
+        "argument": 2,
+        "frame": 16,
+        "statement": "y ∈ τ.finiteIdeal"
+       }
+      ],
+      "role": "identity",
+      "statement": "x * y ∈ τ.finiteIdeal"
+     },
+     {
+      "binder": "hy",
+      "budget_cut": false,
+      "children": [
+       2
+      ],
+      "context": [],
+      "domain": "y ∈ closure ↑τ.finiteSquareAlgebra",
+      "head": "",
+      "id": 1,
+      "objects": [],
+      "path": [
+       0,
+       1
+      ],
+      "premises": [],
+      "role": "assume",
+      "statement": "y ∈ closure ↑τ.finiteSquareAlgebra → x * y ∈ τ.finiteIdeal"
+     },
+     {
+      "budget_cut": false,
+      "children": [
+       3
+      ],
+      "context": [
+       {
+        "name": "hy",
+        "type": "y ∈ closure ↑τ.finiteSquareAlgebra"
+       }
+      ],
+      "head": "id",
+      "id": 2,
+      "objects": [
+       "x * y ∈ τ.finiteIdeal"
+      ],
+      "path": [
+       0,
+       1,
+       1
+      ],
+      "premises": [
+       {
+        "argument": 1,
+        "frame": 3,
+        "statement": "((fun x_1 => x) * id) y ∈ closure ↑τ.finiteSquareAlgebra"
+       }
+      ],
+      "role": "identity",
+      "statement": "x * y ∈ τ.finiteIdeal"
+     },
+     {
+      "budget_cut": false,
+      "children": [
+       4,
+       10,
+       11
+      ],
+      "context": [
+       {
+        "name": "hy",
+        "type": "y ∈ closure ↑τ.finiteSquareAlgebra"
+       }
+      ],
+      "head": "map_mem_closure",
+      "id": 3,
+      "objects": [
+       "A",
+       "A",
+       "PseudoMetricSpace.toUniformSpace.toTopologicalSpace",
+       "PseudoMetricSpace.toUniformSpace.toTopologicalSpace",
+       "(fun x_1 => x) * id",
+       "↑τ.finiteSquareAlgebra",
+       "y",
+       "↑τ.finiteSquareAlgebra"
+      ],
+      "path": [
+       0,
+       1,
+       1,
+       1
+      ],
+      "premises": [
+       {
+        "argument": 8,
+        "frame": 4,
+        "statement": "Continuous ((fun x_1 => x) * id)"
+       },
+       {
+        "argument": 9,
+        "frame": 10,
+        "statement": "y ∈ closure ↑τ.finiteSquareAlgebra"
+       },
+       {
+        "argument": 10,
+        "frame": 11,
+        "statement": "∀ z ∈ ↑τ.finiteSquareAlgebra, x * id z ∈ τ.finiteSquareSet"
+       }
+      ],
+      "role": "application",
+      "statement": "((fun x_1 => x) * id) y ∈ closure ↑τ.finiteSquareAlgebra"
+     },
+     {
+      "budget_cut": false,
+      "children": [
+       5,
+       8,
+       9
+      ],
+      "context": [
+       {
+        "name": "hy",
+        "type": "y ∈ closure ↑τ.finiteSquareAlgebra"
+       }
+      ],
+      "head": "Continuous.mul",
+      "id": 4,
+      "objects": [
+       "A",
+       "PseudoMetricSpace.toUniformSpace.toTopologicalSpace",
+       "inst✝².toNonUnitalNonAssocSemiring.toDistrib.toMul",
+       "A",
+       "PseudoMetricSpace.toUniformSpace.toTopologicalSpace",
+       "fun x_1 => x",
+       "id"
+      ],
+      "path": [
+       0,
+       1,
+       1,
+       1,
+       0,
+       0,
+       1
+      ],
+      "premises": [
+       {
+        "argument": 3,
+        "frame": 5,
+        "statement": "ContinuousMul A"
+       },
+       {
+        "argument": 8,
+        "frame": 8,
+        "statement": "Continuous fun x_1 => x"
+       },
+       {
+        "argument": 9,
+        "frame": 9,
+        "statement": "Continuous id"
+       }
+      ],
+      "role": "application",
+      "statement": "Continuous ((fun x_1 => x) * id)"
+     },
+     {
+      "budget_cut": false,
+      "children": [
+       6
+      ],
+      "context": [
+       {
+        "name": "hy",
+        "type": "y ∈ closure ↑τ.finiteSquareAlgebra"
+       }
+      ],
+      "head": "IsTopologicalSemiring.toContinuousMul",
+      "id": 5,
+      "objects": [
+       "A",
+       "PseudoMetricSpace.toUniformSpace.toTopologicalSpace",
+       "inst✝².toNonUnitalNonAssocSemiring"
+      ],
+      "path": [
+       0,
+       1,
+       1,
+       1,
+       0,
+       0,
+       1,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       1
+      ],
+      "premises": [
+       {
+        "argument": 3,
+        "frame": 6,
+        "statement": "IsTopologicalSemiring A"
+       }
+      ],
+      "role": "application",
+      "statement": "ContinuousMul A"
+     },
+     {
+      "budget_cut": false,
+      "children": [
+       7
+      ],
+      "context": [
+       {
+        "name": "hy",
+        "type": "y ∈ closure ↑τ.finiteSquareAlgebra"
+       }
+      ],
+      "head": "IsTopologicalRing.toIsTopologicalSemiring",
+      "id": 6,
+      "objects": [
+       "A",
+       "PseudoMetricSpace.toUniformSpace.toTopologicalSpace",
+       "inst✝².toNonUnitalNonAssocRing"
+      ],
+      "path": [
+       0,
+       1,
+       1,
+       1,
+       0,
+       0,
+       1,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       1,
+       1
+      ],
+      "premises": [
+       {
+        "argument": 3,
+        "frame": 7,
+        "statement": "IsTopologicalRing A"
+       }
+      ],
+      "role": "application",
+      "statement": "IsTopologicalSemiring A"
+     },
+     {
+      "budget_cut": false,
+      "children": [],
+      "context": [
+       {
+        "name": "hy",
+        "type": "y ∈ closure ↑τ.finiteSquareAlgebra"
+       }
+      ],
+      "head": "NonUnitalSeminormedRing.toIsTopologicalRing",
+      "id": 7,
+      "objects": [
+       "A",
+       "NonUnitalNormedRing.toNonUnitalSeminormedRing"
+      ],
+      "path": [
+       0,
+       1,
+       1,
+       1,
+       0,
+       0,
+       1,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       1,
+       1,
+       1
+      ],
+      "premises": [],
+      "role": "application",
+      "statement": "IsTopologicalRing A"
+     },
+     {
+      "budget_cut": false,
+      "children": [],
+      "context": [
+       {
+        "name": "hy",
+        "type": "y ∈ closure ↑τ.finiteSquareAlgebra"
+       }
+      ],
+      "head": "continuous_const",
+      "id": 8,
+      "objects": [
+       "A",
+       "A",
+       "PseudoMetricSpace.toUniformSpace.toTopologicalSpace",
+       "PseudoMetricSpace.toUniformSpace.toTopologicalSpace",
+       "x"
+      ],
+      "path": [
+       0,
+       1,
+       1,
+       1,
+       0,
+       0,
+       1,
+       0,
+       1
+      ],
+      "premises": [],
+      "role": "application",
+      "statement": "Continuous fun x_1 => x"
+     },
+     {
+      "budget_cut": false,
+      "children": [],
+      "context": [
+       {
+        "name": "hy",
+        "type": "y ∈ closure ↑τ.finiteSquareAlgebra"
+       }
+      ],
+      "head": "continuous_id",
+      "id": 9,
+      "objects": [
+       "A",
+       "PseudoMetricSpace.toUniformSpace.toTopologicalSpace"
+      ],
+      "path": [
+       0,
+       1,
+       1,
+       1,
+       0,
+       0,
+       1,
+       1
+      ],
+      "premises": [],
+      "role": "application",
+      "statement": "Continuous id"
+     },
+     {
+      "binder": "hy",
+      "budget_cut": false,
+      "children": [],
+      "context": [
+       {
+        "name": "hy",
+        "type": "y ∈ closure ↑τ.finiteSquareAlgebra"
+       }
+      ],
+      "head": "",
+      "id": 10,
+      "objects": [],
+      "path": [
+       0,
+       1,
+       1,
+       1,
+       0,
+       1
+      ],
+      "premises": [],
+      "role": "given",
+      "statement": "y ∈ closure ↑τ.finiteSquareAlgebra"
+     },
+     {
+      "binder": "z",
+      "budget_cut": false,
+      "children": [
+       12
+      ],
+      "context": [
+       {
+        "name": "hy",
+        "type": "y ∈ closure ↑τ.finiteSquareAlgebra"
+       }
+      ],
+      "domain": "A",
+      "head": "",
+      "id": 11,
+      "objects": [],
+      "path": [
+       0,
+       1,
+       1,
+       1,
+       1
+      ],
+      "premises": [],
+      "role": "introduce",
+      "statement": "∀ z ∈ ↑τ.finiteSquareAlgebra, x * id z ∈ τ.finiteSquareSet"
+     },
+     {
+      "binder": "hz",
+      "budget_cut": false,
+      "children": [
+       13
+      ],
+      "context": [
+       {
+        "name": "hy",
+        "type": "y ∈ closure ↑τ.finiteSquareAlgebra"
+       },
+       {
+        "name": "z",
+        "type": "A"
+       }
+      ],
+      "domain": "z ∈ ↑τ.finiteSquareAlgebra",
+      "head": "",
+      "id": 12,
+      "objects": [],
+      "path": [
+       0,
+       1,
+       1,
+       1,
+       1,
+       1
+      ],
+      "premises": [],
+      "role": "assume",
+      "statement": "z ∈ ↑τ.finiteSquareAlgebra → x * id z ∈ τ.finiteSquareSet"
+     },
+     {
+      "budget_cut": false,
+      "children": [
+       14,
+       15
+      ],
+      "context": [
+       {
+        "name": "hy",
+        "type": "y ∈ closure ↑τ.finiteSquareAlgebra"
+       },
+       {
+        "name": "z",
+        "type": "A"
+       },
+       {
+        "name": "hz",
+        "type": "z ∈ ↑τ.finiteSquareAlgebra"
+       }
+      ],
+      "head": "OAI.TraceConeClassification.ExtendedTrace.mul_mem_finiteSquareSet_left",
+      "id": 13,
+      "objects": [
+       "A",
+       "inst✝²",
+       "inst✝¹",
+       "τ",
+       "x",
+       "id z"
+      ],
+      "path": [
+       0,
+       1,
+       1,
+       1,
+       1,
+       1,
+       1
+      ],
+      "premises": [
+       {
+        "argument": 3,
+        "frame": 14,
+        "statement": "StarOrderedRing A"
+       },
+       {
+        "argument": 7,
+        "frame": 15,
+        "statement": "z ∈ ↑τ.finiteSquareAlgebra"
+       }
+      ],
+      "role": "application",
+      "statement": "x * id z ∈ τ.finiteSquareSet"
+     },
+     {
+      "binder": "inst._@.OAI.Analysis.TraceCone.FiniteIdeal.2241288119._hygCtx._hyg.9",
+      "budget_cut": false,
+      "children": [],
+      "context": [
+       {
+        "name": "hy",
+        "type": "y ∈ closure ↑τ.finiteSquareAlgebra"
+       },
+       {
+        "name": "z",
+        "type": "A"
+       },
+       {
+        "name": "hz",
+        "type": "z ∈ ↑τ.finiteSquareAlgebra"
+       }
+      ],
+      "head": "",
+      "id": 14,
+      "objects": [],
+      "path": [
+       0,
+       1,
+       1,
+       1,
+       1,
+       1,
+       1,
+       0,
+       0,
+       0,
+       0,
+       1
+      ],
+      "premises": [],
+      "role": "given",
+      "statement": "StarOrderedRing A"
+     },
+     {
+      "binder": "hz",
+      "budget_cut": false,
+      "children": [],
+      "context": [
+       {
+        "name": "hy",
+        "type": "y ∈ closure ↑τ.finiteSquareAlgebra"
+       },
+       {
+        "name": "z",
+        "type": "A"
+       },
+       {
+        "name": "hz",
+        "type": "z ∈ ↑τ.finiteSquareAlgebra"
+       }
+      ],
+      "head": "",
+      "id": 15,
+      "objects": [],
+      "path": [
+       0,
+       1,
+       1,
+       1,
+       1,
+       1,
+       1,
+       1
+      ],
+      "premises": [],
+      "role": "given",
+      "statement": "z ∈ ↑τ.finiteSquareAlgebra"
+     },
+     {
+      "binder": "hy",
+      "budget_cut": false,
+      "children": [],
+      "context": [],
+      "head": "",
+      "id": 16,
+      "objects": [],
+      "path": [
+       1
+      ],
+      "premises": [],
+      "role": "given",
+      "statement": "y ∈ τ.finiteIdeal"
+     }
+    ],
+    "judgements_checked": 17,
+    "lean_version": "4.34.1",
+    "schema": "proofreader.narrative/v1",
+    "statement": "x * y ∈ τ.finiteIdeal",
+    "theorem": "OAI.TraceConeClassification.ExtendedTrace.mul_mem_finiteIdeal_left"
+   }
+  },
   "binder_conjunct_projection": {
    "provenance": {
     "corpus_snapshot": "041ad1b2c7d69a9a62c10c7f",
@@ -438,6 +1078,341 @@
     "schema": "proofreader.narrative/v1",
     "statement": "zStar ≤ OAI.CoordinateSweeps.baseZeta r",
     "theorem": "OAI.CoordinateSweeps.conditional_main"
+   }
+  },
+  "calculation_unchecked": {
+   "provenance": {
+    "corpus_snapshot": "9b66141f700e925b4838f704",
+    "recorded_frames": [
+     61,
+     62,
+     63,
+     64,
+     65,
+     66,
+     67,
+     68,
+     69,
+     70,
+     71
+    ],
+    "root_frame": 61,
+    "snapshot_file_sha256": "17d66b89ed276c99774cc7c8c1bca5623be04c47cfe348163a29806214624c0e",
+    "snapshot_sha256": "8963e1191e8dee5e33481dba2201cf9c03adb841fca371fa14bd112a296389e0",
+    "theorem": "OAI.Solenoidal.sheet_theorem"
+   },
+   "record": {
+    "axioms": [
+     "propext",
+     "Classical.choice",
+     "Quot.sound"
+    ],
+    "formula_backend": "Lean pretty-printer",
+    "frames": [
+     {
+      "budget_cut": false,
+      "children": [
+       1,
+       9
+      ],
+      "context": [],
+      "head": "Eq.trans",
+      "id": 0,
+      "objects": [
+       "Prop",
+       "↑δ * ↑10 ≤ 1",
+       "δ * ↑10 ≤ ↑1",
+       "δ * 10 ≤ 1"
+      ],
+      "path": [],
+      "premises": [
+       {
+        "argument": 4,
+        "frame": 1,
+        "statement": "(↑δ * ↑10 ≤ 1) = (δ * ↑10 ≤ ↑1)"
+       },
+       {
+        "argument": 5,
+        "frame": 9,
+        "statement": "(δ * 10 ≤ ↑1) = (δ * 10 ≤ 1)"
+       }
+      ],
+      "role": "chain",
+      "statement": "(↑δ * ↑10 ≤ 1) = (δ * 10 ≤ 1)"
+     },
+     {
+      "budget_cut": false,
+      "children": [
+       2,
+       5
+      ],
+      "context": [],
+      "head": "Eq.trans",
+      "id": 1,
+      "objects": [
+       "Prop",
+       "↑δ * ↑10 ≤ 1",
+       "↑δ * ↑10 ≤ ↑1",
+       "δ * ↑10 ≤ ↑1"
+      ],
+      "path": [
+       0,
+       1
+      ],
+      "premises": [
+       {
+        "argument": 4,
+        "frame": 2,
+        "statement": "(↑δ * ↑10 ≤ 1) = (↑δ * ↑10 ≤ ↑1)"
+       },
+       {
+        "argument": 5,
+        "frame": 5,
+        "statement": "(↑δ * ↑10 ≤ ↑1) = (δ * ↑10 ≤ ↑1)"
+       }
+      ],
+      "role": "chain",
+      "statement": "(↑δ * ↑10 ≤ 1) = (δ * ↑10 ≤ ↑1)"
+     },
+     {
+      "budget_cut": false,
+      "children": [
+       3
+      ],
+      "context": [],
+      "head": "congrArg",
+      "id": 2,
+      "objects": [
+       "ℝ",
+       "Prop",
+       "1",
+       "↑1",
+       "LE.le (↑δ * ↑10)"
+      ],
+      "path": [
+       0,
+       1,
+       0,
+       1
+      ],
+      "premises": [
+       {
+        "argument": 5,
+        "frame": 3,
+        "statement": "1 = ↑1"
+       }
+      ],
+      "role": "congruence",
+      "statement": "(↑δ * ↑10 ≤ 1) = (↑δ * ↑10 ≤ ↑1)"
+     },
+     {
+      "budget_cut": false,
+      "children": [
+       4
+      ],
+      "context": [],
+      "head": "Eq.symm",
+      "id": 3,
+      "objects": [
+       "ℝ",
+       "↑1",
+       "1"
+      ],
+      "path": [
+       0,
+       1,
+       0,
+       1,
+       1
+      ],
+      "premises": [
+       {
+        "argument": 3,
+        "frame": 4,
+        "statement": "↑1 = 1"
+       }
+      ],
+      "role": "application",
+      "statement": "1 = ↑1"
+     },
+     {
+      "budget_cut": false,
+      "children": [],
+      "context": [],
+      "head": "Nat.cast_one",
+      "id": 4,
+      "objects": [
+       "ℝ",
+       "Real.instRing.toAddGroupWithOne.toAddMonoidWithOne"
+      ],
+      "path": [
+       0,
+       1,
+       0,
+       1,
+       1,
+       1
+      ],
+      "premises": [],
+      "role": "application",
+      "statement": "↑1 = 1"
+     },
+     {
+      "budget_cut": false,
+      "children": [
+       6,
+       7
+      ],
+      "context": [],
+      "head": "Eq.trans",
+      "id": 5,
+      "objects": [
+       "Prop",
+       "↑δ * ↑10 ≤ ↑1",
+       "↑(δ * ↑10) ≤ ↑1",
+       "δ * ↑10 ≤ ↑1"
+      ],
+      "path": [
+       0,
+       1,
+       1
+      ],
+      "premises": [
+       {
+        "argument": 4,
+        "frame": 6,
+        "statement": "(↑δ * ↑10 ≤ ↑1) = (↑(δ * ↑10) ≤ ↑1)"
+       },
+       {
+        "argument": 5,
+        "frame": 7,
+        "statement": "(↑(δ * ↑10) ≤ ↑1) = (δ * ↑10 ≤ ↑1)"
+       }
+      ],
+      "role": "chain",
+      "statement": "(↑δ * ↑10 ≤ ↑1) = (δ * ↑10 ≤ ↑1)"
+     },
+     {
+      "budget_cut": false,
+      "children": [],
+      "context": [],
+      "head": "congrFun'",
+      "id": 6,
+      "objects": [],
+      "path": [
+       0,
+       1,
+       1,
+       0,
+       1
+      ],
+      "premises": [],
+      "role": "rewrite",
+      "statement": "(↑δ * ↑10 ≤ ↑1) = (↑(δ * ↑10) ≤ ↑1)"
+     },
+     {
+      "budget_cut": false,
+      "children": [
+       8
+      ],
+      "context": [],
+      "head": "Rat.cast_le_natCast._simp_1",
+      "id": 7,
+      "objects": [
+       "ℝ",
+       "Real.instField",
+       "Real.linearOrder",
+       "δ * ↑10",
+       "1"
+      ],
+      "path": [
+       0,
+       1,
+       1,
+       1
+      ],
+      "premises": [
+       {
+        "argument": 3,
+        "frame": 8,
+        "statement": "IsStrictOrderedRing ℝ"
+       }
+      ],
+      "role": "application",
+      "statement": "(↑(δ * ↑10) ≤ ↑1) = (δ * ↑10 ≤ ↑1)"
+     },
+     {
+      "budget_cut": false,
+      "children": [],
+      "context": [],
+      "head": "Real.instIsStrictOrderedRing",
+      "id": 8,
+      "objects": [],
+      "path": [
+       0,
+       1,
+       1,
+       1,
+       0,
+       0,
+       1
+      ],
+      "premises": [],
+      "role": "named",
+      "statement": "IsStrictOrderedRing ℝ"
+     },
+     {
+      "budget_cut": false,
+      "children": [
+       10
+      ],
+      "context": [],
+      "head": "congrArg",
+      "id": 9,
+      "objects": [
+       "ℚ",
+       "Prop",
+       "↑1",
+       "1",
+       "LE.le (δ * 10)"
+      ],
+      "path": [
+       1
+      ],
+      "premises": [
+       {
+        "argument": 5,
+        "frame": 10,
+        "statement": "↑1 = 1"
+       }
+      ],
+      "role": "congruence",
+      "statement": "(δ * 10 ≤ ↑1) = (δ * 10 ≤ 1)"
+     },
+     {
+      "budget_cut": false,
+      "children": [],
+      "context": [],
+      "head": "Nat.cast_one",
+      "id": 10,
+      "objects": [
+       "ℚ",
+       "Rat.instDivisionRing.toAddGroupWithOne.toAddMonoidWithOne"
+      ],
+      "path": [
+       1,
+       1
+      ],
+      "premises": [],
+      "role": "application",
+      "statement": "↑1 = 1"
+     }
+    ],
+    "judgements_checked": 11,
+    "lean_version": "4.34.1",
+    "schema": "proofreader.narrative/v1",
+    "statement": "(↑δ * ↑10 ≤ 1) = (δ * 10 ≤ 1)",
+    "theorem": "OAI.Solenoidal.sheet_theorem"
    }
   },
   "cast_with_instances": {
@@ -746,6 +1721,358 @@
     "theorem": "OAI.MatchingEntropy.entropy_main"
    }
   },
+  "choice_unchecked": {
+   "provenance": {
+    "corpus_snapshot": "459e6c5668380927d515a988",
+    "recorded_frames": [
+     15,
+     16,
+     17,
+     18,
+     19,
+     20,
+     21
+    ],
+    "root_frame": 15,
+    "snapshot_file_sha256": "76a93078a4db3075cf039075c4ad4acc1282aed6d8895bc89444b8c5d698804f",
+    "snapshot_sha256": "5a06753e6a42db70e0511dd5616add47692191cde55f210bda73ae7e7546e104",
+    "theorem": "OAI.EuclideanRamsey.ramsey_cospherical"
+   },
+   "record": {
+    "axioms": [
+     "propext",
+     "Classical.choice",
+     "Quot.sound"
+    ],
+    "formula_backend": "Lean pretty-printer",
+    "frames": [
+     {
+      "budget_cut": false,
+      "children": [
+       1,
+       2
+      ],
+      "context": [],
+      "head": "Exists.casesOn",
+      "id": 0,
+      "objects": [
+       "Fin 0",
+       "fun y => a_1 y = p",
+       "fun x => dist p 0 = 0"
+      ],
+      "path": [],
+      "premises": [
+       {
+        "argument": 3,
+        "frame": 1,
+        "statement": "p ∈ Set.range a_1"
+       },
+       {
+        "argument": 4,
+        "frame": 2,
+        "statement": "∀ (i : Fin 0), a_1 i = p → dist p 0 = 0"
+       }
+      ],
+      "role": "choose",
+      "statement": "dist p 0 = 0"
+     },
+     {
+      "binder": "a_2",
+      "budget_cut": false,
+      "children": [],
+      "context": [],
+      "head": "",
+      "id": 1,
+      "objects": [],
+      "path": [
+       0,
+       1
+      ],
+      "premises": [],
+      "role": "given",
+      "statement": "p ∈ Set.range a_1"
+     },
+     {
+      "binder": "i",
+      "budget_cut": false,
+      "children": [
+       3
+      ],
+      "context": [],
+      "domain": "Fin 0",
+      "head": "",
+      "id": 2,
+      "objects": [],
+      "path": [
+       1
+      ],
+      "premises": [],
+      "role": "introduce",
+      "statement": "∀ (i : Fin 0), a_1 i = p → dist p 0 = 0"
+     },
+     {
+      "binder": "h",
+      "budget_cut": false,
+      "children": [
+       4
+      ],
+      "context": [
+       {
+        "name": "i",
+        "type": "Fin 0"
+       }
+      ],
+      "domain": "a_1 i = p",
+      "head": "",
+      "id": 3,
+      "objects": [],
+      "path": [
+       1,
+       1
+      ],
+      "premises": [],
+      "role": "assume",
+      "statement": "a_1 i = p → dist p 0 = 0"
+     },
+     {
+      "budget_cut": false,
+      "children": [
+       5,
+       6
+      ],
+      "context": [
+       {
+        "name": "i",
+        "type": "Fin 0"
+       },
+       {
+        "name": "h",
+        "type": "a_1 i = p"
+       }
+      ],
+      "head": "Eq.ndrec",
+      "id": 4,
+      "objects": [
+       "OAI.EuclideanRamsey.Space d",
+       "a_1 i",
+       "fun p => dist p 0 = 0",
+       "p"
+      ],
+      "path": [
+       1,
+       1,
+       1
+      ],
+      "premises": [
+       {
+        "argument": 3,
+        "frame": 5,
+        "statement": "dist (a_1 i) 0 = 0"
+       },
+       {
+        "argument": 5,
+        "frame": 6,
+        "statement": "a_1 i = p"
+       }
+      ],
+      "role": "application",
+      "statement": "dist p 0 = 0"
+     },
+     {
+      "budget_cut": false,
+      "children": [],
+      "context": [
+       {
+        "name": "i",
+        "type": "Fin 0"
+       },
+       {
+        "name": "h",
+        "type": "a_1 i = p"
+       }
+      ],
+      "head": "Fin.elim0",
+      "id": 5,
+      "objects": [
+       "dist (a_1 i) 0 = 0",
+       "i"
+      ],
+      "path": [
+       1,
+       1,
+       1,
+       0,
+       0,
+       1
+      ],
+      "premises": [],
+      "role": "application",
+      "statement": "dist (a_1 i) 0 = 0"
+     },
+     {
+      "binder": "h",
+      "budget_cut": false,
+      "children": [],
+      "context": [
+       {
+        "name": "i",
+        "type": "Fin 0"
+       },
+       {
+        "name": "h",
+        "type": "a_1 i = p"
+       }
+      ],
+      "head": "",
+      "id": 6,
+      "objects": [],
+      "path": [
+       1,
+       1,
+       1,
+       1
+      ],
+      "premises": [],
+      "role": "given",
+      "statement": "a_1 i = p"
+     }
+    ],
+    "judgements_checked": 7,
+    "lean_version": "4.34.1",
+    "schema": "proofreader.narrative/v1",
+    "statement": "dist p 0 = 0",
+    "theorem": "OAI.EuclideanRamsey.ramsey_cospherical"
+   }
+  },
+  "definition_automatic_name": {
+   "provenance": {
+    "corpus_snapshot": "fece2b389f10d25f22a87911",
+    "recorded_frames": [
+     26,
+     27,
+     28,
+     29
+    ],
+    "root_frame": 26,
+    "snapshot_file_sha256": "62b939005896f8cc5e1fb61c0ab35010655fb201751f88cfd407b26cee12a1bd",
+    "snapshot_sha256": "88547d33f2a34884ccb33c8b7b2e019debc1943b4cf7caa5758c3e5ba5c8371c",
+    "theorem": "OAI.KLInvariance.combinatorial_invariance"
+   },
+   "record": {
+    "axioms": [
+     "propext",
+     "Classical.choice",
+     "Quot.sound"
+    ],
+    "formula_backend": "Lean pretty-printer",
+    "frames": [
+     {
+      "binder": "this_1",
+      "budget_cut": false,
+      "children": [
+       1
+      ],
+      "context": [],
+      "domain": "Fintype ↑F'.indices",
+      "head": "",
+      "id": 0,
+      "objects": [],
+      "path": [],
+      "premises": [],
+      "role": "define",
+      "statement": "OAI.KLInvariance.klPolynomial cs u b = OAI.KLInvariance.klPolynomial cs' u' b'",
+      "value": "⋯.fintype"
+     },
+     {
+      "binder": "basis",
+      "budget_cut": false,
+      "children": [
+       2
+      ],
+      "context": [
+       {
+        "name": "this_1",
+        "type": "Fintype ↑F'.indices"
+       }
+      ],
+      "domain": "Module.Basis\n  (Module.Free.ChooseBasisIndex ℝ\n    (OAI.KLInvariance.TitsSpace.Extended (OAI.KLInvariance.StandardParabolic.matrix F.indices)))\n  ℝ (OAI.KLInvariance.TitsSpace.Extended (OAI.KLInvariance.StandardParabolic.matrix F.indices))",
+      "head": "",
+      "id": 1,
+      "objects": [],
+      "path": [
+       2
+      ],
+      "premises": [],
+      "role": "define",
+      "statement": "OAI.KLInvariance.klPolynomial cs u b = OAI.KLInvariance.klPolynomial cs' u' b'",
+      "value": "Module.Free.chooseBasis ℝ (OAI.KLInvariance.TitsSpace.Extended (OAI.KLInvariance.StandardParabolic.matrix F.indices))"
+     },
+     {
+      "binder": "basis'",
+      "budget_cut": false,
+      "children": [
+       3
+      ],
+      "context": [
+       {
+        "name": "this_1",
+        "type": "Fintype ↑F'.indices"
+       },
+       {
+        "name": "basis",
+        "type": "Module.Basis\n  (Module.Free.ChooseBasisIndex ℝ\n    (OAI.KLInvariance.TitsSpace.Extended (OAI.KLInvariance.StandardParabolic.matrix F.indices)))\n  ℝ (OAI.KLInvariance.TitsSpace.Extended (OAI.KLInvariance.StandardParabolic.matrix F.indices))"
+       }
+      ],
+      "domain": "Module.Basis\n  (Module.Free.ChooseBasisIndex ℝ\n    (OAI.KLInvariance.TitsSpace.Extended (OAI.KLInvariance.StandardParabolic.matrix F'.indices)))\n  ℝ (OAI.KLInvariance.TitsSpace.Extended (OAI.KLInvariance.StandardParabolic.matrix F'.indices))",
+      "head": "",
+      "id": 2,
+      "objects": [],
+      "path": [
+       2,
+       2
+      ],
+      "premises": [],
+      "role": "define",
+      "statement": "OAI.KLInvariance.klPolynomial cs u b = OAI.KLInvariance.klPolynomial cs' u' b'",
+      "value": "Module.Free.chooseBasis ℝ (OAI.KLInvariance.TitsSpace.Extended (OAI.KLInvariance.StandardParabolic.matrix F'.indices))"
+     },
+     {
+      "budget_cut": false,
+      "children": [],
+      "context": [
+       {
+        "name": "this_1",
+        "type": "Fintype ↑F'.indices"
+       },
+       {
+        "name": "basis",
+        "type": "Module.Basis\n  (Module.Free.ChooseBasisIndex ℝ\n    (OAI.KLInvariance.TitsSpace.Extended (OAI.KLInvariance.StandardParabolic.matrix F.indices)))\n  ℝ (OAI.KLInvariance.TitsSpace.Extended (OAI.KLInvariance.StandardParabolic.matrix F.indices))"
+       },
+       {
+        "name": "basis'",
+        "type": "Module.Basis\n  (Module.Free.ChooseBasisIndex ℝ\n    (OAI.KLInvariance.TitsSpace.Extended (OAI.KLInvariance.StandardParabolic.matrix F'.indices)))\n  ℝ (OAI.KLInvariance.TitsSpace.Extended (OAI.KLInvariance.StandardParabolic.matrix F'.indices))"
+       }
+      ],
+      "head": "Eq.mpr",
+      "id": 3,
+      "objects": [],
+      "path": [
+       2,
+       2,
+       2
+      ],
+      "premises": [],
+      "role": "rewrite",
+      "statement": "OAI.KLInvariance.klPolynomial cs u b = OAI.KLInvariance.klPolynomial cs' u' b'"
+     }
+    ],
+    "judgements_checked": 4,
+    "lean_version": "4.34.1",
+    "schema": "proofreader.narrative/v1",
+    "statement": "OAI.KLInvariance.klPolynomial cs u b = OAI.KLInvariance.klPolynomial cs' u' b'",
+    "theorem": "OAI.KLInvariance.combinatorial_invariance"
+   }
+  },
   "equivalence_binder": {
    "provenance": {
     "corpus_snapshot": "151b0da1c1708a5b462d03ba",
@@ -902,6 +2229,98 @@
     "schema": "proofreader.narrative/v1",
     "statement": "MeasureTheory.MeasurePreserving\n  ⇑(OAI.SmoothObstruction.PhaseDynamics.extensionShift (OAI.SmoothObstruction.WordParameters.length 40000) ⋯\n      OAI.SmoothObstruction.WordHierarchy.words)\n  ↑μ ↑μ",
     "theorem": "OAI.SmoothObstruction.main"
+   }
+  },
+  "forward_equivalence_unfolded": {
+   "provenance": {
+    "corpus_snapshot": "6bfcd5b628744719dae2584a",
+    "recorded_frames": [
+     31,
+     32,
+     33
+    ],
+    "root_frame": 31,
+    "snapshot_file_sha256": "a7e775b9b4515dc16b152fdf8a7daaced648c71901e38489576ea88cd7322c92",
+    "snapshot_sha256": "1ebef69645e5a9436dd2cfbf0ce85982d40cda2f35d0457e5d7246212bded87a",
+    "theorem": "OAI.InfiniteMatroidCounterexample.main"
+   },
+   "record": {
+    "axioms": [
+     "propext",
+     "Classical.choice",
+     "Quot.sound"
+    ],
+    "formula_backend": "Lean pretty-printer",
+    "frames": [
+     {
+      "budget_cut": false,
+      "children": [
+       1,
+       2
+      ],
+      "context": [],
+      "head": "Iff.mp",
+      "id": 0,
+      "objects": [
+       "S.matroid.IsBase B",
+       "B ∈ S.bases"
+      ],
+      "path": [],
+      "premises": [
+       {
+        "argument": 2,
+        "frame": 1,
+        "statement": "S.matroid.IsBase B ↔ B ∈ S.bases"
+       },
+       {
+        "argument": 3,
+        "frame": 2,
+        "statement": "Q.IsBase B"
+       }
+      ],
+      "role": "application",
+      "statement": "B ∈ S.bases"
+     },
+     {
+      "budget_cut": false,
+      "children": [],
+      "context": [],
+      "head": "OAI.InfiniteMatroidCounterexample.BasisSystem.isBase_iff",
+      "id": 1,
+      "objects": [
+       "OAI.InfiniteMatroidCounterexample.E0",
+       "S",
+       "B"
+      ],
+      "path": [
+       0,
+       1
+      ],
+      "premises": [],
+      "role": "application",
+      "statement": "S.matroid.IsBase B ↔ B ∈ S.bases"
+     },
+     {
+      "binder": "hB",
+      "budget_cut": false,
+      "children": [],
+      "context": [],
+      "head": "",
+      "id": 2,
+      "objects": [],
+      "path": [
+       1
+      ],
+      "premises": [],
+      "role": "given",
+      "statement": "Q.IsBase B"
+     }
+    ],
+    "judgements_checked": 3,
+    "lean_version": "4.34.1",
+    "schema": "proofreader.narrative/v1",
+    "statement": "B ∈ S.bases",
+    "theorem": "OAI.InfiniteMatroidCounterexample.main"
    }
   },
   "hypotheses_mixed": {
@@ -1082,6 +2501,812 @@
     "schema": "proofreader.narrative/v1",
     "statement": "OAI.BalancedTransport.div\n    (OAI.BalancedTransport.Geometry.loadedRepeat (OAI.BalancedTransport.Geometry.loadingVelocity (z M w) 1) v) t x_1 =\n  0",
     "theorem": "OAI.BalancedTransport.balanced_three_stack_realization"
+   }
+  },
+  "induction_checked": {
+   "provenance": {
+    "corpus_snapshot": "041ad1b2c7d69a9a62c10c7f",
+    "recorded_frames": [
+     44,
+     45,
+     46,
+     47,
+     48,
+     49,
+     50,
+     51,
+     52,
+     53,
+     54,
+     55,
+     56,
+     57,
+     58,
+     59,
+     60,
+     61
+    ],
+    "root_frame": 44,
+    "snapshot_file_sha256": "6a2f3d9b32f4ce043d33308d11c0442171e898659e0539aacd13a58c1d8956d5",
+    "snapshot_sha256": "faec81dc0d7ca20bf7a8b322f5dcb3d434c1383634f2cbaac253647387fd911e",
+    "theorem": "OAI.TraceReconstruction.quantitative_sample_lower_bound"
+   },
+   "record": {
+    "axioms": [
+     "propext",
+     "Classical.choice",
+     "Quot.sound"
+    ],
+    "formula_backend": "Lean pretty-printer",
+    "frames": [
+     {
+      "budget_cut": false,
+      "children": [
+       1,
+       15
+      ],
+      "context": [],
+      "head": "Nat.recAux",
+      "id": 0,
+      "objects": [
+       "fun g => ↑g < 2 ^ g",
+       "g"
+      ],
+      "path": [],
+      "premises": [
+       {
+        "argument": 1,
+        "frame": 1,
+        "statement": "↑0 < 2 ^ 0"
+       },
+       {
+        "argument": 2,
+        "frame": 15,
+        "statement": "∀ (g : ℕ), ↑g < 2 ^ g → ↑(g + 1) < 2 ^ (g + 1)"
+       }
+      ],
+      "role": "induction",
+      "statement": "↑g < 2 ^ g"
+     },
+     {
+      "budget_cut": false,
+      "children": [
+       2,
+       3,
+       4,
+       7,
+       14
+      ],
+      "context": [],
+      "head": "Mathlib.Meta.NormNum.isNat_lt_true",
+      "id": 1,
+      "objects": [
+       "ℝ",
+       "Real.semiring",
+       "Real.partialOrder",
+       "↑0",
+       "2 ^ 0",
+       "0",
+       "1"
+      ],
+      "path": [
+       0,
+       0,
+       1
+      ],
+      "premises": [
+       {
+        "argument": 3,
+        "frame": 2,
+        "statement": "IsOrderedRing ℝ"
+       },
+       {
+        "argument": 4,
+        "frame": 3,
+        "statement": "CharZero ℝ"
+       },
+       {
+        "argument": 9,
+        "frame": 4,
+        "statement": "Mathlib.Meta.NormNum.IsNat (↑0) 0"
+       },
+       {
+        "argument": 10,
+        "frame": 7,
+        "statement": "Mathlib.Meta.NormNum.IsNat (2 ^ 0) 1"
+       },
+       {
+        "argument": 11,
+        "frame": 14,
+        "statement": "false = false"
+       }
+      ],
+      "role": "application",
+      "statement": "↑0 < 2 ^ 0"
+     },
+     {
+      "budget_cut": false,
+      "children": [],
+      "context": [],
+      "head": "Real.instIsOrderedRing",
+      "id": 2,
+      "objects": [],
+      "path": [
+       0,
+       0,
+       1,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       1
+      ],
+      "premises": [],
+      "role": "named",
+      "statement": "IsOrderedRing ℝ"
+     },
+     {
+      "budget_cut": false,
+      "children": [],
+      "context": [],
+      "head": "FloorSemiring.instCharZero",
+      "id": 3,
+      "objects": [
+       "ℝ",
+       "Real.instRing.toSemiring",
+       "Real.partialOrder",
+       "FloorRing.toFloorSemiring"
+      ],
+      "path": [
+       0,
+       0,
+       1,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       1
+      ],
+      "premises": [],
+      "role": "application",
+      "statement": "CharZero ℝ"
+     },
+     {
+      "budget_cut": false,
+      "children": [
+       5
+      ],
+      "context": [],
+      "head": "Mathlib.Meta.NormNum.isNat_natCast",
+      "id": 4,
+      "objects": [
+       "ℝ",
+       "Real.instRing.toAddGroupWithOne.toAddMonoidWithOne",
+       "0",
+       "0"
+      ],
+      "path": [
+       0,
+       0,
+       1,
+       0,
+       0,
+       1
+      ],
+      "premises": [
+       {
+        "argument": 4,
+        "frame": 5,
+        "statement": "Mathlib.Meta.NormNum.IsNat 0 0"
+       }
+      ],
+      "role": "application",
+      "statement": "Mathlib.Meta.NormNum.IsNat (↑0) 0"
+     },
+     {
+      "budget_cut": false,
+      "children": [
+       6
+      ],
+      "context": [],
+      "head": "Mathlib.Meta.NormNum.isNat_ofNat",
+      "id": 5,
+      "objects": [
+       "ℕ",
+       "Nat.instAddMonoidWithOne",
+       "0",
+       "0"
+      ],
+      "path": [
+       0,
+       0,
+       1,
+       0,
+       0,
+       1,
+       1
+      ],
+      "premises": [
+       {
+        "argument": 4,
+        "frame": 6,
+        "statement": "0 = 0"
+       }
+      ],
+      "role": "application",
+      "statement": "Mathlib.Meta.NormNum.IsNat 0 0"
+     },
+     {
+      "budget_cut": false,
+      "children": [],
+      "context": [],
+      "head": "Eq.refl",
+      "id": 6,
+      "objects": [
+       "ℕ",
+       "0"
+      ],
+      "path": [
+       0,
+       0,
+       1,
+       0,
+       0,
+       1,
+       1,
+       1
+      ],
+      "premises": [],
+      "role": "reflexivity",
+      "statement": "0 = 0"
+     },
+     {
+      "budget_cut": false,
+      "children": [
+       8,
+       9,
+       11,
+       13
+      ],
+      "context": [],
+      "head": "Mathlib.Meta.NormNum.isNat_pow",
+      "id": 7,
+      "objects": [
+       "ℝ",
+       "Real.semiring",
+       "HPow.hPow",
+       "2",
+       "0",
+       "2",
+       "0",
+       "1"
+      ],
+      "path": [
+       0,
+       0,
+       1,
+       0,
+       1
+      ],
+      "premises": [
+       {
+        "argument": 8,
+        "frame": 8,
+        "statement": "HPow.hPow = HPow.hPow"
+       },
+       {
+        "argument": 9,
+        "frame": 9,
+        "statement": "Mathlib.Meta.NormNum.IsNat 2 2"
+       },
+       {
+        "argument": 10,
+        "frame": 11,
+        "statement": "Mathlib.Meta.NormNum.IsNat 0 0"
+       },
+       {
+        "argument": 11,
+        "frame": 13,
+        "statement": "Nat.pow 2 0 = 1"
+       }
+      ],
+      "role": "application",
+      "statement": "Mathlib.Meta.NormNum.IsNat (2 ^ 0) 1"
+     },
+     {
+      "budget_cut": false,
+      "children": [],
+      "context": [],
+      "head": "Eq.refl",
+      "id": 8,
+      "objects": [
+       "ℝ → ℕ → ℝ",
+       "HPow.hPow"
+      ],
+      "path": [
+       0,
+       0,
+       1,
+       0,
+       1,
+       0,
+       0,
+       0,
+       1
+      ],
+      "premises": [],
+      "role": "reflexivity",
+      "statement": "HPow.hPow = HPow.hPow"
+     },
+     {
+      "budget_cut": false,
+      "children": [
+       10
+      ],
+      "context": [],
+      "head": "Mathlib.Meta.NormNum.isNat_ofNat",
+      "id": 9,
+      "objects": [
+       "ℝ",
+       "Real.instRing.toAddGroupWithOne.toAddMonoidWithOne",
+       "2",
+       "2"
+      ],
+      "path": [
+       0,
+       0,
+       1,
+       0,
+       1,
+       0,
+       0,
+       1
+      ],
+      "premises": [
+       {
+        "argument": 4,
+        "frame": 10,
+        "statement": "2 = 2"
+       }
+      ],
+      "role": "application",
+      "statement": "Mathlib.Meta.NormNum.IsNat 2 2"
+     },
+     {
+      "budget_cut": false,
+      "children": [],
+      "context": [],
+      "head": "Eq.refl",
+      "id": 10,
+      "objects": [
+       "ℝ",
+       "2"
+      ],
+      "path": [
+       0,
+       0,
+       1,
+       0,
+       1,
+       0,
+       0,
+       1,
+       1
+      ],
+      "premises": [],
+      "role": "reflexivity",
+      "statement": "2 = 2"
+     },
+     {
+      "budget_cut": false,
+      "children": [
+       12
+      ],
+      "context": [],
+      "head": "Mathlib.Meta.NormNum.isNat_ofNat",
+      "id": 11,
+      "objects": [
+       "ℕ",
+       "Nat.instAddMonoidWithOne",
+       "0",
+       "0"
+      ],
+      "path": [
+       0,
+       0,
+       1,
+       0,
+       1,
+       0,
+       1
+      ],
+      "premises": [
+       {
+        "argument": 4,
+        "frame": 12,
+        "statement": "0 = 0"
+       }
+      ],
+      "role": "application",
+      "statement": "Mathlib.Meta.NormNum.IsNat 0 0"
+     },
+     {
+      "budget_cut": false,
+      "children": [],
+      "context": [],
+      "head": "Eq.refl",
+      "id": 12,
+      "objects": [
+       "ℕ",
+       "0"
+      ],
+      "path": [
+       0,
+       0,
+       1,
+       0,
+       1,
+       0,
+       1,
+       1
+      ],
+      "premises": [],
+      "role": "reflexivity",
+      "statement": "0 = 0"
+     },
+     {
+      "budget_cut": false,
+      "children": [],
+      "context": [],
+      "head": "Mathlib.Meta.NormNum.natPow_zero",
+      "id": 13,
+      "objects": [
+       "2"
+      ],
+      "path": [
+       0,
+       0,
+       1,
+       0,
+       1,
+       1
+      ],
+      "premises": [],
+      "role": "application",
+      "statement": "Nat.pow 2 0 = 1"
+     },
+     {
+      "budget_cut": false,
+      "children": [],
+      "context": [],
+      "head": "Eq.refl",
+      "id": 14,
+      "objects": [
+       "Bool",
+       "false"
+      ],
+      "path": [
+       0,
+       0,
+       1,
+       1
+      ],
+      "premises": [],
+      "role": "reflexivity",
+      "statement": "false = false"
+     },
+     {
+      "binder": "g_1",
+      "budget_cut": false,
+      "children": [
+       16
+      ],
+      "context": [],
+      "domain": "ℕ",
+      "head": "",
+      "id": 15,
+      "objects": [],
+      "path": [
+       0,
+       1
+      ],
+      "premises": [],
+      "role": "introduce",
+      "statement": "∀ (g : ℕ), ↑g < 2 ^ g → ↑(g + 1) < 2 ^ (g + 1)"
+     },
+     {
+      "binder": "ih",
+      "budget_cut": false,
+      "children": [
+       17
+      ],
+      "context": [
+       {
+        "name": "g_1",
+        "type": "ℕ"
+       }
+      ],
+      "domain": "↑g_1 < 2 ^ g_1",
+      "head": "",
+      "id": 16,
+      "objects": [],
+      "path": [
+       0,
+       1,
+       1
+      ],
+      "premises": [],
+      "role": "assume",
+      "statement": "↑g_1 < 2 ^ g_1 → ↑(g_1 + 1) < 2 ^ (g_1 + 1)"
+     },
+     {
+      "budget_cut": false,
+      "children": [],
+      "context": [
+       {
+        "name": "g_1",
+        "type": "ℕ"
+       },
+       {
+        "name": "ih",
+        "type": "↑g_1 < 2 ^ g_1"
+       }
+      ],
+      "head": "Eq.mpr",
+      "id": 17,
+      "objects": [],
+      "path": [
+       0,
+       1,
+       1,
+       1
+      ],
+      "premises": [],
+      "role": "rewrite",
+      "statement": "↑(g_1 + 1) < 2 ^ (g_1 + 1)"
+     }
+    ],
+    "judgements_checked": 18,
+    "lean_version": "4.34.1",
+    "schema": "proofreader.narrative/v1",
+    "statement": "↑g < 2 ^ g",
+    "theorem": "OAI.TraceReconstruction.quantitative_sample_lower_bound"
+   }
+  },
+  "induction_unfolded_base": {
+   "provenance": {
+    "corpus_snapshot": "7f424240829ae53312ebe76f",
+    "recorded_frames": [
+     10,
+     11,
+     12,
+     13,
+     14,
+     15,
+     16
+    ],
+    "root_frame": 10,
+    "snapshot_file_sha256": "666a63d97496374bec34cfa5a31bf3a6f6fdeaffa4049821d721a6b3c4dccfbb",
+    "snapshot_sha256": "1b436fcb7c2ce9b7b5c3b1da1e43971e5ce7b92938ec7feada68e0905bffca72",
+    "theorem": "OAI.CorSetReference.cor_set"
+   },
+   "record": {
+    "axioms": [
+     "propext",
+     "Classical.choice",
+     "Quot.sound"
+    ],
+    "formula_backend": "Lean pretty-printer",
+    "frames": [
+     {
+      "budget_cut": false,
+      "children": [
+       1,
+       2
+      ],
+      "context": [],
+      "head": "List.rec",
+      "id": 0,
+      "objects": [
+       "ι",
+       "fun w => (OAI.EntropyRateDimension.Extensions.uniformSystem r t hr0 hr1).wordAffine w = OAI.CorSetReference.word r t w",
+       "w"
+      ],
+      "path": [],
+      "premises": [
+       {
+        "argument": 2,
+        "frame": 1,
+        "statement": "(OAI.EntropyRateDimension.Extensions.uniformSystem r t hr0 hr1).wordAffine [] =\n  (OAI.EntropyRateDimension.Extensions.uniformSystem r t hr0 hr1).wordAffine []"
+       },
+       {
+        "argument": 3,
+        "frame": 2,
+        "statement": "∀ (i : ι) (w : List ι),\n  (OAI.EntropyRateDimension.Extensions.uniformSystem r t hr0 hr1).wordAffine w = OAI.CorSetReference.word r t w →\n    (OAI.EntropyRateDimension.Extensions.uniformSystem r t hr0 hr1).wordAffine (i :: w) =\n      OAI.CorSetReference.word r t (i :: w)"
+       }
+      ],
+      "role": "induction",
+      "statement": "(OAI.EntropyRateDimension.Extensions.uniformSystem r t hr0 hr1).wordAffine w = OAI.CorSetReference.word r t w"
+     },
+     {
+      "budget_cut": false,
+      "children": [],
+      "context": [],
+      "head": "Eq.refl",
+      "id": 1,
+      "objects": [
+       "ℝ × ℝ",
+       "(OAI.EntropyRateDimension.Extensions.uniformSystem r t hr0 hr1).wordAffine []"
+      ],
+      "path": [
+       0,
+       0,
+       1
+      ],
+      "premises": [],
+      "role": "reflexivity",
+      "statement": "(OAI.EntropyRateDimension.Extensions.uniformSystem r t hr0 hr1).wordAffine [] =\n  (OAI.EntropyRateDimension.Extensions.uniformSystem r t hr0 hr1).wordAffine []"
+     },
+     {
+      "binder": "i",
+      "budget_cut": false,
+      "children": [
+       3
+      ],
+      "context": [],
+      "domain": "ι",
+      "head": "",
+      "id": 2,
+      "objects": [],
+      "path": [
+       0,
+       1
+      ],
+      "premises": [],
+      "role": "introduce",
+      "statement": "∀ (i : ι) (w : List ι),\n  (OAI.EntropyRateDimension.Extensions.uniformSystem r t hr0 hr1).wordAffine w = OAI.CorSetReference.word r t w →\n    (OAI.EntropyRateDimension.Extensions.uniformSystem r t hr0 hr1).wordAffine (i :: w) =\n      OAI.CorSetReference.word r t (i :: w)"
+     },
+     {
+      "binder": "w_1",
+      "budget_cut": false,
+      "children": [
+       4
+      ],
+      "context": [
+       {
+        "name": "i",
+        "type": "ι"
+       }
+      ],
+      "domain": "List ι",
+      "head": "",
+      "id": 3,
+      "objects": [],
+      "path": [
+       0,
+       1,
+       1
+      ],
+      "premises": [],
+      "role": "introduce",
+      "statement": "∀ (w : List ι),\n  (OAI.EntropyRateDimension.Extensions.uniformSystem r t hr0 hr1).wordAffine w = OAI.CorSetReference.word r t w →\n    (OAI.EntropyRateDimension.Extensions.uniformSystem r t hr0 hr1).wordAffine (i :: w) =\n      OAI.CorSetReference.word r t (i :: w)"
+     },
+     {
+      "binder": "ih",
+      "budget_cut": false,
+      "children": [
+       5
+      ],
+      "context": [
+       {
+        "name": "i",
+        "type": "ι"
+       },
+       {
+        "name": "w_1",
+        "type": "List ι"
+       }
+      ],
+      "domain": "(OAI.EntropyRateDimension.Extensions.uniformSystem r t hr0 hr1).wordAffine w_1 = OAI.CorSetReference.word r t w_1",
+      "head": "",
+      "id": 4,
+      "objects": [],
+      "path": [
+       0,
+       1,
+       1,
+       1
+      ],
+      "premises": [],
+      "role": "assume",
+      "statement": "(OAI.EntropyRateDimension.Extensions.uniformSystem r t hr0 hr1).wordAffine w_1 = OAI.CorSetReference.word r t w_1 →\n  (OAI.EntropyRateDimension.Extensions.uniformSystem r t hr0 hr1).wordAffine (i :: w_1) =\n    OAI.CorSetReference.word r t (i :: w_1)"
+     },
+     {
+      "budget_cut": false,
+      "children": [
+       6
+      ],
+      "context": [
+       {
+        "name": "i",
+        "type": "ι"
+       },
+       {
+        "name": "w_1",
+        "type": "List ι"
+       },
+       {
+        "name": "ih",
+        "type": "(OAI.EntropyRateDimension.Extensions.uniformSystem r t hr0 hr1).wordAffine w_1 = OAI.CorSetReference.word r t w_1"
+       }
+      ],
+      "head": "id",
+      "id": 5,
+      "objects": [
+       "(OAI.EntropyRateDimension.Extensions.uniformSystem r t hr0 hr1).wordAffine (i :: w_1) =\n  OAI.CorSetReference.word r t (i :: w_1)"
+      ],
+      "path": [
+       0,
+       1,
+       1,
+       1,
+       1
+      ],
+      "premises": [
+       {
+        "argument": 1,
+        "frame": 6,
+        "statement": "(r i * ((OAI.EntropyRateDimension.Extensions.uniformSystem r t hr0 hr1).wordAffine w_1).1,\n    r i * ((OAI.EntropyRateDimension.Extensions.uniformSystem r t hr0 hr1).wordAffine w_1).2 + t i) =\n  (r i * (OAI.CorSetReference.word r t w_1).1, r i * (OAI.CorSetReference.word r t w_1).2 + t i)"
+       }
+      ],
+      "role": "identity",
+      "statement": "(OAI.EntropyRateDimension.Extensions.uniformSystem r t hr0 hr1).wordAffine (i :: w_1) =\n  OAI.CorSetReference.word r t (i :: w_1)"
+     },
+     {
+      "budget_cut": false,
+      "children": [],
+      "context": [
+       {
+        "name": "i",
+        "type": "ι"
+       },
+       {
+        "name": "w_1",
+        "type": "List ι"
+       },
+       {
+        "name": "ih",
+        "type": "(OAI.EntropyRateDimension.Extensions.uniformSystem r t hr0 hr1).wordAffine w_1 = OAI.CorSetReference.word r t w_1"
+       }
+      ],
+      "head": "Eq.mpr",
+      "id": 6,
+      "objects": [],
+      "path": [
+       0,
+       1,
+       1,
+       1,
+       1,
+       1
+      ],
+      "premises": [],
+      "role": "rewrite",
+      "statement": "(r i * ((OAI.EntropyRateDimension.Extensions.uniformSystem r t hr0 hr1).wordAffine w_1).1,\n    r i * ((OAI.EntropyRateDimension.Extensions.uniformSystem r t hr0 hr1).wordAffine w_1).2 + t i) =\n  (r i * (OAI.CorSetReference.word r t w_1).1, r i * (OAI.CorSetReference.word r t w_1).2 + t i)"
+     }
+    ],
+    "judgements_checked": 7,
+    "lean_version": "4.34.1",
+    "schema": "proofreader.narrative/v1",
+    "statement": "(OAI.EntropyRateDimension.Extensions.uniformSystem r t hr0 hr1).wordAffine w = OAI.CorSetReference.word r t w",
+    "theorem": "OAI.CorSetReference.cor_set"
    }
   },
   "instance_assumption": {
@@ -4289,6 +6514,2453 @@
     "schema": "proofreader.narrative/v1",
     "statement": "0 < OAI.MatchingEntropy.entropyDefect G (↑m) y",
     "theorem": "OAI.MatchingEntropy.entropy_main"
+   }
+  },
+  "scope_conclusions": {
+   "provenance": {
+    "corpus_snapshot": "fc83807a73831f2cd1f4ada2",
+    "recorded_frames": [
+     26,
+     27,
+     28,
+     29,
+     30,
+     31,
+     32,
+     33,
+     34,
+     35,
+     36,
+     37,
+     38,
+     39,
+     40,
+     41,
+     42,
+     43,
+     44,
+     45,
+     46,
+     47,
+     48,
+     49,
+     50,
+     51,
+     52,
+     53,
+     54,
+     55
+    ],
+    "root_frame": 26,
+    "snapshot_file_sha256": "9f0f40182fe1aa2b919121c04287a77e24f09e755f69901b7adac39aaf596e12",
+    "snapshot_sha256": "19d9a0848a52b9fb01d7ca96d9bbe908d9fd3a6258530e87375b0fe0b989d4f8",
+    "theorem": "OAI.SharpLiebThirring.sharp_lieb_thirring"
+   },
+   "record": {
+    "axioms": [
+     "propext",
+     "Classical.choice",
+     "Quot.sound"
+    ],
+    "formula_backend": "Lean pretty-printer",
+    "frames": [
+     {
+      "budget_cut": false,
+      "children": [
+       1,
+       7
+      ],
+      "context": [],
+      "head": "And.intro",
+      "id": 0,
+      "objects": [
+       "∀ (W : ℝ → ℝ),\n  OAI.SharpLiebThirring.Admissible γ W →\n    OAI.SharpLiebThirring.negativeMoment γ W ≤\n      ENNReal.ofReal (OAI.SharpLiebThirring.sharpConstant γ) * OAI.SharpLiebThirring.potentialMass γ W",
+       "OAI.SharpLiebThirring.optimalConstant γ = ENNReal.ofReal (OAI.SharpLiebThirring.sharpConstant γ) ∧\n  OAI.SharpLiebThirring.oneStateConstant γ = ENNReal.ofReal (OAI.SharpLiebThirring.sharpConstant γ) ∧\n    OAI.SharpLiebThirring.Admissible γ (OAI.SharpLiebThirring.equalityPotential γ) ∧\n      0 < OAI.SharpLiebThirring.potentialMass γ (OAI.SharpLiebThirring.equalityPotential γ) ∧\n        OAI.SharpLiebThirring.negativeMoment γ (OAI.SharpLiebThirring.equalityPotential γ) =\n          ENNReal.ofReal (OAI.SharpLiebThirring.sharpConstant γ) *\n            OAI.SharpLiebThirring.potentialMass γ (OAI.SharpLiebThirring.equalityPotential γ)"
+      ],
+      "path": [],
+      "premises": [
+       {
+        "argument": 2,
+        "frame": 1,
+        "statement": "∀ (x : ℝ → ℝ),\n  OAI.SharpLiebThirring.Admissible γ x →\n    OAI.SharpLiebThirring.negativeMoment γ x ≤\n      ENNReal.ofReal (OAI.SharpLiebThirring.sharpConstant γ) * OAI.SharpLiebThirring.potentialMass γ x"
+       },
+       {
+        "argument": 3,
+        "frame": 7,
+        "statement": "OAI.SharpLiebThirring.optimalConstant γ = ENNReal.ofReal (OAI.SharpLiebThirring.sharpConstant γ) ∧\n  OAI.SharpLiebThirring.oneStateConstant γ = ENNReal.ofReal (OAI.SharpLiebThirring.sharpConstant γ) ∧\n    OAI.SharpLiebThirring.Admissible γ (OAI.SharpLiebThirring.equalityPotential γ) ∧\n      0 < OAI.SharpLiebThirring.potentialMass γ (OAI.SharpLiebThirring.equalityPotential γ) ∧\n        OAI.SharpLiebThirring.negativeMoment γ (OAI.SharpLiebThirring.equalityPotential γ) =\n          ENNReal.ofReal (OAI.SharpLiebThirring.sharpConstant γ) *\n            OAI.SharpLiebThirring.potentialMass γ (OAI.SharpLiebThirring.equalityPotential γ)"
+       }
+      ],
+      "role": "combine",
+      "statement": "(∀ (W : ℝ → ℝ),\n    OAI.SharpLiebThirring.Admissible γ W →\n      OAI.SharpLiebThirring.negativeMoment γ W ≤\n        ENNReal.ofReal (OAI.SharpLiebThirring.sharpConstant γ) * OAI.SharpLiebThirring.potentialMass γ W) ∧\n  OAI.SharpLiebThirring.optimalConstant γ = ENNReal.ofReal (OAI.SharpLiebThirring.sharpConstant γ) ∧\n    OAI.SharpLiebThirring.oneStateConstant γ = ENNReal.ofReal (OAI.SharpLiebThirring.sharpConstant γ) ∧\n      OAI.SharpLiebThirring.Admissible γ (OAI.SharpLiebThirring.equalityPotential γ) ∧\n        0 < OAI.SharpLiebThirring.potentialMass γ (OAI.SharpLiebThirring.equalityPotential γ) ∧\n          OAI.SharpLiebThirring.negativeMoment γ (OAI.SharpLiebThirring.equalityPotential γ) =\n            ENNReal.ofReal (OAI.SharpLiebThirring.sharpConstant γ) *\n              OAI.SharpLiebThirring.potentialMass γ (OAI.SharpLiebThirring.equalityPotential γ)"
+     },
+     {
+      "binder": "x",
+      "budget_cut": false,
+      "children": [
+       2
+      ],
+      "context": [],
+      "domain": "ℝ → ℝ",
+      "head": "",
+      "id": 1,
+      "objects": [],
+      "path": [
+       0,
+       1
+      ],
+      "premises": [],
+      "role": "introduce",
+      "statement": "∀ (x : ℝ → ℝ),\n  OAI.SharpLiebThirring.Admissible γ x →\n    OAI.SharpLiebThirring.negativeMoment γ x ≤\n      ENNReal.ofReal (OAI.SharpLiebThirring.sharpConstant γ) * OAI.SharpLiebThirring.potentialMass γ x"
+     },
+     {
+      "binder": "hW_1",
+      "budget_cut": false,
+      "children": [
+       3
+      ],
+      "context": [
+       {
+        "name": "x",
+        "type": "ℝ → ℝ"
+       }
+      ],
+      "domain": "OAI.SharpLiebThirring.Admissible γ x",
+      "head": "",
+      "id": 2,
+      "objects": [],
+      "path": [
+       0,
+       1,
+       1
+      ],
+      "premises": [],
+      "role": "assume",
+      "statement": "OAI.SharpLiebThirring.Admissible γ x →\n  OAI.SharpLiebThirring.negativeMoment γ x ≤\n    ENNReal.ofReal (OAI.SharpLiebThirring.sharpConstant γ) * OAI.SharpLiebThirring.potentialMass γ x"
+     },
+     {
+      "budget_cut": false,
+      "children": [
+       4,
+       5,
+       6
+      ],
+      "context": [
+       {
+        "name": "x",
+        "type": "ℝ → ℝ"
+       },
+       {
+        "name": "hW_1",
+        "type": "OAI.SharpLiebThirring.Admissible γ x"
+       }
+      ],
+      "head": "OAI.SharpLiebThirring.negativeMoment_bound",
+      "id": 3,
+      "objects": [
+       "γ",
+       "x"
+      ],
+      "path": [
+       0,
+       1,
+       1,
+       1
+      ],
+      "premises": [
+       {
+        "argument": 1,
+        "frame": 4,
+        "statement": "1 / 2 < γ"
+       },
+       {
+        "argument": 2,
+        "frame": 5,
+        "statement": "γ < 3 / 2"
+       },
+       {
+        "argument": 4,
+        "frame": 6,
+        "statement": "OAI.SharpLiebThirring.Admissible γ x"
+       }
+      ],
+      "role": "application",
+      "statement": "OAI.SharpLiebThirring.negativeMoment γ x ≤\n  ENNReal.ofReal (OAI.SharpLiebThirring.sharpConstant γ) * OAI.SharpLiebThirring.potentialMass γ x"
+     },
+     {
+      "binder": "hγ₀",
+      "budget_cut": false,
+      "children": [],
+      "context": [
+       {
+        "name": "x",
+        "type": "ℝ → ℝ"
+       },
+       {
+        "name": "hW_1",
+        "type": "OAI.SharpLiebThirring.Admissible γ x"
+       }
+      ],
+      "head": "",
+      "id": 4,
+      "objects": [],
+      "path": [
+       0,
+       1,
+       1,
+       1,
+       0,
+       0,
+       0,
+       1
+      ],
+      "premises": [],
+      "role": "given",
+      "statement": "1 / 2 < γ"
+     },
+     {
+      "binder": "hγ₁",
+      "budget_cut": false,
+      "children": [],
+      "context": [
+       {
+        "name": "x",
+        "type": "ℝ → ℝ"
+       },
+       {
+        "name": "hW_1",
+        "type": "OAI.SharpLiebThirring.Admissible γ x"
+       }
+      ],
+      "head": "",
+      "id": 5,
+      "objects": [],
+      "path": [
+       0,
+       1,
+       1,
+       1,
+       0,
+       0,
+       1
+      ],
+      "premises": [],
+      "role": "given",
+      "statement": "γ < 3 / 2"
+     },
+     {
+      "binder": "hW_1",
+      "budget_cut": false,
+      "children": [],
+      "context": [
+       {
+        "name": "x",
+        "type": "ℝ → ℝ"
+       },
+       {
+        "name": "hW_1",
+        "type": "OAI.SharpLiebThirring.Admissible γ x"
+       }
+      ],
+      "head": "",
+      "id": 6,
+      "objects": [],
+      "path": [
+       0,
+       1,
+       1,
+       1,
+       1
+      ],
+      "premises": [],
+      "role": "given",
+      "statement": "OAI.SharpLiebThirring.Admissible γ x"
+     },
+     {
+      "budget_cut": false,
+      "children": [
+       8,
+       13
+      ],
+      "context": [],
+      "head": "And.intro",
+      "id": 7,
+      "objects": [
+       "OAI.SharpLiebThirring.optimalConstant γ = ENNReal.ofReal (OAI.SharpLiebThirring.sharpConstant γ)",
+       "OAI.SharpLiebThirring.oneStateConstant γ = ENNReal.ofReal (OAI.SharpLiebThirring.sharpConstant γ) ∧\n  OAI.SharpLiebThirring.Admissible γ (OAI.SharpLiebThirring.equalityPotential γ) ∧\n    0 < OAI.SharpLiebThirring.potentialMass γ (OAI.SharpLiebThirring.equalityPotential γ) ∧\n      OAI.SharpLiebThirring.negativeMoment γ (OAI.SharpLiebThirring.equalityPotential γ) =\n        ENNReal.ofReal (OAI.SharpLiebThirring.sharpConstant γ) *\n          OAI.SharpLiebThirring.potentialMass γ (OAI.SharpLiebThirring.equalityPotential γ)"
+      ],
+      "path": [
+       1
+      ],
+      "premises": [
+       {
+        "argument": 2,
+        "frame": 8,
+        "statement": "OAI.SharpLiebThirring.optimalConstant γ = ENNReal.ofReal (OAI.SharpLiebThirring.sharpConstant γ)"
+       },
+       {
+        "argument": 3,
+        "frame": 13,
+        "statement": "OAI.SharpLiebThirring.oneStateConstant γ = ENNReal.ofReal (OAI.SharpLiebThirring.sharpConstant γ) ∧\n  OAI.SharpLiebThirring.Admissible γ (OAI.SharpLiebThirring.equalityPotential γ) ∧\n    0 < OAI.SharpLiebThirring.potentialMass γ (OAI.SharpLiebThirring.equalityPotential γ) ∧\n      OAI.SharpLiebThirring.negativeMoment γ (OAI.SharpLiebThirring.equalityPotential γ) =\n        ENNReal.ofReal (OAI.SharpLiebThirring.sharpConstant γ) *\n          OAI.SharpLiebThirring.potentialMass γ (OAI.SharpLiebThirring.equalityPotential γ)"
+       }
+      ],
+      "role": "combine",
+      "statement": "OAI.SharpLiebThirring.optimalConstant γ = ENNReal.ofReal (OAI.SharpLiebThirring.sharpConstant γ) ∧\n  OAI.SharpLiebThirring.oneStateConstant γ = ENNReal.ofReal (OAI.SharpLiebThirring.sharpConstant γ) ∧\n    OAI.SharpLiebThirring.Admissible γ (OAI.SharpLiebThirring.equalityPotential γ) ∧\n      0 < OAI.SharpLiebThirring.potentialMass γ (OAI.SharpLiebThirring.equalityPotential γ) ∧\n        OAI.SharpLiebThirring.negativeMoment γ (OAI.SharpLiebThirring.equalityPotential γ) =\n          ENNReal.ofReal (OAI.SharpLiebThirring.sharpConstant γ) *\n            OAI.SharpLiebThirring.potentialMass γ (OAI.SharpLiebThirring.equalityPotential γ)"
+     },
+     {
+      "budget_cut": false,
+      "children": [
+       9,
+       10
+      ],
+      "context": [],
+      "head": "le_antisymm",
+      "id": 8,
+      "objects": [
+       "ENNReal",
+       "ENNReal.instPartialOrder",
+       "OAI.SharpLiebThirring.optimalConstant γ",
+       "ENNReal.ofReal (OAI.SharpLiebThirring.sharpConstant γ)"
+      ],
+      "path": [
+       1,
+       0,
+       1
+      ],
+      "premises": [
+       {
+        "argument": 4,
+        "frame": 9,
+        "statement": "OAI.SharpLiebThirring.optimalConstant γ ≤ ENNReal.ofReal (OAI.SharpLiebThirring.sharpConstant γ)"
+       },
+       {
+        "argument": 5,
+        "frame": 10,
+        "statement": "ENNReal.ofReal (OAI.SharpLiebThirring.sharpConstant γ) ≤ OAI.SharpLiebThirring.optimalConstant γ"
+       }
+      ],
+      "role": "application",
+      "statement": "OAI.SharpLiebThirring.optimalConstant γ = ENNReal.ofReal (OAI.SharpLiebThirring.sharpConstant γ)"
+     },
+     {
+      "binder": "hupper",
+      "budget_cut": false,
+      "children": [],
+      "context": [],
+      "head": "",
+      "id": 9,
+      "objects": [],
+      "path": [
+       1,
+       0,
+       1,
+       0,
+       1
+      ],
+      "premises": [],
+      "role": "given",
+      "statement": "OAI.SharpLiebThirring.optimalConstant γ ≤ ENNReal.ofReal (OAI.SharpLiebThirring.sharpConstant γ)"
+     },
+     {
+      "budget_cut": false,
+      "children": [
+       11,
+       12
+      ],
+      "context": [],
+      "head": "LE.le.trans",
+      "id": 10,
+      "objects": [
+       "ENNReal",
+       "ENNReal.instPartialOrder.toPreorder",
+       "ENNReal.ofReal (OAI.SharpLiebThirring.sharpConstant γ)",
+       "OAI.SharpLiebThirring.oneStateConstant γ",
+       "OAI.SharpLiebThirring.optimalConstant γ"
+      ],
+      "path": [
+       1,
+       0,
+       1,
+       1
+      ],
+      "premises": [
+       {
+        "argument": 5,
+        "frame": 11,
+        "statement": "ENNReal.ofReal (OAI.SharpLiebThirring.sharpConstant γ) ≤ OAI.SharpLiebThirring.oneStateConstant γ"
+       },
+       {
+        "argument": 6,
+        "frame": 12,
+        "statement": "OAI.SharpLiebThirring.oneStateConstant γ ≤ OAI.SharpLiebThirring.optimalConstant γ"
+       }
+      ],
+      "role": "application",
+      "statement": "ENNReal.ofReal (OAI.SharpLiebThirring.sharpConstant γ) ≤ OAI.SharpLiebThirring.optimalConstant γ"
+     },
+     {
+      "binder": "hlower",
+      "budget_cut": false,
+      "children": [],
+      "context": [],
+      "head": "",
+      "id": 11,
+      "objects": [],
+      "path": [
+       1,
+       0,
+       1,
+       1,
+       0,
+       1
+      ],
+      "premises": [],
+      "role": "given",
+      "statement": "ENNReal.ofReal (OAI.SharpLiebThirring.sharpConstant γ) ≤ OAI.SharpLiebThirring.oneStateConstant γ"
+     },
+     {
+      "binder": "hone",
+      "budget_cut": false,
+      "children": [],
+      "context": [],
+      "head": "",
+      "id": 12,
+      "objects": [],
+      "path": [
+       1,
+       0,
+       1,
+       1,
+       1
+      ],
+      "premises": [],
+      "role": "given",
+      "statement": "OAI.SharpLiebThirring.oneStateConstant γ ≤ OAI.SharpLiebThirring.optimalConstant γ"
+     },
+     {
+      "budget_cut": false,
+      "children": [
+       14,
+       19
+      ],
+      "context": [],
+      "head": "And.intro",
+      "id": 13,
+      "objects": [
+       "OAI.SharpLiebThirring.oneStateConstant γ = ENNReal.ofReal (OAI.SharpLiebThirring.sharpConstant γ)",
+       "OAI.SharpLiebThirring.Admissible γ (OAI.SharpLiebThirring.equalityPotential γ) ∧\n  0 < OAI.SharpLiebThirring.potentialMass γ (OAI.SharpLiebThirring.equalityPotential γ) ∧\n    OAI.SharpLiebThirring.negativeMoment γ (OAI.SharpLiebThirring.equalityPotential γ) =\n      ENNReal.ofReal (OAI.SharpLiebThirring.sharpConstant γ) *\n        OAI.SharpLiebThirring.potentialMass γ (OAI.SharpLiebThirring.equalityPotential γ)"
+      ],
+      "path": [
+       1,
+       1
+      ],
+      "premises": [
+       {
+        "argument": 2,
+        "frame": 14,
+        "statement": "OAI.SharpLiebThirring.oneStateConstant γ = ENNReal.ofReal (OAI.SharpLiebThirring.sharpConstant γ)"
+       },
+       {
+        "argument": 3,
+        "frame": 19,
+        "statement": "OAI.SharpLiebThirring.Admissible γ (OAI.SharpLiebThirring.equalityPotential γ) ∧\n  0 < OAI.SharpLiebThirring.potentialMass γ (OAI.SharpLiebThirring.equalityPotential γ) ∧\n    OAI.SharpLiebThirring.negativeMoment γ (OAI.SharpLiebThirring.equalityPotential γ) =\n      ENNReal.ofReal (OAI.SharpLiebThirring.sharpConstant γ) *\n        OAI.SharpLiebThirring.potentialMass γ (OAI.SharpLiebThirring.equalityPotential γ)"
+       }
+      ],
+      "role": "combine",
+      "statement": "OAI.SharpLiebThirring.oneStateConstant γ = ENNReal.ofReal (OAI.SharpLiebThirring.sharpConstant γ) ∧\n  OAI.SharpLiebThirring.Admissible γ (OAI.SharpLiebThirring.equalityPotential γ) ∧\n    0 < OAI.SharpLiebThirring.potentialMass γ (OAI.SharpLiebThirring.equalityPotential γ) ∧\n      OAI.SharpLiebThirring.negativeMoment γ (OAI.SharpLiebThirring.equalityPotential γ) =\n        ENNReal.ofReal (OAI.SharpLiebThirring.sharpConstant γ) *\n          OAI.SharpLiebThirring.potentialMass γ (OAI.SharpLiebThirring.equalityPotential γ)"
+     },
+     {
+      "budget_cut": false,
+      "children": [
+       15,
+       18
+      ],
+      "context": [],
+      "head": "le_antisymm",
+      "id": 14,
+      "objects": [
+       "ENNReal",
+       "ENNReal.instPartialOrder",
+       "OAI.SharpLiebThirring.oneStateConstant γ",
+       "ENNReal.ofReal (OAI.SharpLiebThirring.sharpConstant γ)"
+      ],
+      "path": [
+       1,
+       1,
+       0,
+       1
+      ],
+      "premises": [
+       {
+        "argument": 4,
+        "frame": 15,
+        "statement": "OAI.SharpLiebThirring.oneStateConstant γ ≤ ENNReal.ofReal (OAI.SharpLiebThirring.sharpConstant γ)"
+       },
+       {
+        "argument": 5,
+        "frame": 18,
+        "statement": "ENNReal.ofReal (OAI.SharpLiebThirring.sharpConstant γ) ≤ OAI.SharpLiebThirring.oneStateConstant γ"
+       }
+      ],
+      "role": "application",
+      "statement": "OAI.SharpLiebThirring.oneStateConstant γ = ENNReal.ofReal (OAI.SharpLiebThirring.sharpConstant γ)"
+     },
+     {
+      "budget_cut": false,
+      "children": [
+       16,
+       17
+      ],
+      "context": [],
+      "head": "LE.le.trans",
+      "id": 15,
+      "objects": [
+       "ENNReal",
+       "ENNReal.instPartialOrder.toPreorder",
+       "OAI.SharpLiebThirring.oneStateConstant γ",
+       "OAI.SharpLiebThirring.optimalConstant γ",
+       "ENNReal.ofReal (OAI.SharpLiebThirring.sharpConstant γ)"
+      ],
+      "path": [
+       1,
+       1,
+       0,
+       1,
+       0,
+       1
+      ],
+      "premises": [
+       {
+        "argument": 5,
+        "frame": 16,
+        "statement": "OAI.SharpLiebThirring.oneStateConstant γ ≤ OAI.SharpLiebThirring.optimalConstant γ"
+       },
+       {
+        "argument": 6,
+        "frame": 17,
+        "statement": "OAI.SharpLiebThirring.optimalConstant γ ≤ ENNReal.ofReal (OAI.SharpLiebThirring.sharpConstant γ)"
+       }
+      ],
+      "role": "application",
+      "statement": "OAI.SharpLiebThirring.oneStateConstant γ ≤ ENNReal.ofReal (OAI.SharpLiebThirring.sharpConstant γ)"
+     },
+     {
+      "binder": "hone",
+      "budget_cut": false,
+      "children": [],
+      "context": [],
+      "head": "",
+      "id": 16,
+      "objects": [],
+      "path": [
+       1,
+       1,
+       0,
+       1,
+       0,
+       1,
+       0,
+       1
+      ],
+      "premises": [],
+      "role": "given",
+      "statement": "OAI.SharpLiebThirring.oneStateConstant γ ≤ OAI.SharpLiebThirring.optimalConstant γ"
+     },
+     {
+      "binder": "hupper",
+      "budget_cut": false,
+      "children": [],
+      "context": [],
+      "head": "",
+      "id": 17,
+      "objects": [],
+      "path": [
+       1,
+       1,
+       0,
+       1,
+       0,
+       1,
+       1
+      ],
+      "premises": [],
+      "role": "given",
+      "statement": "OAI.SharpLiebThirring.optimalConstant γ ≤ ENNReal.ofReal (OAI.SharpLiebThirring.sharpConstant γ)"
+     },
+     {
+      "binder": "hlower",
+      "budget_cut": false,
+      "children": [],
+      "context": [],
+      "head": "",
+      "id": 18,
+      "objects": [],
+      "path": [
+       1,
+       1,
+       0,
+       1,
+       1
+      ],
+      "premises": [],
+      "role": "given",
+      "statement": "ENNReal.ofReal (OAI.SharpLiebThirring.sharpConstant γ) ≤ OAI.SharpLiebThirring.oneStateConstant γ"
+     },
+     {
+      "budget_cut": false,
+      "children": [
+       20,
+       21
+      ],
+      "context": [],
+      "head": "And.intro",
+      "id": 19,
+      "objects": [
+       "OAI.SharpLiebThirring.Admissible γ (OAI.SharpLiebThirring.equalityPotential γ)",
+       "0 < OAI.SharpLiebThirring.potentialMass γ (OAI.SharpLiebThirring.equalityPotential γ) ∧\n  OAI.SharpLiebThirring.negativeMoment γ (OAI.SharpLiebThirring.equalityPotential γ) =\n    ENNReal.ofReal (OAI.SharpLiebThirring.sharpConstant γ) *\n      OAI.SharpLiebThirring.potentialMass γ (OAI.SharpLiebThirring.equalityPotential γ)"
+      ],
+      "path": [
+       1,
+       1,
+       1
+      ],
+      "premises": [
+       {
+        "argument": 2,
+        "frame": 20,
+        "statement": "OAI.SharpLiebThirring.Admissible γ (OAI.SharpLiebThirring.equalityPotential γ)"
+       },
+       {
+        "argument": 3,
+        "frame": 21,
+        "statement": "0 < OAI.SharpLiebThirring.potentialMass γ (OAI.SharpLiebThirring.equalityPotential γ) ∧\n  OAI.SharpLiebThirring.negativeMoment γ (OAI.SharpLiebThirring.equalityPotential γ) =\n    ENNReal.ofReal (OAI.SharpLiebThirring.sharpConstant γ) *\n      OAI.SharpLiebThirring.potentialMass γ (OAI.SharpLiebThirring.equalityPotential γ)"
+       }
+      ],
+      "role": "combine",
+      "statement": "OAI.SharpLiebThirring.Admissible γ (OAI.SharpLiebThirring.equalityPotential γ) ∧\n  0 < OAI.SharpLiebThirring.potentialMass γ (OAI.SharpLiebThirring.equalityPotential γ) ∧\n    OAI.SharpLiebThirring.negativeMoment γ (OAI.SharpLiebThirring.equalityPotential γ) =\n      ENNReal.ofReal (OAI.SharpLiebThirring.sharpConstant γ) *\n        OAI.SharpLiebThirring.potentialMass γ (OAI.SharpLiebThirring.equalityPotential γ)"
+     },
+     {
+      "binder": "hW",
+      "budget_cut": false,
+      "children": [],
+      "context": [],
+      "head": "",
+      "id": 20,
+      "objects": [],
+      "path": [
+       1,
+       1,
+       1,
+       0,
+       1
+      ],
+      "premises": [],
+      "role": "given",
+      "statement": "OAI.SharpLiebThirring.Admissible γ (OAI.SharpLiebThirring.equalityPotential γ)"
+     },
+     {
+      "budget_cut": false,
+      "children": [
+       22,
+       24
+      ],
+      "context": [],
+      "head": "And.intro",
+      "id": 21,
+      "objects": [
+       "0 < OAI.SharpLiebThirring.potentialMass γ (OAI.SharpLiebThirring.equalityPotential γ)",
+       "OAI.SharpLiebThirring.negativeMoment γ (OAI.SharpLiebThirring.equalityPotential γ) =\n  ENNReal.ofReal (OAI.SharpLiebThirring.sharpConstant γ) *\n    OAI.SharpLiebThirring.potentialMass γ (OAI.SharpLiebThirring.equalityPotential γ)"
+      ],
+      "path": [
+       1,
+       1,
+       1,
+       1
+      ],
+      "premises": [
+       {
+        "argument": 2,
+        "frame": 22,
+        "statement": "0 < OAI.SharpLiebThirring.potentialMass γ (OAI.SharpLiebThirring.ExtremizerProof.potential (γ - 1 / 2)⁻¹)"
+       },
+       {
+        "argument": 3,
+        "frame": 24,
+        "statement": "OAI.SharpLiebThirring.negativeMoment γ (OAI.SharpLiebThirring.equalityPotential γ) =\n  ENNReal.ofReal (OAI.SharpLiebThirring.sharpConstant γ) *\n    OAI.SharpLiebThirring.potentialMass γ (OAI.SharpLiebThirring.equalityPotential γ)"
+       }
+      ],
+      "role": "combine",
+      "statement": "0 < OAI.SharpLiebThirring.potentialMass γ (OAI.SharpLiebThirring.equalityPotential γ) ∧\n  OAI.SharpLiebThirring.negativeMoment γ (OAI.SharpLiebThirring.equalityPotential γ) =\n    ENNReal.ofReal (OAI.SharpLiebThirring.sharpConstant γ) *\n      OAI.SharpLiebThirring.potentialMass γ (OAI.SharpLiebThirring.equalityPotential γ)"
+     },
+     {
+      "budget_cut": false,
+      "children": [
+       23
+      ],
+      "context": [],
+      "head": "OAI.SharpLiebThirring.ExtremizerProof.potential_mass_pos",
+      "id": 22,
+      "objects": [
+       "γ",
+       "(γ - 1 / 2)⁻¹"
+      ],
+      "path": [
+       1,
+       1,
+       1,
+       1,
+       0,
+       1
+      ],
+      "premises": [
+       {
+        "argument": 2,
+        "frame": 23,
+        "statement": "0 < (γ - 1 / 2)⁻¹"
+       }
+      ],
+      "role": "application",
+      "statement": "0 < OAI.SharpLiebThirring.potentialMass γ (OAI.SharpLiebThirring.ExtremizerProof.potential (γ - 1 / 2)⁻¹)"
+     },
+     {
+      "binder": "hr",
+      "budget_cut": false,
+      "children": [],
+      "context": [],
+      "head": "",
+      "id": 23,
+      "objects": [],
+      "path": [
+       1,
+       1,
+       1,
+       1,
+       0,
+       1,
+       1
+      ],
+      "premises": [],
+      "role": "given",
+      "statement": "0 < (γ - 1 / 2)⁻¹"
+     },
+     {
+      "budget_cut": false,
+      "children": [
+       25,
+       29
+      ],
+      "context": [],
+      "head": "le_antisymm",
+      "id": 24,
+      "objects": [
+       "ENNReal",
+       "ENNReal.instPartialOrder",
+       "OAI.SharpLiebThirring.negativeMoment γ (OAI.SharpLiebThirring.equalityPotential γ)",
+       "ENNReal.ofReal (OAI.SharpLiebThirring.sharpConstant γ) *\n  OAI.SharpLiebThirring.potentialMass γ (OAI.SharpLiebThirring.equalityPotential γ)"
+      ],
+      "path": [
+       1,
+       1,
+       1,
+       1,
+       1
+      ],
+      "premises": [
+       {
+        "argument": 4,
+        "frame": 25,
+        "statement": "OAI.SharpLiebThirring.negativeMoment γ (OAI.SharpLiebThirring.equalityPotential γ) ≤\n  ENNReal.ofReal (OAI.SharpLiebThirring.sharpConstant γ) *\n    OAI.SharpLiebThirring.potentialMass γ (OAI.SharpLiebThirring.equalityPotential γ)"
+       },
+       {
+        "argument": 5,
+        "frame": 29,
+        "statement": "ENNReal.ofReal (OAI.SharpLiebThirring.sharpConstant γ) *\n    OAI.SharpLiebThirring.potentialMass γ (OAI.SharpLiebThirring.equalityPotential γ) ≤\n  OAI.SharpLiebThirring.negativeMoment γ (OAI.SharpLiebThirring.equalityPotential γ)"
+       }
+      ],
+      "role": "application",
+      "statement": "OAI.SharpLiebThirring.negativeMoment γ (OAI.SharpLiebThirring.equalityPotential γ) =\n  ENNReal.ofReal (OAI.SharpLiebThirring.sharpConstant γ) *\n    OAI.SharpLiebThirring.potentialMass γ (OAI.SharpLiebThirring.equalityPotential γ)"
+     },
+     {
+      "budget_cut": false,
+      "children": [
+       26,
+       27,
+       28
+      ],
+      "context": [],
+      "head": "OAI.SharpLiebThirring.negativeMoment_bound",
+      "id": 25,
+      "objects": [
+       "γ",
+       "OAI.SharpLiebThirring.equalityPotential γ"
+      ],
+      "path": [
+       1,
+       1,
+       1,
+       1,
+       1,
+       0,
+       1
+      ],
+      "premises": [
+       {
+        "argument": 1,
+        "frame": 26,
+        "statement": "1 / 2 < γ"
+       },
+       {
+        "argument": 2,
+        "frame": 27,
+        "statement": "γ < 3 / 2"
+       },
+       {
+        "argument": 4,
+        "frame": 28,
+        "statement": "OAI.SharpLiebThirring.Admissible γ (OAI.SharpLiebThirring.equalityPotential γ)"
+       }
+      ],
+      "role": "application",
+      "statement": "OAI.SharpLiebThirring.negativeMoment γ (OAI.SharpLiebThirring.equalityPotential γ) ≤\n  ENNReal.ofReal (OAI.SharpLiebThirring.sharpConstant γ) *\n    OAI.SharpLiebThirring.potentialMass γ (OAI.SharpLiebThirring.equalityPotential γ)"
+     },
+     {
+      "binder": "hγ₀",
+      "budget_cut": false,
+      "children": [],
+      "context": [],
+      "head": "",
+      "id": 26,
+      "objects": [],
+      "path": [
+       1,
+       1,
+       1,
+       1,
+       1,
+       0,
+       1,
+       0,
+       0,
+       0,
+       1
+      ],
+      "premises": [],
+      "role": "given",
+      "statement": "1 / 2 < γ"
+     },
+     {
+      "binder": "hγ₁",
+      "budget_cut": false,
+      "children": [],
+      "context": [],
+      "head": "",
+      "id": 27,
+      "objects": [],
+      "path": [
+       1,
+       1,
+       1,
+       1,
+       1,
+       0,
+       1,
+       0,
+       0,
+       1
+      ],
+      "premises": [],
+      "role": "given",
+      "statement": "γ < 3 / 2"
+     },
+     {
+      "binder": "hW",
+      "budget_cut": false,
+      "children": [],
+      "context": [],
+      "head": "",
+      "id": 28,
+      "objects": [],
+      "path": [
+       1,
+       1,
+       1,
+       1,
+       1,
+       0,
+       1,
+       1
+      ],
+      "premises": [],
+      "role": "given",
+      "statement": "OAI.SharpLiebThirring.Admissible γ (OAI.SharpLiebThirring.equalityPotential γ)"
+     },
+     {
+      "budget_cut": false,
+      "children": [],
+      "context": [],
+      "head": "Eq.mpr",
+      "id": 29,
+      "objects": [],
+      "path": [
+       1,
+       1,
+       1,
+       1,
+       1,
+       1
+      ],
+      "premises": [],
+      "role": "rewrite",
+      "statement": "ENNReal.ofReal (OAI.SharpLiebThirring.sharpConstant γ) *\n    OAI.SharpLiebThirring.potentialMass γ (OAI.SharpLiebThirring.equalityPotential γ) ≤\n  OAI.SharpLiebThirring.negativeMoment γ (OAI.SharpLiebThirring.equalityPotential γ)"
+     }
+    ],
+    "judgements_checked": 30,
+    "lean_version": "4.34.1",
+    "schema": "proofreader.narrative/v1",
+    "statement": "(∀ (W : ℝ → ℝ),\n    OAI.SharpLiebThirring.Admissible γ W →\n      OAI.SharpLiebThirring.negativeMoment γ W ≤\n        ENNReal.ofReal (OAI.SharpLiebThirring.sharpConstant γ) * OAI.SharpLiebThirring.potentialMass γ W) ∧\n  OAI.SharpLiebThirring.optimalConstant γ = ENNReal.ofReal (OAI.SharpLiebThirring.sharpConstant γ) ∧\n    OAI.SharpLiebThirring.oneStateConstant γ = ENNReal.ofReal (OAI.SharpLiebThirring.sharpConstant γ) ∧\n      OAI.SharpLiebThirring.Admissible γ (OAI.SharpLiebThirring.equalityPotential γ) ∧\n        0 < OAI.SharpLiebThirring.potentialMass γ (OAI.SharpLiebThirring.equalityPotential γ) ∧\n          OAI.SharpLiebThirring.negativeMoment γ (OAI.SharpLiebThirring.equalityPotential γ) =\n            ENNReal.ofReal (OAI.SharpLiebThirring.sharpConstant γ) *\n              OAI.SharpLiebThirring.potentialMass γ (OAI.SharpLiebThirring.equalityPotential γ)",
+    "theorem": "OAI.SharpLiebThirring.sharp_lieb_thirring"
+   }
+  },
+  "scope_substitution": {
+   "provenance": {
+    "corpus_snapshot": "bc972fd76d6c038d2fc02f87",
+    "recorded_frames": [
+     9,
+     10,
+     11,
+     12,
+     13,
+     14,
+     15,
+     16,
+     17,
+     18,
+     19,
+     20,
+     21,
+     22,
+     23,
+     24,
+     25
+    ],
+    "root_frame": 9,
+    "snapshot_file_sha256": "d2bdc2bde45a546cc7c5a6c4e41ad34799cf04754cc89949fe662d3b2bd13e2b",
+    "snapshot_sha256": "181af974f64f075aa91e271f0a406c66f565daa1c0cce41e309210b2a78a2e4d",
+    "theorem": "OAI.DirectionalZeroOne.directional_zero_one"
+   },
+   "record": {
+    "axioms": [
+     "propext",
+     "Classical.choice",
+     "Quot.sound"
+    ],
+    "formula_backend": "Lean pretty-printer",
+    "frames": [
+     {
+      "budget_cut": false,
+      "children": [
+       1,
+       11,
+       13,
+       14,
+       15,
+       16
+      ],
+      "context": [],
+      "head": "Eq.ndrec",
+      "id": 0,
+      "objects": [
+       "ℕ",
+       "0",
+       "fun d =>\n  3 ≤ d →\n    ∀ (μ : MeasureTheory.Measure (OAI.DirectionalZeroOne.Row d)) [inst : MeasureTheory.IsProbabilityMeasure μ],\n      OAI.DirectionalZeroOne.StrictEllipticity μ →\n        ∀ (ℓ : Fin d → ℝ),\n          ℓ ≠ 0 →\n            (OAI.DirectionalZeroOne.annealed μ 0) (OAI.DirectionalZeroOne.escape ℓ) = 0 ∨\n              (OAI.DirectionalZeroOne.annealed μ 0) (OAI.DirectionalZeroOne.escape ℓ) = 1",
+       "d",
+       "μ",
+       "ℓ"
+      ],
+      "path": [],
+      "premises": [
+       {
+        "argument": 3,
+        "frame": 1,
+        "statement": "3 ≤ 0 →\n  ∀ (μ : MeasureTheory.Measure (OAI.DirectionalZeroOne.Row 0)) [inst : MeasureTheory.IsProbabilityMeasure μ],\n    OAI.DirectionalZeroOne.StrictEllipticity μ →\n      ∀ (ℓ : Fin 0 → ℝ),\n        ℓ ≠ 0 →\n          (OAI.DirectionalZeroOne.annealed μ 0) (OAI.DirectionalZeroOne.escape ℓ) = 0 ∨\n            (OAI.DirectionalZeroOne.annealed μ 0) (OAI.DirectionalZeroOne.escape ℓ) = 1"
+       },
+       {
+        "argument": 5,
+        "frame": 11,
+        "statement": "0 = d"
+       },
+       {
+        "argument": 6,
+        "frame": 13,
+        "statement": "3 ≤ d"
+       },
+       {
+        "argument": 8,
+        "frame": 14,
+        "statement": "MeasureTheory.IsProbabilityMeasure μ"
+       },
+       {
+        "argument": 9,
+        "frame": 15,
+        "statement": "OAI.DirectionalZeroOne.StrictEllipticity μ"
+       },
+       {
+        "argument": 11,
+        "frame": 16,
+        "statement": "ℓ ≠ 0"
+       }
+      ],
+      "role": "application",
+      "statement": "(OAI.DirectionalZeroOne.annealed μ 0) (OAI.DirectionalZeroOne.escape ℓ) = 0 ∨\n  (OAI.DirectionalZeroOne.annealed μ 0) (OAI.DirectionalZeroOne.escape ℓ) = 1"
+     },
+     {
+      "binder": "hd_1",
+      "budget_cut": false,
+      "children": [
+       2
+      ],
+      "context": [],
+      "domain": "3 ≤ 0",
+      "head": "",
+      "id": 1,
+      "objects": [],
+      "path": [
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       1
+      ],
+      "premises": [],
+      "role": "assume",
+      "statement": "3 ≤ 0 →\n  ∀ (μ : MeasureTheory.Measure (OAI.DirectionalZeroOne.Row 0)) [inst : MeasureTheory.IsProbabilityMeasure μ],\n    OAI.DirectionalZeroOne.StrictEllipticity μ →\n      ∀ (ℓ : Fin 0 → ℝ),\n        ℓ ≠ 0 →\n          (OAI.DirectionalZeroOne.annealed μ 0) (OAI.DirectionalZeroOne.escape ℓ) = 0 ∨\n            (OAI.DirectionalZeroOne.annealed μ 0) (OAI.DirectionalZeroOne.escape ℓ) = 1"
+     },
+     {
+      "binder": "μ_1",
+      "budget_cut": false,
+      "children": [
+       3
+      ],
+      "context": [
+       {
+        "name": "hd_1",
+        "type": "3 ≤ 0"
+       }
+      ],
+      "domain": "MeasureTheory.Measure (OAI.DirectionalZeroOne.Row 0)",
+      "head": "",
+      "id": 2,
+      "objects": [],
+      "path": [
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       1,
+       1
+      ],
+      "premises": [],
+      "role": "introduce",
+      "statement": "∀ (μ : MeasureTheory.Measure (OAI.DirectionalZeroOne.Row 0)) [inst : MeasureTheory.IsProbabilityMeasure μ],\n  OAI.DirectionalZeroOne.StrictEllipticity μ →\n    ∀ (ℓ : Fin 0 → ℝ),\n      ℓ ≠ 0 →\n        (OAI.DirectionalZeroOne.annealed μ 0) (OAI.DirectionalZeroOne.escape ℓ) = 0 ∨\n          (OAI.DirectionalZeroOne.annealed μ 0) (OAI.DirectionalZeroOne.escape ℓ) = 1"
+     },
+     {
+      "binder": "inst_1",
+      "budget_cut": false,
+      "children": [
+       4
+      ],
+      "context": [
+       {
+        "name": "hd_1",
+        "type": "3 ≤ 0"
+       },
+       {
+        "name": "μ_1",
+        "type": "MeasureTheory.Measure (OAI.DirectionalZeroOne.Row 0)"
+       }
+      ],
+      "domain": "MeasureTheory.IsProbabilityMeasure μ_1",
+      "head": "",
+      "id": 3,
+      "objects": [],
+      "path": [
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       1,
+       1,
+       1
+      ],
+      "premises": [],
+      "role": "assume",
+      "statement": "∀ [inst : MeasureTheory.IsProbabilityMeasure μ_1],\n  OAI.DirectionalZeroOne.StrictEllipticity μ_1 →\n    ∀ (ℓ : Fin 0 → ℝ),\n      ℓ ≠ 0 →\n        (OAI.DirectionalZeroOne.annealed μ_1 0) (OAI.DirectionalZeroOne.escape ℓ) = 0 ∨\n          (OAI.DirectionalZeroOne.annealed μ_1 0) (OAI.DirectionalZeroOne.escape ℓ) = 1"
+     },
+     {
+      "binder": "hell_1",
+      "budget_cut": false,
+      "children": [
+       5
+      ],
+      "context": [
+       {
+        "name": "hd_1",
+        "type": "3 ≤ 0"
+       },
+       {
+        "name": "μ_1",
+        "type": "MeasureTheory.Measure (OAI.DirectionalZeroOne.Row 0)"
+       },
+       {
+        "name": "inst_1",
+        "type": "MeasureTheory.IsProbabilityMeasure μ_1"
+       }
+      ],
+      "domain": "OAI.DirectionalZeroOne.StrictEllipticity μ_1",
+      "head": "",
+      "id": 4,
+      "objects": [],
+      "path": [
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       1,
+       1,
+       1,
+       1
+      ],
+      "premises": [],
+      "role": "assume",
+      "statement": "OAI.DirectionalZeroOne.StrictEllipticity μ_1 →\n  ∀ (ℓ : Fin 0 → ℝ),\n    ℓ ≠ 0 →\n      (OAI.DirectionalZeroOne.annealed μ_1 0) (OAI.DirectionalZeroOne.escape ℓ) = 0 ∨\n        (OAI.DirectionalZeroOne.annealed μ_1 0) (OAI.DirectionalZeroOne.escape ℓ) = 1"
+     },
+     {
+      "binder": "ℓ_1",
+      "budget_cut": false,
+      "children": [
+       6
+      ],
+      "context": [
+       {
+        "name": "hd_1",
+        "type": "3 ≤ 0"
+       },
+       {
+        "name": "μ_1",
+        "type": "MeasureTheory.Measure (OAI.DirectionalZeroOne.Row 0)"
+       },
+       {
+        "name": "inst_1",
+        "type": "MeasureTheory.IsProbabilityMeasure μ_1"
+       },
+       {
+        "name": "hell_1",
+        "type": "OAI.DirectionalZeroOne.StrictEllipticity μ_1"
+       }
+      ],
+      "domain": "Fin 0 → ℝ",
+      "head": "",
+      "id": 5,
+      "objects": [],
+      "path": [
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       1,
+       1,
+       1,
+       1,
+       1
+      ],
+      "premises": [],
+      "role": "introduce",
+      "statement": "∀ (ℓ : Fin 0 → ℝ),\n  ℓ ≠ 0 →\n    (OAI.DirectionalZeroOne.annealed μ_1 0) (OAI.DirectionalZeroOne.escape ℓ) = 0 ∨\n      (OAI.DirectionalZeroOne.annealed μ_1 0) (OAI.DirectionalZeroOne.escape ℓ) = 1"
+     },
+     {
+      "binder": "hℓ_1",
+      "budget_cut": false,
+      "children": [
+       7
+      ],
+      "context": [
+       {
+        "name": "hd_1",
+        "type": "3 ≤ 0"
+       },
+       {
+        "name": "μ_1",
+        "type": "MeasureTheory.Measure (OAI.DirectionalZeroOne.Row 0)"
+       },
+       {
+        "name": "inst_1",
+        "type": "MeasureTheory.IsProbabilityMeasure μ_1"
+       },
+       {
+        "name": "hell_1",
+        "type": "OAI.DirectionalZeroOne.StrictEllipticity μ_1"
+       },
+       {
+        "name": "ℓ_1",
+        "type": "Fin 0 → ℝ"
+       }
+      ],
+      "domain": "ℓ_1 ≠ 0",
+      "head": "",
+      "id": 6,
+      "objects": [],
+      "path": [
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       1,
+       1,
+       1,
+       1,
+       1,
+       1
+      ],
+      "premises": [],
+      "role": "assume",
+      "statement": "ℓ_1 ≠ 0 →\n  (OAI.DirectionalZeroOne.annealed μ_1 0) (OAI.DirectionalZeroOne.escape ℓ_1) = 0 ∨\n    (OAI.DirectionalZeroOne.annealed μ_1 0) (OAI.DirectionalZeroOne.escape ℓ_1) = 1"
+     },
+     {
+      "budget_cut": false,
+      "children": [
+       8
+      ],
+      "context": [
+       {
+        "name": "hd_1",
+        "type": "3 ≤ 0"
+       },
+       {
+        "name": "μ_1",
+        "type": "MeasureTheory.Measure (OAI.DirectionalZeroOne.Row 0)"
+       },
+       {
+        "name": "inst_1",
+        "type": "MeasureTheory.IsProbabilityMeasure μ_1"
+       },
+       {
+        "name": "hell_1",
+        "type": "OAI.DirectionalZeroOne.StrictEllipticity μ_1"
+       },
+       {
+        "name": "ℓ_1",
+        "type": "Fin 0 → ℝ"
+       },
+       {
+        "name": "hℓ_1",
+        "type": "ℓ_1 ≠ 0"
+       }
+      ],
+      "head": "Decidable.byContradiction",
+      "id": 7,
+      "objects": [
+       "(OAI.DirectionalZeroOne.annealed μ_1 0) (OAI.DirectionalZeroOne.escape ℓ_1) = 0 ∨\n  (OAI.DirectionalZeroOne.annealed μ_1 0) (OAI.DirectionalZeroOne.escape ℓ_1) = 1",
+       "instDecidableOr"
+      ],
+      "path": [
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       1,
+       1,
+       1,
+       1,
+       1,
+       1,
+       1
+      ],
+      "premises": [
+       {
+        "argument": 2,
+        "frame": 8,
+        "statement": "¬((OAI.DirectionalZeroOne.annealed μ_1 0) (OAI.DirectionalZeroOne.escape ℓ_1) = 0 ∨\n      (OAI.DirectionalZeroOne.annealed μ_1 0) (OAI.DirectionalZeroOne.escape ℓ_1) = 1) →\n  False"
+       }
+      ],
+      "role": "application",
+      "statement": "(OAI.DirectionalZeroOne.annealed μ_1 0) (OAI.DirectionalZeroOne.escape ℓ_1) = 0 ∨\n  (OAI.DirectionalZeroOne.annealed μ_1 0) (OAI.DirectionalZeroOne.escape ℓ_1) = 1"
+     },
+     {
+      "binder": "a",
+      "budget_cut": false,
+      "children": [
+       9
+      ],
+      "context": [
+       {
+        "name": "hd_1",
+        "type": "3 ≤ 0"
+       },
+       {
+        "name": "μ_1",
+        "type": "MeasureTheory.Measure (OAI.DirectionalZeroOne.Row 0)"
+       },
+       {
+        "name": "inst_1",
+        "type": "MeasureTheory.IsProbabilityMeasure μ_1"
+       },
+       {
+        "name": "hell_1",
+        "type": "OAI.DirectionalZeroOne.StrictEllipticity μ_1"
+       },
+       {
+        "name": "ℓ_1",
+        "type": "Fin 0 → ℝ"
+       },
+       {
+        "name": "hℓ_1",
+        "type": "ℓ_1 ≠ 0"
+       }
+      ],
+      "domain": "¬((OAI.DirectionalZeroOne.annealed μ_1 0) (OAI.DirectionalZeroOne.escape ℓ_1) = 0 ∨\n    (OAI.DirectionalZeroOne.annealed μ_1 0) (OAI.DirectionalZeroOne.escape ℓ_1) = 1)",
+      "head": "",
+      "id": 8,
+      "objects": [],
+      "path": [
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       1,
+       1,
+       1,
+       1,
+       1,
+       1,
+       1,
+       1
+      ],
+      "premises": [],
+      "role": "assume",
+      "statement": "¬((OAI.DirectionalZeroOne.annealed μ_1 0) (OAI.DirectionalZeroOne.escape ℓ_1) = 0 ∨\n      (OAI.DirectionalZeroOne.annealed μ_1 0) (OAI.DirectionalZeroOne.escape ℓ_1) = 1) →\n  False"
+     },
+     {
+      "budget_cut": false,
+      "children": [
+       10
+      ],
+      "context": [
+       {
+        "name": "hd_1",
+        "type": "3 ≤ 0"
+       },
+       {
+        "name": "μ_1",
+        "type": "MeasureTheory.Measure (OAI.DirectionalZeroOne.Row 0)"
+       },
+       {
+        "name": "inst_1",
+        "type": "MeasureTheory.IsProbabilityMeasure μ_1"
+       },
+       {
+        "name": "hell_1",
+        "type": "OAI.DirectionalZeroOne.StrictEllipticity μ_1"
+       },
+       {
+        "name": "ℓ_1",
+        "type": "Fin 0 → ℝ"
+       },
+       {
+        "name": "hℓ_1",
+        "type": "ℓ_1 ≠ 0"
+       },
+       {
+        "name": "a",
+        "type": "¬((OAI.DirectionalZeroOne.annealed μ_1 0) (OAI.DirectionalZeroOne.escape ℓ_1) = 0 ∨\n    (OAI.DirectionalZeroOne.annealed μ_1 0) (OAI.DirectionalZeroOne.escape ℓ_1) = 1)"
+       }
+      ],
+      "head": "OAI.DirectionalZeroOne.directional_zero_one._proof_1_1",
+      "id": 9,
+      "objects": [],
+      "path": [
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       1,
+       1,
+       1,
+       1,
+       1,
+       1,
+       1,
+       1,
+       1
+      ],
+      "premises": [
+       {
+        "argument": 0,
+        "frame": 10,
+        "statement": "3 ≤ 0"
+       }
+      ],
+      "role": "application",
+      "statement": "False"
+     },
+     {
+      "binder": "hd_1",
+      "budget_cut": false,
+      "children": [],
+      "context": [
+       {
+        "name": "hd_1",
+        "type": "3 ≤ 0"
+       },
+       {
+        "name": "μ_1",
+        "type": "MeasureTheory.Measure (OAI.DirectionalZeroOne.Row 0)"
+       },
+       {
+        "name": "inst_1",
+        "type": "MeasureTheory.IsProbabilityMeasure μ_1"
+       },
+       {
+        "name": "hell_1",
+        "type": "OAI.DirectionalZeroOne.StrictEllipticity μ_1"
+       },
+       {
+        "name": "ℓ_1",
+        "type": "Fin 0 → ℝ"
+       },
+       {
+        "name": "hℓ_1",
+        "type": "ℓ_1 ≠ 0"
+       },
+       {
+        "name": "a",
+        "type": "¬((OAI.DirectionalZeroOne.annealed μ_1 0) (OAI.DirectionalZeroOne.escape ℓ_1) = 0 ∨\n    (OAI.DirectionalZeroOne.annealed μ_1 0) (OAI.DirectionalZeroOne.escape ℓ_1) = 1)"
+       }
+      ],
+      "head": "",
+      "id": 10,
+      "objects": [],
+      "path": [
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       1,
+       1,
+       1,
+       1,
+       1,
+       1,
+       1,
+       1,
+       1,
+       1
+      ],
+      "premises": [],
+      "role": "given",
+      "statement": "3 ≤ 0"
+     },
+     {
+      "budget_cut": false,
+      "children": [
+       12
+      ],
+      "context": [],
+      "head": "Eq.symm",
+      "id": 11,
+      "objects": [
+       "ℕ",
+       "d",
+       "0"
+      ],
+      "path": [
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       1
+      ],
+      "premises": [
+       {
+        "argument": 3,
+        "frame": 12,
+        "statement": "d = 0"
+       }
+      ],
+      "role": "application",
+      "statement": "0 = d"
+     },
+     {
+      "binder": "h",
+      "budget_cut": false,
+      "children": [],
+      "context": [],
+      "head": "",
+      "id": 12,
+      "objects": [],
+      "path": [
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       1,
+       1
+      ],
+      "premises": [],
+      "role": "given",
+      "statement": "d = 0"
+     },
+     {
+      "binder": "hd",
+      "budget_cut": false,
+      "children": [],
+      "context": [],
+      "head": "",
+      "id": 13,
+      "objects": [],
+      "path": [
+       0,
+       0,
+       0,
+       0,
+       0,
+       1
+      ],
+      "premises": [],
+      "role": "given",
+      "statement": "3 ≤ d"
+     },
+     {
+      "binder": "inst",
+      "budget_cut": false,
+      "children": [],
+      "context": [],
+      "head": "",
+      "id": 14,
+      "objects": [],
+      "path": [
+       0,
+       0,
+       0,
+       1
+      ],
+      "premises": [],
+      "role": "given",
+      "statement": "MeasureTheory.IsProbabilityMeasure μ"
+     },
+     {
+      "binder": "hell",
+      "budget_cut": false,
+      "children": [],
+      "context": [],
+      "head": "",
+      "id": 15,
+      "objects": [],
+      "path": [
+       0,
+       0,
+       1
+      ],
+      "premises": [],
+      "role": "given",
+      "statement": "OAI.DirectionalZeroOne.StrictEllipticity μ"
+     },
+     {
+      "binder": "hℓ",
+      "budget_cut": false,
+      "children": [],
+      "context": [],
+      "head": "",
+      "id": 16,
+      "objects": [],
+      "path": [
+       1
+      ],
+      "premises": [],
+      "role": "given",
+      "statement": "ℓ ≠ 0"
+     }
+    ],
+    "judgements_checked": 17,
+    "lean_version": "4.34.1",
+    "schema": "proofreader.narrative/v1",
+    "statement": "(OAI.DirectionalZeroOne.annealed μ 0) (OAI.DirectionalZeroOne.escape ℓ) = 0 ∨\n  (OAI.DirectionalZeroOne.annealed μ 0) (OAI.DirectionalZeroOne.escape ℓ) = 1",
+    "theorem": "OAI.DirectionalZeroOne.directional_zero_one"
+   }
+  },
+  "structure_constructor": {
+   "provenance": {
+    "corpus_snapshot": "596fb7fd45ee28847ae3699f",
+    "recorded_frames": [
+     82,
+     83,
+     84,
+     85,
+     86,
+     87,
+     88,
+     89,
+     90,
+     91,
+     92,
+     93,
+     94,
+     95,
+     96,
+     97,
+     98,
+     99,
+     100,
+     101,
+     102,
+     103,
+     104,
+     105,
+     106
+    ],
+    "root_frame": 82,
+    "snapshot_file_sha256": "0c9574952b0b3b8d66b6050dd9700d6341443e170703824df3edea9ca151e1ee",
+    "snapshot_sha256": "6fe9e06a8cdaf2368cd854254cee615d5334006865a4e6f4f72134810ed40fb5",
+    "theorem": "OAI.CurrentProjection.actualRowSourceMain"
+   },
+   "record": {
+    "axioms": [
+     "propext",
+     "Classical.choice",
+     "Quot.sound"
+    ],
+    "formula_backend": "Lean pretty-printer",
+    "frames": [
+     {
+      "budget_cut": false,
+      "children": [
+       1,
+       6,
+       7,
+       8,
+       9,
+       12,
+       15,
+       16,
+       19,
+       20,
+       21,
+       24
+      ],
+      "context": [],
+      "head": "OAI.CurrentProjection.ActualRowSourceConclusion.mk",
+      "id": 0,
+      "objects": [
+       "d",
+       "m",
+       "r",
+       "q",
+       "W",
+       "inst",
+       "P",
+       "OAI.CurrentProjection.completeFamily (MeasureTheory.Measure.map (⇑OAI.CurrentProjection.swapLast) P).snd ρ 0",
+       "OAI.CurrentProjection.completeFamily (MeasureTheory.Measure.map (⇑OAI.CurrentProjection.swapLast) P).snd B 1",
+       "OAI.CurrentProjection.completeFamily (MeasureTheory.Measure.map (⇑OAI.CurrentProjection.swapLast) P).snd D 1"
+      ],
+      "path": [],
+      "premises": [
+       {
+        "argument": 6,
+        "frame": 1,
+        "statement": "StandardBorelSpace W"
+       },
+       {
+        "argument": 8,
+        "frame": 6,
+        "statement": "MeasureTheory.IsProbabilityMeasure P"
+       },
+       {
+        "argument": 12,
+        "frame": 7,
+        "statement": "OAI.CurrentProjection.actualConditionalRowInformation P ≠ ⊤"
+       },
+       {
+        "argument": 13,
+        "frame": 8,
+        "statement": "(OAI.CurrentProjection.actualConditionalRowInformation P).toReal ≤\n  (OAI.CurrentProjection.shannonEntropy (MeasureTheory.Measure.map (⇑OAI.CurrentProjection.swapLast) P).snd).toReal"
+       },
+       {
+        "argument": 14,
+        "frame": 9,
+        "statement": "∀ᵐ (gw :\n  OAI.CurrentProjection.Rows (m + r) d ×\n    W) ∂(MeasureTheory.Measure.map OAI.CurrentProjection.actualObservation\n      (OAI.CurrentProjection.actualExperiment P)).fst,\n  ((MeasureTheory.Measure.map OAI.CurrentProjection.actualObservation\n            (OAI.CurrentProjection.actualExperiment P)).condKernel\n        gw).AbsolutelyContinuous\n    MeasureTheory.volume"
+       },
+       {
+        "argument": 15,
+        "frame": 12,
+        "statement": "∀ᵐ (p :\n  ((↑(OAI.CurrentProjection.Sphere d) × W) × OAI.CurrentProjection.Rows m d) ×\n    OAI.CurrentProjection.Rows r d) ∂OAI.CurrentProjection.actualExperiment P,\n  Filter.Tendsto\n    (fun j =>\n      OAI.CurrentProjection.selectedCube\n        (OAI.CurrentProjection.completeFamily (MeasureTheory.Measure.map (⇑OAI.CurrentProjection.swapLast) P).snd ρ 0)\n        (1 / ↑j) (OAI.CurrentProjection.actualObservation p))\n    Filter.atTop\n    (nhds\n      (OAI.CurrentProjection.selectedExact\n        (OAI.CurrentProjection.completeFamily (MeasureTheory.Measure.map (⇑OAI.CurrentProjection.swapLast) P).snd ρ 0)\n        (OAI.CurrentProjection.actualObservation p)))"
+       },
+       {
+        "argument": 16,
+        "frame": 15,
+        "statement": "∀ (δ : ℝ),\n  0 < δ →\n    MeasureTheory.Integrable\n        (fun p =>\n          Real.log\n            (1 +\n              (OAI.CurrentProjection.selectedCube\n                  (OAI.CurrentProjection.completeFamily\n                    (MeasureTheory.Measure.map (⇑OAI.CurrentProjection.swapLast) P).snd ρ 0)\n                  δ (OAI.CurrentProjection.actualObservation p)).toReal))\n        (OAI.CurrentProjection.actualExperiment P) ∧\n      ∫ (p :\n          ((↑(OAI.CurrentProjection.Sphere d) × W) × OAI.CurrentProjection.Rows m d) × OAI.CurrentProjection.Rows r d),\n          Real.log\n            (1 +\n              (OAI.CurrentProjection.selectedCube\n                  (OAI.CurrentProjection.completeFamily\n                    (MeasureTheory.Measure.map (⇑OAI.CurrentProjection.swapLast) P).snd ρ 0)\n                  δ (OAI.CurrentProjection.actualObservation p)).toReal) ∂OAI.CurrentProjection.actualExperiment P ≤\n        (OAI.CurrentProjection.actualConditionalRowInformation P).toReal / ↑q +\n          ∫ (sw : ↑(OAI.CurrentProjection.Sphere d) × W),\n            Real.log\n              (1 +\n                OAI.CurrentProjection.momentBound 9 d\n                  (OAI.CurrentProjection.completeFamily\n                    (MeasureTheory.Measure.map (⇑OAI.CurrentProjection.swapLast) P).snd B 1 sw.2)\n                  (OAI.CurrentProjection.completeFamily\n                    (MeasureTheory.Measure.map (⇑OAI.CurrentProjection.swapLast) P).snd D 1 sw.2)) ∂P.fst"
+       },
+       {
+        "argument": 17,
+        "frame": 16,
+        "statement": "MeasureTheory.Integrable\n  (fun p =>\n    Real.log\n      (1 +\n        (OAI.CurrentProjection.selectedExact\n            (OAI.CurrentProjection.completeFamily (MeasureTheory.Measure.map (⇑OAI.CurrentProjection.swapLast) P).snd ρ\n              0)\n            (OAI.CurrentProjection.actualObservation p)).toReal))\n  (OAI.CurrentProjection.actualExperiment P)"
+       },
+       {
+        "argument": 18,
+        "frame": 19,
+        "statement": "∫ (p : ((↑(OAI.CurrentProjection.Sphere d) × W) × OAI.CurrentProjection.Rows m d) × OAI.CurrentProjection.Rows r d),\n    Real.log\n      (1 +\n        (OAI.CurrentProjection.selectedExact\n            (OAI.CurrentProjection.completeFamily (MeasureTheory.Measure.map (⇑OAI.CurrentProjection.swapLast) P).snd ρ\n              0)\n            (OAI.CurrentProjection.actualObservation p)).toReal) ∂OAI.CurrentProjection.actualExperiment P ≤\n  (OAI.CurrentProjection.actualConditionalRowInformation P).toReal / ↑q +\n    ∫ (sw : ↑(OAI.CurrentProjection.Sphere d) × W),\n      Real.log\n        (1 +\n          OAI.CurrentProjection.momentBound 9 d\n            (OAI.CurrentProjection.completeFamily (MeasureTheory.Measure.map (⇑OAI.CurrentProjection.swapLast) P).snd B\n              1 sw.2)\n            (OAI.CurrentProjection.completeFamily (MeasureTheory.Measure.map (⇑OAI.CurrentProjection.swapLast) P).snd D\n              1 sw.2)) ∂P.fst"
+       },
+       {
+        "argument": 19,
+        "frame": 20,
+        "statement": "(OAI.CurrentProjection.actualConditionalRowInformation P).toReal / ↑q +\n    ∫ (sw : ↑(OAI.CurrentProjection.Sphere d) × W),\n      Real.log\n        (1 +\n          OAI.CurrentProjection.momentBound 9 d\n            (OAI.CurrentProjection.completeFamily (MeasureTheory.Measure.map (⇑OAI.CurrentProjection.swapLast) P).snd B\n              1 sw.2)\n            (OAI.CurrentProjection.completeFamily (MeasureTheory.Measure.map (⇑OAI.CurrentProjection.swapLast) P).snd D\n              1 sw.2)) ∂P.fst ≤\n  (OAI.CurrentProjection.shannonEntropy (MeasureTheory.Measure.map (⇑OAI.CurrentProjection.swapLast) P).snd).toReal /\n      ↑q +\n    ∫ (sw : ↑(OAI.CurrentProjection.Sphere d) × W),\n      Real.log\n        (1 +\n          OAI.CurrentProjection.momentBound 9 d\n            (OAI.CurrentProjection.completeFamily (MeasureTheory.Measure.map (⇑OAI.CurrentProjection.swapLast) P).snd B\n              1 sw.2)\n            (OAI.CurrentProjection.completeFamily (MeasureTheory.Measure.map (⇑OAI.CurrentProjection.swapLast) P).snd D\n              1 sw.2)) ∂P.fst"
+       },
+       {
+        "argument": 20,
+        "frame": 21,
+        "statement": "MeasureTheory.Integrable\n  (fun p =>\n    OAI.CurrentProjection.logPositive\n      (OAI.CurrentProjection.selectedExact\n        (OAI.CurrentProjection.completeFamily (MeasureTheory.Measure.map (⇑OAI.CurrentProjection.swapLast) P).snd ρ 0)\n        (OAI.CurrentProjection.actualObservation p)))\n  (OAI.CurrentProjection.actualExperiment P)"
+       },
+       {
+        "argument": 21,
+        "frame": 24,
+        "statement": "(OAI.CurrentProjection.extendedLogExpectation (OAI.CurrentProjection.actualExperiment P) fun p =>\n    OAI.CurrentProjection.selectedExact\n      (OAI.CurrentProjection.completeFamily (MeasureTheory.Measure.map (⇑OAI.CurrentProjection.swapLast) P).snd ρ 0)\n      (OAI.CurrentProjection.actualObservation p)) ≤\n  ↑(OAI.CurrentProjection.actualConditionalRowInformation P).toReal / ↑q +\n    ↑(∫ (sw : ↑(OAI.CurrentProjection.Sphere d) × W),\n        Real.log\n          (1 +\n            OAI.CurrentProjection.momentBound 9 d\n              (OAI.CurrentProjection.completeFamily (MeasureTheory.Measure.map (⇑OAI.CurrentProjection.swapLast) P).snd\n                B 1 sw.2)\n              (OAI.CurrentProjection.completeFamily (MeasureTheory.Measure.map (⇑OAI.CurrentProjection.swapLast) P).snd\n                D 1 sw.2)) ∂P.fst)"
+       }
+      ],
+      "role": "application",
+      "statement": "OAI.CurrentProjection.ActualRowSourceConclusion P\n  (OAI.CurrentProjection.completeFamily (MeasureTheory.Measure.map (⇑OAI.CurrentProjection.swapLast) P).snd ρ 0)\n  (OAI.CurrentProjection.completeFamily (MeasureTheory.Measure.map (⇑OAI.CurrentProjection.swapLast) P).snd B 1)\n  (OAI.CurrentProjection.completeFamily (MeasureTheory.Measure.map (⇑OAI.CurrentProjection.swapLast) P).snd D 1)"
+     },
+     {
+      "budget_cut": false,
+      "children": [
+       2,
+       5
+      ],
+      "context": [],
+      "head": "standardBorelSpace_of_discreteMeasurableSpace",
+      "id": 1,
+      "objects": [
+       "W",
+       "inst"
+      ],
+      "path": [
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       1
+      ],
+      "premises": [
+       {
+        "argument": 2,
+        "frame": 2,
+        "statement": "DiscreteMeasurableSpace W"
+       },
+       {
+        "argument": 3,
+        "frame": 5,
+        "statement": "Countable W"
+       }
+      ],
+      "role": "application",
+      "statement": "StandardBorelSpace W"
+     },
+     {
+      "budget_cut": false,
+      "children": [
+       3,
+       4
+      ],
+      "context": [],
+      "head": "MeasurableSingletonClass.toDiscreteMeasurableSpace",
+      "id": 2,
+      "objects": [
+       "W",
+       "inst"
+      ],
+      "path": [
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       1,
+       0,
+       1
+      ],
+      "premises": [
+       {
+        "argument": 2,
+        "frame": 3,
+        "statement": "MeasurableSingletonClass W"
+       },
+       {
+        "argument": 3,
+        "frame": 4,
+        "statement": "Countable W"
+       }
+      ],
+      "role": "application",
+      "statement": "DiscreteMeasurableSpace W"
+     },
+     {
+      "binder": "inst_2",
+      "budget_cut": false,
+      "children": [],
+      "context": [],
+      "head": "",
+      "id": 3,
+      "objects": [],
+      "path": [
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       1,
+       0,
+       1,
+       0,
+       1
+      ],
+      "premises": [],
+      "role": "given",
+      "statement": "MeasurableSingletonClass W"
+     },
+     {
+      "binder": "inst_1",
+      "budget_cut": false,
+      "children": [],
+      "context": [],
+      "head": "",
+      "id": 4,
+      "objects": [],
+      "path": [
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       1,
+       0,
+       1,
+       1
+      ],
+      "premises": [],
+      "role": "given",
+      "statement": "Countable W"
+     },
+     {
+      "binder": "inst_1",
+      "budget_cut": false,
+      "children": [],
+      "context": [],
+      "head": "",
+      "id": 5,
+      "objects": [],
+      "path": [
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       1,
+       1
+      ],
+      "premises": [],
+      "role": "given",
+      "statement": "Countable W"
+     },
+     {
+      "binder": "inst_3",
+      "budget_cut": false,
+      "children": [],
+      "context": [],
+      "head": "",
+      "id": 6,
+      "objects": [],
+      "path": [
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       1
+      ],
+      "premises": [],
+      "role": "given",
+      "statement": "MeasureTheory.IsProbabilityMeasure P"
+     },
+     {
+      "budget_cut": false,
+      "children": [],
+      "context": [],
+      "head": "Eq.mpr",
+      "id": 7,
+      "objects": [],
+      "path": [
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       1
+      ],
+      "premises": [],
+      "role": "rewrite",
+      "statement": "OAI.CurrentProjection.actualConditionalRowInformation P ≠ ⊤"
+     },
+     {
+      "budget_cut": false,
+      "children": [],
+      "context": [],
+      "head": "Eq.mpr",
+      "id": 8,
+      "objects": [],
+      "path": [
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       1
+      ],
+      "premises": [],
+      "role": "rewrite",
+      "statement": "(OAI.CurrentProjection.actualConditionalRowInformation P).toReal ≤\n  (OAI.CurrentProjection.shannonEntropy (MeasureTheory.Measure.map (⇑OAI.CurrentProjection.swapLast) P).snd).toReal"
+     },
+     {
+      "budget_cut": false,
+      "children": [
+       10,
+       11
+      ],
+      "context": [],
+      "head": "OAI.CurrentProjection.ActualRowConclusion.conditional_density",
+      "id": 9,
+      "objects": [
+       "d",
+       "m",
+       "r",
+       "q",
+       "W",
+       "inst",
+       "P",
+       "OAI.CurrentProjection.completeFamily (MeasureTheory.Measure.map (⇑OAI.CurrentProjection.swapLast) P).snd ρ 0",
+       "OAI.CurrentProjection.completeFamily (MeasureTheory.Measure.map (⇑OAI.CurrentProjection.swapLast) P).snd B 1",
+       "OAI.CurrentProjection.completeFamily (MeasureTheory.Measure.map (⇑OAI.CurrentProjection.swapLast) P).snd D 1"
+      ],
+      "path": [
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       1
+      ],
+      "premises": [
+       {
+        "argument": 7,
+        "frame": 10,
+        "statement": "MeasureTheory.IsProbabilityMeasure P"
+       },
+       {
+        "argument": 11,
+        "frame": 11,
+        "statement": "OAI.CurrentProjection.ActualRowConclusion P\n  (OAI.CurrentProjection.completeFamily (MeasureTheory.Measure.map (⇑OAI.CurrentProjection.swapLast) P).snd ρ 0)\n  (OAI.CurrentProjection.completeFamily (MeasureTheory.Measure.map (⇑OAI.CurrentProjection.swapLast) P).snd B 1)\n  (OAI.CurrentProjection.completeFamily (MeasureTheory.Measure.map (⇑OAI.CurrentProjection.swapLast) P).snd D 1)"
+       }
+      ],
+      "role": "application",
+      "statement": "∀ᵐ (gw :\n  OAI.CurrentProjection.Rows (m + r) d ×\n    W) ∂(MeasureTheory.Measure.map OAI.CurrentProjection.actualObservation\n      (OAI.CurrentProjection.actualExperiment P)).fst,\n  ((MeasureTheory.Measure.map OAI.CurrentProjection.actualObservation\n            (OAI.CurrentProjection.actualExperiment P)).condKernel\n        gw).AbsolutelyContinuous\n    MeasureTheory.volume"
+     },
+     {
+      "binder": "inst_3",
+      "budget_cut": false,
+      "children": [],
+      "context": [],
+      "head": "",
+      "id": 10,
+      "objects": [],
+      "path": [
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       1,
+       0,
+       0,
+       0,
+       0,
+       1
+      ],
+      "premises": [],
+      "role": "given",
+      "statement": "MeasureTheory.IsProbabilityMeasure P"
+     },
+     {
+      "binder": "h",
+      "budget_cut": false,
+      "children": [],
+      "context": [],
+      "head": "",
+      "id": 11,
+      "objects": [],
+      "path": [
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       1,
+       1
+      ],
+      "premises": [],
+      "role": "given",
+      "statement": "OAI.CurrentProjection.ActualRowConclusion P\n  (OAI.CurrentProjection.completeFamily (MeasureTheory.Measure.map (⇑OAI.CurrentProjection.swapLast) P).snd ρ 0)\n  (OAI.CurrentProjection.completeFamily (MeasureTheory.Measure.map (⇑OAI.CurrentProjection.swapLast) P).snd B 1)\n  (OAI.CurrentProjection.completeFamily (MeasureTheory.Measure.map (⇑OAI.CurrentProjection.swapLast) P).snd D 1)"
+     },
+     {
+      "budget_cut": false,
+      "children": [
+       13,
+       14
+      ],
+      "context": [],
+      "head": "OAI.CurrentProjection.ActualRowConclusion.actual_limit",
+      "id": 12,
+      "objects": [
+       "d",
+       "m",
+       "r",
+       "q",
+       "W",
+       "inst",
+       "P",
+       "OAI.CurrentProjection.completeFamily (MeasureTheory.Measure.map (⇑OAI.CurrentProjection.swapLast) P).snd ρ 0",
+       "OAI.CurrentProjection.completeFamily (MeasureTheory.Measure.map (⇑OAI.CurrentProjection.swapLast) P).snd B 1",
+       "OAI.CurrentProjection.completeFamily (MeasureTheory.Measure.map (⇑OAI.CurrentProjection.swapLast) P).snd D 1"
+      ],
+      "path": [
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       1
+      ],
+      "premises": [
+       {
+        "argument": 7,
+        "frame": 13,
+        "statement": "MeasureTheory.IsProbabilityMeasure P"
+       },
+       {
+        "argument": 11,
+        "frame": 14,
+        "statement": "OAI.CurrentProjection.ActualRowConclusion P\n  (OAI.CurrentProjection.completeFamily (MeasureTheory.Measure.map (⇑OAI.CurrentProjection.swapLast) P).snd ρ 0)\n  (OAI.CurrentProjection.completeFamily (MeasureTheory.Measure.map (⇑OAI.CurrentProjection.swapLast) P).snd B 1)\n  (OAI.CurrentProjection.completeFamily (MeasureTheory.Measure.map (⇑OAI.CurrentProjection.swapLast) P).snd D 1)"
+       }
+      ],
+      "role": "application",
+      "statement": "∀ᵐ (p :\n  ((↑(OAI.CurrentProjection.Sphere d) × W) × OAI.CurrentProjection.Rows m d) ×\n    OAI.CurrentProjection.Rows r d) ∂OAI.CurrentProjection.actualExperiment P,\n  Filter.Tendsto\n    (fun j =>\n      OAI.CurrentProjection.selectedCube\n        (OAI.CurrentProjection.completeFamily (MeasureTheory.Measure.map (⇑OAI.CurrentProjection.swapLast) P).snd ρ 0)\n        (1 / ↑j) (OAI.CurrentProjection.actualObservation p))\n    Filter.atTop\n    (nhds\n      (OAI.CurrentProjection.selectedExact\n        (OAI.CurrentProjection.completeFamily (MeasureTheory.Measure.map (⇑OAI.CurrentProjection.swapLast) P).snd ρ 0)\n        (OAI.CurrentProjection.actualObservation p)))"
+     },
+     {
+      "binder": "inst_3",
+      "budget_cut": false,
+      "children": [],
+      "context": [],
+      "head": "",
+      "id": 13,
+      "objects": [],
+      "path": [
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       1,
+       0,
+       0,
+       0,
+       0,
+       1
+      ],
+      "premises": [],
+      "role": "given",
+      "statement": "MeasureTheory.IsProbabilityMeasure P"
+     },
+     {
+      "binder": "h",
+      "budget_cut": false,
+      "children": [],
+      "context": [],
+      "head": "",
+      "id": 14,
+      "objects": [],
+      "path": [
+       0,
+       0,
+       0,
+       0,
+       0,
+       0,
+       1,
+       1
+      ],
+      "premises": [],
+      "role": "given",
+      "statement": "OAI.CurrentProjection.ActualRowConclusion P\n  (OAI.CurrentProjection.completeFamily (MeasureTheory.Measure.map (⇑OAI.CurrentProjection.swapLast) P).snd ρ 0)\n  (OAI.CurrentProjection.completeFamily (MeasureTheory.Measure.map (⇑OAI.CurrentProjection.swapLast) P).snd B 1)\n  (OAI.CurrentProjection.completeFamily (MeasureTheory.Measure.map (⇑OAI.CurrentProjection.swapLast) P).snd D 1)"
+     },
+     {
+      "budget_cut": false,
+      "children": [],
+      "context": [],
+      "head": "Eq.mpr",
+      "id": 15,
+      "objects": [],
+      "path": [
+       0,
+       0,
+       0,
+       0,
+       0,
+       1
+      ],
+      "premises": [],
+      "role": "rewrite",
+      "statement": "∀ (δ : ℝ),\n  0 < δ →\n    MeasureTheory.Integrable\n        (fun p =>\n          Real.log\n            (1 +\n              (OAI.CurrentProjection.selectedCube\n                  (OAI.CurrentProjection.completeFamily\n                    (MeasureTheory.Measure.map (⇑OAI.CurrentProjection.swapLast) P).snd ρ 0)\n                  δ (OAI.CurrentProjection.actualObservation p)).toReal))\n        (OAI.CurrentProjection.actualExperiment P) ∧\n      ∫ (p :\n          ((↑(OAI.CurrentProjection.Sphere d) × W) × OAI.CurrentProjection.Rows m d) × OAI.CurrentProjection.Rows r d),\n          Real.log\n            (1 +\n              (OAI.CurrentProjection.selectedCube\n                  (OAI.CurrentProjection.completeFamily\n                    (MeasureTheory.Measure.map (⇑OAI.CurrentProjection.swapLast) P).snd ρ 0)\n                  δ (OAI.CurrentProjection.actualObservation p)).toReal) ∂OAI.CurrentProjection.actualExperiment P ≤\n        (OAI.CurrentProjection.actualConditionalRowInformation P).toReal / ↑q +\n          ∫ (sw : ↑(OAI.CurrentProjection.Sphere d) × W),\n            Real.log\n              (1 +\n                OAI.CurrentProjection.momentBound 9 d\n                  (OAI.CurrentProjection.completeFamily\n                    (MeasureTheory.Measure.map (⇑OAI.CurrentProjection.swapLast) P).snd B 1 sw.2)\n                  (OAI.CurrentProjection.completeFamily\n                    (MeasureTheory.Measure.map (⇑OAI.CurrentProjection.swapLast) P).snd D 1 sw.2)) ∂P.fst"
+     },
+     {
+      "budget_cut": false,
+      "children": [
+       17,
+       18
+      ],
+      "context": [],
+      "head": "OAI.CurrentProjection.ActualRowConclusion.exact_integrable",
+      "id": 16,
+      "objects": [
+       "d",
+       "m",
+       "r",
+       "q",
+       "W",
+       "inst",
+       "P",
+       "OAI.CurrentProjection.completeFamily (MeasureTheory.Measure.map (⇑OAI.CurrentProjection.swapLast) P).snd ρ 0",
+       "OAI.CurrentProjection.completeFamily (MeasureTheory.Measure.map (⇑OAI.CurrentProjection.swapLast) P).snd B 1",
+       "OAI.CurrentProjection.completeFamily (MeasureTheory.Measure.map (⇑OAI.CurrentProjection.swapLast) P).snd D 1"
+      ],
+      "path": [
+       0,
+       0,
+       0,
+       0,
+       1
+      ],
+      "premises": [
+       {
+        "argument": 7,
+        "frame": 17,
+        "statement": "MeasureTheory.IsProbabilityMeasure P"
+       },
+       {
+        "argument": 11,
+        "frame": 18,
+        "statement": "OAI.CurrentProjection.ActualRowConclusion P\n  (OAI.CurrentProjection.completeFamily (MeasureTheory.Measure.map (⇑OAI.CurrentProjection.swapLast) P).snd ρ 0)\n  (OAI.CurrentProjection.completeFamily (MeasureTheory.Measure.map (⇑OAI.CurrentProjection.swapLast) P).snd B 1)\n  (OAI.CurrentProjection.completeFamily (MeasureTheory.Measure.map (⇑OAI.CurrentProjection.swapLast) P).snd D 1)"
+       }
+      ],
+      "role": "application",
+      "statement": "MeasureTheory.Integrable\n  (fun p =>\n    Real.log\n      (1 +\n        (OAI.CurrentProjection.selectedExact\n            (OAI.CurrentProjection.completeFamily (MeasureTheory.Measure.map (⇑OAI.CurrentProjection.swapLast) P).snd ρ\n              0)\n            (OAI.CurrentProjection.actualObservation p)).toReal))\n  (OAI.CurrentProjection.actualExperiment P)"
+     },
+     {
+      "binder": "inst_3",
+      "budget_cut": false,
+      "children": [],
+      "context": [],
+      "head": "",
+      "id": 17,
+      "objects": [],
+      "path": [
+       0,
+       0,
+       0,
+       0,
+       1,
+       0,
+       0,
+       0,
+       0,
+       1
+      ],
+      "premises": [],
+      "role": "given",
+      "statement": "MeasureTheory.IsProbabilityMeasure P"
+     },
+     {
+      "binder": "h",
+      "budget_cut": false,
+      "children": [],
+      "context": [],
+      "head": "",
+      "id": 18,
+      "objects": [],
+      "path": [
+       0,
+       0,
+       0,
+       0,
+       1,
+       1
+      ],
+      "premises": [],
+      "role": "given",
+      "statement": "OAI.CurrentProjection.ActualRowConclusion P\n  (OAI.CurrentProjection.completeFamily (MeasureTheory.Measure.map (⇑OAI.CurrentProjection.swapLast) P).snd ρ 0)\n  (OAI.CurrentProjection.completeFamily (MeasureTheory.Measure.map (⇑OAI.CurrentProjection.swapLast) P).snd B 1)\n  (OAI.CurrentProjection.completeFamily (MeasureTheory.Measure.map (⇑OAI.CurrentProjection.swapLast) P).snd D 1)"
+     },
+     {
+      "budget_cut": false,
+      "children": [],
+      "context": [],
+      "head": "Eq.mpr",
+      "id": 19,
+      "objects": [],
+      "path": [
+       0,
+       0,
+       0,
+       1
+      ],
+      "premises": [],
+      "role": "rewrite",
+      "statement": "∫ (p : ((↑(OAI.CurrentProjection.Sphere d) × W) × OAI.CurrentProjection.Rows m d) × OAI.CurrentProjection.Rows r d),\n    Real.log\n      (1 +\n        (OAI.CurrentProjection.selectedExact\n            (OAI.CurrentProjection.completeFamily (MeasureTheory.Measure.map (⇑OAI.CurrentProjection.swapLast) P).snd ρ\n              0)\n            (OAI.CurrentProjection.actualObservation p)).toReal) ∂OAI.CurrentProjection.actualExperiment P ≤\n  (OAI.CurrentProjection.actualConditionalRowInformation P).toReal / ↑q +\n    ∫ (sw : ↑(OAI.CurrentProjection.Sphere d) × W),\n      Real.log\n        (1 +\n          OAI.CurrentProjection.momentBound 9 d\n            (OAI.CurrentProjection.completeFamily (MeasureTheory.Measure.map (⇑OAI.CurrentProjection.swapLast) P).snd B\n              1 sw.2)\n            (OAI.CurrentProjection.completeFamily (MeasureTheory.Measure.map (⇑OAI.CurrentProjection.swapLast) P).snd D\n              1 sw.2)) ∂P.fst"
+     },
+     {
+      "budget_cut": false,
+      "children": [],
+      "context": [],
+      "head": "Eq.mpr",
+      "id": 20,
+      "objects": [],
+      "path": [
+       0,
+       0,
+       1
+      ],
+      "premises": [],
+      "role": "rewrite",
+      "statement": "(OAI.CurrentProjection.actualConditionalRowInformation P).toReal / ↑q +\n    ∫ (sw : ↑(OAI.CurrentProjection.Sphere d) × W),\n      Real.log\n        (1 +\n          OAI.CurrentProjection.momentBound 9 d\n            (OAI.CurrentProjection.completeFamily (MeasureTheory.Measure.map (⇑OAI.CurrentProjection.swapLast) P).snd B\n              1 sw.2)\n            (OAI.CurrentProjection.completeFamily (MeasureTheory.Measure.map (⇑OAI.CurrentProjection.swapLast) P).snd D\n              1 sw.2)) ∂P.fst ≤\n  (OAI.CurrentProjection.shannonEntropy (MeasureTheory.Measure.map (⇑OAI.CurrentProjection.swapLast) P).snd).toReal /\n      ↑q +\n    ∫ (sw : ↑(OAI.CurrentProjection.Sphere d) × W),\n      Real.log\n        (1 +\n          OAI.CurrentProjection.momentBound 9 d\n            (OAI.CurrentProjection.completeFamily (MeasureTheory.Measure.map (⇑OAI.CurrentProjection.swapLast) P).snd B\n              1 sw.2)\n            (OAI.CurrentProjection.completeFamily (MeasureTheory.Measure.map (⇑OAI.CurrentProjection.swapLast) P).snd D\n              1 sw.2)) ∂P.fst"
+     },
+     {
+      "budget_cut": false,
+      "children": [
+       22,
+       23
+      ],
+      "context": [],
+      "head": "OAI.CurrentProjection.ActualRowConclusion.positive_log_integrable",
+      "id": 21,
+      "objects": [
+       "d",
+       "m",
+       "r",
+       "q",
+       "W",
+       "inst",
+       "P",
+       "OAI.CurrentProjection.completeFamily (MeasureTheory.Measure.map (⇑OAI.CurrentProjection.swapLast) P).snd ρ 0",
+       "OAI.CurrentProjection.completeFamily (MeasureTheory.Measure.map (⇑OAI.CurrentProjection.swapLast) P).snd B 1",
+       "OAI.CurrentProjection.completeFamily (MeasureTheory.Measure.map (⇑OAI.CurrentProjection.swapLast) P).snd D 1"
+      ],
+      "path": [
+       0,
+       1
+      ],
+      "premises": [
+       {
+        "argument": 7,
+        "frame": 22,
+        "statement": "MeasureTheory.IsProbabilityMeasure P"
+       },
+       {
+        "argument": 11,
+        "frame": 23,
+        "statement": "OAI.CurrentProjection.ActualRowConclusion P\n  (OAI.CurrentProjection.completeFamily (MeasureTheory.Measure.map (⇑OAI.CurrentProjection.swapLast) P).snd ρ 0)\n  (OAI.CurrentProjection.completeFamily (MeasureTheory.Measure.map (⇑OAI.CurrentProjection.swapLast) P).snd B 1)\n  (OAI.CurrentProjection.completeFamily (MeasureTheory.Measure.map (⇑OAI.CurrentProjection.swapLast) P).snd D 1)"
+       }
+      ],
+      "role": "application",
+      "statement": "MeasureTheory.Integrable\n  (fun p =>\n    OAI.CurrentProjection.logPositive\n      (OAI.CurrentProjection.selectedExact\n        (OAI.CurrentProjection.completeFamily (MeasureTheory.Measure.map (⇑OAI.CurrentProjection.swapLast) P).snd ρ 0)\n        (OAI.CurrentProjection.actualObservation p)))\n  (OAI.CurrentProjection.actualExperiment P)"
+     },
+     {
+      "binder": "inst_3",
+      "budget_cut": false,
+      "children": [],
+      "context": [],
+      "head": "",
+      "id": 22,
+      "objects": [],
+      "path": [
+       0,
+       1,
+       0,
+       0,
+       0,
+       0,
+       1
+      ],
+      "premises": [],
+      "role": "given",
+      "statement": "MeasureTheory.IsProbabilityMeasure P"
+     },
+     {
+      "binder": "h",
+      "budget_cut": false,
+      "children": [],
+      "context": [],
+      "head": "",
+      "id": 23,
+      "objects": [],
+      "path": [
+       0,
+       1,
+       1
+      ],
+      "premises": [],
+      "role": "given",
+      "statement": "OAI.CurrentProjection.ActualRowConclusion P\n  (OAI.CurrentProjection.completeFamily (MeasureTheory.Measure.map (⇑OAI.CurrentProjection.swapLast) P).snd ρ 0)\n  (OAI.CurrentProjection.completeFamily (MeasureTheory.Measure.map (⇑OAI.CurrentProjection.swapLast) P).snd B 1)\n  (OAI.CurrentProjection.completeFamily (MeasureTheory.Measure.map (⇑OAI.CurrentProjection.swapLast) P).snd D 1)"
+     },
+     {
+      "budget_cut": false,
+      "children": [],
+      "context": [],
+      "head": "Eq.mpr",
+      "id": 24,
+      "objects": [],
+      "path": [
+       1
+      ],
+      "premises": [],
+      "role": "rewrite",
+      "statement": "(OAI.CurrentProjection.extendedLogExpectation (OAI.CurrentProjection.actualExperiment P) fun p =>\n    OAI.CurrentProjection.selectedExact\n      (OAI.CurrentProjection.completeFamily (MeasureTheory.Measure.map (⇑OAI.CurrentProjection.swapLast) P).snd ρ 0)\n      (OAI.CurrentProjection.actualObservation p)) ≤\n  ↑(OAI.CurrentProjection.actualConditionalRowInformation P).toReal / ↑q +\n    ↑(∫ (sw : ↑(OAI.CurrentProjection.Sphere d) × W),\n        Real.log\n          (1 +\n            OAI.CurrentProjection.momentBound 9 d\n              (OAI.CurrentProjection.completeFamily (MeasureTheory.Measure.map (⇑OAI.CurrentProjection.swapLast) P).snd\n                B 1 sw.2)\n              (OAI.CurrentProjection.completeFamily (MeasureTheory.Measure.map (⇑OAI.CurrentProjection.swapLast) P).snd\n                D 1 sw.2)) ∂P.fst)"
+     }
+    ],
+    "judgements_checked": 25,
+    "lean_version": "4.34.1",
+    "schema": "proofreader.narrative/v1",
+    "statement": "OAI.CurrentProjection.ActualRowSourceConclusion P\n  (OAI.CurrentProjection.completeFamily (MeasureTheory.Measure.map (⇑OAI.CurrentProjection.swapLast) P).snd ρ 0)\n  (OAI.CurrentProjection.completeFamily (MeasureTheory.Measure.map (⇑OAI.CurrentProjection.swapLast) P).snd B 1)\n  (OAI.CurrentProjection.completeFamily (MeasureTheory.Measure.map (⇑OAI.CurrentProjection.swapLast) P).snd D 1)",
+    "theorem": "OAI.CurrentProjection.actualRowSourceMain"
    }
   },
   "substitution": {
