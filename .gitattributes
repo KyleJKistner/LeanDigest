@@ -1,0 +1,2 @@
+# The canonical document grammar requires two final newline characters.
+artifacts/source-document/proof.txt whitespace=-blank-at-eof

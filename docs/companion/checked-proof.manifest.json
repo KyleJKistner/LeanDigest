@@ -1,0 +1,14 @@
+{
+  "authored_companion_certified": false,
+  "canonical_document_certified": true,
+  "canonical_text_sha256": "d3daeabb618085d61e1ba8c9babb44a429062f4548aa60ba68514b59d7d31cf8",
+  "html_semantics_proved": false,
+  "index_sha256": "73901c7bf40465f96d90789eca7b34996f793f7593a44a254d8aa070e7e8adad",
+  "lean_executed_by_build": false,
+  "native_observation_sha256": "b5b1f8b04c7e000bf6783db3809649040d304e92f2d962304bd024b84a7cb811",
+  "native_record_sha256": "a616f24f83f634bedd4ae329623141eae02d4176f77d87ef5339ad834d634a5d",
+  "network_requests_by_build": false,
+  "schema": "leanglish.canonical-proof-page/v1",
+  "source_passages": 14,
+  "theorem": "OAI.ComplexCancellation.BezoutFrame.exists_frame"
+}
