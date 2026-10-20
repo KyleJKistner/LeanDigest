@@ -56,8 +56,11 @@ site records `not_run`. With `--no-archive`, no zip or `SHA256SUMS` is written.
    `original-evidence/environment.json`, as described in
    [Acceptance](DEPENDENCY_CONE.md#acceptance). Any failure stops the preview
    before a reading is re-rendered.
-4. Index the bundled solution modules in `originals/` once, as the catalog
-   builder does, and re-render each reading with `narrative_io.write_bundle`.
+4. Index the bundled solution modules in `originals/` once, with the catalog
+   builder's indexer, and re-render each reading with `narrative_io.write_bundle`.
+   Unlike a catalog build, a preview does not follow import headers or bundle
+   cited dependency sources (see
+   [Citation links in a preview](#citation-links-in-a-preview)).
    The published title and provenance note are kept. Citation links are built
    with the builder's functions (`declaration_index.citation_links` and
    `finding_catalog.source_name`), including links to the supporting lemma
@@ -166,9 +169,13 @@ navigation between files.
 ## Workflow
 
 `catalog-preview.yml` runs on pushes to `claude/keen-archimedes-ihorkq` that
-change `proofreader/**`, the script, the scripts it imports, its tests,
-`benchmarks/reading-kpis/**`, `benchmarks/dependency-cone/**` or the workflow,
-and on manual dispatch. It has no schedule. It runs the preview tests
+change `proofreader/**`, `leanglish/**`, `pyproject.toml`, the script, the
+scripts it imports or runs, its tests, `benchmarks/reading-kpis/**`,
+`benchmarks/dependency-cone/**` or the workflow, and on manual dispatch. `main` does not contain the workflow, and no dispatch of
+it has been tested (see
+[Dispatch](../.github/workflow-archive/README.md#dispatch)). It has no schedule.
+Its recorded runs are push runs 39399318913 (`ab2bfb3`), 39425058262
+(`f787dae`) and 39456773394 (`bbc90ac`), all successful. It runs the preview tests
 (`tests/test_rerender_catalog.py`, `tests/test_cone_catalog.py`), downloads the
 pinned release zip and checks its SHA-256.
 
@@ -199,11 +206,13 @@ records, screenshots, the cone download record and the download log as
 workflow has read-only repository and Actions permissions. It never creates a
 release and never pushes.
 
-## Pinned release with renderer 0.5.0
+## Pinned release with renderer 0.7.0
 
-A local run on the published `leanglish-original-project-317dc31` site, with
-renderer `source-math-en/0.5.0`, gave the following. A later renderer changes
-these numbers; `summary.json` in the workflow artifact records the current ones.
+A local run of the application code of commit `bbc90ac` (renderer
+`source-math-en/0.7.0`) on the published `leanglish-original-project-317dc31`
+release zip, without supporting lemma readings and without a browser audit,
+gave the following. A later renderer changes these numbers; `summary.json` in
+the workflow artifact records the current ones.
 
 | Measure | Published | Preview |
 | --- | ---: | ---: |
@@ -211,33 +220,38 @@ these numbers; `summary.json` in the workflow artifact records the current ones.
 | Proof readings | 492 | 492 (none added or removed) |
 | Evidence files byte-identical to the published manifest | — | 2,460 |
 | Selected checked frames | 22,452 | 22,452 |
-| Explicit explanation gaps | 7,587 | 5,098 |
-| Checked frames inside explanation gaps | 7,587 | 8,171 |
+| Explicit explanation gaps | 7,587 | 5,014 |
+| Checked frames inside explanation gaps | 7,587 | 8,175 |
 | Readings without explanation gaps | 0 | 0 |
 | Cited project names | No links | 1,762 |
 | … linked to a proof reading | — | 30 |
 | … linked only to a bundled source line | — | 320 |
 | … unresolved | — | 1,412 |
 
-The gap-step count fell while more checked frames sit inside gaps. Renderer
-0.5.0 groups several frames into one displayed step, and instance and
+The gap-step count fell while more checked frames sit inside gaps. The current
+renderer groups several frames into one displayed step, and instance and
 automation groups are counted as gaps: the 522 `instance-facts` gap steps hold
-2,132 checked frames, and the 260 `automation` gap steps hold 1,723. Every other
-gap step, published or preview, holds one frame. The step count is therefore
-not a measure of explained frames. The totals and the counts by rule match
-`benchmarks/reading-kpis/current.json`.
+2,132 checked frames, and the 260 `automation` gap steps hold 1,723. The 50
+unchecked choices, conjunction destructurings, calculations and restated
+hypotheses hold 138 frames. Every other gap step, published or preview, holds
+one frame. The step count is therefore not a measure of explained frames. The
+totals and the counts by rule equal `benchmarks/reading-kpis/current.json` at
+`bbc90ac`.
 
 | Readings with | Fewer | The same | More |
 | --- | ---: | ---: | ---: |
-| Gap steps | 171 | 300 | 21 |
-| Checked frames inside gaps | 65 | 324 | 103 |
+| Gap steps | 177 | 294 | 21 |
+| Checked frames inside gaps | 71 | 306 | 115 |
 
-Gap steps by rule in the preview: `project-citation` 2,068;
-`citation` 1,440; `instance-facts` 522; `rewrite` 346; `automation` 260;
-`unchecked-projection` 224; `restatement` 124; `substitution` 56; `witness` 35;
-`choose` 12; `application` 7; `ring` 4. The published 0.4.1 readings used other
-rule tags (`application` 5,502; `named` 1,476; `rewrite` 434; `identity` 124;
-`witness` 35; `choose` 12; `ring` 4), so the rows are not a one-to-one mapping.
+Gap steps by rule in the preview: `project-citation` 2,068; `citation` 1,420;
+`instance-facts` 522; `rewrite` 346; `automation` 260; `restatement` 124;
+`unchecked-projection` 117; `substitution` 56; `unchecked-choice` 27; `witness`
+17; `unchecked-conjunction` 12; `unchecked-equivalence` 12;
+`unchecked-application` 10; `application` 7; `unchecked-calculation` 6;
+`assumption-restatement` 5; `ring` 4; `unchecked-induction` 1. The published
+0.4.1 readings used other rule tags (`application` 5,502; `named` 1,476;
+`rewrite` 434; `identity` 124; `witness` 35; `choose` 12; `ring` 4), so the
+rows are not a one-to-one mapping.
 
 In every reading directory the preview replaced `reading.json`, `reader.html`,
 `proof.txt` and `coverage.json` and added `links.json`;
@@ -249,28 +263,54 @@ bundled original files, 790 original-evidence files, `catalog.json`,
 `release.json` and `original-verification.json` are unchanged.
 
 The static audit passed on 1,282 pages with 9,328 local links, 95,027 anchors and
-385 citation links. Real Chromium file navigation passed for the catalog, the
-original-verification pages and the preview pages. The largest retained snapshot
-(38 MB, `proofs/305b16dfae1b96214507073b`) re-rendered within the 64 MB snapshot
-limit.
+385 citation links. The largest retained snapshot (38 MB,
+`proofs/305b16dfae1b96214507073b`) re-rendered within the 64 MB snapshot limit.
+This run had no browser audit; the workflow run described in
+[Pinned release with the pilot supporting lemma readings](#pinned-release-with-the-pilot-supporting-lemma-readings)
+ran both browser audits.
 
-The preview site has 8,858 files and 635.5 MB; its zip is 52.2 MB. The
-published site has 8,361 files and 659.3 MB; its zip is 49.1 MB. The run from the
-release zip, including both browser audits and the zip, took about 165 s on
-four CPU cores. Two runs from the same checkout produced byte-identical zips.
+The preview site has 8,858 files and 629.8 MB; its zip is 52.6 MB. The
+published site has 8,361 files and 659.3 MB; its zip is 49.1 MB. The run from
+the release zip, including the zip but no browser audit, took 151 s. Sizes are
+in units of 10^6 bytes.
+
+The first measurement of this kind, with renderer `source-math-en/0.5.0`, gave
+5,098 explicit explanation gaps and 8,171 frames inside them, with the same
+citation-link counts; two runs from the same checkout then produced
+byte-identical zips. The comparison was repeated with two runs from a clean
+checkout of commit `9c91c41`, whose 103 application source files have the
+digest `91b7afac…` that the `bbc90ac` runs record: both gave the counts and
+sizes above, their zips (52,608,239 bytes) and `SHA256SUMS` files were
+byte-identical, and they took 140 s and 136 s.
+
+### Citation links in a preview
+
+A preview indexes only the 413 solution modules bundled under `originals/` in
+the published release. It does not follow their import headers and bundles no
+cited dependency sources, because the release holds no upstream tree: the
+static audit records `cited_dependency_source_pages` 0, and the site has no
+`evidence/cited-dependency-sources.json`. Its citation-link counts are therefore
+those of the **Solution modules only** column in
+[Citation links](CITATION_LINKS.md#local-measurement-of-cited-dependency-sources).
+A catalog built with `leanglish catalog` from the upstream tree also bundles the
+cited dependency modules; in the local full build described there, 31 of the
+1,762 cited project names link to a proof reading and 1,526 to a source line.
 
 ## Pinned release with the pilot supporting lemma readings
 
-A local run at application commit `171ab5e` (renderer `source-math-en/0.6.0`)
-used the pinned release zip and the artifacts of dependency-cone run
-39373979494, downloaded with `scripts/download_cone_artifacts.py`. All 10
-artifact digests matched the GitHub API. The table compares it with a run of
-the same application code without `--cone-shards`.
+The catalog-preview workflow run
+[39456773394](https://github.com/KyleJKistner/LeanDigest/actions/runs/39456773394),
+on a push of commit `bbc90ac` (renderer `source-math-en/0.7.0`, clean tracked
+tree), built the preview with the artifacts of dependency-cone run 39373979494.
+All 10 artifact digests matched the GitHub API. The table compares its
+`catalog-preview-diagnostics` record with the local run of the same
+application code without `--cone-shards` described above. A local run of the
+same code with the same artifacts gave the same counts.
 
 | Measure | Without supporting readings | With them |
 | --- | ---: | ---: |
 | Target readings re-rendered | 492 | 492 |
-| Explicit explanation gaps (target readings) | 4,961 | 4,961 |
+| Explicit explanation gaps (target readings) | 5,014 | 5,014 |
 | Supporting lemma readings | — | 151 of 1,722 planned |
 | Cited project names linked to a target reading | 30 | 30 |
 | … linked to a supporting lemma reading | — | 151 |
@@ -280,16 +320,18 @@ the same application code without `--cone-shards`.
 | Static audit: local links | 9,328 | 9,480 |
 | Static audit: citation links | 385 | 593 |
 | Site files | 8,858 | 10,520 |
-| Site size | 624.2 MB | 731.4 MB |
-| Zip size | 52.1 MB | 60.0 MB |
+| Site size | 629.8 MB | 738.3 MB |
+| Zip size | 52.6 MB | 60.6 MB |
 
 Both static audits passed; the second also checked 151 supporting lemma pages
-and 202 supporting lemma links. Real Chromium file navigation passed for the
-catalog, the original-verification pages, the preview pages and the supporting
-lemma checks. The target readings' gap counts, in total and by rule, equal
-`benchmarks/reading-kpis/current.json` in both runs. The packaged zip was
-extracted, checked against its `SHA256SUMS.json` and audited again. The run with
-supporting readings took 219 s, including both browser audits and the zip.
+and 202 supporting lemma links. In the workflow run, real Chromium file
+navigation passed for the catalog, the original-verification pages, the preview
+pages and the supporting lemma checks, the packaged zip was extracted, checked
+against its `SHA256SUMS.json` and audited again, and the target readings' gap
+counts, in total and by rule, equal `benchmarks/reading-kpis/current.json`. The
+local run with supporting readings took 212 s without a browser audit. An
+earlier local pair of runs at application commit `171ab5e` (renderer
+`source-math-en/0.6.0`) gave the same link and audit counts.
 [Pilot readings in the preview](DEPENDENCY_CONE.md#pilot-readings-in-the-preview)
 lists the supporting lemma counts.
 
@@ -299,6 +341,7 @@ A preview is a rendering of retained, unsigned observations. It does not
 re-extract any snapshot, authenticate a receipt, or replay the original project.
 The English is deterministic and regression-tested, not formally verified, and a
 reading without gaps is not a certified complete proof. The browser audits
-exercise selected pages and interactions, not every page. The citation-link and
-explanation-gap limitations in `docs/CITATION_LINKS.md` and `docs/TRUST.md`
-apply unchanged.
+exercise selected pages and interactions, not every page. A preview bundles no
+cited dependency sources, so it links fewer cited names than a catalog built
+from the upstream tree. The citation-link and explanation-gap limitations in
+`docs/CITATION_LINKS.md` and `docs/TRUST.md` apply unchanged.

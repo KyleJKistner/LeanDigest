@@ -15,6 +15,13 @@ GitHub branch listing at that time. Every other remote branch tip was unchanged,
 and each of those branches has the same containment and **Ahead** count against
 f787dae as against 04df977.
 
+The same rows and sections were refreshed again on 2026-10-20 at about
+16:40 UTC for commit bbc90ac, from read-only GitHub branch, pull-request and
+Actions listings. The branch listing then showed `claude/keen-archimedes-ihorkq`
+at beaf08d, two commits after bbc90ac. Every other remote branch tip was
+unchanged, and each has the same containment and **Ahead** count against bbc90ac
+as against f787dae.
+
 ## Consolidation branch
 
 `claude/keen-archimedes-ihorkq` was built in three steps up to 04df977:
@@ -27,8 +34,8 @@ f787dae as against 04df977.
 3. Commit 04df977, which adds the corpus reading measurements.
 
 At 04df977 the PR #8 branch had 19 further commits. Merge 4c072f1, whose second
-parent is the PR #8 head efc679d, brought them in. f787dae therefore contains
-every commit of `work/completion-evidence-retries` and of
+parent is the PR #8 head efc679d, brought them in. f787dae and bbc90ac therefore
+contain every commit of `work/completion-evidence-retries` and of
 `release/validated-2149131`.
 
 ## Pull requests
@@ -60,11 +67,18 @@ On 2026-10-20 the Actions listing showed the following PR #8 activity:
   release `leanglish-original-project-2149131`, tagged at 2149131.
 
 On 2026-10-20 at about 14:30 UTC the Actions API listed no queued or
-in-progress run.
+in-progress run. At about 16:40 UTC the only in-progress run was
+dependency-cone run 39456773610 on bbc90ac, which succeeded at 16:54 UTC; no
+PR #8 run was queued or in progress, and PR #8 was still an open draft with
+head efc679d.
 
 Merge 4c072f1 brought in the PR #8 versions of the five completion workflows
-it changes. Four remain in `.github/workflows/`; `publish-completion.yml` was
-archived on 2026-10-20 because both releases it created exist (see
+it changes: `git diff --name-status -M 4c072f1^1 4c072f1 -- .github` lists
+`atomic-completion-worker.yml` as added and `completion-delivery.yml`,
+`completion-recovery.yml`, `completion-resume.yml` and `publish-completion.yml`
+as modified, and nothing under `.github/workflow-archive/`. Four remain in
+`.github/workflows/`; `publish-completion.yml` was archived on 2026-10-20
+because both releases it created exist (see
 `.github/workflow-archive/README.md`). Every archived file is identical to its
 active copy on the PR #8 head efc679d. After any later merge of PR #8, check
 moved workflow files:
@@ -83,7 +97,7 @@ version with the versions in the history of 04df977.
 
 | Branch | Tip | Contained | Ahead | Behind | Relationship and content check | Recommendation |
 | --- | --- | --- | ---: | ---: | --- | --- |
-| `claude/keen-archimedes-ihorkq` | 04df977; f787dae on 2026-10-20 at about 14:30 UTC | Yes (equal) | 0 | 0 | The consolidation branch. | Keep. |
+| `claude/keen-archimedes-ihorkq` | 04df977; f787dae on 2026-10-20 at about 14:30 UTC; beaf08d at about 16:40 UTC | Yes (equal) at 04df977 | 0 | 0 | The consolidation branch. Its tip beaf08d is two commits after bbc90ac: dc5f48b edits `README.md` and `HANDOFF.md`, and beaf08d edits `tests/test_narrative_batch_integration.py`. | Keep. |
 | `main` | 01dfd1e | Yes | 0 | 70 | Default branch. | Keep. |
 | `work/completion-evidence-retries` | efc679d | No at 04df977; yes since merge 4c072f1 | 19 | 22 | PR #8 head. | Keep. |
 | `release/validated-2149131` | 2149131 | No at 04df977; yes since merge 4c072f1 | 5 | 22 | Its five commits are on the PR #8 branch. Release `leanglish-original-project-2149131` is tagged at 2149131. | Keep until PR #8 is resolved. The tag preserves the commit if the branch is later deleted. |
@@ -135,16 +149,16 @@ at any later commit of `claude/keen-archimedes-ihorkq`. The five
 certified-English gates run on pull requests that touch their paths
 and on dispatch; three also run on pushes to their finished work branches. The
 table gives the latest run in each Actions run listing, read on 2026-10-20 at
-about 14:30 UTC, and the files under the gate's pull-request path filter that
-differ between that run's head and f787dae.
+about 14:30 UTC and unchanged at about 16:40 UTC, and the files under the gate's
+pull-request path filter that differ between that run's head and bbc90ac.
 
 | Workflow | Latest run | Head | Changed under its path filter |
 | --- | --- | --- | --- |
-| `checked-companion.yml` | 39346545308 (pull request, success) | 85d19cc | `proofreader/narrative.py`, `proofreader/data/Narrative.lean`, `docs/companion/index.html`, `docs/companion/build-manifest.json` |
-| `proof-document.yml` | 39346545246 (pull request, success) | 85d19cc | `docs/companion/index.html`, `docs/companion/build-manifest.json` |
-| `source-bound-cancellation.yml` | 39346545311 (pull request, success) | 85d19cc | `docs/companion/index.html`, `docs/companion/build-manifest.json` |
-| `source-bound-equations.yml` | 39346545135 (pull request, success) | 85d19cc | `docs/companion/index.html`, `docs/companion/build-manifest.json` |
-| `checked-text-boundary.yml` | 39276117654 (pull request, success) | 5c20704 | `docs/CHECKED_TEXT_BOUNDARY.md`, `docs/CONTROLLED_ENGLISH_PROTOTYPE.md` |
+| `checked-companion.yml` | 39346545308 (pull request, success) | 85d19cc | `proofreader/narrative.py`, `proofreader/data/Narrative.lean`, `docs/companion/index.html`, `docs/companion/build-manifest.json`, `.github/workflows/checked-companion.yml` |
+| `proof-document.yml` | 39346545246 (pull request, success) | 85d19cc | `docs/companion/index.html`, `docs/companion/build-manifest.json`, `.github/workflows/proof-document.yml` |
+| `source-bound-cancellation.yml` | 39346545311 (pull request, success) | 85d19cc | `docs/companion/index.html`, `docs/companion/build-manifest.json`, `.github/workflows/source-bound-cancellation.yml` |
+| `source-bound-equations.yml` | 39346545135 (pull request, success) | 85d19cc | `docs/companion/index.html`, `docs/companion/build-manifest.json`, `.github/workflows/source-bound-equations.yml` |
+| `checked-text-boundary.yml` | 39276117654 (pull request, success) | 5c20704 | `docs/CHECKED_TEXT_BOUNDARY.md`, `docs/CONTROLLED_ENGLISH_PROTOTYPE.md`, `.github/workflows/checked-text-boundary.yml` |
 | `acceptance.yml` | 38810650764 (push, failure) | 19bdbd4 | No pull-request trigger |
 | `build-resume-validation.yml` | 39275609967 (push, success) | 390b326 | No pull-request trigger |
 
@@ -152,19 +166,28 @@ differ between that run's head and f787dae.
 extracts a fresh native snapshot with the exporter
 `proofreader/data/Narrative.lean` and requires it to equal
 `artifacts/companion/native/current/snapshot.json`. The exporter changed in
-153bc35. Its SHA-256 at f787dae is `222fd3c2…`, and
+153bc35. Its SHA-256 at bbc90ac, as at f787dae, is `222fd3c2…`, and
 `artifacts/companion/native/observation.json` records `exporter_sha256`
 `0e3186dc…`, the 85d19cc version. No native run has checked that snapshot with
 the changed exporter, so whether it still matches is not established.
 
-Native checks that did run on the consolidated tree: the `lean-integration`
-job of `ci.yml` at f787dae (run 39425058269; that run failed in its other job,
-`python-and-browser`, at the demo drift check) and the `dependency-cone.yml`
-pilot at 4c072f1 (run 39373979494).
+Native checks that did run on the consolidated tree:
+
+- The `lean-integration` job of `ci.yml` at f787dae (run 39425058269) passed;
+  that run failed in its other job, `python-and-browser`, at the demo drift
+  check.
+- At bbc90ac (run 39456773446), `python-and-browser` passed, including the
+  drift check, and `lean-integration` failed at its step "Require actual
+  export, exact replay and tamper rejection". Commit beaf08d, on the remote
+  branch after bbc90ac, changes `tests/test_narrative_batch_integration.py`;
+  its run 39458302869 passed.
+- The `dependency-cone.yml` pilot at 4c072f1 (run 39373979494) succeeded, and
+  so did the second pilot run on a push of bbc90ac (run 39456773610, completed
+  at 16:54 UTC).
 
 Each of the five gates lists its own workflow file in its pull-request paths.
-The 2026-10-20 change that removed stored checkout credentials edits all five
-files, so a pull request that includes it runs all five.
+The 2026-10-20 change that removed stored checkout credentials (06af274) edits
+all five files, so a pull request that includes it runs all five.
 
 ## Artifact expiry
 
@@ -179,7 +202,7 @@ The **Downloaded by** column was updated on 2026-10-20, when
 
 | Artifact | Run | Expires (UTC) | Downloaded by |
 | --- | --- | --- | --- |
-| `cancellation-env-a` (12202194378) | 39285448721 | 2026-10-20 16:27 | No kept workflow. The optional `--retained-environment` input of `scripts/check_source_cancellation.py`. |
+| `cancellation-env-a` (12202194378) | 39285448721 | 2026-10-20 16:27 (expired) | No kept workflow. The optional `--retained-environment` input of `scripts/check_source_cancellation.py`. On 2026-10-20 at about 17:20 UTC the Actions API returned 404 for the artifact and listed no artifact for the run. |
 | `checkpoint-142c3d0f555a25666bb36dd1-1` (12217614568) | 39315174445 | 2026-11-02 20:14 | `completion-resume.yml` |
 | `complete-openai-lean-source` (12012738377) | 38822475057 | 2026-11-14 23:16 | `all-findings-release.yml`, `atomic-completion-worker.yml`, `breadth-release.yml`, `completion-delivery.yml`, `completion-resume.yml`, `completion-worker.yml`, `dependency-cone.yml` |
 | `finding-statement-retry-*` (12107274354, 12108605282) | 39050823104 | 2026-11-16 16:52 and 17:06 | `all-findings-release.yml`, `breadth-release.yml`, `completion-delivery.yml` |
@@ -191,6 +214,14 @@ The **Downloaded by** column was updated on 2026-10-20, when
 | `validated-completion-plan` (12197582957) | 39276345053 | 2027-01-17 15:15 | `completion-delivery.yml`, `completion-recovery.yml`, `completion-resume.yml` |
 | `completion-result-*` (74 and 1 artifacts) | 39315174445 and 39321225048 | 2027-01-17 19:56 and 20:40 | `completion-delivery.yml` (through `scripts/collect_completion_results.py`), `completion-recovery.yml` (run 39315174445 only) |
 | `completion-reading-delivery` (12234627856) | 39353736010 | 2027-01-18 01:29 | No kept workflow. The archived `publish-completion.yml`. |
+| `dependency-cone-plan` (12242630994), `cone-summary-level-1` (12243920789) and the 8 `dependency-cone-<shard>` artifacts | 39373979494 | 2027-01-18 05:16 | `catalog-preview.yml`, through `scripts/download_cone_artifacts.py`. They hold the 151 pilot readings that docs/DEPENDENCY_CONE.md and the preview use. The second pilot run, 39456773610, has its own artifacts, which expire on 2027-01-18 at 16:21 and which no kept workflow downloads. |
+
+The last row was added on 2026-10-20 at about 16:40 UTC from a read-only
+listing of run 39373979494, which has 11 artifacts with the same expiry; the
+eleventh, `cone-preflight`, is not downloaded. The workflow run 39456773394
+recorded the same 10 digests in its `cone-artifacts.json`. When they expire,
+`catalog-preview.yml` builds the preview without supporting lemma readings and
+states why; it does not fail. `preserve-inputs.yml` does not copy them.
 
 Among the inputs that kept workflows download, the checkpoint expires first.
 `completion-worker.yml` produced it in recovery run 39315174445 and keeps

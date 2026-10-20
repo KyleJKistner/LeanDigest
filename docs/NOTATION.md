@@ -299,9 +299,10 @@ multi-character operators (`=>`, `:=`, `..`, `''`, `∑'`, `∏'`). A string wit
 stray quote, a backtick, a guillemet name (`«…»`), comment syntax or unbalanced
 brackets is displayed unchanged, including its names. A closed string literal
 is one opaque token: names inside it are never shortened. The corpus has no
-string literals or guillemet names. The corpus readings pass 14,135 distinct
-strings (counted once per reading) to `math_text()`, and the tokenizer
-recognizes all of them.
+string literals or guillemet names. Under `source-math-en/0.7.0` (commit
+`bbc90ac`), the corpus readings pass 14,113 distinct strings (counted once per
+reading) to `math_text()`, and the 151 dependency-cone readings pass 5,876. The
+tokenizer recognizes all of them.
 
 Other brackets, such as `⟪x, y⟫_ℝ`, `⁅x, y⁆`, `K⟮x, y⟯` and `‹p›`, are lexed as
 single characters, not as pairs, so a comma inside them would look like the
@@ -359,8 +360,8 @@ the limit's `n` is not the lambda's `n`.
 
 ### Forms left as printed
 
-- `↑` coercion arrows (9,643 of the remaining 10,125 Lean markers in displayed
-  text in the 0.4.2 measurement below). Removing them changes meaning:
+- `↑` coercion arrows (8,771 of the 9,167 Lean markers in the displayed corpus
+  text under `source-math-en/0.7.0`). Removing them changes meaning:
   `↑(n / 2)` is natural-number division followed by a cast, and `↑n / 2` is
   real division.
 - Lambdas with several binders, typed binders or patterns, such as
@@ -385,9 +386,11 @@ This section records the measurement made when the notation layer was
 introduced, with renderer `source-math-en/0.4.2`. It is not updated for later
 renderer versions; `benchmarks/reading-kpis/current.json` holds the current
 corpus figures. Later changes are described in the sections above: cited names
-are now shortened through `notation.name()`, the `Apply … to the supplied
-arguments.` wording occurs in 7 steps under `source-math-en/0.6.0`, and the
-`Filter.Tendsto` rule needs printed number types.
+are now shortened through `notation.name()`, and the `Filter.Tendsto` rule needs
+printed number types. Under `source-math-en/0.7.0` (commit `bbc90ac`), the
+displayed corpus text has 2,153,019 characters, 17,393 qualified names and
+9,167 Lean markers, and the `Apply … to the supplied arguments.` wording occurs
+in 7 steps, which contain no qualified name.
 
 Measured with `python -m proofreader.reading_kpis CORPUS` over the 492 retained
 snapshots, before and after the notation layer. The renderer version string was

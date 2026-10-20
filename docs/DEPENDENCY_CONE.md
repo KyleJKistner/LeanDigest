@@ -6,8 +6,9 @@ mathematics. The retained readings show those lemmas only as cited names. This
 page describes the plan, the workflow and the loader that extend reading coverage
 to the lemmas that the retained readings cite.
 
-The [Denominator](#denominator) describes the plan. One workflow run has read the
-pilot scope; [Pilot results](#pilot-results) gives its outcomes, and
+The [Denominator](#denominator) describes the plan. Two workflow runs have read
+the pilot scope, and no run has read the full scopes;
+[Pilot results](#pilot-results) gives the outcomes, and
 [Entering the catalog](#entering-the-catalog) describes how a catalog includes
 the readings.
 
@@ -187,25 +188,54 @@ artifacts and the plan artifact were downloaded, their digests matched the
 values GitHub records, and `scripts/plan_dependency_cone.py reconcile` on them
 reproduced the CI summary byte for byte.
 
-| Environment module | Readings | Checked frames | Displayed steps | Gap steps | Shard job time |
-| --- | ---: | ---: | ---: | ---: | ---: |
-| `OAI.Probability.ContinuumTransition.Main` | 30 | 1,107 | 606 | 295 | 24 min |
-| `OAI.Combinatorics.UniformKServer.Main` | 21 | 814 | 554 | 244 | 26 min |
-| `OAI.Probability.GaussianInformation.Main` | 21 | 1,472 | 1,008 | 547 | 11 min |
-| `OAI.Probability.CoordinateSweeps.Main` | 18 | 1,419 | 1,130 | 561 | 10 min |
-| `OAI.Probability.UnimodularPercolation.CayleyMain` | 17 | 936 | 588 | 224 | 18 min |
-| `OAI.MathematicalPhysics.SheetFlows.SheetProgram` | 15 | 397 | 281 | 113 | 9 min |
-| `OAI.Probability.ProjectionMoments.Main` | 15 | 2,248 | 1,324 | 402 | 11 min |
-| `OAI.MathematicalPhysics.NavierStokes.BalancedTransport.MainResult` | 14 | 917 | 721 | 268 | 11 min |
-| Total | 151 | 9,310 | 6,212 | 2,654 | |
+The run's 11 artifacts (the plan, the preflight record, the 8 shards and the
+summary) are the artifacts that this page and the catalog preview use. GitHub
+deletes all 11 on 2027-01-18 (their recorded `expires_at`,
+2027-01-18T05:16:06Z). `scripts/preserve_inputs.py` does not copy them, and no
+cone reading is committed. After the artifacts of both pilot runs expire, the
+readings can be restored only by a new run, which needs a source bundle that
+has not expired (see [External inputs](#external-inputs)).
+
+The push of commit `bbc90ac`, which changes `dependency-cone.yml` relative to
+the previous push (`f787dae`), started a second pilot run,
+[39456773610](https://github.com/KyleJKistner/LeanDigest/actions/runs/39456773610),
+which succeeded on 2026-10-20 at 16:54 UTC. Its preflight re-created the
+dependency tree again, and all 8 shards took the `resolve` route. Its summary
+artifact (SHA-256 `2149b1d3…`, matching the API) holds a
+`dependency-cone-summary.json` byte-identical to that of run 39373979494: 151
+readings generated. Its shard artifacts, which expire on 2027-01-18 at 16:21,
+were not downloaded or compared with those of the first run.
+`catalog-preview.yml` downloads the artifacts of run 39373979494 (`CONE_RUN`).
+
+| Environment module | Readings | Checked frames | Displayed steps | Gap steps | Job time | Build and extraction step |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: |
+| `OAI.Probability.ContinuumTransition.Main` | 30 | 1,107 | 584 | 296 | 25 min | 24 min |
+| `OAI.Combinatorics.UniformKServer.Main` | 21 | 814 | 515 | 256 | 27 min | 26 min |
+| `OAI.Probability.GaussianInformation.Main` | 21 | 1,472 | 999 | 585 | 13 min | 11 min |
+| `OAI.Probability.CoordinateSweeps.Main` | 18 | 1,419 | 1,080 | 601 | 12 min | 10 min |
+| `OAI.Probability.UnimodularPercolation.CayleyMain` | 17 | 936 | 546 | 228 | 19 min | 18 min |
+| `OAI.MathematicalPhysics.SheetFlows.SheetProgram` | 15 | 397 | 261 | 115 | 11 min | 9 min |
+| `OAI.Probability.ProjectionMoments.Main` | 15 | 2,248 | 1,253 | 403 | 12 min | 11 min |
+| `OAI.MathematicalPhysics.NavierStokes.BalancedTransport.MainResult` | 14 | 917 | 751 | 270 | 13 min | 11 min |
+| Total | 151 | 9,310 | 5,989 | 2,754 | | |
 
 The frame, step and gap counts come from `leanglish reading-kpis` with renderer
-`source-math-en/0.5.0` on the downloaded snapshots. The gap step share is 0.43
-and the gap frame share is 0.46. No pilot reading is free of gaps. By rule, the
-gap steps are 1,337 library citations, 508 project citations, 239 instance-fact
-groups, 201 rewrites, 166 restatements, 129 automation summaries and 74 others.
-Library lemmas are the largest gap category in these supporting lemmas, unlike
-the documented targets, where project citations dominate.
+`source-math-en/0.7.0` (commit `bbc90ac`) on the downloaded snapshots, grouped
+by the `module` of each shard report. A later renderer changes the step and gap
+counts; the checked frames do not change. The gap step share is 0.46 and the
+gap frame share is 0.48. No pilot reading is free of gaps. By rule, the gap
+steps are 1,334 library citations, 508 project citations, 239 instance-fact
+groups, 201 rewrites, 166 restatements, 129 automation summaries, 87 unchecked
+calculations and 90 others. Library lemmas are the largest gap category in
+these supporting lemmas, unlike the documented targets, where project citations
+dominate. When the pilot ran, renderer `source-math-en/0.5.0` gave 6,212
+displayed steps and 2,654 gap steps for the same snapshots.
+
+The two time columns come from the run's job records: a job's time runs from
+its start to its completion, and the step is "Build this environment module
+once and extract every planned lemma". Both are rounded to the minute. The rest
+of each job restores the original source (42 to 70 seconds) and sets up the
+runner and the Lean toolchain.
 
 These are unsigned retained observations, and they do not count toward the 536
 documented targets. The catalog preview includes them as supporting lemma
@@ -215,14 +245,23 @@ readings; see [Entering the catalog](#entering-the-catalog).
 
 The workflow `.github/workflows/dependency-cone.yml` runs on pushes to
 `claude/keen-archimedes-ihorkq` that change the workflow or
-`benchmarks/dependency-cone/`, and on `workflow_dispatch`. A push runs the pilot.
-The Actions page offers a dispatch button only for workflows on the default
-branch; from this branch, dispatch with
-`gh workflow run dependency-cone.yml --ref claude/keen-archimedes-ihorkq -f scope=full-1`.
-The scopes are:
+`benchmarks/dependency-cone/`, and on `workflow_dispatch`. A push always runs
+the pilot, because a push has no inputs. The scopes are:
 
 - `pilot` (default): the 8 pilot shards.
 - `full-1`, then `full-2`: all 379 shards in two dispatches.
+
+The full scopes can be started only by a dispatch, and no dispatch has been
+tested. GitHub's documentation states that a workflow must be in the default
+branch for the `workflow_dispatch` event to trigger it. `main`, the default
+branch, does not contain `dependency-cone.yml`. GitHub has registered the file
+(workflow 390162521) from its push run, but on 2026-10-20 the Actions API listed
+no `workflow_dispatch` run of any workflow in this repository. The documented
+route is to put `dependency-cone.yml` on `main` first and then dispatch it, for
+example with `gh workflow run dependency-cone.yml --ref BRANCH -f scope=full-1`,
+where `BRANCH` holds the version to run. A dispatch of the file from a branch
+other than `main` is untested until a run records it; see
+[Dispatch](../.github/workflow-archive/README.md#dispatch).
 
 Each run has four jobs:
 
@@ -466,16 +505,20 @@ the links of the supporting readings themselves.
 
 ### Pilot readings in the preview
 
-A local preview of the pinned release `leanglish-original-project-317dc31` with
-renderer `source-math-en/0.6.0` and the artifacts of run 39373979494, downloaded
-with `scripts/download_cone_artifacts.py` (all 10 digests matched the API),
-gave the following.
+The catalog-preview workflow run
+[39456773394](https://github.com/KyleJKistner/LeanDigest/actions/runs/39456773394)
+at commit `bbc90ac` (renderer `source-math-en/0.7.0`, clean tracked tree)
+built a preview of the pinned release `leanglish-original-project-317dc31` with
+the artifacts of run 39373979494, which `scripts/download_cone_artifacts.py`
+downloaded with matching digests. Its `catalog-preview-diagnostics` artifact
+(SHA-256 `3878dc00…`, matching the API) records the following. A local build of
+the same application code with the same inputs gave the same counts.
 
 | Measure | Count |
 | --- | ---: |
 | Supporting lemma readings bundled | 151 of 1,722 planned (pilot scope) |
 | Checked frames | 9,310 |
-| Explicit explanation gaps | 2,649 |
+| Explicit explanation gaps | 2,754 |
 | Readings without explanation gaps | 0 |
 | Citations in target readings newly linked to a supporting lemma reading | 153 |
 | … distinct cited names | 151 |
@@ -490,21 +533,26 @@ Every one of the 153 citing pairs is in the environment module of the cited
 lemma, so the `same-module` rule decides all of them. No citation in a
 supporting reading links to a target reading, and 6 link only to a source line.
 
-The run used application commit `171ab5e` with a clean tracked tree. The
-reconciled outcomes equal the campaign summary. The static audit passed and
+The reconciled outcomes equal the campaign summary. The static audit passed and
 checked 1,433 pages, including the 151 supporting lemma pages and 202
-supporting lemma links. Real Chromium file navigation passed, including a finding
-page's supporting lemma list, a supporting lemma reader page and a target
-reader's link to it. The target readings' gap steps, frames inside gaps and gap
-counts by rule still equal `benchmarks/reading-kpis/current.json`.
+supporting lemma links. Real Chromium file navigation passed in the workflow
+run, including a finding page's supporting lemma list, a supporting lemma
+reader page and a target reader's link to it. The target readings' gap steps,
+frames inside gaps and gap counts by rule equal
+`benchmarks/reading-kpis/current.json`. The first local measurement, at commit
+`171ab5e` with renderer 0.6.0, gave the same link counts and 2,649 explicit
+explanation gaps.
 
-The supporting readings add 1,662 files to the site, which grows from 624.2 MB
-to 731.4 MB; the preview zip grows from 52.1 MB to 60.0 MB. Compared with a
-preview of the same application code without them, every other difference is in
-the 492 target `links.json` files and their reader pages, `coverage.json`,
-`coverage.html`, the pages that carry the preview notice, and the preview
-records. In `links.json` only the 153 newly linked entries change, and the
-per-reading `counts` gain a `cone-reading` key.
+Two local builds of the `bbc90ac` application code, with and without the
+supporting readings, compare as follows. The supporting readings add 1,662
+files to the site, which grows from 629.8 MB to 738.3 MB; the preview zip grows
+from 52.6 MB to 60.6 MB (the workflow run's site has 738.3 MB and its zip
+60.6 MB). Every other difference is in the 492 target `links.json` files and
+their reader pages, `coverage.json`, `coverage.html`, the pages that carry the
+preview notice, and the preview records. In `links.json` only the 153 newly
+linked entries change, and the per-reading `counts` gain a `cone-reading` key;
+in the 12 readings with such a link the `unresolved` count falls, and in 3 of
+them the `source` count as well.
 
 These readings are unsigned observations from one CI run. A link to a
 supporting lemma reading does not mean that the citation is explained or
@@ -515,10 +563,11 @@ checked, and no English fidelity is claimed.
 - **Level 1 only.** The plan covers constants that the 492 retained readings
   cite. Lemmas cited by cone readings form level 2. Level 2 is planned from level-1
   readings by the same rules, after level-1 results exist.
-- **Pilot only.** One workflow run (39373979494) read the 8 pilot shards; 1,571
-  planned lemmas are outside its scope. No Lean toolchain ran locally. Apart from
-  that run's artifacts, the planner, worker, loader and catalog code are tested
-  only with synthetic fixtures.
+- **Pilot only.** Two workflow runs (39373979494 and 39456773610) read the 8
+  pilot shards; 1,571 planned lemmas are outside the pilot scope. No Lean
+  toolchain ran locally. Apart from the artifacts of the first run, the
+  planner, worker, loader and catalog code are tested only with synthetic
+  fixtures.
 - **Name-based exclusions.** The constructor and compiler rules, and the
   instance hint, are conventions. The exporter does not record whether an
   accepted constant is a theorem, a proof-valued definition, an instance or a
@@ -527,7 +576,9 @@ checked, and no English fidelity is claimed.
 - **Private names.** The two private lemmas cannot be addressed by the current
   exporter.
 - **External inputs.** The source artifact of run 38822475057 expires on
-  2026-11-14. Outside the cache's branch scope, each shard spends a few minutes
+  2026-11-14, and the artifacts of pilot runs 39373979494 and 39456773610,
+  which hold the 151 pilot readings, expire on 2027-01-18. Outside the cache's
+  branch scope, each shard spends a few minutes
   re-creating the dependency tree. Route `resolve` relies on `lake update`
   resolving to the pinned revisions. The preflight checks this once per run, and
   every shard checks it again with the environment audit. In the pilot run both

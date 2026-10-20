@@ -124,8 +124,13 @@ the last update in the run listing.
 The merged 0.4.2 reader stack moved the corpus from 7,587 gap steps
 (`source-math-en/0.4.1`) to 7,635 gap steps (`source-math-en/0.4.2`), on the same
 492 snapshots (corpus SHA-256 `9b34751d…`). See
-`benchmarks/reading-kpis/baseline-source-math-en-0.4.1.json` and
-`benchmarks/reading-kpis/current.json`.
+`benchmarks/reading-kpis/baseline-source-math-en-0.4.1.json` and the 0.4.2
+measurement, which is `benchmarks/reading-kpis/current.json` as committed at
+04df977 (`git show 04df977:benchmarks/reading-kpis/current.json`). Later
+renderers changed these counts again: under `source-math-en/0.7.0` (commit
+`bbc90ac`), `current.json` records 13,608 displayed steps and 5,014 gap steps,
+and docs/READING_QUALITY.md describes each change. The measurements below
+compare 0.4.1 with 0.4.2 only.
 
 | Measure | 0.4.1 | 0.4.2 |
 | --- | ---: | ---: |
@@ -181,8 +186,11 @@ following.
    recorded per proof.
 3. **Corpus effect.** `reading-kpis` reports the number of displayed steps whose
    text comes from a certified grammar; this measure does not exist yet. On the
-   pinned corpus the count is at least 1% of display steps (183 of 18,275), and
-   `gap_frame_share` does not increase.
+   pinned corpus the count is at least 1% of the display steps that the
+   renderer current at the decision reports, and `gap_frame_share` does not
+   increase. The denominator changes with the renderer: the threshold was 183
+   of 18,275 display steps under `source-math-en/0.4.2` and is 137 of 13,608
+   under `source-math-en/0.7.0`.
 4. **Unchanged boundaries.** Unsupported constructs fail closed. A certificate
    does not extend to surrounding prose, and no reading is relabelled as
    certified without its gate.
