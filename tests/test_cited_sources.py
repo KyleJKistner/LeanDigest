@@ -12,14 +12,15 @@ from pathlib import Path
 import random
 import re
 import shutil
+from types import SimpleNamespace
 
 import pytest
 
 from proofreader.catalog_audit import audit
 from proofreader.catalog_inputs import PIN
-from proofreader.declaration_index import (ATOM, CAPS, CHAR, LINE_BREAKS, RAW, _header, build_index, closure, header_imports,
-                                           mask, reachable_headers, scan, searched_components, select_dependencies,
-                                           walk_imports)
+from proofreader.declaration_index import (ATOM, CAPS, CHAR, ID_REST, LINE_BREAKS, RAW, Unterminated, _header, build_index,
+                                           citation_links, closure, header_imports, mask, reachable_headers, reading_map,
+                                           scan, searched_components, select_dependencies, walk_imports)
 from proofreader.finding_catalog import build, source_name
 from proofreader.model import digest
 
@@ -64,11 +65,15 @@ def walk_and_select(tree=TREE, cites=CITES, caps=None, statuses=None, log=None, 
 @pytest.mark.parametrize('source,imports', [
     ('import A\nimport B.C\n', ['A', 'B.C']),
     # In a module-system file only a public, non-meta import reaches every importer's environment.
-    ('/- copyright /- nested -/ -/\nmodule\n\npublic import A -- why\nmeta import B\nimport all C\n\nnamespace X\nimport D\n', ['A']),
+    ('/- copyright /- nested -/ -/\nmodule\n\npublic import A -- why\nmeta import B\nimport all C\n\nnamespace X\n', ['A']),
     ('module\npublic import A\nimport B\npublic meta import C\npublic import all D\n', ['A', 'D']),
     ('import A\nimport all B\n', ['A', 'B']),
     ('import\n  A\ntheorem t : True := trivial\n', ['A']),
     ('prelude\nimport Init.Core\n', ['Init.Core']),
+    # Lean's identifier characters include the letter-like block (U+2118 here), unlike Python's \w.
+    ('import OAI.Foo\u2118\nimport Lp\'\nimport Kappa\u2081\n', ['OAI.Foo\u2118', "Lp'", 'Kappa\u2081']),
+    # A section header of a module-system file may follow the imports.
+    ('module\npublic import A\npublic section\ntheorem t : True := trivial\nend\n', ['A']),
     ('theorem t : True := trivial\n', []),
     ('', []),
 ])
@@ -81,6 +86,25 @@ def test_header_imports_agree_with_scan(source, imports):
 def test_header_imports_never_guess_a_dependency(source):
     with pytest.raises(ValueError):
         header_imports(source)
+
+
+@pytest.mark.parametrize('source', [
+    'import OAI.Foo\u0434\ntheorem t : True := trivial\n',  # Cyrillic is not a Lean identifier character.
+    'import OAI.Foo.\n',
+])
+def test_scan_never_records_a_truncated_import(source):
+    """Synthetic: scan() once read `import OAI.Foo<letter-like>` as an import of OAI.Foo."""
+    for reader in (header_imports, lambda s: scan(s, 'M')):
+        with pytest.raises(ValueError):
+            reader(source)
+
+
+def test_an_import_after_the_header_is_refused_by_scan():
+    # Lean stops at an import command after the header with an error; the header itself still reads.
+    source = 'module\npublic import A\nnamespace X\nimport D\n'
+    assert header_imports(source) == ['A']
+    with pytest.raises(ValueError, match='Import after the module header'):
+        scan(source, 'M')
 
 
 def repository_lean_files():
@@ -104,45 +128,76 @@ def test_header_reader_and_atom_prefilter_on_repository_files():
     assert checked > 100
 
 
-# The optimised mask must equal the previous character-by-character implementation.
+# The optimised mask must equal a character-by-character reading of the same Lean lexer rules.
 
 
 def reference_mask(source):
-    """The previous mask() implementation, kept verbatim as the test oracle."""
-    def ident_char(c): return c.isalnum() or c in "_'!?"
-    out = list(source); n = len(source); i = 0
+    """Test oracle: Lean 4's comment, literal and escape rules (Parser/Basic.lean,
+    Parser/StrInterpolation.lean, v4.34.1) applied one character at a time.
+    Every string literal is read both plainly and as an interpolated string."""
+    n = len(source); rest = re.compile('[' + ID_REST + ']')
+    def comment(i):  # finishCommentBlock starts after the third character.
+        depth, j = 1, i + 3
+        while depth:
+            if j >= n: raise Unterminated('comment')
+            if source.startswith('-/', j): depth -= 1; j += 2
+            elif source.startswith('/-', j): depth += 1; j += 2
+            else: j += 1
+        return j
+    def plain(i):
+        j = i + 1
+        while j < n and source[j] != '"': j += 2 if source[j] == '\\' else 1
+        if j >= n: raise Unterminated('string')
+        return j + 1
+    def interpolated(i):
+        j = i + 1
+        while j < n:
+            if source[j] == '"': return j + 1
+            j = term(j + 1) + 1 if source[j] == '{' else j + (2 if source[j] == '\\' else 1)
+        raise Unterminated('string')
+    def string(i):
+        end = plain(i)
+        try: other = interpolated(i)
+        except Unterminated: return end
+        if other != end: raise ValueError('ambiguous string')
+        return end
+    def item(j):
+        if source.startswith('--', j):
+            k = source.find('\n', j); return n if k < 0 else k
+        if source.startswith('/-', j): return comment(j)
+        if source[j] == '"': return string(j)
+        if source[j] == '«':
+            k = j + 1
+            while k < n and source[k] != '»': k += 1
+            if k >= n: raise Unterminated('escape')
+            return k + 1
+        if j and rest.match(source[j - 1]): return None  # Not the start of a token.
+        if source[j] == 'r' and (m := RAW.match(source, j)):
+            k = m.end()
+            while not source.startswith('"' + m[1], k):
+                if k >= n: raise Unterminated('raw')
+                k += 1
+            return k + 1 + len(m[1])
+        if source[j] == "'" and (m := CHAR.match(source, j)): return m.end()
+        return None
+    def term(j):
+        braces = 0
+        while j < n:
+            k = item(j)
+            if k is not None: j = k; continue
+            if source[j] == '}' and not braces: return j
+            braces += {'{': 1, '}': -1}.get(source[j], 0); j += 1
+        raise Unterminated('interpolation')
+    out = list(source); j = 0
     def blank(a, b):
         for k in range(a, b):
             if out[k] not in LINE_BREAKS: out[k] = ' '
-    while i < n:
-        c = source[i]
-        if source.startswith('--', i):
-            j = source.find('\n', i); j = n if j < 0 else j
-            blank(i, j); i = j
-        elif source.startswith('/-', i):
-            depth, j = 1, i+2
-            while depth:
-                a, b = source.find('/-', j), source.find('-/', j)
-                if b < 0: raise ValueError('Unterminated block comment')
-                if 0 <= a < b: depth, j = depth+1, a+2
-                else: depth, j = depth-1, b+2
-            blank(i, j); i = j
-        elif c == '"' or (c == 'r' and (i == 0 or not ident_char(source[i-1])) and RAW.match(source, i)):
-            if c == 'r':
-                m = RAW.match(source, i); end = '"'+m[1]
-                j = source.find(end, m.end())
-                if j < 0: raise ValueError('Unterminated raw string literal')
-                j += len(end)
-            else:
-                j = i+1
-                while j < n and source[j] != '"': j += 2 if source[j] == '\\' else 1
-                if j >= n: raise ValueError('Unterminated string literal')
-                j += 1
-            blank(i, j); i = j
-        elif c == "'" and (i == 0 or not ident_char(source[i-1])) and CHAR.match(source, i):
-            j = CHAR.match(source, i).end(); blank(i, j); i = j
-        else:
-            i += 1
+    while j < n:
+        k = item(j)
+        if k is None: j += 1; continue
+        if source[j] == '«': blank(j + 1, k - 1)
+        else: blank(j, k)
+        j = k
     text = ''.join(out)
     for m in list(re.finditer(r'`\(', text)):
         if out[m.start()] != '`': continue
@@ -157,21 +212,24 @@ def reference_mask(source):
 def outcome(f, text):
     try:
         return f(text)
-    except ValueError as exc:
-        return ('error', str(exc))
+    except Unterminated:
+        return 'unterminated'
+    except ValueError:
+        return 'refused'
 
 
-def test_mask_matches_the_previous_implementation_on_random_text():
-    """Synthetic fuzz over the characters that open and close comments and literals."""
-    pieces = ['--', '/-', '-/', '"', '\\', "'", 'r"', 'r#"', '"#', '`(', '(', ')', 'a', 'r', '1', ' ', '\n', '\r\n',
-              ' ', '\x0c', 'λ', 'é', "x'", '?', 'theorem t', '\\x41', "'\\''", "'a'"]
+def test_mask_matches_the_reference_reading_on_random_text():
+    """Synthetic fuzz over the characters that open and close comments, literals and escapes."""
+    pieces = ['--', '/-', '-/', '/--/', '/-!', '"', '\\', "'", 'r"', 'r#"', '"#', '`(', '(', ')', '{', '}', 's!"', '«', '»',
+              'a', 'r', '1', ' ', '\n', '\r\n', ' ', '\x0c', 'λ', 'é', '℘', 'д',
+              "x'", '?', 'theorem t', '\\x41', "'\\''", "'a'", "'\\u0041'"]
     rng = random.Random(20261020)
-    for _ in range(4000):
+    for _ in range(6000):
         text = ''.join(rng.choice(pieces) for _ in range(rng.randrange(1, 30)))
         assert outcome(mask, text) == outcome(reference_mask, text), text
 
 
-def test_mask_matches_the_previous_implementation_on_repository_files():
+def test_mask_matches_the_reference_reading_on_repository_files():
     for p in repository_lean_files():
         text = p.read_text(encoding='utf-8')
         assert outcome(mask, text) == outcome(reference_mask, text), p
@@ -346,6 +404,75 @@ def test_the_catalog_build_rejects_an_invalid_cap_before_writing_output(tmp_path
     with pytest.raises(ValueError, match='cited dependency cap'):
         make_site(tmp_path, caps={'max_selected_modules': -1})
     assert not (tmp_path/'site').exists()
+
+
+# Lexical misreadings that once became wrong source links (synthetic fixtures from the links audit)
+
+
+def cite(names, module='OAI.Main', theorem='OAI.main'):
+    return SimpleNamespace(declarations=[SimpleNamespace(name=theorem, dependencies=list(names), steps=[])])
+
+
+def links_after_walk(tree, roots, cited, page=lambda m: 'a'*24+'.html'):
+    """The catalog's sequence: walk, select, index the bundle with the recorded headers, link."""
+    known = {m: tree[m] for m in roots}
+    base = build_index(known)
+    walk = walk_imports(sorted(roots), known, loader(tree), set(cited), failed_known=base['failed_modules'])
+    selection = select_dependencies(walk, {m: set(cited) for m in roots}, base)
+    bundle = {**known, **{m: tree[m] for m in selection['modules']}}
+    index = build_index(bundle, reachable_headers(walk['headers'], sorted(roots), set(bundle)))
+    links = {m: citation_links(cite(cited, m), m, index, reading_map({}), page)['names'] for m in roots}
+    return walk, selection, links
+
+
+@pytest.mark.parametrize('phantom', [
+    'namespace OAI\n/--/ theorem Foo.bar : True := trivial -/\ntheorem other : True := trivial\nend OAI\n',
+    'namespace OAI\ndef msg : String := s!"{"theorem Foo.bar : True"}"\nend OAI\n',
+    'namespace OAI\ntheorem other : True := trivial\n#exit\ntheorem Foo.bar : True := trivial\nend OAI\n',
+    # An escaped identifier part may span lines: «x … y» is one name.
+    'namespace OAI\ndef «x\ntheorem Foo.bar : True := trivial\ny» := 1\nend OAI\n',
+])
+def test_text_that_lean_does_not_elaborate_never_supplies_a_source_link(phantom):
+    # Lean declares OAI.Foo.bar only as the field projection of OAI.X; the index never records projections.
+    tree = {'OAI.Main': 'import OAI.X\nimport OAI.Y\n\ntheorem OAI.main : True := trivial\n',
+            'OAI.X': 'namespace OAI\nstructure Foo where\n  bar : True\nend OAI\n', 'OAI.Y': phantom}
+    walk, selection, links = links_after_walk(tree, ['OAI.Main'], ['OAI.Foo.bar'])
+    assert 'OAI.Foo.bar' not in walk['declares'] and not selection['modules']
+    assert links['OAI.Main']['OAI.Foo.bar']['status'] == 'unresolved'
+
+
+def test_an_import_of_a_letter_like_module_name_is_not_read_as_a_shorter_one():
+    # U+2118 is a Lean identifier character: OAI.Main imports OAI.Foo<U+2118>, a missing file, not OAI.Foo.
+    tree = {'OAI.Main': 'import OAI.Foo℘\n\ntheorem OAI.main : True := trivial\n',
+            'OAI.Foo': 'namespace OAI\ntheorem lemma1 : True := trivial\nend OAI\n'}
+    index = build_index(tree)
+    assert index['imports']['OAI.Main'] == ['OAI.Foo℘']
+    assert citation_links(cite(['OAI.lemma1']), 'OAI.Main', index, reading_map({}), source_name)['names'] == {
+        'OAI.lemma1': {'status': 'unresolved', 'reason': 'not-visibly-imported'}}
+    walk = walk_imports(['OAI.Main'], {'OAI.Main': tree['OAI.Main']}, loader(tree), {'OAI.lemma1'})
+    assert walk['unused'] == {'OAI.Foo℘': 'missing-file'}
+
+
+def test_a_letter_like_namespace_is_not_truncated_into_another_constant():
+    # X declares OAI.Weierstrass<U+2118>.bar; header-only Y declares OAI.Weierstrass.bar, which Main cites.
+    x = 'namespace OAI\nnamespace Weierstrass℘\ntheorem bar : True := trivial\nend Weierstrass℘\nend OAI\n'
+    main = 'import OAI.X\nimport OAI.Y\n\ntheorem OAI.main : True := trivial\n'
+    index = build_index({'OAI.Main': main, 'OAI.X': x}, {'OAI.Y': []})
+    assert set(index['names']) == {'OAI.main', 'OAI.Weierstrass℘.bar'}
+    assert citation_links(cite(['OAI.Weierstrass.bar']), 'OAI.Main', index, reading_map({}), source_name)['names'] == {
+        'OAI.Weierstrass.bar': {'status': 'unresolved', 'reason': 'not-in-declaration-index'}}
+
+
+def test_a_default_private_module_system_declaration_is_found_under_its_mangled_name():
+    # In a `module` file, a declaration outside `public section` without `public` is private (Lean 4.34.1).
+    y = 'module\nnamespace OAI\ntheorem hidden : True := trivial\npublic section\ntheorem shown : True := trivial\nend\nend OAI\n'
+    tree = {'OAI.Main': 'import OAI.Y\n\ntheorem OAI.main : True := trivial\n', 'OAI.Y': y}
+    cited = ['_private.OAI.Y.0.OAI.hidden', 'OAI.shown', 'OAI.hidden']
+    walk, selection, links = links_after_walk(tree, ['OAI.Main'], cited)
+    assert set(walk['declares']) == {'_private.OAI.Y.0.OAI.hidden', 'OAI.shown'} and list(selection['modules']) == ['OAI.Y']
+    found = links['OAI.Main']
+    assert (found['_private.OAI.Y.0.OAI.hidden']['line'], found['OAI.shown']['line']) == (3, 5)
+    assert found['OAI.hidden'] == {'status': 'unresolved', 'reason': 'not-in-declaration-index'}
 
 
 def test_pruned_header_records_keep_every_reachable_bundled_module():

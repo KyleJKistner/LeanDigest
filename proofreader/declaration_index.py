@@ -7,6 +7,13 @@ constructors, ``to_additive`` and ``_proof_`` auxiliaries) and quoted
 identifiers are reported, never linked. A module whose scopes or brackets do
 not balance contributes no names at all.
 
+Comments, literals and identifiers are read by the rules of the Lean 4 lexer of
+the pinned toolchain (v4.34.1: ``Init/Meta/Defs.lean``, ``Parser/Basic.lean``,
+``Parser/StrInterpolation.lean``). Where the lexical reading depends on the
+grammar, as when a string literal ends at a different place if Lean reads it as
+an interpolated string, or on commands the reader does not model, such as
+``with_weak_namespace``, the module raises ValueError and contributes no names.
+
 A citation link is attached only when the cited Lean name provably denotes the
 target: the target module is the citing module or is reachable from it through
 recorded import headers, and it is the only indexed declaration of that name so
@@ -44,25 +51,48 @@ SCHEMA = 'leanglish.declaration-index/v2'
 LINKS_SCHEMA = 'leanglish.citation-links/v1'
 DEPENDENCY_SCHEMA = 'leanglish.cited-dependency-sources/v1'
 DECLARATIONS = frozenset('theorem lemma def abbrev instance structure class inductive opaque axiom'.split())
-MODIFIERS = frozenset('private protected noncomputable partial unsafe nonrec scoped local'.split())
+# Declaration modifiers; `public` and `meta` also prefix module-system imports and sections.
+MODIFIERS = frozenset('private protected public noncomputable meta partial unsafe nonrec scoped local'.split())
+# Commands that set the namespace of the command they contain; a module that uses one is not indexed.
+UNSUPPORTED = frozenset(('with_weak_namespace',))
 # Tokens that are never a section, namespace or declaration name.
-KEYWORDS = DECLARATIONS | MODIFIERS | frozenset((
+KEYWORDS = DECLARATIONS | MODIFIERS | UNSUPPORTED | frozenset((
     'namespace section end mutual example deriving import open export variable universe in where '
     'attribute set_option notation infix infixl infixr prefix postfix macro macro_rules syntax '
     'elab elab_rules initialize omit include alias irreducible_def by fun').split())
 LINE_BREAKS = '\n\r\x0b\x0c\x1c\x1d\x1e\x85\u2028\u2029'
 OPEN, CLOSE = '([{⟨⦃', ')]}⟩⦄'
-_ATOM = r"(?:«[^»\n]*»|(?![λΠΣ])[^\W\d][\w'!?]*)"
+# Lean's identifier characters (Init/Meta/Defs.lean, v4.34.1). isIdFirst: an ASCII
+# letter, '_' or isLetterLike; isIdRest adds ASCII digits, ', !, ? and
+# isSubScriptAlnum. Python's \w differs in both directions (it rejects ℘ and accepts
+# Cyrillic letters), so it never decides where a Lean name ends.
+LETTER_LIKE = ('\u03b1-\u03ba\u03bc-\u03c9\u0391-\u039f\u03a1-\u03a2\u03a4-\u03a9\u03ca-\u03fb\u1f00-\u1ffe'
+               '\u2100-\u214f\U0001d49c-\U0001d59f\u00c0-\u00d6\u00d8-\u00f6\u00f8-\u00ff\u0100-\u017f')
+ID_FIRST = 'A-Za-z_'+LETTER_LIKE
+ID_REST = ID_FIRST+"0-9'!?\u2080-\u2089\u2090-\u209c\u1d62-\u1d6a\u2c7c"
+_ID = '['+ID_FIRST+']['+ID_REST+']*'
+# An escaped part «…» ends at the first », as in Lean; mask() blanks its inside.
+_ATOM = '(?:«[^»]*»|'+_ID+')'
 IDENT = re.compile(_ATOM+r'(?:\.'+_ATOM+r')*')
 TOKEN = re.compile(r'@\[|['+re.escape(OPEN+CLOSE)+r']|'+IDENT.pattern+r'|\S')
-CHAR = re.compile(r"'(?:\\(?:x[0-9a-fA-F]{2}|u\{[0-9a-fA-F]{1,6}\}|.)|[^\\'\n])'")
+# A character literal: one character or one escape (\\ \" \' \r \n \t, \xHH, \uHHHH).
+CHAR = re.compile(r"""'(?:\\(?:[\\"'rnt]|x[0-9a-fA-F]{2}|u[0-9a-fA-F]{4})|[^\\'])'""")
 RAW = re.compile(r'r(#*)"')
-# mask() only acts where a comment, string, raw string or character literal can open.
-SPECIAL = re.compile(r"""--|/-|"|(?<![\w'!?])(?:r(?=#*")|')""")
+# mask() acts only where a comment, a string, raw string or character literal, or an
+# escaped identifier part can open. A raw string or character literal opens only at
+# the start of a token, never right after an identifier character.
+SPECIAL = re.compile('--|/-|"|«|(?<!['+ID_REST+r'])(?:r(?=#*")|' "')")
+# Inside the braces of an interpolated string the braces also count.
+SPECIAL_IN_TERM = re.compile(SPECIAL.pattern+'|[{}]')
 STRING_BODY = re.compile(r'(?:[^"\\]|\\[\s\S])*"')
+INTERPOLATED = re.compile(r'[\\"{]')
+MAX_INTERPOLATION_DEPTH = 32
 KEEP_BREAKS = re.compile('[^'+re.escape(LINE_BREAKS)+']')
 # A declaration name must end at a binder, a colon, a universe list or whitespace.
 NAME_END = re.compile(r'(?:\s|[(\[{⦃:]|\.\{|\Z)')
+# A namespace, section or end name, and an imported module name, end at whitespace.
+WORD_END = re.compile(r'\s|\Z')
+ID_REST_CHAR = re.compile('['+ID_REST+']')
 READING_HREF, SOURCE_HREF = '../{}/reader.html', '../../sources/{}#L{}'
 # Reader pages live in proofs/<id>/ (documented targets) or cone/<id>/ (supporting
 # lemmas). A target link from a target page keeps its published form; every other
@@ -84,9 +114,9 @@ HEADER_WORDS = frozenset(('prelude', 'module', 'public', 'meta'))
 PRIVATE = re.compile(r'_private\.(?:[^.]+\.)+?0\.(.+)\Z')
 # Module names that map to a file path without escaping: unquoted identifier
 # components (Lean allows file names such as Kappa₁ and Lp'), never a separator.
-MODULE_NAME = re.compile(r"(?![λΠΣ])[^\W\d][\w'!?]*(?:\.(?![λΠΣ])[^\W\d][\w'!?]*)*\Z")
+MODULE_NAME = re.compile(_ID+r'(?:\.'+_ID+r')*\Z')
 # An unquoted identifier atom. Each component of a name that scan() indexes is one.
-ATOM = re.compile(r"(?![λΠΣ])[^\W\d][\w'!?]*")
+ATOM = re.compile(_ID)
 TYPE_KINDS = frozenset(('structure', 'class', 'inductive', 'class inductive'))
 UNUSED = ('missing-file', 'unverified-source', 'unreadable-source', 'unreadable-header',
           'unsupported-module-name', 'path-outside-tree', 'not-visited-cap')
@@ -95,45 +125,109 @@ CAPS = {'max_visited_modules': 100_000, 'max_read_bytes': 1_200_000_000, 'max_se
         'max_selected_modules': 3_000, 'max_selected_bytes': 40_000_000}
 
 
+class Unterminated(ValueError):
+    """No reading of the text closes a comment, literal or identifier escape."""
+
+
+def _block_comment_end(source: str, i: int, error: str) -> int:
+    """End of the block comment opening at ``i``. Lean starts the nested scan after the
+    third character, the ``-`` or ``!`` of a doc comment, so ``/--/`` does not close."""
+    depth, j = 1, i+3
+    while depth:
+        a, b = source.find('/-', j), source.find('-/', j)
+        if b < 0: raise Unterminated(error)
+        depth, j = (depth+1, a+2) if 0 <= a < b else (depth-1, b+2)
+    return j
+
+
 def mask(source: str) -> str:
-    """Blank comments, string and character literals, then syntax quotations.
+    """Blank comments, string and character literals and escaped identifier parts, then syntax quotations.
 
     Offsets and every line break are preserved, so positions in the result are
-    positions in the source. Unterminated comments or strings raise ValueError.
+    positions in the source. Unterminated comments, literals or escapes raise
+    ValueError. So does a string literal that ends at a different place when
+    Lean reads it as an interpolated string (``s!"{"a"}"``): which reading
+    applies depends on the grammar, so the reader does not choose. When only one
+    reading closes, that reading is used.
     """
-    n = len(source); i = last = 0; pieces: list[str] = []
+    n = len(source); ends: dict[int, int | ValueError] = {}
+
+    def item(i: int, depth: int) -> int | None:
+        """End of the comment, literal or escape that opens at ``i``, or None."""
+        if source.startswith('--', i):
+            j = source.find('\n', i); return n if j < 0 else j
+        if source.startswith('/-', i): return _block_comment_end(source, i, 'Unterminated block comment')
+        c = source[i]
+        if c == '"': return string(i, depth)
+        if c == '«':
+            j = source.find('»', i+1)
+            if j < 0: raise Unterminated('Unterminated identifier escape')
+            return j+1
+        if c == 'r':
+            m = RAW.match(source, i); end = '"'+m[1]
+            j = source.find(end, m.end())
+            if j < 0: raise Unterminated('Unterminated raw string literal')
+            return j+len(end)
+        m = CHAR.match(source, i)
+        return m.end() if m else None
+
+    def code(i: int, depth: int, spans: list | None = None) -> int:
+        """Read code from ``i``: to the end of the text at depth 0, else to the '}' that
+        closes an interpolation, whose index is returned."""
+        braces, pattern = 0, SPECIAL_IN_TERM if depth else SPECIAL
+        while (m := pattern.search(source, i)) is not None:
+            i = m.start(); c = source[i]
+            if depth and c in '{}':
+                if c == '}' and not braces: return i
+                braces += 1 if c == '{' else -1; i += 1; continue
+            j = item(i, depth)
+            if j is None: i += 1; continue
+            if spans is not None: spans.append((i, j))
+            i = j
+        if depth: raise Unterminated('Unterminated string interpolation')
+        return n
+
+    def string(i: int, depth: int) -> int:
+        if i not in ends:
+            try: ends[i] = plain_or_interpolated(i, depth)
+            except ValueError as exc: ends[i] = exc
+        if isinstance(ends[i], ValueError): raise ends[i]
+        return ends[i]
+
+    def plain_or_interpolated(i: int, depth: int) -> int:
+        # Lean reads a plain string literal (strLitFnAux) or, where the grammar asks for
+        # one, an interpolated string (interpolatedStrFn), whose {…} hold terms.
+        body = STRING_BODY.match(source, i+1)
+        if body is None: raise Unterminated('Unterminated string literal')
+        end = body.end()
+        if '{' not in source[i+1:end]: return end
+        if depth >= MAX_INTERPOLATION_DEPTH: raise ValueError('String interpolation nested too deeply')
+        try:
+            other = interpolated(i, depth+1)
+        except Unterminated:
+            return end  # Only the plain reading closes.
+        if other != end: raise ValueError('A string literal ends at a different place when read as an interpolated string')
+        return end
+
+    def interpolated(i: int, depth: int) -> int:
+        j = i+1
+        while (m := INTERPOLATED.search(source, j)) is not None:
+            j = m.start()
+            if source[j] == '"': return j+1
+            if source[j] == '\\': j += 2; continue
+            j = code(j+1, depth)+1
+        raise Unterminated('Unterminated string literal')
+
+    spans: list[tuple[int, int]] = []
+    code(0, 0, spans)
+    pieces, last = [], 0
     def blank(text: str, a: int, b: int) -> None:
         nonlocal last
         pieces.extend((text[last:a], KEEP_BREAKS.sub(' ', text[a:b]))); last = b
-    # Jump between the only characters that can open a comment or literal.
-    while (m := SPECIAL.search(source, i)) is not None:
-        i = m.start(); c = source[i]
-        if source.startswith('--', i):
-            j = source.find('\n', i); j = n if j < 0 else j
-            blank(source, i, j); i = j
-        elif source.startswith('/-', i):
-            depth, j = 1, i+2
-            while depth:
-                a, b = source.find('/-', j), source.find('-/', j)
-                if b < 0: raise ValueError('Unterminated block comment')
-                if 0 <= a < b: depth, j = depth+1, a+2
-                else: depth, j = depth-1, b+2
-            blank(source, i, j); i = j
-        elif c in '"r':
-            if c == 'r':
-                m = RAW.match(source, i); end = '"'+m[1]
-                j = source.find(end, m.end())
-                if j < 0: raise ValueError('Unterminated raw string literal')
-                j += len(end)
-            else:
-                body = STRING_BODY.match(source, i+1)
-                if body is None: raise ValueError('Unterminated string literal')
-                j = body.end()
-            blank(source, i, j); i = j
-        elif (char := CHAR.match(source, i)) is not None:
-            j = char.end(); blank(source, i, j); i = j
-        else:
-            i += 1
+    for a, b in spans:
+        # An escaped identifier part keeps its guillemets, so a token still shows it is quoted.
+        if source[a] == '«': blank(source, a+1, b-1)
+        else: blank(source, a, b)
     text = ''.join(pieces)+source[last:]; pieces, last = [], 0
     # Syntax quotations can contain command keywords that declare nothing here.
     for m in re.finditer(r'`\(', text):
@@ -191,11 +285,7 @@ def _header(source: str) -> tuple[list[str], int, list[str]]:
             elif source.startswith('--', i):
                 j = source.find('\n', i); i = n if j < 0 else j
             elif source.startswith('/-', i):
-                depth, i = 1, i+2
-                while depth:
-                    a, b = source.find('/-', i), source.find('-/', i)
-                    if b < 0: raise ValueError('Unterminated block comment in the module header')
-                    depth, i = (depth+1, a+2) if 0 <= a < b else (depth-1, b+2)
+                i = _block_comment_end(source, i, 'Unterminated block comment in the module header')
             else: return i
         return i
     i = skip(0)
@@ -217,16 +307,32 @@ def _header(source: str) -> tuple[list[str], int, list[str]]:
 
 
 def scan(source: str, module: str) -> dict:
-    """Declarations and imports of one module. Raises ValueError on unbalanced scopes."""
+    """Declarations and imports of one module.
+
+    Raises ValueError on unbalanced scopes or brackets, an import that is not
+    one readable module name, an unsupported namespace command, and anything
+    mask() does not read without guessing. Lean reads nothing after ``#exit``,
+    so neither does scan(). In a module-system file (its header starts with
+    ``module``), a declaration outside ``public section`` without ``public`` is
+    private, as Lean's ``Visibility.isInferredPublic`` decides, and is recorded
+    under its mangled name.
+    """
     text = mask(source); line = _lines(source)
     toks = [(m.group(), m.start(), m.end()) for m in TOKEN.finditer(text)]
+    # A scope is (kind, name part, opened by `public section`).
     found, skipped, imports, scopes, stack, pending = [], [], [], [], [], []
-    header, prev, module_file, modifiers = True, None, False, set()
+    header, prev, module_file = True, None, False
     def same_line(k: int, i: int) -> bool:
         return k < len(toks) and line(toks[k][1]) == line(toks[i][1])
     i = 0
     while i < len(toks):
         t, start, end = toks[i]
+        if t == '#' and text.startswith('exit', end):
+            # Lean's #exit is a terminal command: nothing after it is parsed or elaborated.
+            if ID_REST_CHAR.match(text, end+4):  # A longer command name, which the reader does not know.
+                raise ValueError(f'Unrecognized command at line {line(start)}')
+            if stack: raise ValueError(f'#exit inside brackets at line {line(start)}')
+            break
         if t == '@[' or (len(t) == 1 and t in OPEN):
             stack.append(t); i += 1; continue
         if len(t) == 1 and t in CLOSE:
@@ -238,35 +344,46 @@ def scan(source: str, module: str) -> dict:
         if stack:
             i += 1; continue
         if header:
-            k = i+1+(i+1 < len(toks) and toks[i+1][0] == 'all')
-            if t == 'import' and k < len(toks) and _name(toks[k][0]):
-                if reexported(module_file, modifiers): imports.append(toks[k][0])
-                modifiers = set(); i = k+1; continue
+            if t == 'import':
+                k = i+1+(i+1 < len(toks) and toks[i+1][0] == 'all')
+                if not (k < len(toks) and _name(toks[k][0]) and WORD_END.match(text, toks[k][2])):
+                    raise ValueError(f'Unsupported import syntax at line {line(start)}')
+                if reexported(module_file, set(pending)): imports.append(toks[k][0])
+                pending, prev = [], t; i = k+1; continue
+            if t in {'module', 'prelude'}:
+                module_file = module_file or t == 'module'; prev = t; i += 1; continue
             if t not in HEADER_WORDS: header = False
-            elif t == 'module': module_file = True
-            elif t != 'prelude': modifiers.add(t)
         if t in KEYWORDS and start and text[start-1] in '.`':
             # A name literal (`instance) or dot notation (.structure, x.1.end) is a term, not a command.
             pending, prev = [], text[start-1]+t; i += 1; continue
+        if t in UNSUPPORTED:
+            raise ValueError(f'Unsupported namespace command {t} at line {line(start)}')
+        if t == 'import':
+            raise ValueError(f'Import after the module header at line {line(start)}')
         if t in MODIFIERS:
-            pending.append(t); prev = t; i += 1; continue
+            # `deriving noncomputable instance` derives an instance; it declares no name here.
+            pending.append(t); prev = prev if (prev, t) == ('deriving', 'noncomputable') else t; i += 1; continue
         if t == 'namespace':
-            if not _name(toks[i+1][0] if i+1 < len(toks) else None) or '_root_' in toks[i+1][0]:
+            name = toks[i+1] if i+1 < len(toks) else None
+            if name is None or not _name(name[0]) or '_root_' in name[0] or not WORD_END.match(text, name[2]):
                 raise ValueError(f'Unrecognized namespace at line {line(start)}')
-            scopes += [('namespace', part) for part in toks[i+1][0].split('.')]
+            scopes += [('namespace', part, False) for part in name[0].split('.')]
             pending, prev = [], t; i += 2; continue
         if t in {'section', 'end', 'mutual'}:
             named = t != 'mutual' and same_line(i+1, i) and _name(toks[i+1][0])
+            if named and not WORD_END.match(text, toks[i+1][2]):
+                raise ValueError(f'Unrecognized {t} name at line {line(start)}')
             parts = toks[i+1][0].split('.') if named else ['']
             if t == 'section':
-                scopes += [('section', part) for part in parts]
+                scopes += [('section', part, 'public' in pending) for part in parts]
             elif t == 'mutual':
-                scopes.append(('mutual', ''))
+                scopes.append(('mutual', '', False))
             elif not named and scopes and scopes[-1][0] == 'mutual':
                 scopes.pop()
             else:
                 closing = scopes[len(scopes)-len(parts):] if len(parts) <= len(scopes) else None
-                if not closing or [p for _, p in closing] != parts or any(k == 'mutual' for k, _ in closing) or (not named and closing[0][0] != 'section'):
+                if (not closing or [p for _, p, _ in closing] != parts or any(k == 'mutual' for k, _, _ in closing)
+                        or (not named and closing[0][0] != 'section')):
                     raise ValueError(f'Unmatched end at line {line(start)}')
                 del scopes[len(scopes)-len(parts):]
             pending, prev = [], t; i += 2 if named else 1; continue
@@ -282,11 +399,15 @@ def scan(source: str, module: str) -> dict:
             name = toks[j][0] if j < len(toks) else None
             row = {'module': module, 'line': line(start), 'kind': kind}
             if _name(name) and NAME_END.match(text, toks[j][2]):
-                namespace = '.'.join(p for k, p in scopes if k == 'namespace')
+                namespace = '.'.join(p for k, p, _ in scopes if k == 'namespace')
                 full = name[7:] if name.startswith('_root_.') else (namespace+'.'+name if namespace else name)
-                if 'private' in pending:
+                # Visibility.isInferredPublic: outside a public section of a module-system
+                # file only `public` exports a name; elsewhere only `private` hides one.
+                private = 'private' in pending or (module_file and 'public' not in pending
+                                                   and not any(p for _, _, p in scopes))
+                if private:
                     full = '_private.'+module+'.0.'+full
-                found.append({**row, 'name': full, 'private': 'private' in pending})
+                found.append({**row, 'name': full, 'private': private})
             else:
                 anonymous = t == 'instance' and (name in {':', '[', '{', '(', '⦃', 'where'} or name is None)
                 reason = 'anonymous-instance' if anonymous else 'quoted-identifier' if name and '«' in name else 'unrecognized-header'
@@ -375,6 +496,14 @@ def citation_links(document, module: str, index: dict, readings: dict[str, list[
     documented-target reading, then a visible supporting lemma reading, then a
     source line. ``here`` is the directory of the citing page: ``proofs`` or
     ``cone`` (a supporting lemma reading, whose ``module`` is its environment).
+
+    A link's ``basis`` says how the citing module reaches the link's ``module``:
+    the module whose environment fixes the constant. For a source line that is the
+    declaring module; for a reading it is the reading's solution module, or the
+    environment module of a supporting lemma reading, which may import the
+    declaring module. The ``source`` entry of a reading link, present when the
+    index locates the one visible declaration, carries the declaring module's
+    own ``basis``.
     """
     if here not in READING_DIRECTORIES: raise ValueError('Unknown reading directory')
     reach = closure(index, module); own = {d.name for d in document.declarations}
@@ -392,7 +521,7 @@ def citation_links(document, module: str, index: dict, readings: dict[str, list[
         entries = [index['names'][name]] if name in index['names'] else index['ambiguous'].get(name, [])
         visible = [e for e in entries if e['module'] in reach]
         source = ({'href': SOURCE_HREF.format(source_page(visible[0]['module']), visible[0]['line']),
-                   'module': visible[0]['module'], 'line': visible[0]['line']}
+                   'module': visible[0]['module'], 'line': visible[0]['line'], 'basis': basis(visible[0]['module'])}
                   if len(visible) == 1 else None)
         if targets:
             _, m, ident = targets[0]
@@ -403,7 +532,7 @@ def citation_links(document, module: str, index: dict, readings: dict[str, list[
             names[name] = {'status': 'reading', 'href': CONE_HREF.format(ident), 'module': m,
                            'basis': basis(m), 'denominator': CONE_DENOMINATOR, **({'source': source} if source else {})}
         elif source:
-            names[name] = {'status': 'source', **source, 'basis': basis(source['module'])}
+            names[name] = {'status': 'source', **source}
         else:
             # State only what the bundle shows: a known but unreachable target comes
             # before name-shape guesses, and "not indexed" is not "not declared".
