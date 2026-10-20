@@ -487,8 +487,8 @@ gave the following.
 | Evidence files byte-identical to the shard artifacts | 755 |
 
 Every one of the 153 citing pairs is in the environment module of the cited
-lemma, so the `same-module` rule decides all of them. The supporting readings
-cite no target reading, and 6 of their citations link only to a source line.
+lemma, so the `same-module` rule decides all of them. No citation in a
+supporting reading links to a target reading, and 6 link only to a source line.
 
 The run used application commit `171ab5e` with a clean tracked tree. The
 reconciled outcomes equal the campaign summary. The static audit passed and
@@ -498,11 +498,13 @@ page's supporting lemma list, a supporting lemma reader page and a target
 reader's link to it. The target readings' gap steps, frames inside gaps and gap
 counts by rule still equal `benchmarks/reading-kpis/current.json`.
 
-The supporting readings add 1,662 files to the site, which grows from 624.2 MB to
-731.4 MB; the preview zip grows from 52.1 MB to 60.0 MB. Every other change is in the 492 target `links.json` files and their
-reader pages, the finding pages, the coverage page and the preview records. In
-`links.json` only the 153 newly linked entries change, and the per-reading
-`counts` gain a `cone-reading` key.
+The supporting readings add 1,662 files to the site, which grows from 624.2 MB
+to 731.4 MB; the preview zip grows from 52.1 MB to 60.0 MB. Compared with a
+preview of the same application code without them, every other difference is in
+the 492 target `links.json` files and their reader pages, `coverage.json`,
+`coverage.html`, the pages that carry the preview notice, and the preview
+records. In `links.json` only the 153 newly linked entries change, and the
+per-reading `counts` gain a `cone-reading` key.
 
 These readings are unsigned observations from one CI run. A link to a
 supporting lemma reading does not mean that the citation is explained or
