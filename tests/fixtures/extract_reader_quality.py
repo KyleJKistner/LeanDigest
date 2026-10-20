@@ -54,6 +54,17 @@ FIXTURES = [
     ('applied_projection', '380d53f06e20517c2d1f4c4b', 10),
     ('local_instance', '3a43803ef4ef28944eac9eb2', 44),
     ('nonempty_construction', '9d371e576d1c015cba0577cc', 2),
+    # Added for source-math-en/0.7.0.
+    ('scope_conclusions', 'fc83807a73831f2cd1f4ada2', 26),
+    ('scope_substitution', 'bc972fd76d6c038d2fc02f87', 9),
+    ('structure_constructor', '596fb7fd45ee28847ae3699f', 82),
+    ('forward_equivalence_unfolded', '6bfcd5b628744719dae2584a', 31),
+    ('assumption_restatement', '3812a4e0fc0b0ca282d9fcd5', 8),
+    ('induction_unfolded_base', '7f424240829ae53312ebe76f', 10),
+    ('induction_checked', '041ad1b2c7d69a9a62c10c7f', 44),
+    ('calculation_unchecked', '9b66141f700e925b4838f704', 61),
+    ('choice_unchecked', '459e6c5668380927d515a988', 15),
+    ('definition_automatic_name', 'fece2b389f10d25f22a87911', 26),
 ]
 
 

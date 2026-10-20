@@ -31,7 +31,8 @@ def owner(n, d, frame):
 
 
 def owned(step):
-    return [int(x[1:]) for x in step.term_id.split(',')]
+    # A step that only nests the displayed proof of one premise (rule subproof) owns no frame.
+    return [int(x[1:]) for x in step.term_id.split(',')] if step.term_id else []
 
 
 def real(name):
@@ -48,11 +49,15 @@ def synthetic(node, theorem='Synthetic.readerQuality'):
                      context=deepcopy(context), children=[], premises=[], objects=list(node.get('objects', [])),
                      budget_cut=node.get('cut', False))
         frames.append(frame)
-        for key in ('binder', 'domain'):
+        for key in ('binder', 'domain', 'value'):
             if key in node:
                 frame[key] = node[key]
         if 'body' in node:
-            frame['children'].append(visit(node['body'], path+[1], context+[dict(name=node['binder'], type=node['domain'])]))
+            # A have's proof is at [1] and its body at [2]; a definition's body is at [2].
+            if node['role'] == 'have':
+                frame['children'].append(visit(node['proof'], path+[1], context))
+            suffix = [2] if node['role'] in {'have', 'define'} else [1]
+            frame['children'].append(visit(node['body'], path+suffix, context+[dict(name=node['binder'], type=node['domain'])]))
         else:
             arguments = node.get('arguments', [])
             arity = len(frame['objects']) + len(arguments)
@@ -233,7 +238,9 @@ def test_linarith_contradiction_absorbs_only_its_certificate():
     assert root.rule == 'citation' and root.text == 'The statement follows from lt_of_not_ge, applied to the facts below.'
     assert root.conclusion is None
     step = next(s for s in walk_steps(d.declarations[0].steps) if s.rule == 'automation')
-    assert step.text == 'Linear arithmetic (linarith) derives a contradiction; the certificate is not expanded.'
+    # The certificate lemmas name linarith's procedure, which nlinarith also uses, not the source tactic.
+    assert step.text == ('Linear arithmetic (a certificate of Mathlib’s linarith procedure, which nlinarith also uses) '
+                         'derives a contradiction; the certificate is not expanded.')
     assert step.conclusion is None
     assert {record['frames'][i]['head'] for i in owned(step)} == {'Mathlib.Tactic.Linarith.lt_irrefl', 'Eq.mp'}
 
@@ -426,8 +433,10 @@ def test_conjunction_is_named_only_when_printed_with_the_right_precedence(left, 
     record = synthetic(destructuring(left, right, conjunction, given('hs', 'S')))
     n, d = rendered(record)
     step = d.declarations[0].steps[0]
-    assert step.rule == 'unpack-conjunction' and not step.fallback
+    # Since 0.7.0 a premise not printed as the two parts joined by ∧ keeps a gap.
+    assert step.rule == ('unpack-conjunction' if named else 'unchecked-conjunction') and step.fallback is not named
     assert step.text.startswith('From h, obtain' if named else 'From the conjunction, obtain')
+    assert step.text.endswith('.' if named else 'That the premise below has this form is not checked here.')
     assert bool(step.children) is not named
     assert set(n.owners) == set(range(len(record['frames'])))
     check_reading(record, d)
@@ -579,7 +588,10 @@ def test_hypotheses_from_different_scopes_are_not_merged():
                            (3, given('h2', 'Q')), objects=['∀ x, P x', 'Q'], role='combine'))
     n, d = rendered(record)
     [step] = d.declarations[0].steps
-    assert [c.text for c in step.children] == ['Let x ∈ T be arbitrary.', 'Use the hypothesis h: P x.', 'Use the hypothesis h2: Q.']
+    # Since 0.7.0 the first conjunct's proof is nested, so x is not in scope for h2.
+    assert [c.text for c in step.children] == ['Prove ∀ x, P x.', 'Use the hypothesis h2: Q.']
+    assert [c.text for c in step.children[0].children] == ['Let x ∈ T be arbitrary.', 'Use the hypothesis h: P x.']
+    assert step.children[0].rule == 'subproof' and not owned(step.children[0])
     check_reading(record, d)
 
 
@@ -852,6 +864,289 @@ def test_exhibited_element_is_described_and_stays_a_gap():
                                       body=app('Nonempty.intro', 'Nonempty T', objects=['T', 'f']))))
     n, d = rendered(record)
     assert owner(n, d, 2).rule == 'citation' and owner(n, d, 2).fallback
+
+
+# 7. Rules added in source-math-en/0.7.0.
+
+def scope_leaks(n, d):
+    """Pairs (binder step, later sibling) where the sibling owns a frame outside the binder's body.
+
+    Written independently of Narrative.require_scopes: a step owning a binder
+    frame whose body it does not display is followed by that body, so every
+    later step of its list, with its descendants, must own only frames below it.
+    """
+    owned = {}
+    for i, sid in n.owners.items():
+        owned.setdefault(sid, []).append(i)
+    frames = lambda s: [i for t in walk_steps([s]) for i in owned.get(t.id, [])]
+
+    def under(a, b):
+        while a != b and a in n.snapshot.parents:
+            a = n.snapshot.parents[a]
+        return a == b
+    leaks = []
+
+    def check(steps):
+        for k, s in enumerate(steps):
+            inside = set(frames(s))
+            for b in owned.get(s.id, []):
+                f = n.frames[b]
+                if f['role'] in {'introduce', 'assume', 'have', 'define', 'witness'} and f['children'] and f['children'][-1] not in inside:
+                    leaks.extend((s.id, t.id) for t in steps[k+1:] if not all(under(i, f['children'][-1]) for i in frames(t)))
+            check(s.children)
+    check(d.declarations[0].steps)
+    return leaks
+
+
+RETAINED = {'bezout': DATA/'bezout-snapshot.json',
+            'companion': Path(__file__).parents[1]/'artifacts/companion/native/current/snapshot.json'}
+
+
+@pytest.mark.parametrize('name', sorted(FIXTURES)+sorted(RETAINED))
+def test_no_binder_scope_reaches_a_later_sibling(name):
+    record = real(name) if name in FIXTURES else json.loads(RETAINED[name].read_text())
+    n, d = rendered(record)
+    assert scope_leaks(n, d) == []
+
+
+def conjunction_with_binder():
+    # Synthetic format fixture (the audit's counterexample): ⟨fun x => rfl, hq⟩ : (∀ (x : ℕ), x = x) ∧ Q.
+    return synthetic(app('And.intro', '(∀ (x : ℕ), x = x) ∧ Q',
+                         (2, dict(role='introduce', binder='x', domain='ℕ', statement='∀ (x : ℕ), x = x',
+                                  body=app('Eq.refl', 'x = x', objects=['ℕ', 'x'], role='reflexivity'))),
+                         (3, given('hq', 'Q')), objects=['∀ (x : ℕ), x = x', 'Q'], role='combine'))
+
+
+def test_a_binder_in_one_conclusion_is_scoped_to_that_conclusion():
+    record = conjunction_with_binder()
+    n, d = rendered(record)
+    [step] = d.declarations[0].steps
+    assert [c.text for c in step.children] == ['Prove ∀ (x : ℕ), x = x.', 'Use the hypothesis hq: Q.']
+    nested = step.children[0]
+    assert nested.rule == 'subproof' and not nested.fallback and nested.term_id is None and nested.source == '∀ (x : ℕ), x = x'
+    assert [c.text for c in nested.children] == ['Let x ∈ ℕ be arbitrary.', 'By reflexivity, x = x.']
+    assert ('Verify the 2 required conclusions.\n  Prove ∀ (x : ℕ), x = x.\n    Let x ∈ ℕ be arbitrary.\n'
+            '    By reflexivity, x = x.\n  Use the hypothesis hq: Q.\n') in prose(d)
+    assert set(n.owners) == set(range(len(record['frames']))) and n.sid(1)+':proof' not in n.owners.values()
+    check_reading(record, d)
+
+
+def test_document_refuses_a_binder_scope_that_reaches_a_later_sibling(monkeypatch):
+    # Synthetic: the 0.6.0 flat list, in which hq reads as proved under x.
+    monkeypatch.setattr(Narrative, 'joined', lambda self, proofs, after=None: [s for _, p in proofs for s in p]+(after or []))
+    with pytest.raises(InvalidExport, match='binder scope'):
+        Narrative(conjunction_with_binder()).document()
+
+
+def test_retained_premise_and_conclusion_proofs_are_nested():
+    n, d = rendered(real('scope_conclusions'))
+    [verify] = d.declarations[0].steps
+    first = verify.children[0]
+    assert verify.rule == 'verify-conclusions' and first.rule == 'subproof'
+    assert first.text.startswith('Prove ∀ (x : ℝ → ℝ),\n  Admissible γ x →')
+    assert [c.text for c in first.children[:2]] == ['Let x ∈ ℝ → ℝ be arbitrary.', 'Assume Admissible γ x.']
+    assert all(c.rule != 'introduce' for c in verify.children[1:])
+    n, d = rendered(real('scope_substitution'))
+    [rewrite] = d.declarations[0].steps
+    assert rewrite.rule == 'substitution' and rewrite.children[0].rule == 'subproof'
+    assert rewrite.children[0].children[0].text == 'Assume 3 ≤ 0.'
+    assert [c.rule for c in rewrite.children[1:]] == ['application', 'hypotheses', 'instance-assumptions']
+    n, d = rendered(real('structure_constructor'))
+    root = d.declarations[0].steps[0]
+    assert root.rule == 'project-citation' and root.fallback
+    assert root.text == ('The statement follows from the project structure constructor ActualRowSourceConclusion.mk, '
+                         'applied to the facts below.')
+
+
+def test_bezout_reading_is_unchanged_and_uses_its_displayed_definitions():
+    from collections import Counter
+    from proofreader.render import load_document
+    record = json.loads((DATA/'bezout-snapshot.json').read_text())
+    root = Path(__file__).parents[1]
+    check_reading(record, load_document((root/'artifacts/v0.3/bezout-reader/reading.json').read_bytes()))
+    n, d = rendered(record)
+    steps = list(walk_steps(d.declarations[0].steps))
+    rules = Counter((s.rule, s.fallback) for s in steps)
+    # Iff.mp from hg : g = 0, the two restated hypotheses, the divisibility choices and
+    # the calculations agree with their premises once Set g = gcd(x, z), r and s are unfolded.
+    assert rules[('application', False)] >= 1 and rules[('equivalent-assumption', False)] == 2
+    assert rules[('choose', False)] == 2 and rules[('calculation', False)] == 4
+    assert not any(s.rule.startswith('unchecked') or s.rule in {'assumption-restatement', 'subproof'} for s in steps)
+    assert 'Use the same hypothesis in the form x = g · a.' in [s.text for s in steps]
+
+
+def iff_mp(hypothesis, left='P a', right='Q'):
+    # A binder on the left of ↔ is parenthesized, as Lean prints it.
+    iff = ('('+left+')' if left[0] in '∀∃' else left)+' ↔ '+right
+    return app('Iff.mp', right, (2, given('h', iff)), (3, given('ha', hypothesis)), objects=[left, right])
+
+
+@pytest.mark.parametrize('hypothesis,left,explained', [
+    # Synthetic format fixtures for the printed-form check of Iff.mp.
+    ('P a', 'P a', True),
+    ('R a', 'P a', False),
+    ('∀ᶠ (n : ℕ) in l, P n', '∀ᶠ (x : ℕ) in l, P x', True),   # bound variable renamed
+    ('∀ᶠ (n : ℕ) in l, P n x', '∀ᶠ (x : ℕ) in l, P x x', False),  # x is free in the hypothesis
+    ('P → False', '¬P', True),
+    ('n ≥ m', 'm ≤ n', True),
+])
+def test_forward_equivalence_requires_the_printed_sides(hypothesis, left, explained):
+    n, d = rendered(synthetic(iff_mp(hypothesis, left)))
+    [step] = d.declarations[0].steps
+    assert (step.rule, step.fallback) == (('application', False) if explained else ('unchecked-equivalence', True))
+    assert step.text.startswith('Apply the forward direction of the stated equivalence to the supplied hypothesis.')
+
+
+@pytest.mark.parametrize('value,hypothesis,left,explained', [
+    # Synthetic: a displayed local definition g may be unfolded, with Lean's precedence.
+    ('f a', 'g = 0', 'f a = 0', True),
+    ('x + y', 'g * a = 0', '(x + y) * a = 0', True),
+    ('x + y', 'g * a = 0', 'x + y * a = 0', False),
+    ('f a', 'h g = 0', 'h f a = 0', False),
+    ('f a', 'h g = 0', 'h (f a) = 0', True),
+])
+def test_displayed_local_definitions_may_be_unfolded(value, hypothesis, left, explained):
+    record = synthetic(dict(role='define', binder='g', domain='ℕ', value=value, statement='Q', body=iff_mp(hypothesis, left)))
+    n, d = rendered(record)
+    assert d.declarations[0].steps[0].text == 'Set g = '+value.replace(' * ', ' · ')+'.'
+    step = owner(n, d, 1)
+    assert step.fallback is not explained
+    check_reading(record, d)
+
+
+def test_unfolded_hypotheses_and_equivalences_stay_gaps():
+    n, d = rendered(real('forward_equivalence_unfolded'))
+    [step] = d.declarations[0].steps
+    assert step.rule == 'unchecked-equivalence' and step.fallback
+    assert step.text.endswith('That the hypothesis and the conclusion have the printed forms of its two sides is not checked here.')
+    assert [c.text for c in step.children][-1] == 'Use the hypothesis hB: Q.IsBase B.'
+    n, d = rendered(real('assumption_restatement'))
+    step = d.declarations[0].steps[0]
+    assert step.rule == 'assumption-restatement' and step.fallback
+    assert step.text == ('Use the same hypothesis in the definitionally equal form y ∈ closure ↑τ.finiteSquareAlgebra; '
+                         'the unfolding is not expanded.')
+
+
+def test_induction_cases_are_compared_with_the_motive():
+    n, d = rendered(real('induction_unfolded_base'))
+    [step] = d.declarations[0].steps
+    assert step.rule == 'unchecked-induction' and step.fallback
+    assert ('The empty-list case must prove (EntropyRateDimension.Extensions.uniformSystem r t hr0 hr1).wordAffine [] = '
+            'word r t []; the proof below establishes a definitionally equal form, whose unfolding is not expanded.') in step.text
+    assert step.children[0].text.startswith('Empty-list case. By reflexivity,') and step.children[1].rule == 'subproof'
+    n, d = rendered(real('induction_checked'))
+    [step] = d.declarations[0].steps
+    assert step.rule == 'induction' and not step.fallback and step.text == 'Proceed by induction on g.'
+    assert step.children[1].text == 'Successor step. Prove ∀ (g : ℕ), ↑g < 2 ^ g → ↑(g + 1) < 2 ^ (g + 1).'
+    assert [c.text for c in step.children[1].children[:2]] == ['Let g_1 ∈ ℕ be arbitrary.', 'Assume ↑g_1 < 2 ^ g_1.']
+
+
+def choice(major, name, kind, prop):
+    body = given('hs', 'S')
+    intro = dict(role='introduce', binder=name, domain=kind, statement='∀ ('+name+' : '+kind+'), '+prop+' → S',
+                 body=dict(role='assume', binder='h', domain=prop, statement=prop+' → S', body=body))
+    return app('Exists.casesOn', 'S', (3, given('hm', major)), (4, intro), objects=[kind, 'fun x => P x', 'fun _ => S'], role='choose')
+
+
+@pytest.mark.parametrize('major,name,prop,explained', [
+    # Synthetic format fixtures: the premise of a choice must be printed as an existential.
+    ('∃ x, P x', 'y', 'P y', True),
+    ('b ∣ c', 'k', 'c = b * k', True),        # Mathlib's divisibility: ∃ k, c = b * k
+    ('b + 1 ∣ c', 'k', 'c = (b + 1) * k', True),
+    ('b ∣ c', 'k', 'c = k * b', False),
+    ('Even n', 'r', 'n = r + r', False),
+    ('∃! x, P x', 'y', 'P y ∧ ∀ (z : ℕ), P z → z = y', False),
+])
+def test_a_choice_needs_an_existential_premise(major, name, prop, explained):
+    record = synthetic(choice(major, name, 'ℕ', prop))
+    n, d = rendered(record)
+    step = d.declarations[0].steps[0]
+    assert (step.rule, step.fallback) == (('choose', False) if explained else ('unchecked-choice', True))
+    assert step.text.endswith('.' if explained else 'That the premise unfolds to an existential statement is not checked here.')
+    check_reading(record, d)
+    n, d = rendered(real('choice_unchecked'))
+    assert d.declarations[0].steps[0].rule == 'unchecked-choice'
+
+
+def test_a_conjunction_ending_in_a_binder_is_read_with_lean_precedence():
+    # Synthetic: A ∧ B ∧ ∀ x, P x → Q is A ∧ (B ∧ ∀ x, (P x → Q)); ∧ is right-associative.
+    n, d = rendered(synthetic(destructuring('A', 'B ∧ ∀ x, P x → Q', 'A ∧ B ∧ ∀ x, P x → Q', given('hs', 'S'))))
+    step = d.declarations[0].steps[0]
+    # The named form keeps its 0.6.0 reading; the premise check accepts the conjunction.
+    assert step.rule == 'unpack-conjunction' and not step.fallback
+    assert step.text == 'From the conjunction, obtain ha: A and hb: B ∧ ∀ x, P x → Q.'
+    projection = app('And.left', 'A', (2, given('h', 'A ∧ B ∧ ∀ x, P x → Q')), objects=['A', 'B ∧ ∀ x, P x → Q'])
+    n, d = rendered(synthetic(projection))
+    assert d.declarations[0].steps[0].rule == 'conjunction-projection'
+    # (A ∧ B) → C is not a conjunction of A and B → C.
+    n, d = rendered(synthetic(destructuring('A', 'B → C', 'A ∧ B → C', given('hs', 'S'))))
+    assert d.declarations[0].steps[0].rule == 'unchecked-conjunction'
+
+
+def chain(*links, statement):
+    # Synthetic Eq.trans chain over the given link statements, left-nested.
+    node = given('h0', links[0])
+    for k, link in enumerate(links[1:], 1):
+        left = node['statement'].split(' = ')[0]
+        node = app('Eq.trans', left+' = '+link.split(' = ')[1], (4, node), (5, given('h'+str(k), link)),
+                   objects=['ℕ', 'a', 'b', 'c'], role='chain')
+    node['statement'] = statement
+    return node
+
+
+@pytest.mark.parametrize('links,statement,explained', [
+    (('a = b', 'b = c'), 'a = c', True),
+    (('a = b', 'b = c', 'c = d'), 'a = d', True),
+    (('a = b', 'b2 = c'), 'a = c', False),
+    (('a = b', 'b = c'), 'a = d', False),
+])
+def test_calculation_links_must_share_their_endpoints(links, statement, explained):
+    record = synthetic(chain(*links, statement=statement))
+    n, d = rendered(record)
+    [step] = d.declarations[0].steps
+    assert (step.rule, step.fallback) == (('calculation', False) if explained else ('unchecked-calculation', True))
+    check_reading(record, d)
+
+
+def test_calculation_with_a_cast_unfolding_is_a_gap():
+    n, d = rendered(real('calculation_unchecked'))
+    [step] = d.declarations[0].steps
+    assert step.rule == 'unchecked-calculation' and step.fallback
+    assert step.children[0].text == 'Apply t ↦ ↑δ · ↑10 ≤ t to both sides of the supplied equality.'
+
+
+def test_wording_of_constructors_definitions_binders_and_functions():
+    # Synthetic format fixtures, except the retained definition.
+    n, d = rendered(synthetic(app('OAI.Synthetic.Pair.mk', 'Pair a', (1, given('ha', 'P a')), objects=['a']),
+                              theorem='OAI.Synthetic.readerQuality'))
+    assert d.declarations[0].steps[0].text == ('The statement follows from the project structure constructor Synthetic.Pair.mk, '
+                                               'applied to the facts below.')
+    n, d = rendered(real('definition_automatic_name'))
+    assert d.declarations[0].steps[0].text == "Set this_1 = ⋯.fintype (of type Fintype ↑F'.indices)."
+    assert d.declarations[0].steps[1].text.startswith('Set basis = ')
+    body = given('h', 'P V')
+    binders = dict(role='introduce', binder='V', domain='Type u_1', statement='∀ (V : Type u_1) [inst : Fintype V] (p : Prop), P V',
+                   body=dict(role='introduce', binder='inst', domain='Fintype V', statement='∀ [inst : Fintype V] (p : Prop), P V',
+                             body=dict(role='introduce', binder='p', domain='Prop', statement='∀ (p : Prop), P V', body=body)))
+    n, d = rendered(synthetic(app('Foo.lemma', 'R', (0, binders))))
+    assert [s.text for s in d.declarations[0].steps[0].children] == [
+        'Let V be an arbitrary type.', 'Fix an instance of Fintype V.', 'Let p be an arbitrary proposition.', 'Use the hypothesis h: P V.']
+    for function, shown in [('HMul.hMul (x + y)', 't ↦ (x + y) · t'), ('LE.le (x * y)', 't ↦ x · y ≤ t'), ('f', 'f')]:
+        record = synthetic(dict(role='introduce', binder='t', domain='ℕ', statement='∀ (t : ℕ), F a = F b',
+                                body=app('congrArg', 'F a = F b', (5, given('hab', 'a = b')), objects=['ℕ', 'ℕ', 'a', 'b', function],
+                                         role='congruence')))
+        n, d = rendered(record)
+        # t is in the local context here, so the new variable is s.
+        assert d.declarations[0].steps[0].text == 'Apply '+shown.replace('t', 's')+' to both sides of the supplied equality.'
+
+
+def test_instance_lists_and_line_breaks_keep_recorded_notation():
+    n, d = rendered(synthetic(app('Foo.cancel', 'P', (0, app('Foo.instIsDomain', 'IsDomain R')), (1, given('hp', 'Q')))))
+    assert d.declarations[0].steps[0].children[-1].text == 'Standard instance fact used: IsDomain R.'
+    # The dictionary sentence is kept outside instance lists.
+    assert narrative.math_text('IsDomain R') == 'R is an integral domain'
+    # Binary * and - at a line break of the pretty-printer read like the spaced ones (N10).
+    assert narrative._math_dictionary('a - b * c -\n  d *\n e - -f') == 'a − b · c −\n  d ·\n e − -f'
 
 
 # Regeneration across the version label.
