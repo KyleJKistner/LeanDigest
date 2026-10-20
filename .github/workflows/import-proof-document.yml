@@ -1,0 +1,102 @@
+name: Import canonical proof document
+on:
+  push:
+    branches: ['work/proof-document-20261019']
+    paths: ['.github/workflows/import-proof-document.yml']
+permissions:
+  contents: write
+jobs:
+  import:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Recover the exact reviewed patch
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          test "$(git rev-parse HEAD^)" = 2977830535b8fbbf5b56516a42ba54e90452f2d7
+          mkdir -p import-results
+          python - <<'PY'
+          import base64, hashlib, json, lzma, os, pathlib, time, urllib.request
+          parts = [
+              'd801383499b90a1d5a36f5801609a4050d8e13ac',
+              '69da5af4f62668186d950dc6cd99203e2725d9ed',
+              '886cc422643e6ff2171f015a0da9e0cb762075c8',
+              '0f46ddff70cbc5fe1ba5487419954f2e672afaae',
+              '105120be404e7c3b0c38ea199de3bd312c24b1a4',
+              'd8d2b3eeaf3420d254469bf55396f463389e32dc',
+              '054d4f8165c2e3f4fa9c5a870a11452672e0cc97',
+          ]
+          def fetch_blob(sha):
+              request = urllib.request.Request(
+                  f'https://api.github.com/repos/KyleJKistner/LeanDigest/git/blobs/{sha}',
+                  headers={'Authorization': 'Bearer ' + os.environ['GH_TOKEN'],
+                           'Accept': 'application/vnd.github+json'})
+              for attempt in range(4):
+                  try:
+                      with urllib.request.urlopen(request, timeout=60) as response:
+                          record = json.load(response)
+                      break
+                  except OSError:
+                      if attempt == 3:
+                          raise
+                      time.sleep(2 ** attempt)
+              assert record['sha'] == sha and record['encoding'] == 'base64'
+              data = base64.b64decode(''.join(record['content'].split()), validate=True)
+              assert hashlib.sha1(b'blob ' + str(len(data)).encode() + b'\0' + data).hexdigest() == sha
+              return data
+          archive = b''.join(fetch_blob(sha) for sha in parts)
+          assert hashlib.sha256(archive).hexdigest() == 'edcfa43b3c10668c070ca0e1c15925cdec29a0999a52d5a7073d88199014e519'
+          patch = lzma.decompress(archive)
+          assert hashlib.sha256(patch).hexdigest() == '8eb68a178a8e072c85f4090bc406d6c1c8c0ee77a6b29faa14cf2cca1ad08b8c'
+          pathlib.Path(os.environ['RUNNER_TEMP'], 'proof-document.patch').write_bytes(patch)
+          PY
+      - name: Reproduce the tested implementation tree
+        run: |
+          git update-index --force-remove .github/workflows/import-proof-document.yml
+          test "$(git write-tree)" = f72c97b097106a4021aeaae53e954811b7992e43
+          git apply --index --check "$RUNNER_TEMP/proof-document.patch"
+          git apply --index "$RUNNER_TEMP/proof-document.patch"
+          test "$(git write-tree)" = 995e2061b505024c0918d88c34f9a344b88a79cb
+          python -m pip install '.[dev,webtest]'
+          python docs/companion/build_checked_proof.py
+          git diff --check --cached
+          git diff --exit-code
+      - name: Check the document reader in an actual offline browser
+        env:
+          PROOFREADER_REQUIRE_BROWSER: '1'
+        run: |
+          python -m playwright install --with-deps chromium
+          python -m pytest tests/test_proof_document.py tests/reader/test_checked_proof.py -q --junitxml=import-results/tests.xml
+          python docs/companion/build_checked_proof.py
+          git diff --exit-code
+          test "$(git write-tree)" = 995e2061b505024c0918d88c34f9a344b88a79cb
+          git write-tree > import-results/implementation-tree.txt
+      - name: Publish without changing workflow files or a moved branch
+        run: |
+          branch=work/proof-document-20261019
+          test "$(git ls-remote origin "refs/heads/$branch" | cut -f1)" = "$GITHUB_SHA"
+          # Keep this workflow byte-for-byte unchanged in the pushed commit.
+          # The connector removes it after inspecting the run; the Actions
+          # contents token is not used to create, edit, or delete a workflow.
+          git add .github/workflows/import-proof-document.yml
+          test -z "$(git diff --cached --name-only -- .github/workflows)"
+          git config user.name 'Kyle Kistner'
+          git config user.email '14222111+KyleJKistner@users.noreply.github.com'
+          git commit -m 'Certify the scoped canonical Bezout proof document and add its reader'
+          git rev-parse HEAD > import-results/commit.txt
+          git rev-parse HEAD^{tree} > import-results/tree.txt
+          git push origin "HEAD:refs/heads/$branch"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: proof-document-import-results
+          path: import-results/
+          retention-days: 30
+          if-no-files-found: error
