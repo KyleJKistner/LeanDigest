@@ -576,7 +576,8 @@ def browser_expectations(site: Path) -> dict:
         lemma=next((n for n in sorted(names) if link_kind(names[n])=='cone-reading'),None)
         if lemma and cone is None:
             page=cone_catalog.DIRECTORY+'/'+names[lemma]['href'].split('/')[-2]+'/reader.html'
-            finding=next(p for p,text in pages.items() if '../'+reader+'"' in text and '../'+page+'"' in text)
+            finding=next((p for p,text in pages.items() if '../'+reader+'"' in text and '../'+page+'"' in text),None)
+            require(finding is not None,'No finding page lists the supporting lemma reading '+page)
             cone={'reader':reader,'citation':lemma,'href':names[lemma]['href'],'module':names[lemma]['module'],'page':page,
                   'finding':finding.relative_to(site).as_posix(),'finding_href':'../'+page}
     require(expect is not None,'No reading links to another proof reading; the reader link check cannot run')

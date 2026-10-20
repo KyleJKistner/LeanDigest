@@ -233,9 +233,14 @@ EVIDENCE_LINK = ' · <a href="'+SUMMARY_RECORD+'">Dependency-cone outcomes</a>'
 
 def validate_section(sec: Any) -> dict:
     """Shape and flags of a coverage section, for the audit and the preview."""
+    counts = ('readings', 'readings_accepted', 'planned_lemmas', 'selected_checked_frames', 'explicit_explanation_gaps')
     if (not isinstance(sec, dict) or sec.get('schema') != SCHEMA or sec.get('denominator_name') != DENOMINATOR or
         any(sec.get(k) is not v for k, v in FLAGS.items()) or sec.get('evidence_names') != list(EVIDENCE) or
-        type(sec.get('readings')) is not int or sec.get('readings') + len(sec.get('rendering_failures', [])) != sec.get('readings_accepted')):
+        any(type(sec.get(k)) is not int for k in counts) or not isinstance(sec.get('rendering_failures'), list) or
+        not isinstance(sec.get('statuses'), dict) or not isinstance(sec.get('from_target_readings'), dict) or
+        type(sec['from_target_readings'].get('citations_linked')) is not int or
+        not all(isinstance(sec.get(k), str) for k in ('cone_plan_sha256', 'summary_sha256', 'scope')) or
+        sec['readings'] + len(sec['rendering_failures']) != sec['readings_accepted']):
         raise ValueError('Malformed dependency-cone coverage section')
     if Counter(sec['statuses'])['reading-generated'] != sec['readings_accepted'] or sum(sec['statuses'].values()) != sec['planned_lemmas']:
         raise ValueError('Dependency-cone coverage counts do not reconcile')

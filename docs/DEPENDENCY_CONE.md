@@ -375,7 +375,8 @@ layout from a workflow run. Both commands also take `--cone-scope` (default
 ### Acceptance
 
 A campaign directory is used only if all of these hold. Otherwise the build
-stops before it writes anything.
+stops before any reading is rendered; the catalog builder has then written
+nothing.
 
 - The directory contains no symbolic link, and `dependency-cone-plan/` holds the
   three files.
