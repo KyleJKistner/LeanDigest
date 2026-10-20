@@ -331,12 +331,12 @@ def preview_page(record: dict) -> str:
     for label,key in [('Gap steps','gap_steps'),('Checked frames inside gaps','frames_in_gaps')]:
         c=record['explanation_gaps']['per_reading'][key]
         body+='<tr><td>'+label+'</td><td>'+str(c['fewer'])+'</td><td>'+str(c['same'])+'</td><td>'+str(c['more'])+'</td></tr>'
-    body+=('</tbody></table><h3>Explanation gaps by rule</h3><table><thead><tr><th>Rule</th><th>Published gap steps</th>'
+    body+=('</tbody></table><h3>Explanation gaps by rule</h3><div class="gap-table-wrap"><table><thead><tr><th>Rule</th><th>Published gap steps</th>'
            '<th>Published frames inside</th><th>Preview gap steps</th><th>Preview frames inside</th></tr></thead><tbody>')
     rules=sorted(set(b['gaps_by_rule'])|set(a['gaps_by_rule']),key=lambda r:(-a['gaps_by_rule'].get(r,0),-b['gaps_by_rule'].get(r,0),r))
     body+=''.join('<tr><td><code>'+esc(r)+'</code></td>'+''.join('<td>'+str(side[field].get(r,0))+'</td>' for side in (b,a)
                   for field in ('gaps_by_rule','frames_in_gaps_by_rule'))+'</tr>' for r in rules)
-    body+=('</tbody></table><p class="small">Rule tags come from each renderer version. A later version can split one earlier tag '
+    body+=('</tbody></table></div><p class="small">Rule tags come from each renderer version. A later version can split one earlier tag '
            'into several, so the rows are not a one-to-one mapping between versions. Frames inside a gap step are counted '
            'under the rule of that step.</p><h3>Files</h3>')
     body+='<p class="small">Grouped by path pattern and compared with the published manifest.</p><table><thead><tr><th>Path</th><th>Added</th><th>Replaced</th><th>Unchanged</th></tr></thead><tbody>'
@@ -440,6 +440,9 @@ def preview_browser_checks(site: Path, harness: bool, expect: dict, shots: Path 
         assert page.locator('h1').inner_text()=='Catalog preview'
         assert str(expect['gaps']) in page.locator('.stats').inner_text()
         if shots:page.screenshot(path=str(shots/'preview-desktop.png'),full_page=True)
+        page.set_viewport_size({'width':390,'height':844})
+        assert page.evaluate('document.documentElement.scrollWidth <= innerWidth'),'The preview page overflows on mobile'
+        page.set_viewport_size({'width':1440,'height':1000})
         load('explanations.html')
         page.wait_for_function("document.getElementById('gap-result-count').textContent.length > 0")
         assert page.locator('.gap-reading:visible').count()==expect['readings_with_gaps']
@@ -455,7 +458,7 @@ def preview_browser_checks(site: Path, harness: bool, expect: dict, shots: Path 
     assert not errors,errors
     assert not external,external
     return {'navigation_backend':'direct-document-test-harness' if harness else 'real-offline-file-navigation',
-            'preview_notice':True,'preview_page':True,'explanation_gap_filters':True,'reader_citation_link':True,
+            'preview_notice':True,'preview_page':True,'preview_page_mobile_overflow':False,'explanation_gap_filters':True,'reader_citation_link':True,
             'page_errors':errors,'external_requests':external,'passed':True}
 
 

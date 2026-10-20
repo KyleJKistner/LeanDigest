@@ -13,7 +13,7 @@ release and uploads it as a workflow artifact.
 ## Build a preview
 
 ```sh
-python scripts/rerender_catalog.py PUBLISHED OUTPUT [--browser real|document-harness]
+python scripts/rerender_catalog.py PUBLISHED OUTPUT [--archive-sha256 DIGEST] [--browser real|document-harness] [--no-archive]
 ```
 
 `PUBLISHED` is an extracted `Leanglish/` site or its release zip. A zip must match
@@ -30,7 +30,7 @@ python scripts/rerender_catalog.py PUBLISHED OUTPUT [--browser real|document-har
 | `screenshots/`, `original-verification-*.png` | Browser-audit screenshots, when a browser route runs. |
 
 Without `--browser`, no browser audit runs, and `browser-audit.json` in the
-site records `not_run`.
+site records `not_run`. With `--no-archive`, no zip or `SHA256SUMS` is written.
 
 ## Procedure
 
@@ -61,8 +61,8 @@ site records `not_run`.
    main navigation of the catalog's own pages (top level, `findings/` and
    `sources/`). A page's navigation may only gain links. Bundled originals and
    evidence are never rewritten.
-8. Add a preview notice to the catalog, coverage, explanation-gap,
-   original-verification and finding pages, and write `preview.html`,
+8. Add a preview notice to every top-level page (catalog, coverage, explanation
+   gaps, original verification) and every finding page, and write `preview.html`,
    `preview.json`, a preview section at the top of `RELEASE-NOTES.md`, and a
    first line in `START-HERE.txt`. Reader pages carry no notice, because each
    reader page must equal its regenerated reading.
@@ -105,12 +105,16 @@ release. Their coverage no longer equals the preview's `coverage.json`, so
 
 `--browser real` opens each page from the file system in Chromium. It runs
 `scripts/audit_finding_browser.py` and `scripts/audit_original_browser.py`, then
-checks the pages the preview adds or changes: the notice links to
-`preview.html`; the preview page shows the gap count; the explanation-gap table
-lists every reading with gaps and its filter for the most frequent reference
-shows the inventory's count; and a reader page links a cited name to another
-proof reading. The audits use Python assertions, so the script refuses a browser
-route under `python -O`.
+checks the pages the preview adds or changes:
+
+- The notice on the catalog page links to `preview.html`.
+- The preview page shows the gap count and fits a 390-pixel-wide viewport.
+- The explanation-gap table lists every reading with gaps, and its filter for
+  the most frequent reference shows the inventory's count.
+- A reader page links a cited name to another proof reading.
+
+The audits use Python assertions, so the script refuses a browser route under
+`python -O`.
 
 `--browser document-harness` loads each document with its local styles and
 scripts inlined. Use it only where browser policy blocks `file://` navigation.
@@ -156,8 +160,11 @@ these numbers; `summary.json` in the workflow artifact records the current ones.
 
 The gap-step count fell while more checked frames sit inside gaps. Renderer
 0.5.0 groups several frames into one displayed step, and instance and
-automation groups are counted as gaps, so the step count is not a measure of
-explained frames. The totals match `benchmarks/reading-kpis/current.json`.
+automation groups are counted as gaps: the 522 `instance-facts` gap steps hold
+2,132 checked frames, and the 260 `automation` gap steps hold 1,723. Every other
+gap step, published or preview, holds one frame. The step count is therefore
+not a measure of explained frames. The totals and the counts by rule match
+`benchmarks/reading-kpis/current.json`.
 
 | Readings with | Fewer | The same | More |
 | --- | ---: | ---: | ---: |
@@ -188,8 +195,8 @@ limit.
 
 The preview site has 8,858 files and 635.5 MB; its zip is 52.2 MB. The
 published site has 8,361 files and 659.3 MB; its zip is 49.1 MB. The run from the
-release zip, including both browser audits and the zip, took 166 s on four CPU
-cores. Two runs from the same checkout produced byte-identical zips.
+release zip, including both browser audits and the zip, took about 165 s on
+four CPU cores. Two runs from the same checkout produced byte-identical zips.
 
 ## Limitations
 
