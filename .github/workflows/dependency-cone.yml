@@ -1,0 +1,121 @@
+name: Dependency-cone readings (level 1) in the original environment
+
+# Extracts source-bound readings of the project lemmas that retained readings
+# cite, each in the unchanged original environment of a citing module. A pilot
+# of 8 planned shards runs by default; full-1/full-2 dispatch every shard in two
+# blocks of at most 256 (a matrix limit). Every shard uploads its outcomes,
+# including failures. Cone readings are a separate denominator from the 536
+# documented targets. This workflow never publishes, releases or pushes.
+on:
+  workflow_dispatch:
+    inputs:
+      scope:
+        description: 'pilot (8 planned shards), full-1 (shards 1-256) or full-2 (remaining shards)'
+        type: choice
+        options: [pilot, full-1, full-2]
+        default: pilot
+  push:
+    branches: [claude/keen-archimedes-ihorkq]
+    paths: ['.github/workflows/dependency-cone.yml', 'benchmarks/dependency-cone/**']
+permissions:
+  contents: read
+  actions: read
+concurrency:
+  group: dependency-cone-level-1
+  cancel-in-progress: false
+env:
+  GLIBC_TUNABLES: glibc.malloc.mmap_max=0:glibc.malloc.arena_max=1
+  SCOPE: ${{ inputs.scope || 'pilot' }}
+jobs:
+  plan:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    outputs:
+      matrix: ${{ steps.matrix.outputs.matrix }}
+      count: ${{ steps.matrix.outputs.count }}
+    steps:
+      - uses: actions/checkout@v4
+        with: {persist-credentials: false}
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: python -m pip install '.[dev]'
+      - name: Planner, worker and loader tests (synthetic fixtures)
+        run: python -m pytest -q tests/test_dependency_cone.py
+      - name: Re-derive the committed plan from the pinned release archive
+        run: |
+          mkdir -p /tmp/cone
+          python scripts/plan_dependency_cone.py fetch --output /tmp/release.zip
+          python scripts/plan_dependency_cone.py plan --archive /tmp/release.zip --check
+          python scripts/plan_dependency_cone.py inputs --archive /tmp/release.zip --output /tmp/cone
+          cp benchmarks/dependency-cone/plan.json /tmp/cone/plan.json
+          git rev-parse HEAD > /tmp/cone/application-commit.txt
+      - id: matrix
+        run: python scripts/plan_dependency_cone.py matrix --cone-plan /tmp/cone/plan.json --scope "$SCOPE" --github-output "$GITHUB_OUTPUT"
+      - uses: actions/upload-artifact@v4
+        with: {name: dependency-cone-plan, path: /tmp/cone/, retention-days: 90, if-no-files-found: error}
+  extract:
+    needs: plan
+    if: needs.plan.outputs.count != '0'
+    name: extract (${{ matrix.module }})
+    strategy:
+      fail-fast: false
+      max-parallel: 8
+      matrix: ${{ fromJSON(needs.plan.outputs.matrix) }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 225
+    steps:
+      - uses: actions/checkout@v4
+        with: {persist-credentials: false}
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - uses: leanprover/lean-action@v1
+        with: {lake-package-directory: lean, auto-config: false, build: false, test: false, lint: false, use-mathlib-cache: false, use-github-cache: false}
+      - uses: actions/download-artifact@v4
+        with: {name: dependency-cone-plan, path: /tmp/cone}
+      - name: Restore unchanged original source
+        env: {GH_TOKEN: '${{ github.token }}'}
+        run: |
+          mkdir -p /tmp/inputs/source
+          gh run download 38822475057 -R "$GITHUB_REPOSITORY" -n complete-openai-lean-source -D /tmp/inputs/source
+          python -c "from pathlib import Path; from scripts.assemble_finding_release import unpack_source; unpack_source(Path('/tmp/inputs'),Path('/tmp/original-project'))"
+      - uses: actions/cache/restore@v4
+        id: deps
+        with:
+          path: /tmp/original-project/lean/.lake/packages
+          key: original-openai-deps-1581d4cb-4341-full-v1
+      - name: Build this environment module once and extract every planned lemma
+        # Runs after an earlier failure too, so the shard still records why nothing was read.
+        if: ${{ !cancelled() }}
+        run: |
+          sudo sysctl -w vm.max_map_count=1048576
+          python scripts/plan_dependency_cone.py run --project /tmp/original-project/lean --cone-plan /tmp/cone/plan.json \
+            --original-plan /tmp/cone/original-plan.json --environment /tmp/cone/environment.json \
+            --shard '${{ matrix.id }}' --dependency-cache '${{ steps.deps.outputs.cache-hit }}' \
+            --output /tmp/cone-output --trust-project
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: dependency-cone-${{ matrix.id }}
+          path: /tmp/cone-output/
+          retention-days: 90
+          if-no-files-found: warn
+  summary:
+    if: ${{ !cancelled() && needs.plan.result == 'success' }}
+    needs: [plan, extract]
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with: {persist-credentials: false}
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - uses: actions/download-artifact@v4
+        with: {pattern: 'dependency-cone-*', path: /tmp/shards}
+      - name: Account for every planned lemma (separate dependency-cone denominator)
+        run: |
+          python scripts/plan_dependency_cone.py reconcile --cone-plan /tmp/shards/dependency-cone-plan/plan.json \
+            --environment /tmp/shards/dependency-cone-plan/environment.json --scope "$SCOPE" \
+            --shards /tmp/shards --output /tmp/cone-summary/dependency-cone-summary.json
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with: {name: cone-summary-level-1, path: /tmp/cone-summary/, retention-days: 90, if-no-files-found: warn}
