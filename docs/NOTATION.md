@@ -20,7 +20,7 @@ display convention, not a translation with a correctness proof.
 | Hook | Location | Effect |
 |---|---|---|
 | `math_text()` | `narrative.py` | Applies `notation.display()` to the result of the existing gcd/`·`/`≠` dictionary (`_math_dictionary`). |
-| `@notation.reading` | `Narrative.document()` | Builds one display context from the whole snapshot, then attaches the legend to the declaration. |
+| `@notation.reading` | `Narrative.document()` | Builds one display context from the whole snapshot, then attaches the legend to the declaration's axes and appends it to its warnings. |
 | `notation.legend()` | `prose()` | Prints the legend between the trust notice and the statement. |
 | `notation.name(full)` | not yet called | Shortens one cited Lean name, for example a lemma in a step sentence, under the same collision rules, and records it for the legend. |
 
@@ -46,9 +46,12 @@ Notation (display only; the recorded Lean formulas are unchanged):
 - x ↦ e stands for fun x => e.
 ```
 
-The HTML reader receives the field in its embedded document, but `app.js` does
-not display it yet. Until it does, the per-step **Exact step source** is the
-reader's only view of the full names.
+The same legend, as one paragraph, is the declaration's last warning. The HTML
+reader lists warnings in its audit panel and the Markdown view prints them, so
+every view that shows shortened names also shows the legend. `app.js` does not
+yet read `axes['notation']` or show the legend beside the statement. Warnings
+are outside the reading binding; `check_reading()` compares the bound copy in
+`axes['notation']`. The per-step **Exact step source** keeps the full names.
 
 ## Corpus profile
 
@@ -212,9 +215,12 @@ Some names receive a fixed symbol instead:
 
 The display context collects every name in the snapshot: statements, objects,
 domains, values, context types, cited heads, binder names and context names.
-It is built before any step is rendered, so a shortening is decided once for
-the whole reading. A shortening is refused, and the name falls back to the next
-longer form (finally the full name), when any of these holds:
+It also reads each string as the narrative dictionary rewrites it, so a
+shortened name cannot look like a word that the dictionary introduces, such as
+`gcd` in `gcd(a, b)`. It is built before any step is rendered, so a
+shortening is decided once for the whole reading. A shortening is refused, and
+the name falls back to the next longer form (finally the full name), when any
+of these holds:
 
 - Two distinct full names would be shown as the same text in that reading.
 - A dotted prefix of the shown text would denote something else. For example,
@@ -225,21 +231,25 @@ longer form (finally the full name), when any of these holds:
   bound variable name in that reading.
 - The shown text starts with a Lean keyword or a reserved root name (`RESERVED`
   in the module): root classes such as `Finite`, `Countable` and `Nonempty`,
-  which a reader would take to be the library's own, and major library namespaces
-  such as `Real` or `Set`.
+  which a reader would take to be the library's own, major library namespaces
+  such as `Real` or `Set`, and root names that project constants of the corpus
+  repeat, such as `IsClosed`, `Field` and `Lattice`. The list is maintained by
+  hand and is not complete.
 
 Field names after `(…).` are not free names and do not block a shortening; the
 `b` in `a..b` does. The decision does not depend on iteration order, and the
 cross-process test runs it under several hash seeds.
 
-Across the corpus, 6,177 qualified names could be shortened. Of these, 6,167 use
-the first choice, 4 fall back to a longer form, and 6 keep the full name. The
-four fallbacks show the rules at work. `OAI.AbhyankarSathaye.F` collides with
-the bound variable of `∃ F`, `OAI.CoordinateSweeps.a` with a local binder `a`,
-`OAI.Solenoidal.Field` with the root class `Field` (cited as
-`Field.toSemifield…`), and `OAI.RVM.Classical` with the reserved name
-`Classical`. The six refusals are `Set.Finite` and names under `Set.Finite`,
-`Set.Infinite` and `Set.Nonempty`.
+Across the corpus, 6,177 qualified names could be shortened. Of these, 6,154 use
+the first choice, 17 fall back to a longer form, and 6 keep the full name. Two
+fallbacks are collisions: `OAI.AbhyankarSathaye.F` with the bound variable of
+`∃ F`, and `OAI.CoordinateSweeps.a` with a local binder `a`. The other 15 start
+with a reserved name and keep one more namespace component, for example
+`TamingCompatibility.IsClosed` and `Routing.Field`. They are `Algebra`,
+`Classical`, `Dense` (two names), `Field` (two), `IsClosed`, `Language` (two),
+`Lattice`, `Multiplicative`, `Small` (two), `gradient` and `spectrum`. The six
+refusals are `Set.Finite` and names under `Set.Finite`, `Set.Infinite` and
+`Set.Nonempty`.
 
 ### Strings left unchanged
 
@@ -265,16 +275,20 @@ the text is printed as before, apart from name shortening.
 | Lean | Shown | Conditions | Readings |
 |---|---|---|---:|
 | `fun x => e` | `x ↦ e` | One plain binder; parenthesized unless it fills its bracket group or the whole formula; not used if the reading already contains `↦`. | 125 |
-| `Filter.Tendsto (fun x => e) Filter.atTop (nhds a)` | `e → a as x → ∞` | The lambda rule's binder conditions; the source filter is exactly `Filter.atTop`; the target is `nhds a` with an atomic `a`, `Filter.atTop` (`∞`) or `Filter.atBot` (`−∞`). `e` is parenthesized unless it uses only arithmetic operators; the whole form is parenthesized when it is an operand. Not used if `as` is a name in the reading. | 36 |
+| `Filter.Tendsto (fun x => e) Filter.atTop (nhds a)` | `e → a as x → ∞` | The lambda rule's binder conditions; the source filter is exactly `Filter.atTop`; the target is `nhds a` with an atomic `a`, `Filter.atTop` (`∞`) or `Filter.atBot` (`−∞`). `a` does not mention `x`, which `as x → ∞` would bind. `e` is parenthesized unless it uses only arithmetic operators; the whole form is parenthesized when it is an operand. Not used if `as` is a name in the reading. | 36 |
 | `nhdsWithin a s` | `𝓝[s] a` | Mathlib's notation; only when `nhds` is shown as `𝓝` in that reading. | 1 |
 | `Finset.card s` | `#s` | Mathlib's notation; not used if `#` already occurs. | 1 |
 | `Real.sqrt x` | `√x` | Mathlib's notation. Lean already prints `√` in the corpus, so this never fires there. | 0 |
-| `Nat.choose n k` | `(n choose k)` | Two atomic arguments; not used if `choose` is a name in the reading. | 1 |
+| `Nat.choose n k` | `(n choose k)` | Two atomic arguments; not used if `choose` is a name in the reading. Not parenthesized twice when it fills a parenthesized group, as in `↑(20 choose 10)`. | 1 |
 
 `x → ∞` follows Mathlib's reading of `Filter.atTop`: eventually above every
 bound of the domain's order. For a type such as `Finset ℕ` this is "eventually
 containing every finite set", not a real-valued limit. The legend names the
 exact Lean form.
+
+A limit `nhds a` whose `a` mentions the bound variable is left as printed: in
+`Filter.Tendsto (fun n => f n) Filter.atTop (nhds n)` the limit's `n` is not
+the lambda's `n`.
 
 ### Forms left as printed
 
@@ -309,9 +323,9 @@ changed; both columns therefore read `source-math-en/0.4.2`.
 | gap_frame_share | 0.3401 | 0.3401 |
 | opaque_apply_steps | 7,616 | 7,616 |
 | words | 393,664 | 391,827 |
-| characters | 3,557,369 | 2,916,329 |
-| qualified names | 55,067 | 28,025 |
-| qualified_names_per_1000_characters | 15.48 | 9.61 |
+| characters | 3,557,369 | 2,917,425 |
+| qualified names | 55,067 | 28,081 |
+| qualified_names_per_1000_characters | 15.48 | 9.63 |
 | Lean markers (`fun`, `=>`, `↑`) | 13,925 | 10,125 |
 | lean_markers_per_1000_characters | 3.91 | 3.47 |
 
@@ -319,12 +333,12 @@ Notation changes no step, gap or ownership count. Most of the reduction comes
 from omitting prefixes: a shortened name has the same meaning, and the reader
 needs the legend to recover the prefix. The counts fall by 49% (qualified
 names) and 27% (Lean markers). The per-1000-character rates fall less, because
-the displayed text is also 18% shorter. The 28,025 qualified names that remain
+the displayed text is also 18% shorter. The 28,081 qualified names that remain
 in displayed text are:
 
 | Remaining qualified names | Count |
 |---|---:|
-| Shortened but still dotted, such as `CKSLorentz.bondiCharge` or `Measure.map` | 12,495 |
+| Shortened but still dotted, such as `CKSLorentz.bondiCharge` or `Measure.map` | 12,551 |
 | Cited names in `Apply … to the supplied arguments.` | 6,471 |
 | Names in namespaces that are not opened, such as `ENNReal.ofReal`, `Fintype.card` and `Real.instIsOrderedRing` | 4,986 |
 | Fields or projections of local binders, such as `P.fst` | 4,055 |
@@ -343,6 +357,8 @@ legend lines in `prose()` are not part of the measured text.
 - A shortened single-letter constant, such as `E` for `OAI.CKSLorentz.E`, can
   look like a variable. The collision rules guarantee only that no variable or
   other name in the same reading is displayed with the same text.
+- A shortened project name can still coincide with a library root name that
+  the reading does not contain and that `RESERVED` does not list.
 - The legend includes an entry when a recorded display form, or a shortened
   name as a whole word, occurs in the displayed text. A shortened name that is
   also an ordinary word of the text can add an entry that is not needed. An

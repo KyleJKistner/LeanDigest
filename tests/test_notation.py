@@ -69,6 +69,18 @@ def test_reserved_root_names_and_library_namespaces():
     assert shown('Set.Finite s ∧ Set.Nonempty s') == 'Set.Finite s ∧ Set.Nonempty s'
     assert shown('OAI.BinPackingGap.Nonempty x') == 'BinPackingGap.Nonempty x'
     assert shown('OAI.Real.foo x', theorem='OAI.thm') == 'OAI.Real.foo x'
+    # Project constants of the corpus that repeat a library root name.
+    assert shown('OAI.BinPackingGap.IsClosed s ∧ OAI.BinPackingGap.Field') == 'BinPackingGap.IsClosed s ∧ BinPackingGap.Field'
+
+
+def test_words_of_the_narrative_dictionary_block_shortening():
+    from proofreader.narrative import _math_dictionary
+    frame = {'statement': 'EuclideanDomain.gcd a b = OAI.BinPackingGap.gcd a', 'objects': [], 'head': '', 'context': []}
+    record = {'theorem': 'OAI.BinPackingGap.t', 'frames': [frame]}
+    assert Reading.of(record).names['OAI.BinPackingGap.gcd'] == 'gcd'
+    r = Reading.of(record, _math_dictionary)
+    assert r.names['OAI.BinPackingGap.gcd'] == 'BinPackingGap.gcd'
+    assert display(_math_dictionary(frame['statement']), r) == 'gcd(a, b) = BinPackingGap.gcd a'
 
 
 def test_names_in_string_literals_and_fields_are_untouched():
@@ -149,6 +161,21 @@ def test_tendsto_word_collision_bails_out():
 
 
 @pytest.mark.parametrize('text,expected', [
+    # The limit's n is free; "as n → ∞" would bind it.
+    ('Filter.Tendsto (fun n => f n) Filter.atTop (nhds n)', 'Tendsto (n ↦ f n) atTop (𝓝 n)'),
+    ('Filter.Tendsto (fun n => f n) Filter.atTop (nhds (g n.1))', 'Tendsto (n ↦ f n) atTop (𝓝 (g n.1))'),
+])
+def test_tendsto_limit_mentioning_the_bound_variable_bails_out(text, expected):
+    assert shown(text) == expected
+
+
+def test_n_ary_binder_commas_stay_inside_a_lambda_body():
+    assert shown('⟨fun x => Σ y, f x y, h⟩') == '⟨(x ↦ Σ y, f x y), h⟩'
+    assert shown('⟨fun x => ⨁ i, f i x, h⟩') == '⟨(x ↦ ⨁ i, f i x), h⟩'
+    assert shown('⟨fun x => ∫ t in a..b, f t x, h⟩') == '⟨(x ↦ ∫ t in a..b, f t x), h⟩'
+
+
+@pytest.mark.parametrize('text,expected', [
     ('fun x => x + 1', 'x ↦ x + 1'),
     ('(fun x => x + 1) 2', '(x ↦ x + 1) 2'),
     ('Finset.sum s fun i => f i', 'Finset.sum s (i ↦ f i)'),
@@ -180,6 +207,9 @@ def test_symbols():
     assert shown('Real.sqrt (x + 1) ^ 2 = x + 1') == '√(x + 1) ^ 2 = x + 1'
     assert shown('Nat.choose n 2 = n * (n - 1) / 2') == '(n choose 2) = n * (n - 1) / 2'
     assert shown('Finset.card (s ∪ t) ≤ Finset.card s + Finset.card t') == '#(s ∪ t) ≤ #s + #t'
+    # A choose form that fills a parenthesized group is not parenthesized twice.
+    assert shown('↑(Nat.choose 20 10) / 2') == '↑(20 choose 10) / 2'
+    assert shown('(Nat.choose n k : ℝ)') == '((n choose k) : ℝ)'
 
 
 @pytest.mark.parametrize('text,local,expected', [
@@ -249,6 +279,11 @@ def test_retained_fixture_legend_and_regeneration(fixture):
     assert 'Notation (display only; the recorded Lean formulas are unchanged):' in text
     for ns in axes['notation']['omitted_namespaces']:
         assert ns in text
+    # The reader page and the Markdown view show the warnings: the same legend
+    # is the last warning, so no view shows shortened names without it.
+    legend = d.declarations[0].warnings[-1]
+    assert legend.startswith(notation.LEGEND_TITLE)
+    assert all(line[2:] in legend for line in notation.legend(d.declarations[0])[1:-1])
     # Raw Lean formulas stay attached to each step and are untouched.
     frames = {f['statement'] for f in record['frames']}
     assert all(s.source in frames for s in walk_steps(d.declarations[0].steps))

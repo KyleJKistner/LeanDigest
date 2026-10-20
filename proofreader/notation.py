@@ -44,6 +44,17 @@ _COMMENT = re.compile(r'--|/-|-/')
 KEYWORDS = frozenset('fun λ let have show match if then else do by at from in with calc Type Sort Prop where deriving'.split())
 _NO_EXTENT = frozenset('let have show match calc do by λ where deriving'.split())
 _BINDERS = frozenset("∀ ∃ ∑ ∏ ∑' ∏' ∫ ∮ ⋃ ⋂ ⨆ ⨅".split())
+# Lean lexes Σ and Π as tokens, not identifier letters. With the n-ary operator
+# characters (∐, ∫…∳, ⋀…⋃, ⨀…⨜, e.g. ⨍ ⨁ ⨂) they may open a binder whose comma
+# must not be read as the end of an enclosing lambda body.
+_BINDER_IDS = frozenset("Σ Σ' Π Π'".split())
+
+
+def _nary(x: str) -> bool:
+    return x in _BINDERS or (len(x) == 1 and (x == '∐' or '∫' <= x <= '∳'
+                                              or '⋀' <= x <= '⋃' or '⨀' <= x <= '⨜'))
+
+
 _PREFIX = frozenset('↑ ⇑ ↥'.split())
 # Items that can begin a further application argument after whitespace.
 _ARG_START = _PREFIX | _BINDERS | frozenset('¬ √ @ # | ‖ ⟪ ∂'.split())
@@ -58,8 +69,14 @@ SYMBOLS = {'Real.log': 'log', 'Real.exp': 'exp', 'Real.sin': 'sin', 'Real.cos': 
            'Real.arctan': 'arctan', 'Real.sinh': 'sinh', 'Real.cosh': 'cosh', 'Real.tanh': 'tanh',
            'Real.artanh': 'artanh', 'Real.pi': 'π', 'nhds': '𝓝'}
 # A shortened name never starts with one of these: root-level Lean/Mathlib
-# names and namespaces that a reader would take to be the library's own.
+# names and namespaces that a reader would take to be the library's own. The
+# list is hand-maintained, not complete; the second line holds the root names
+# that project constants of the corpus repeat (e.g. OAI.TamingCompatibility.
+# IsClosed), with a few equally common library roots.
 RESERVED = frozenset('''Finite Infinite Countable Nonempty Subsingleton Nontrivial Unique Inhabited IsEmpty Elem
+    Field IsClosed Algebra Lattice Small Language Multiplicative Additive spectrum gradient Dense Group Monoid Ring
+    CommRing Semiring Ideal Subgroup Continuous Differentiable Measurable MeasurableSet IsOpen IsCompact Convex
+    Irrational Prime Even Odd Summable HasSum IsUnit Irreducible
     Mem Disjoint Pairwise Monotone Antitone StrictMono StrictAnti Injective Surjective Bijective Prod Sum Sigma
     Subtype Real Nat Int Rat Complex Set Finset Filter MeasureTheory ProbabilityTheory Function List Multiset Fin
     Fintype Matrix Polynomial MvPolynomial ENNReal NNReal EReal Metric TopologicalSpace Topology Module Submodule
@@ -140,7 +157,10 @@ class Reading:
     outputs: dict[str, frozenset[str]] = field(default_factory=dict)
 
     @classmethod
-    def of(cls, record: dict) -> 'Reading':
+    def of(cls, record: dict, prepare: Any = None) -> 'Reading':
+        """``prepare`` is the transformation applied before ``display`` (the
+        narrative dictionary); its outputs count as displayed words, so a
+        shortened name cannot look like a word it introduces, such as gcd."""
         strings: set[str] = set(); local: set[str] = set()
         for f in record['frames']:
             strings.add(f['statement']); strings.update(f['objects']); strings.add(f['head'])
@@ -149,6 +169,8 @@ class Reading:
                 local.add(f['binder'])
             for c in f['context']:
                 local.add(c['name']); strings.add(c['type'])
+        if prepare is not None:
+            strings |= {prepare(s) for s in strings}
         return cls.build(record['theorem'], strings, local)
 
     @classmethod
@@ -336,8 +358,10 @@ def _extent(items: tuple, start: int) -> int | None:
                     return i
             elif x in ('at', 'from'):
                 return i
+            elif x in _BINDER_IDS:
+                expect.append(',')
         elif t.kind == 'op':
-            if x in _BINDERS:
+            if _nary(x):
                 expect.append(',')
             elif x == ',':
                 if not expect or expect[-1] != ',':
@@ -394,17 +418,26 @@ def _lambda(items: tuple) -> tuple[str, tuple] | None:
     return None
 
 
-def _render(items: tuple, r: Reading, used: set[str]) -> str:
+def _ids(items: Iterable) -> Iterable[str]:
+    for t in items:
+        if isinstance(t, Group):
+            yield from _ids(t.items)
+        elif t.kind == 'id':
+            yield t.text
+
+
+def _render(items: tuple, r: Reading, used: set[str], paren: bool = False) -> str:
+    """``paren``: ``items`` is the whole content of a parenthesized group."""
     out: list[str] = []
     i = 0
     while i < len(items):
-        hit = _rule(items, i, r, used)
+        hit = _rule(items, i, r, used, paren)
         if hit is not None:
             out.append(hit[0]); i = hit[1]
             continue
         it = items[i]
         if isinstance(it, Group):
-            out.append(it.open + _render(it.items, r, used) + it.close)
+            out.append(it.open + _render(it.items, r, used, it.open == '(') + it.close)
         elif it.kind == 'id' and it.text in r.names and not (i and _is(items[i-1], 'op', '.')):
             out.append(r.names[it.text]); used.add(r.via[it.text])
         else:
@@ -419,7 +452,7 @@ def _wrap(items: tuple, start: int, end: int, text: str) -> str:
     return text if alone else '('+text+')'
 
 
-def _rule(items: tuple, i: int, r: Reading, used: set[str]) -> tuple[str, int] | None:
+def _rule(items: tuple, i: int, r: Reading, used: set[str], paren: bool = False) -> tuple[str, int] | None:
     it = items[i]
     if not _is(it, 'id'):
         return None
@@ -446,6 +479,10 @@ def _rule(items: tuple, i: int, r: Reading, used: set[str]) -> tuple[str, int] |
         if found is None or not (len(source) == 1 and _is(source[0], 'id', 'Filter.atTop')) or len(target) != 1:
             return None
         x, body = found
+        # In `Tendsto (fun n => f n) atTop (nhds (g n))` the limit's n is not
+        # the bound one; "as n → ∞" would bind it, so such a limit stays as printed.
+        if any(t == x or t.startswith(x+'.') for t in _ids(target)):
+            return None
         target = target[0]
         if _is(target, 'id', 'Filter.atTop'):
             limit = '∞'
@@ -491,7 +528,11 @@ def _rule(items: tuple, i: int, r: Reading, used: set[str]) -> tuple[str, int] |
             return None
         (a0, a1), (b0, b1) = args
         used.add('choose')
-        return '('+sub(items[a0:a1])+' choose '+sub(items[b0:b1])+')', b1
+        shown = sub(items[a0:a1])+' choose '+sub(items[b0:b1])
+        # Not ((n choose k)) when the form already fills a parenthesized group.
+        if paren and _prev(items, i) < 0 and _next(items, b1) >= len(items):
+            return shown, b1
+        return '('+shown+')', b1
     return None
 
 
@@ -528,19 +569,30 @@ def summary(r: Reading, text: str) -> dict:
     return {'omitted_namespaces': [ns for ns in order if 'ns:'+ns in keys], 'symbols': symbols}
 
 
+LEGEND_TITLE = 'Notation (display only; the recorded Lean formulas are unchanged):'
+
+
 def attach(document: Any, r: Reading) -> None:
-    """Record the reading's legend in ``axes['notation']``, which the UI can read."""
+    """Record the reading's legend in ``axes['notation']``, which the UI can read.
+
+    The same legend is appended to the declaration's warnings, which the reader
+    page and the Markdown view already display, so no view shows shortened
+    names without it. Warnings are outside the reading binding; the bound
+    ``axes['notation']`` is what ``check_reading`` compares.
+    """
     d = document.declarations[0]
     s = summary(r, displayed_text(d))
     if s['omitted_namespaces'] or s['symbols']:
         d.axes['notation'] = s
+        d.warnings.append(LEGEND_TITLE+' '+' '.join(_entries(s)))
 
 
 def reading(method):
     """Decorate ``Narrative.document``: one display context per rendered reading."""
     @functools.wraps(method)
     def document(self, *args, **kwargs):
-        r = Reading.of(self.snapshot.record)
+        from .narrative import _math_dictionary  # applied to every string before display
+        r = Reading.of(self.snapshot.record, _math_dictionary)
         token = _CURRENT.set(r)
         try:
             result = method(self, *args, **kwargs)
@@ -551,16 +603,17 @@ def reading(method):
     return document
 
 
+def _entries(n: dict) -> list[str]:
+    out = ['Namespace prefixes not written: '+', '.join(n['omitted_namespaces'])+'.'] if n['omitted_namespaces'] else []
+    return out+[shown+' stands for '+lean+'.' for shown, lean in n['symbols']]
+
+
 def legend(declaration: Any) -> list[str]:
     """Plain-text legend lines for ``prose``; empty when no notation is displayed."""
     n = declaration.axes.get('notation')
     if not n:
         return []
-    lines = ['Notation (display only; the recorded Lean formulas are unchanged):']
-    if n['omitted_namespaces']:
-        lines.append('- Namespace prefixes not written: '+', '.join(n['omitted_namespaces'])+'.')
-    lines += ['- '+shown+' stands for '+lean+'.' for shown, lean in n['symbols']]
-    return lines+['']
+    return [LEGEND_TITLE]+['- '+e for e in _entries(n)]+['']
 
 
 # --- corpus profile (docs/NOTATION.md) --------------------------------------
