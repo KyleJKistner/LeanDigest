@@ -168,6 +168,46 @@ because no original-environment build of it is retained.
 The retained worker times are unsigned observations. They select the pilot and
 are never acceptance evidence.
 
+## Pilot results
+
+Run [39373979494](https://github.com/KyleJKistner/LeanDigest/actions/runs/39373979494)
+on commit `4c072f149df9c6e43fa2a87cf062746838fffade` (2026-10-20) ran the pilot
+scope. The dependency cache was not restorable from this branch, so the
+preflight job re-created the dependency tree with the seed commands (4 minutes
+42 seconds) and its environment audit matched the pinned audit. All 8 shards
+then took the `resolve` route.
+
+All 151 planned pilot lemmas reached `reading-generated`. No shard artifact is
+missing, and the other 1,571 planned lemmas are `not-in-run-scope`. The
+summary artifact `cone-summary-level-1` has SHA-256
+`f5a040a92258d77251a49b11a3520e861e4a8271716386a3da6aa6556de696c4`. The 8 shard
+artifacts and the plan artifact were downloaded, their digests matched the
+values GitHub records, and `scripts/plan_dependency_cone.py reconcile` on them
+reproduced the CI summary byte for byte.
+
+| Environment module | Readings | Checked frames | Displayed steps | Gap steps | Shard job time |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| `OAI.Probability.ContinuumTransition.Main` | 30 | 1,107 | 606 | 295 | 24 min |
+| `OAI.Combinatorics.UniformKServer.Main` | 21 | 814 | 554 | 244 | 26 min |
+| `OAI.Probability.GaussianInformation.Main` | 21 | 1,472 | 1,008 | 547 | 11 min |
+| `OAI.Probability.CoordinateSweeps.Main` | 18 | 1,419 | 1,130 | 561 | 10 min |
+| `OAI.Probability.UnimodularPercolation.CayleyMain` | 17 | 936 | 588 | 224 | 18 min |
+| `OAI.MathematicalPhysics.SheetFlows.SheetProgram` | 15 | 397 | 281 | 113 | 9 min |
+| `OAI.Probability.ProjectionMoments.Main` | 15 | 2,248 | 1,324 | 402 | 11 min |
+| `OAI.MathematicalPhysics.NavierStokes.BalancedTransport.MainResult` | 14 | 917 | 721 | 268 | 11 min |
+| Total | 151 | 9,310 | 6,212 | 2,654 | |
+
+The frame, step and gap counts come from `leanglish reading-kpis` with renderer
+`source-math-en/0.5.0` on the downloaded snapshots. The gap step share is 0.43
+and the gap frame share is 0.46. No pilot reading is free of gaps. By rule, the
+gap steps are 1,337 library citations, 508 project citations, 239 instance-fact
+groups, 201 rewrites, 166 restatements, 129 automation summaries and 74 others.
+Library lemmas are the largest gap category in these supporting lemmas, unlike
+the documented targets, where project citations dominate.
+
+These are unsigned retained observations. The readings are not yet in any
+catalog, and they do not count toward the 536 documented targets.
+
 ## Running the campaign
 
 The workflow `.github/workflows/dependency-cone.yml` runs on pushes to
