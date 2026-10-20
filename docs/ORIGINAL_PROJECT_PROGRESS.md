@@ -53,12 +53,12 @@ is explicitly distinguished from running Lean again.
 
 ## Delivery and focused verification work
 
-`original-reading-delivery.yml` rebuilds the expanded offline catalog from frozen
+`.github/workflow-archive/original-reading-delivery.yml` rebuilds the expanded offline catalog from frozen
 inputs, requires actual file-navigation browser checks and links every original
 build/configuration obligation to its status. It does not rerun the active corpus
 campaign or alter its evidence. Publication is a separate explicit action.
 
-`original-nanoda-recovery.yml` builds the external checker at
+`.github/workflow-archive/original-nanoda-recovery.yml` builds the external checker at
 `f67473ba5f9397266f89c7852082c9c914b5d219`, requires acceptance and disallowed-axiom
 rejection controls, and retries only the diagnosed ArtinParabolicIntersections
 configuration with its original `enable_nanoda: true` unchanged. A successful
