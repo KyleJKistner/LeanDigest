@@ -1041,6 +1041,62 @@ def test_induction_cases_are_compared_with_the_motive():
     assert [c.text for c in step.children[1].children[:2]] == ['Let g_1 ∈ ℕ be arbitrary.', 'Assume ↑g_1 < 2 ^ g_1.']
 
 
+@pytest.mark.parametrize('motive,base', [
+    # Synthetic format fixtures: the motive variable n is bound again inside the
+    # motive (an integral, a.e. quantifier, tsum or let), so no textual instance is
+    # stated; substituting under the binder would print (∫ 0, f 0 ∂μ) ≤ g 0.
+    ('(∫ n, f n ∂μ) ≤ g n', '(∫ n, f n ∂μ) ≤ g 0'),
+    ('(∀ᵐ n ∂μ, P n) ∧ Q n', '(∀ᵐ n ∂μ, P n) ∧ Q 0'),
+    ("(∑' n, f n) = g n", "(∑' n, f n) = g 0"),
+    ('let n := 3; n = n', 'let n := 3; n = n'),
+])
+def test_motive_instance_is_not_substituted_under_an_inner_binder(motive, base):
+    record = synthetic(app('Nat.rec', 'Q', (1, given('h0', base)), (2, given('hs', '∀ (k : ℕ), R k')),
+                           objects=['fun n => '+motive, 'm'], role='induction'))
+    n, d = rendered(record)
+    [step] = d.declarations[0].steps
+    assert step.rule == 'unchecked-induction' and step.fallback
+    assert 'That the base case below is the instance of the induction claim is not checked here.' in step.text
+    assert ' 0, ' not in step.text and '(0)' not in step.text
+    check_reading(record, d)
+
+
+@pytest.mark.parametrize('value,precedence', [
+    # Synthetic: an infix operator without a known precedence is never read as an application.
+    ('f a', 1024), ('a + b', 65), ('a % b', 70), ('a • b', None), ('s ∪ t', None), ("f ⁻¹' s", None), ('a ⬝ᵥ b', None),
+])
+def test_unknown_infix_operators_have_no_precedence(value, precedence):
+    from proofreader.narrative_checks import _value_precedence
+    assert _value_precedence(value) == precedence
+
+
+def test_displayed_definition_with_an_unknown_operator_is_not_unfolded_bare():
+    # Synthetic: g := a • b; g ^ 2 = 0 is not a • b ^ 2 = 0 (• binds less tightly than ^).
+    record = synthetic(dict(role='define', binder='g', domain='M', value='a • b', statement='Q',
+                            body=iff_mp('g ^ 2 = 0', 'a • b ^ 2 = 0')))
+    n, d = rendered(record)
+    assert owner(n, d, 1).rule == 'unchecked-equivalence'
+    record = synthetic(dict(role='define', binder='g', domain='M', value='a • b', statement='Q',
+                            body=iff_mp('g ^ 2 = 0', '(a • b) ^ 2 = 0')))
+    n, d = rendered(record)
+    assert owner(n, d, 1).rule == 'application' and not owner(n, d, 1).fallback
+
+
+@pytest.mark.parametrize('node', [
+    # Synthetic: Iff.mp applied to a further argument, and Iff.mp unapplied.
+    app('Iff.mp', 'Q x', (2, given('h', 'P ↔ ∀ (x : ℕ), Q x')), (3, given('ha', 'P')), objects=['P', '∀ (x : ℕ), Q x', 'x']),
+    app('Iff.mp', '(P ↔ Q) → P → Q', role='named'),
+])
+def test_iff_mp_not_applied_to_exactly_two_premises_is_a_cited_constant(node):
+    record = synthetic(node)
+    n, d = rendered(record)
+    [step] = d.declarations[0].steps
+    # At top level a citation proving the theorem reads "The statement follows from X[, applied to the facts below]."
+    assert step.text.startswith('The statement follows from Iff.mp') and (step.rule, step.fallback) == ('citation', True)
+    assert 'forward direction' not in step.text
+    check_reading(record, d)
+
+
 def choice(major, name, kind, prop):
     body = given('hs', 'S')
     intro = dict(role='introduce', binder=name, domain=kind, statement='∀ ('+name+' : '+kind+'), '+prop+' → S',

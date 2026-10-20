@@ -181,10 +181,10 @@ displayed step, and `check_reading` still regenerates the reading.
 | `have` (anonymous) | A `have` whose binder is `this` or `this_n` | "Establish S." without "call this fact this"; a later use of that hypothesis reads "Use the fact S established above." only when the nearest enclosing binder of that name is that `have` | No |
 | `subproof` (0.7.0) | The displayed proof of a premise, conjunct, calculation link, case or recursor case that has more than one step and shares its list with another proof or a following step | "Prove S." ("Derive False." for False) with S the recorded statement of the premise, and the proof's steps nested below. The step owns no frame and is not a gap; its children keep their own gap flags | No |
 | `application` for `Iff.mp` | `Iff.mp` with exact argument paths whose equivalence prints as L ↔ R (precedence reading as for `equivalence-reverse`), whose hypothesis prints as L and whose conclusion prints as R (see "Printed-form checks") | "Apply the forward direction of the stated equivalence to the supplied hypothesis." | No |
-| `unchecked-equivalence` (0.7.0) | The same head when any of these checks fails | The same sentence, then "That the hypothesis and the conclusion have the printed forms of its two sides is not checked here." | Yes |
+| `unchecked-equivalence` (0.7.0) | The same head with exact argument paths when any printed-form check fails; `Iff.mp` not applied to exactly its two premises (unapplied, or applied further) is a `citation` instead, as `Iff.mpr` is | The same sentence, then "That the hypothesis and the conclusion have the printed forms of its two sides is not checked here." | Yes |
 | `equivalent-assumption` | `id (fun h : A => body) h'` whose binder domain A prints as the statement of h' | "Use the same hypothesis in the form A." | No |
 | `assumption-restatement` (0.7.0) | The same shape with A printed differently | "Use the same hypothesis in the definitionally equal form A; the unfolding is not expanded." | Yes |
-| `induction` | `Nat.rec`, `Nat.recAux`, `Nat.recOn`, `List.rec` or `List.recOn` with exact argument slots, whose cases print as the motive's instances (since 0.7.0): `fun x => B` instantiated at `0` (or `[]`), and `∀ (n : ℕ), B[n] → B[n + 1]` (or `∀ (a : α) (l : List α), B[l] → B[a :: l]`), substituted without capturing a bound name | "Proceed by induction on n." with each case labelled ("Base case (zero).", "Successor step."), a case of several steps nested under "Prove S." | No |
+| `induction` | `Nat.rec`, `Nat.recAux`, `Nat.recOn`, `List.rec` or `List.recOn` with exact argument slots, whose cases print as the motive's instances (since 0.7.0): `fun x => B` instantiated at `0` (or `[]`), and `∀ (n : ℕ), B[n] → B[n + 1]` (or `∀ (a : α) (l : List α), B[l] → B[a :: l]`), substituted without capturing a bound name; a motive that binds its variable again inside B (∀, ∃, fun, ∑, ∑', ∫, ∫⁻, ∀ᵐ, let, have, set-builder …) is not instantiated | "Proceed by induction on n." with each case labelled ("Base case (zero).", "Successor step."), a case of several steps nested under "Prove S." | No |
 | `unchecked-induction` (0.7.0) | The same recursor when a case is not printed as the motive's instance | The sentence, then "The empty-list case must prove C; the proof below establishes a definitionally equal form, whose unfolding is not expanded." (or, when the motive cannot be instantiated, "That the … below is the instance of the induction claim is not checked here.") | Yes |
 | `choose` | `Exists.casesOn` with an introduced value and an assumption, whose premise prints with a leading `∃` (not `∃!`), or as `a ∣ b` with the assumption printed `b = a * c` for the chosen c (Mathlib's definition of divisibility) | "Since P, choose x ∈ A with Q." | No |
 | `unchecked-choice` (0.7.0) | The same shape with any other premise (a named predicate, `Even n`, `p ∈ Set.range f`, a `have` form) | The sentence, then "That the premise unfolds to an existential statement is not checked here." | Yes |
@@ -263,7 +263,8 @@ name the body does not use), in ¬P written P → False, or in a ≥ b written
 b ≤ a. A local definition that the reading displays as "Set x = v." above the
 step may be unfolded: x is replaced by v, without parentheses only where the
 neighbouring operators bind less tightly than v (Lean precedence), and never
-inside a formula with a binder. This keeps the certified Bézout reading
+inside a formula with a binder. A value with an infix operator whose
+precedence the check does not know (•, ∪, ++, ⁻¹' …) is always parenthesized. This keeps the certified Bézout reading
 unchanged: its `Iff.mp` step uses `hg : g = 0` for `gcd(x, z) = 0`, its two
 restated hypotheses and its first calculation use `g`, `r` and `s`, all
 displayed as "Set …" steps, and its two choices are from divisibilities.
@@ -405,8 +406,10 @@ flat list. Tests that build records by hand say so; they are format fixtures,
 not Lean observations. The precedence traps for ∧ and ↔, the
 hypothesis-grouping boundaries (budget cuts, anonymous `have` facts, different
 scopes, labelled lines) and the 0.7.0 printed-form cases (bound-variable
-renaming, displayed local definitions with and without parentheses,
-divisibility, broken calculation chains) are synthetic.
+renaming, displayed local definitions with and without parentheses, infix
+operators of unknown precedence, divisibility, broken calculation chains,
+motives that bind their variable again, `Iff.mp` not applied to exactly two
+premises) are synthetic.
 `tests/audit/test_retained_reader_regressions.py`, written for the audit role,
 requires oversaturated projections in two retained snapshots to stay gaps:
 the InfiniteMatroid projection is now an `unchecked-application` gap, and the

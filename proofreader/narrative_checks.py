@@ -33,7 +33,8 @@ _VALUE_PRECEDENCE = {**{k: v for k, v in _PRECEDENCE.items() if len(k) == 1}, '�
 # Any binding construct: a name inside it may be bound, so nothing there is substituted.
 _BINDERS = re.compile(r"[∀∃λ∑∏⋃⋂⨆⨅∫∮|]|↦|=>|(?<![\w.'])(?:fun|let|have|match|show|do)(?![\w'])")
 _WHOLE_BINDER = re.compile(r"[∀∃λ|]|↦|=>|(?:fun|let|have|match|show|do)(?![\w'])")
-_BINDER_START = re.compile(r"(?:∀ᶠ|∃ᶠ|∃!|[∀∃λ∑∏⋃⋂⨆⨅]|(?<![\w.'])fun(?![\w']))(?= )")
+# Binders whose names bound_names collects; integrals, tsums, a.e. quantifiers and let/have bind too.
+_BINDER_START = re.compile(r"(?:∀ᶠ|∃ᶠ|∀ᵐ|∃ᵐ|∃!|∑'|∏'|∑ᶠ|∏ᶠ|∫⁻|[∀∃λ∑∏⋃⋂⨆⨅∫∮]|(?<![\w.'])(?:fun|let|have)(?![\w']))(?= )")
 _IDENT = re.compile(r"[^\W\d][\w'!?₀-₉✝⁰-⁹]*(?:\.[^\W\d][\w'!?₀-₉]*)*")
 _ATOM = re.compile(r"[^\W\d][\w'!?₀-₉✝⁰-⁹.]*|\d+|\[\]")
 # The relations a calculation link may be written with.
@@ -59,14 +60,42 @@ def _closing(text: str, k: int) -> int | None:
     return None
 
 
+def _symbols(text: str) -> list[str]:
+    """Space-separated tokens outside brackets that are infix operators.
+
+    A token is an operand when it begins with a letter, digit or bracket, or
+    with a prefix operator attached to its operand (↑x, -x, ¬p, ‖x‖); any
+    other token (=, +, •, ⁻¹', ⬝ᵥ, ++ …) is an infix operator.
+    """
+    depth, token, out = 0, '', []
+    for c in text+' ':
+        depth += (c in _FORMULA_GROUPS) - (c in _FORMULA_GROUPS.values())
+        if depth == 0 and c == ' ':
+            first = token[:1]
+            if first and not (first.isalnum() or first in _FORMULA_GROUPS or first in "_'"
+                              or (first in '↑¬-√‖|⌊⌈!' and len(token) > 1)):
+                out.append(token)
+            token = ''
+        else:
+            token += c
+    return out
+
+
 def _value_precedence(value: str) -> int | None:
-    """2000 for an atom or a bracketed group, 1024 for an application, else its outer operator's precedence."""
+    """2000 for an atom or a bracketed group, 1024 for an application, else its outer operator's precedence.
+
+    None when an infix operator outside brackets has no known precedence
+    (•, ∪, ++, '' …): such a value is never treated as an application.
+    """
     if _ATOM.fullmatch(value) or (value[0] in _FORMULA_GROUPS and _closing(value, 0) == len(value)-1):
         return 2000
     outer = _outer(value)
     if outer is None or 'keyword' in outer[1] or not outer[1] <= set(_VALUE_PRECEDENCE):
         return None
-    return min((_VALUE_PRECEDENCE[c] for c in outer[1]), default=1024)
+    infix = _symbols(outer[0])
+    if not set(infix) <= set(_VALUE_PRECEDENCE):
+        return None
+    return min((_VALUE_PRECEDENCE[c] for c in outer[1] | set(infix)), default=1024)
 
 
 def _neighbour(text: str, left: bool) -> int | None:
@@ -369,14 +398,20 @@ class ReadingChecks:
 
         The sentence needs exact argument slots and paths, the equivalence
         printed as a ↔ b, the hypothesis as a and the conclusion as b; otherwise
-        the step says so and stays a gap.
+        the step says so and stays a gap. Iff.mp not applied to exactly these
+        two premises (unapplied, partially or further applied) is a cited
+        constant, as Iff.mpr is.
         """
+        from .narrative import _citation, math_text
         f = self.frames[i]; ch = f['children']
-        if (self.logical_application(i, 2, [2, 3]) and self.equivalent(self.frames[ch[0]]['statement'], *f['objects'])
+        if not self.logical_application(i, 2, [2, 3]):
+            text, rule = _citation(f['head'])
+            return [self.step(i, text, rule=rule, fallback=True, conclusion=math_text(f['statement']),
+                              children=self.subproofs(ch))]
+        if (self.equivalent(self.frames[ch[0]]['statement'], *f['objects'])
                 and self.printed_as(i, self.frames[ch[1]]['statement'], f['objects'][0])
                 and self.printed_as(i, f['statement'], f['objects'][1])):
             return None
-        from .narrative import math_text
         return [self.step(i, 'Apply the forward direction of the stated equivalence to the supplied hypothesis. '
                           'That the hypothesis and the conclusion have the printed forms of its two sides is not checked here.',
                           rule='unchecked-equivalence', fallback=True, conclusion=math_text(f['statement']),
