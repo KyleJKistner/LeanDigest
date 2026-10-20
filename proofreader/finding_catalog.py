@@ -13,11 +13,13 @@ import json
 from pathlib import Path
 import re
 import shutil
+import sys
 
 from .model import canonical_json, digest
-from .narrative import Snapshot
+from .narrative import Narrative, Snapshot
 from .narrative_io import write_bundle
-from .declaration_index import build_index, citation_links, reading_map, summarize
+from .declaration_index import (build_index, citation_links, cited_names, reading_map, summarize,
+    walk_imports, select_dependencies, dependency_report, reachable_headers, CAPS)
 from .catalog_inputs import (PIN, read_json, write_json, safe_child, upstream_url,
     config_inventory, load_statements, load_proofs, families, verify_metadata)
 
@@ -88,6 +90,25 @@ def source_name(module: str) -> str:
     return sha256(module.encode()).hexdigest()[:24]+'.html'
 
 
+def source_page(module: str, source: str, dependency: dict | None = None) -> str:
+    """One exact source page; a cited dependency also states why it is bundled."""
+    relative=module.replace('.','/')+'.lean'
+    lines='\n'.join('<span class="line" id="L'+str(i)+'"><a href="#L'+str(i)+'">'+str(i)+'</a> '+html.escape(line)+'</span>' for i,line in enumerate(source.splitlines(),1))
+    note=''
+    if dependency is not None:
+        names,roots,path=dependency['cited_names'],dependency['citing_modules'],dependency['import_path']
+        code=lambda xs,sep:sep.join('<code>'+html.escape(x)+'</code>' for x in xs)
+        hops=('imports it directly.' if len(path)==2 else 'imports it through '+str(len(path)-2)+' intermediate module'+'s'*(len(path)!=3)+'.')
+        note=('<p class="notice">This module is not a solution module. Proof readings of '+str(len(roots))+' solution module'+'s'*(len(roots)!=1)
+              +' cite '+str(len(names))+' Lean name'+'s'*(len(names)!=1)+' that the lexical declaration index locates here: '+code(names,', ')
+              +'. The citing solution module '+code(path[:1],'')+' '+hops+'</p>'
+              +('<details><summary>Import path read from import headers</summary><p>'+code(path,' → ')+'</p></details>' if len(path)>2 else ''))
+    eyebrow='Cited dependency source · exact source' if dependency is not None else 'Exact source'
+    eyebrow+=' · not an English translation'
+    body='<p class="eyebrow">'+eyebrow+'</p><h1 class="long">'+html.escape(module)+'</h1>'+note+'<p><a href="'+upstream_url('lean/'+relative)+'">Pinned upstream file ↗</a> · SHA-256 <code>'+digest(source)+'</code></p><pre class="source">'+lines+'</pre>'
+    return shell(module,body,root='../')
+
+
 def shell(title: str, body: str, *, root: str = '', page: str = '') -> str:
     return ('<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">'
         '<meta http-equiv="Content-Security-Policy" content="default-src \'none\'; script-src \'self\'; style-src \'self\' \'unsafe-inline\'; img-src \'self\' data:; base-uri \'none\'; form-action \'none\'">'
@@ -109,7 +130,8 @@ def statement_html(s: dict) -> str:
 
 
 def build(upstream: Path, lean: Path, statement_roots: list[Path], proof_roots: list[Path],
-          output: Path, *, math_assets: Path | None = None, source_inventory: Path | None = None) -> dict:
+          output: Path, *, math_assets: Path | None = None, source_inventory: Path | None = None,
+          dependency_caps: dict | None = None) -> dict:
     if output.exists(): raise ValueError('Use a new output directory')
     verify_metadata(upstream,lean,source_inventory)
     configs=config_inventory(lean);fs=families(upstream,configs)
@@ -121,6 +143,7 @@ def build(upstream: Path, lean: Path, statement_roots: list[Path], proof_roots: 
     modules={c['solution_module'] for c in configs.values()}
     required=['ComparatorChallenges/'+k+ext for k in configs for ext in ('.json','.lean')]
     required += [m.replace('.','/')+'.lean' for m in modules]
+    manifest=None
     if source_inventory is not None:
         manifest={x['path']:x for x in read_json(source_inventory)}
         for relative in required:
@@ -134,34 +157,69 @@ def build(upstream: Path, lean: Path, statement_roots: list[Path], proof_roots: 
     else:
         (output/'assets/katex.min.js').write_text('/* MathML rendering unavailable; literal TeX is retained. */\n')
     shutil.copy2(upstream/'LICENSE',output/'OPENAI-LICENSE.txt')
-    # One lexical index of the bundled solution modules locates cited names; links
-    # stay outside each checked reading (links.json and a separate data island).
-    index=build_index({m:(lean/(m.replace('.','/')+'.lean')).read_text() for m in sorted(modules)})
-    def bundles(available):
+    # One lexical index of the bundled modules locates cited names; links stay
+    # outside each checked reading (links.json and a separate data island).
+    sources={m:(lean/(m.replace('.','/')+'.lean')).read_text() for m in sorted(modules)}
+    def load(module):  # Cited dependency modules are read only from the verified upstream tree.
+        relative=module.replace('.','/')+'.lean'
+        try: path=safe_child(lean,relative)
+        except ValueError: return None,'unsupported-module-name'
+        if not path.is_file(): return None,'missing-file'
+        data=path.read_bytes();entry=manifest.get('lean/'+relative) if manifest is not None else None
+        if manifest is not None and (not entry or digest(data)!=entry['sha256']): return None,'unverified-source'
+        try: return data.decode('utf-8'),'read'
+        except UnicodeDecodeError: return None,'unreadable-source'
+    def arguments(key,p):
+        return dict(source=sources[key[0]],file='lean/'+key[0].replace('.','/')+'.lean',receipt=p['receipt'],title=key[1],
+                    provenance_note='Retained native observation on unaltered source with shared upstream dependency pins; not a Comparator or complete-project replay.')
+    cited={}  # The names each reading cites, from the same document write_bundle renders.
+    for key,p in sorted(proofs.items()):
+        try: cited[key]=set(cited_names(Narrative(p['record']).document(**arguments(key,p))))
+        except (ValueError,OSError,RuntimeError,RecursionError): pass
+    log=lambda message:print(message,file=sys.stderr)
+    base=build_index(sources)
+    roots=sorted({k[0] for k in cited})
+    walk=walk_imports(roots,sources,load,set().union(*cited.values()),caps=dependency_caps,log=log)
+    def prepare(available):
+        citing={}
+        for key in sorted(available & cited.keys()): citing.setdefault(key[0],set()).update(cited[key])
+        selection=select_dependencies(walk,citing,base,log=log);extra={}
+        for module in selection['modules']:
+            text,status=load(module)
+            if text is None: raise ValueError('Cited dependency source changed during the build: '+module)
+            extra[module]=text;selection['modules'][module]['sha256']=digest(text.encode('utf-8'))
+        return selection,extra,build_index({**sources,**extra},reachable_headers(walk['headers'],roots,set(sources)|set(extra)))
+    def bundles(available,index):
         rows={};failures=[];made={};names=reading_map({k:proofs[k]['row']['id'] for k in available})
         for key,p in sorted(proofs.items()):
             ident=p['row']['id'];dest=output/'proofs'/ident
             try:
-                source=lean/(key[0].replace('.','/')+'.lean')
-                coverage=write_bundle(p['record'],dest,source=source.read_text(),file='lean/'+source.relative_to(lean).as_posix(),
-                    receipt=p['receipt'],title=key[1],provenance_note='Retained native observation on unaltered source with shared upstream dependency pins; not a Comparator or complete-project replay.',
+                coverage=write_bundle(p['record'],dest,**arguments(key,p),
                     links=lambda d,key=key:made.setdefault(key,citation_links(d,key[0],index,names,source_name)))
                 for name in ('Extract.lean','run.json','stdout.txt'): shutil.copy2(p['directory']/name,dest/name)
                 rows[key]={'id':ident,'gaps':coverage['source_bound_unexpanded_steps'],
                     'frames':p['record']['judgements_checked'],'snapshot_sha256':Snapshot(p['record']).sha256}
             except (ValueError,OSError,RuntimeError,RecursionError) as exc:
                 failures.append({'module':key[0],'name':key[1],'error':str(exc)})
+        if any(set(made[k]['names'])!=cited.get(k) for k in rows):
+            raise ValueError('Cited names differ between the dependency selection and the rendered reading')
         return rows,failures,[made[k] for k in sorted(rows)]
-    reading_rows,errors,payloads=bundles(set(proofs))
+    selection,extra,index=prepare(set(proofs))
+    reading_rows,errors,payloads=bundles(set(proofs),index)
     if errors:  # Never link to a reading that failed to render: rebuild against the rendered set.
-        reading_rows,errors,payloads=bundles(set(reading_rows))
+        selection,extra,index=prepare(set(reading_rows))
+        reading_rows,errors,payloads=bundles(set(reading_rows),index)
     write_json(output/'evidence/declaration-index.json',index)
+    dependencies=dependency_report(walk,selection,payloads,index,hashes_checked=manifest is not None)
+    write_json(output/'evidence/cited-dependency-sources.json',dependencies)
     for module in sorted(modules):
-        relative=module.replace('.','/')+'.lean';source=(lean/relative).read_text()
-        lines='\n'.join('<span class="line" id="L'+str(i)+'"><a href="#L'+str(i)+'">'+str(i)+'</a> '+html.escape(line)+'</span>' for i,line in enumerate(source.splitlines(),1))
-        body='<p class="eyebrow">Exact source · not an English translation</p><h1 class="long">'+html.escape(module)+'</h1><p><a href="'+upstream_url('lean/'+relative)+'">Pinned upstream file ↗</a> · SHA-256 <code>'+digest(source)+'</code></p><pre class="source">'+lines+'</pre>'
-        (output/'sources'/source_name(module)).write_text(shell(module,body,root='../'),encoding='utf-8')
+        relative=module.replace('.','/')+'.lean';source=sources[module]
+        (output/'sources'/source_name(module)).write_text(source_page(module,source),encoding='utf-8')
         path=output/'originals'/relative;path.parent.mkdir(parents=True,exist_ok=True);path.write_text(source)
+    for module,source in sorted(extra.items()):
+        relative=module.replace('.','/')+'.lean'
+        (output/'sources'/source_name(module)).write_text(source_page(module,source,selection['modules'][module]),encoding='utf-8')
+        path=output/'originals'/relative;path.parent.mkdir(parents=True,exist_ok=True);path.write_bytes(source.encode('utf-8'))
     cards=[];ledger=[]
     for f in fs:
         names={(configs[k]['solution_module'],n) for k in f['configurations'] for n in configs[k].get('theorem_names',[])}
@@ -221,7 +279,9 @@ def build(upstream: Path, lean: Path, statement_roots: list[Path], proof_roots: 
         'source_hashes_checked':source_inventory is not None,'full_project_build':False,
         'comparator_executed':False,'formally_certified_english_proofs':0,'human_readability_evaluated':False,
         'rendering_failures':errors,'receipts_authenticated':False,
-        'citation_links':summarize(payloads,index)}
+        'cited_dependency_source_modules':len(extra),'citation_links':summarize(payloads,index),
+        'cited_dependency_sources':{k:dependencies[k] for k in ('schema','method','followed_import_prefix','searched_name_namespace','source_hashes_checked',
+            'caps','caps_hit','counts','names_by_link','names_by_search','project_names_by_search')}}
     subjects=sorted({f['subject'] for f in fs if f['documented']})
     body='<p class="eyebrow">The OpenAI mathematics collection · finding-level access</p><h1>Read the finding.<br>Inspect the formalization.</h1><p class="lede">One place for every documented Lean finding in the release: mathematical scope, explicit assumptions, formal statements, original source, and the proof readings available so far.</p>'
     body+='<div class="stats">'+''.join('<div><strong>'+str(n)+'</strong><span>'+label+'</span></div>' for n,label in [(summary['documented_findings'],'documented findings, all indexed'),(len(statements),'elaborated statement entries'),(len(reading_rows),'available proof readings'),(len(configs),'comparison configurations')])+'</div>'
@@ -229,10 +289,10 @@ def build(upstream: Path, lean: Path, statement_roots: list[Path], proof_roots: 
     body+='<form class="filters" role="search"><label>Search findings, titles, or declarations<input id="search" type="search" placeholder="Try quasi-Riemann, Catalan, Hodge, or a Lean declaration"></label><label>Coverage<select id="coverage"><option value="documented">With Lean documentation</option><option value="readings">With a proof reading</option><option value="all">All findings in the release</option></select></label><label>Subject<select id="subject"><option value="">All subjects</option>'+''.join('<option>'+html.escape(s)+'</option>' for s in subjects)+'</select></label></form><p id="result-count" role="status"></p><div class="cards" id="cards">'+''.join(cards)+'</div><p id="empty" hidden>No findings match these filters.</p>'
     (output/'index.html').write_text(shell('OpenAI findings',body,page='catalog'),encoding='utf-8')
     body='<p class="eyebrow">Coverage is multidimensional</p><h1>What is accessible.<br>What is checked.</h1><p class="lede">An upstream scope note, an elaborated specification, a source-bound proof reading, and a faithful English proof are different deliverables.</p><table><thead><tr><th>Layer</th><th>Observed result</th></tr></thead><tbody>'
-    cl=summary['citation_links'];pn=cl['project_names']
-    for label,value in [('Documented findings indexed',f"{summary['documented_findings']} / {summary['documented_findings']}"),('Comparison configurations',str(len(configs))),('Statement entries',f'{len(statements)} / {total_occurrences}'),('Unique formal targets',str(summary['unique_formal_targets'])),('Theorem targets with a proof reading',f'{len(reading_rows)} / {len(targets)}'),('Definition references (separate denominator)',str(len(definitions))),('Source modules included',str(len(modules))),('Selected proof frames checked',str(summary['selected_checked_frames'])),('Explicit explanation gaps',str(summary['explicit_explanation_gaps'])),('Cited project names (OAI.*) in the readings',str(pn['cited'])),('… linked to a proof reading of the same constant',str(pn['linked_to_reading'])),('… linked only to a declaration line in bundled source',str(pn['linked_to_source'])),('… unresolved (not in the bundled declaration index, Lean-generated, ambiguous, or not visibly imported)',str(pn['unresolved'])),('Whole original project / Comparator execution','Not completed'),('Formally certified English proofs','0'),('Human comprehension benchmark','Not performed')]:
+    cl=summary['citation_links'];pn=cl['project_names'];dc=summary['cited_dependency_sources']
+    for label,value in [('Documented findings indexed',f"{summary['documented_findings']} / {summary['documented_findings']}"),('Comparison configurations',str(len(configs))),('Statement entries',f'{len(statements)} / {total_occurrences}'),('Unique formal targets',str(summary['unique_formal_targets'])),('Theorem targets with a proof reading',f'{len(reading_rows)} / {len(targets)}'),('Definition references (separate denominator)',str(len(definitions))),('Solution source modules included',str(len(modules))),('Cited dependency source modules included',str(len(extra))),('Project modules read to follow import headers',str(dc['counts']['modules_visited'])),('Cited dependency caps reached',', '.join(dc['caps_hit']) or 'None'),('Selected proof frames checked',str(summary['selected_checked_frames'])),('Explicit explanation gaps',str(summary['explicit_explanation_gaps'])),('Cited project names (OAI.*) in the readings',str(pn['cited'])),('… linked to a proof reading of the same constant',str(pn['linked_to_reading'])),('… linked only to a declaration line in bundled source',str(pn['linked_to_source'])),('… unresolved (not in the bundled declaration index, Lean-generated, ambiguous, or not visibly imported)',str(pn['unresolved'])),('Whole original project / Comparator execution','Not completed'),('Formally certified English proofs','0'),('Human comprehension benchmark','Not performed')]:
         body+='<tr><td>'+label+'</td><td>'+value+'</td></tr>'
-    body+='</tbody></table><section><h2>Interpretation</h2><p>The statements were elaborated from comparison specifications. These specifications intentionally contain placeholders. They are not solution proofs. The linked proof readings instead use retained native Lean observations, with source hashes and original-proof paths checked. The runs used original solution modules with the recorded shared dependency pins, not a complete replay of the original project or its Comparator checks.</p><p>Imported evidence is an unsigned observation. The Lean compiler, source, pretty-printer, extraction code, transport and English renderer remain within the trust boundary. A missing explanation is shown as a gap, not replaced by plausible prose.</p><p>Scope notes are reproduced without changing their claims or limitations. Neither indexing a finding nor reading its statement establishes the correctness of the paper.</p><p>Citation links are navigation aids outside each checked reading. A cited Lean name links to a bundled proof reading of the same constant, else to its declaration line in bundled source, only when the bundled import headers show it is that constant. Ambiguous names, Lean-generated names and names the lexical index of the bundled modules does not record stay visibly unresolved, each with its reason. A link does not mean the citation is explained or checked.</p></section><p><a href="coverage.json">Machine-readable coverage</a> · <a href="catalog.json">Finding inventory</a> · <a href="evidence/declaration-index.json">Declaration index for citation links</a> · <a href="evidence/attempts.json">Every retained attempt</a> · <a href="OPENAI-LICENSE.txt">Upstream license</a></p>'
+    body+='</tbody></table><section><h2>Interpretation</h2><p>The statements were elaborated from comparison specifications. These specifications intentionally contain placeholders. They are not solution proofs. The linked proof readings instead use retained native Lean observations, with source hashes and original-proof paths checked. The runs used original solution modules with the recorded shared dependency pins, not a complete replay of the original project or its Comparator checks.</p><p>Imported evidence is an unsigned observation. The Lean compiler, source, pretty-printer, extraction code, transport and English renderer remain within the trust boundary. A missing explanation is shown as a gap, not replaced by plausible prose.</p><p>Scope notes are reproduced without changing their claims or limitations. Neither indexing a finding nor reading its statement establishes the correctness of the paper.</p><p>Citation links are navigation aids outside each checked reading. A cited Lean name links to a bundled proof reading of the same constant, else to its declaration line in bundled source, only when the recorded import headers show it is that constant. A cited dependency source page is an exact upstream file that declares a cited name and that a citing solution module imports, directly or through other modules; the import headers read to establish this are recorded with the declaration index. Ambiguous names, Lean-generated names and names the lexical index of the bundled modules does not record stay visibly unresolved, each with its reason. A link does not mean the citation is explained or checked.</p></section><p><a href="coverage.json">Machine-readable coverage</a> · <a href="catalog.json">Finding inventory</a> · <a href="evidence/declaration-index.json">Declaration index for citation links</a> · <a href="evidence/cited-dependency-sources.json">Cited dependency sources</a> · <a href="evidence/attempts.json">Every retained attempt</a> · <a href="OPENAI-LICENSE.txt">Upstream license</a></p>'
     (output/'coverage.html').write_text(shell('Coverage and evidence',body),encoding='utf-8')
     write_json(output/'coverage.json',summary);write_json(output/'catalog.json',ledger)
     write_json(output/'evidence/attempts.json',{'statements':statement_attempts,'proofs':proof_attempts})
@@ -247,6 +307,10 @@ def main(argv: list[str] | None = None, *, prog: str | None = None):
     p.add_argument('--upstream',required=True,type=Path);p.add_argument('--lean',required=True,type=Path)
     p.add_argument('--statements',action='append',required=True,type=Path);p.add_argument('--proofs',action='append',required=True,type=Path)
     p.add_argument('--output','-o',required=True,type=Path);p.add_argument('--math-assets',type=Path);p.add_argument('--source-inventory',type=Path)
-    a=p.parse_args(argv);result=build(a.upstream,a.lean,a.statements,a.proofs,a.output,math_assets=a.math_assets,source_inventory=a.source_inventory)
+    p.add_argument('--dependency-caps',type=json.loads,help='JSON object overriding the cited dependency caps: '+', '.join(CAPS))
+    a=p.parse_args(argv)
+    if a.dependency_caps is not None and (not isinstance(a.dependency_caps,dict) or not set(a.dependency_caps)<=set(CAPS)):
+        p.error('Unknown cited dependency cap')
+    result=build(a.upstream,a.lean,a.statements,a.proofs,a.output,math_assets=a.math_assets,source_inventory=a.source_inventory,dependency_caps=a.dependency_caps)
     print(json.dumps(result,indent=2));return 0 if result['all_specification_entries_accessible'] and not result['rendering_failures'] else 2
 if __name__=='__main__':raise SystemExit(main())

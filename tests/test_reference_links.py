@@ -93,6 +93,18 @@ def test_duplicate_declarations_are_ambiguous_even_when_visible():
     assert names['OAI.Alpha.helper'] == {'status': 'unresolved', 'reason': 'ambiguous-in-bundled-source'}
 
 
+def test_a_duplicate_the_citing_module_cannot_see_does_not_block_the_visible_declaration():
+    # Lean forbids two declarations of one name in one environment, so the only visible one is the constant.
+    delta = 'OAI.Algebra.Delta.Main'
+    sources = {**SOURCES, delta: 'namespace OAI.Beta\ntheorem target : True := trivial\nend OAI.Beta\n'}
+    names = alpha_links(alpha_document(), sources, readings={})['names']
+    assert names['OAI.Beta.target'] == {'status': 'source', 'href': f'../../sources/{source_name(BETA)}#L5',
+                                        'module': BETA, 'line': 5, 'basis': 'imported-bundled-module'}
+    both = {**sources, ALPHA: 'import ' + delta + '\n' + SOURCES[ALPHA]}
+    assert alpha_links(alpha_document(), both, readings={})['names']['OAI.Beta.target'] == {
+        'status': 'unresolved', 'reason': 'ambiguous-in-bundled-source'}
+
+
 def test_a_reading_never_links_to_itself():
     self_citing = record(THEOREMS[ALPHA], 'OAI.Alpha.main', ['OAI.Alpha.helper'])
     document = Narrative(self_citing).document(source=SOURCES[ALPHA], file=FILE)

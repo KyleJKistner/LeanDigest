@@ -138,6 +138,15 @@ def test_imports_and_visible_closure():
     assert closure(index, 'C') == {'C'}
 
 
+def test_closure_follows_header_only_records_but_indexed_modules_keep_scanned_imports():
+    index = build_index({'A': 'import H\n', 'B': 'theorem b : True := trivial\n', 'F': 'import B\ntheorem f : True := (\n'},
+                        {'H': ['B'], 'A': ['ignored'], 'F': ['B']})
+    # A failed module contributes no names, but its readable header still records an import.
+    assert index['header_imports'] == {'F': ['B'], 'H': ['B']} and index['imports']['A'] == ['H']
+    assert closure(index, 'A') == {'A', 'H', 'B'} and closure(index, 'A', recorded=False) == {'A'}
+    assert closure(index, 'F') == {'F', 'B'} and 'F' in index['failed_modules']
+
+
 def test_real_retained_module_matches_lean_recorded_theorem_name():
     """Not synthetic: the committed upstream module and the Lean-exported theorem name."""
     source = (ROOT / 'proofreader/data/bezout-original.lean').read_text(encoding='utf-8')

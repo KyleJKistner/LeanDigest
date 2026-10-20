@@ -2,12 +2,14 @@
 from __future__ import annotations
 import argparse
 from html.parser import HTMLParser
+from hashlib import sha256
 import json
 from pathlib import Path
 import re
 from urllib.parse import unquote, urlsplit
 
-from .declaration_index import validate_links
+from .declaration_index import MODULE_NAME, validate_links
+from .model import digest
 
 class Links(HTMLParser):
     def __init__(self):
@@ -81,12 +83,25 @@ def audit(site: Path) -> dict:
     require(expected=={p.name for p in (site/'findings').glob('*.html')},'Finding page inventory mismatch')
     require(len(list((site/'evidence/statements').glob('*.json')))==summary['elaborated_statement_entries'],'Statement file inventory mismatch')
     require(len(list((site/'proofs').glob('*/reader.html')))==summary['proof_readings'],'Proof reader inventory mismatch')
-    require(len(list((site/'sources').glob('*.html')))==summary['solution_source_modules'],'Source module inventory mismatch')
+    dependencies=summary.get('cited_dependency_source_modules',0)
+    require(len(list((site/'sources').glob('*.html')))==summary['solution_source_modules']+dependencies,'Source module inventory mismatch')
+    # Each cited dependency page names its module, and its original copy has the recorded hash.
+    record=site/'evidence/cited-dependency-sources.json'
+    selected=json.loads(record.read_text())['modules'] if record.is_file() else {}
+    require(len(selected)==dependencies,'Cited dependency inventory mismatch')
+    for module,row in sorted(selected.items()):
+        if not MODULE_NAME.fullmatch(module) or not isinstance(row,dict):
+            errors.append({'module':module,'error':'malformed cited dependency record'});continue
+        relative=module.replace('.','/')+'.lean';page=site/'sources'/(sha256(module.encode()).hexdigest()[:24]+'.html')
+        original=site/'originals'/relative
+        if not page.is_file() or 'Cited dependency source' not in page.read_text() or not original.is_file() or digest(original.read_bytes())!=row.get('sha256'):
+            errors.append({'module':module,'error':'cited dependency source does not match its record'})
     fonts=[str(p.relative_to(site)) for p in site.rglob('*') if p.suffix.lower() in {'.ttf','.otf','.woff','.woff2'}]
     if fonts:errors.append({'error':'font files included','paths':fonts})
     return {'schema':'leanglish.catalog-audit/v1','pages':len(parsed),'local_links_checked':links,
         'local_anchors_checked':anchors,'citation_links_checked':citations,'finding_page_denominator_reconciled':True,
         'statement_files_reconciled':True,'proof_reader_files_reconciled':True,
+        'source_pages':summary['solution_source_modules']+dependencies,'cited_dependency_source_pages':dependencies,
         'font_files':len(fonts),'errors':errors,'passed':not errors}
 
 def main(argv: list[str] | None = None, *, prog: str | None = None):
