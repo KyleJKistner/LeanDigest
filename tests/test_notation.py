@@ -198,6 +198,11 @@ def test_tendsto_bails_out(text, expected):
     ('Filter.Tendsto (fun (n : ℕ) => (f n : ENNReal)) Filter.atTop Filter.atTop',
      'Tendsto (fun (n : ℕ) => (f n : ENNReal)) atTop atTop'),
     ('Filter.Tendsto (fun x => x) Filter.atTop Filter.atBot', 'Tendsto (x ↦ x) atTop atBot'),
+    # ℕ has a least element: atBot there means "eventually equal to 0", not "→ −∞".
+    ('Filter.Tendsto (fun (x : ℝ) => (f x : ℕ)) Filter.atTop Filter.atBot',
+     'Tendsto (fun (x : ℝ) => (f x : ℕ)) atTop atBot'),
+    ('Filter.Tendsto (fun (n : ℕ) => (f n : ℕ)) Filter.atTop Filter.atTop', '(f n : ℕ) → ∞ as n → ∞'),
+    ('Filter.Tendsto (fun (x : ℝ) => (f x : ℤ)) Filter.atTop Filter.atBot', '(f x : ℤ) → −∞ as x → ∞'),
 ])
 def test_tendsto_needs_printed_number_types(text, expected):
     assert shown(text, theorem='OAI.TotientAsymptotic.formula') == expected

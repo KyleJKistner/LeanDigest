@@ -52,8 +52,10 @@ _BINDERS = frozenset("∀ ∃ ∑ ∏ ∑' ∏' ∫ ∮ ⋃ ⋂ ⨆ ⨅".split()
 # must not be read as the end of an enclosing lambda body. ⋀ is left out: in
 # Mathlib it is the exterior power ⋀[R]^n M, which takes no comma.
 _BINDER_IDS = frozenset("Σ Σ' Π Π'".split())
-# Number systems on which Filter.atTop is the usual limit at +∞.
+# Number systems on which Filter.atTop is the usual limit at +∞. ℕ has a least
+# element, on which Filter.atBot means "eventually equal to 0", not "→ −∞".
 _NUMERIC = frozenset('ℕ ℤ ℚ ℝ'.split())
+_SIGNED = _NUMERIC - {'ℕ'}
 
 
 def _foreign_bracket(x: str) -> bool:
@@ -100,8 +102,8 @@ RESERVED = frozenset('''Finite Infinite Countable Nonempty Subsingleton Nontrivi
 NOTATIONS = {  # legend key -> (shown form, Lean form)
     'lambda': ('x ↦ e', 'fun x => e'),
     'tendsto': ('e → a as x → ∞', 'Filter.Tendsto (fun (x : T) => e) Filter.atTop (nhds a), where the printed binder '
-                'type T is ℕ, ℤ, ℚ or ℝ, so x → ∞ is the usual limit; a limit ∞ or −∞ is Filter.atTop or '
-                'Filter.atBot for a value printed as (e : U), with U one of these types'),
+                'type T is ℕ, ℤ, ℚ or ℝ, so x → ∞ is the usual limit; a limit ∞ is Filter.atTop for a value '
+                'printed as (e : U), with U one of these types, and −∞ is Filter.atBot with U ℤ, ℚ or ℝ'),
     'nhdsWithin': ('𝓝[s] a', 'nhdsWithin a s'),
     'card': ('#s', 'Finset.card s'),
     'sqrt': ('√x', 'Real.sqrt x'),
@@ -572,13 +574,15 @@ def _rule(items: tuple, i: int, r: Reading, used: set[str], paren: bool = False,
         target = target[0]
         if _is(target, 'id', 'Filter.atTop') or _is(target, 'id', 'Filter.atBot'):
             # On a type with a top element, atTop means "eventually equal to ⊤",
-            # not "→ ∞": the value's type must be printed and be a number system.
+            # not "→ ∞": the value's type must be printed and be a number system
+            # (for atBot one without a least element).
             value = _strip(body)
             typed = (_ascribed(value[0].items) if len(value) == 1 and isinstance(value[0], Group)
                      and value[0].open == '(' else None)
-            if typed is None or typed[1] not in _NUMERIC:
+            top = target.text == 'Filter.atTop'
+            if typed is None or typed[1] not in (_NUMERIC if top else _SIGNED):
                 return None
-            limit = '∞' if target.text == 'Filter.atTop' else '−∞'
+            limit = '∞' if top else '−∞'
         elif isinstance(target, Group) and target.open == '(':
             inner = _strip(target.items)
             if not (len(inner) >= 3 and _is(inner[0], 'id', 'nhds') and _is(inner[1], 'ws')

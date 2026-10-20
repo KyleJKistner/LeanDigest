@@ -258,8 +258,9 @@ corpus pin `d13f23b723b8a846827a245b89c10fc7d3f11612`. It lists the
 definitions, structures, classes, inductive types, opaque constants and axioms
 that are not private and that lie at the root (3,570 names) or directly in
 `Filter` (136), `MeasureTheory` (184) or `Set` (194). Theorems, instances and
-aliases are left out: they appear in citations, which say "the project lemma"
-for project names, rather than in formulas. Regenerate the file with:
+aliases are left out: they appear in citations rather than in formulas, and a
+citation introduces a project lemma or instance as "the project lemma" or "the
+project instance". Regenerate the file with:
 
 ```sh
 python scripts/derive_notation_reserved.py MATHLIB_CHECKOUT --revision COMMIT
@@ -323,7 +324,7 @@ the text is printed as before, apart from name shortening.
 | Lean | Shown | Conditions | Readings |
 |---|---|---|---:|
 | `fun x => e` | `x ↦ e` | One plain binder; parenthesized unless it fills its bracket group or the whole formula; not used if the reading already contains `↦`, or if the body contains a bracket the parser does not pair (see above). | 141 |
-| `Filter.Tendsto (fun (x : T) => e) Filter.atTop (nhds a)` | `e → a as x → ∞` | One plain binder whose printed type `T` is `ℕ`, `ℤ`, `ℚ` or `ℝ`; the source filter is exactly `Filter.atTop`; the target is `nhds a` with an atomic `a`, or `Filter.atTop` (`∞`) or `Filter.atBot` (`−∞`) when `e` is printed as `(e : U)` with `U` one of the same types. `a` does not mention `x`, which `as x → ∞` would bind. `e` is parenthesized unless it uses only arithmetic operators; the whole form is parenthesized unless it is a whole formula or bracket group, for example as an operand or as the body of a lambda. Not used if `as` is a name in the reading or `∞` occurs in it. | 0 |
+| `Filter.Tendsto (fun (x : T) => e) Filter.atTop (nhds a)` | `e → a as x → ∞` | One plain binder whose printed type `T` is `ℕ`, `ℤ`, `ℚ` or `ℝ`; the source filter is exactly `Filter.atTop`; the target is `nhds a` with an atomic `a`, or `Filter.atTop` (`∞`) when `e` is printed as `(e : U)` with `U` one of the same types, or `Filter.atBot` (`−∞`) when `U` is `ℤ`, `ℚ` or `ℝ` (on `ℕ`, `Filter.atBot` means eventually equal to `0`). `a` does not mention `x`, which `as x → ∞` would bind. `e` is parenthesized unless it uses only arithmetic operators; the whole form is parenthesized unless it is a whole formula or bracket group, for example as an operand or as the body of a lambda. Not used if `as` is a name in the reading or `∞` occurs in it. | 0 |
 | `nhdsWithin a s` | `𝓝[s] a` | Mathlib's notation; only when `nhds` is shown as `𝓝` in that reading. | 1 |
 | `Finset.card s` | `#s` | Mathlib's notation; not used if `#` already occurs. | 1 |
 | `Real.sqrt x` | `√x` | Mathlib's notation. Lean already prints `√` in the corpus, so this never fires there. | 0 |
@@ -345,8 +346,10 @@ the lambda's binder may shadow it.
 No formula in the corpus or dependency-cone snapshots contains `fun (`, so
 none prints a lambda binder's type and the rule fires on none of them. The
 36 corpus readings and 5 dependency-cone readings that previously showed
-`e → a as x → ∞` (278 and 26 occurrences) now show
-`Tendsto (x ↦ e) atTop (𝓝 a)`, with `Filter` and `𝓝` in the legend.
+`e → a as x → ∞` (278 and 26 occurrences) now show Lean's form with the lambda
+rule applied: `Tendsto (x ↦ e) atTop (𝓝 a)`, or `Tendsto (x ↦ e) atTop atTop`
+for a limit `Filter.atTop`. All 41 legends list `Filter`; the 38 that show a
+limit point also list `𝓝`.
 
 The rule is also not used when `∞` occurs in the reading, as in `ENNReal`'s `∞`
 or `ℕ∞`: there `Filter.atTop` and `𝓝 ∞` are different filters, and both would
