@@ -51,10 +51,10 @@ The index records a full name only when it was read without guessing:
   not one readable module name contributes no names.
 - So does a module whose lexical reading depends on the grammar or on commands
   the index does not model: a string literal that ends at a different place
-  when Lean reads it as an interpolated string (`s!"{"a"}"`, or a notation
-  token such as `"∂_{"`), or a `with_weak_namespace` command, which sets the
-  namespace of the command it contains. When only one reading of a string
-  closes, that reading is used.
+  when Lean reads it as an interpolated string (`s!"{"a"}"`, a notation token
+  such as `"∂_{"`, or a plain `"{"` followed by other string literals), or a
+  `with_weak_namespace` command, which sets the namespace of the command it
+  contains. When only one reading of a string closes, that reading is used.
 - Anonymous instances, `example`, quoted identifiers, structure projections,
   constructors and other generated names are not indexed.
 
@@ -67,7 +67,11 @@ For the 65,678 project files, the declarations, imports, skipped headers and
 header imports are the same. Of the 8,529 Mathlib files, 96 now record some
 declarations under private names: in 90 by the module-system default, and in 6
 because a `meta` modifier after `private` no longer drops it. Another 29
-Mathlib files are refused because a notation token has two string readings.
+Mathlib files are refused because a string literal ends at a different place
+when read as an interpolated string. The first such literal is, in 19 files, an
+interpolated string whose braces contain another string literal, such as
+`s!"{stdText "-/"}"` in `Mathlib/Tactic/Linter/Header.lean`; in 6, a notation
+or syntax token such as `"∂_{"`; and in 4, a plain string value such as `"{"`.
 Mathlib modules are not indexed by the catalog.
 
 ## When a link is attached
