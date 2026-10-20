@@ -8,6 +8,19 @@ from proofreader.narrative_batch import run_batch, aggregate
 from proofreader.narrative import Snapshot, Narrative, check_reading
 from proofreader.narrative_io import verify_certificates
 from proofreader.render import load_document
+from proofreader.model import walk_steps
+
+
+def gap_rules(output, row):
+    """Rules of the explanation-gap steps in one rendered batch reading."""
+    document = load_document(((output/row['reader']).parent/'reading.json').read_bytes())
+    return [s.rule for s in walk_steps(document.declarations[0].steps) if s.fallback]
+
+
+# Each base or successor proof here establishes a definitionally equal form of its
+# motive instance (for example 0 + 0 = 0 + 0 for 0 + 0 = 0). The renderer states
+# that unfolding as one unchecked-induction gap instead of calling the case explained.
+INDUCTION_GAP = ['unchecked-induction']
 
 REQUIRED = os.environ.get('PROOFREADER_REQUIRE_LEAN') == '1'
 ROOT = Path(__file__).parents[1]
@@ -67,7 +80,7 @@ def test_native_batch_breadth_and_failure_accounting(tmp_path):
     assert 'Apply the hypothesis' in ((output/by_name['BatchAcceptance.Logic.implication']['reader']).parent/'proof.txt').read_text()
 
     row=by_name['BatchAcceptance.Induction.rec_overapplied']
-    assert row['unexpanded_steps'] == 0
+    assert row['unexpanded_steps'] == 1 and gap_rules(output, row) == INDUCTION_GAP, row
     prose=((output/row['reader']).parent/'proof.txt').read_text()
     assert 'Proceed by induction on m' not in prose
 
@@ -78,7 +91,7 @@ def test_native_batch_breadth_and_failure_accounting(tmp_path):
     for name, variable in [('BatchAcceptance.Induction.zero_add_recOn','n'),
                            ('BatchAcceptance.Lists.append_empty_recOn','xs')]:
         row=by_name[name]
-        assert row['unexpanded_steps']==0, row
+        assert row['unexpanded_steps']==1 and gap_rules(output, row)==INDUCTION_GAP, row
         text=((output/row['reader']).parent/'proof.txt').read_text()
         assert 'Proceed by induction on '+variable+'.' in text, text
         assert 'Proceed by induction on fun' not in text
