@@ -12,8 +12,10 @@ reading context (``reading``); elsewhere ``display`` is the identity.
   its enclosing namespaces (Lean's resolution inside ``namespace``), and
   relative to three library namespaces that the original sources open most
   often. A shortening is refused when the shown text could denote another name,
-  a local binder or bound variable, or a reserved root name in that reading.
-  A refused name falls back to a longer prefix, ultimately the full name.
+  a local binder or bound variable in that reading, a reserved root name, or a
+  Mathlib definition at the pin (data/notation-reserved.json), and a project
+  constant is not shortened to a single letter. A refused name falls back to a
+  longer prefix, ultimately the full name.
 * Structural notation for frequent library forms. A balanced-bracket tokenizer
   recognizes a form only at an application boundary with atomic arguments and
   a body of known extent. Anything else is left as printed.
@@ -31,6 +33,7 @@ from pathlib import Path
 import re
 import sys
 from typing import Any, Iterable
+import unicodedata
 
 _IDENT = r"[^\W\d][\w'!?]*"
 NAME = re.compile(_IDENT + r"(?:\.(?:" + _IDENT + r"|\d+))*")
@@ -49,6 +52,18 @@ _BINDERS = frozenset("∀ ∃ ∑ ∏ ∑' ∏' ∫ ∮ ⋃ ⋂ ⨆ ⨅".split()
 # must not be read as the end of an enclosing lambda body. ⋀ is left out: in
 # Mathlib it is the exterior power ⋀[R]^n M, which takes no comma.
 _BINDER_IDS = frozenset("Σ Σ' Π Π'".split())
+# Number systems on which Filter.atTop is the usual limit at +∞.
+_NUMERIC = frozenset('ℕ ℤ ℚ ℝ'.split())
+
+
+def _foreign_bracket(x: str) -> bool:
+    """An opening or closing bracket or quote outside the modelled pairs, such as ⟪ ⁅ ⟮ ‹.
+
+    Mathlib's floor and ceiling brackets (⌊a⌋, ⌈a⌉₊) enclose one term and no
+    separating comma, so they do not end or extend a lambda body.
+    """
+    return (len(x) == 1 and x not in _OPEN and x not in _CLOSE and x not in '⌊⌋⌈⌉'
+            and unicodedata.category(x) in ('Ps', 'Pe', 'Pi', 'Pf'))
 
 
 def _nary(x: str) -> bool:
@@ -70,9 +85,10 @@ SYMBOLS = {'Real.log': 'log', 'Real.exp': 'exp', 'Real.sin': 'sin', 'Real.cos': 
            'Real.artanh': 'artanh', 'Real.pi': 'π', 'nhds': '𝓝'}
 # A shortened name never starts with one of these: root-level Lean/Mathlib
 # names and namespaces that a reader would take to be the library's own. The
-# list is hand-maintained, not complete; the second line holds the root names
-# that project constants of the corpus repeat (e.g. OAI.TamingCompatibility.
-# IsClosed), with a few equally common library roots.
+# list is hand-maintained, not complete. It holds the Lean core names (Nat, Eq,
+# id, …) and the major namespaces, which the Mathlib-derived list below does
+# not cover, and root names that corpus project constants repeat (e.g.
+# OAI.TamingCompatibility.IsClosed).
 RESERVED = frozenset('''Finite Infinite Countable Nonempty Subsingleton Nontrivial Unique Inhabited IsEmpty Elem
     Field IsClosed Algebra Lattice Small Language Multiplicative Additive spectrum gradient Dense Group Monoid Ring
     CommRing Semiring Ideal Subgroup Continuous Differentiable Measurable MeasurableSet IsOpen IsCompact Convex
@@ -83,14 +99,43 @@ RESERVED = frozenset('''Finite Infinite Countable Nonempty Subsingleton Nontrivi
     LinearMap Equiv Order Lean Mathlib Std Classical Decidable Eq Ne Iff And Or Not Exists True False id'''.split())
 NOTATIONS = {  # legend key -> (shown form, Lean form)
     'lambda': ('x ↦ e', 'fun x => e'),
-    'tendsto': ('e → a as x → ∞', 'Filter.Tendsto (fun x => e) Filter.atTop (nhds a); x → ∞ is Filter.atTop for the '
-                'order on the type of x (eventually x ≥ b for every b; the usual limit on ℕ and ℝ), and a limit ∞ or −∞ '
-                'is Filter.atTop or Filter.atBot'),
+    'tendsto': ('e → a as x → ∞', 'Filter.Tendsto (fun (x : T) => e) Filter.atTop (nhds a), where the printed binder '
+                'type T is ℕ, ℤ, ℚ or ℝ, so x → ∞ is the usual limit; a limit ∞ or −∞ is Filter.atTop or '
+                'Filter.atBot for a value printed as (e : U), with U one of these types'),
     'nhdsWithin': ('𝓝[s] a', 'nhdsWithin a s'),
     'card': ('#s', 'Finset.card s'),
     'sqrt': ('√x', 'Real.sqrt x'),
     'choose': ('(n choose k)', 'Nat.choose n k'),
 }
+# Mathlib definitions, structures and classes at the corpus pin, derived by
+# scripts/derive_notation_reserved.py: root-level names, and the names directly
+# inside each LIBRARY namespace, which the display writes without their prefix.
+RESERVED_DATA = Path(__file__).with_name('data')/'notation-reserved.json'
+# One letter, optionally followed by digits and primes: e, μ, A, I3, x'.
+_LETTER = re.compile(r"[^\W\d_][0-9₀-₉]*'*")
+
+
+@functools.lru_cache(maxsize=None)
+def _mathlib_terms() -> tuple[frozenset[str], dict[str, frozenset[str]]]:
+    data = json.loads(RESERVED_DATA.read_text(encoding='utf-8'))
+    return frozenset(data['root']), {ns: frozenset(names) for ns, names in data['library'].items()}
+
+
+def _refused(ns: str, shown: str) -> bool:
+    """Whether a name in namespace ``ns`` may not be shown as ``shown``.
+
+    The shown text may not start with a keyword or a reserved name, or with a
+    Mathlib constant that the display writes the same way: a root-level one, or
+    one in another opened library namespace. A project constant is not shown as
+    a lone letter, which reads as a variable; it keeps a namespace component.
+    """
+    head = shown.split('.', 1)[0]
+    if head in KEYWORDS or head in RESERVED:
+        return True
+    root, library = _mathlib_terms()
+    if head in root or any(head in names for lib, names in library.items() if lib != ns):
+        return True
+    return ns not in LIBRARY and _LETTER.fullmatch(head) is not None
 
 
 @dataclass(frozen=True)
@@ -194,10 +239,8 @@ class Reading:
             choice = [(SYMBOLS[t], 'sym:'+t)] if t in SYMBOLS else []
             for ns in opened:
                 rest = t[len(ns)+1:]
-                if t.startswith(ns+'.') and rest and not rest[0].isdigit():
-                    head = rest.split('.', 1)[0]
-                    if head not in KEYWORDS and head not in RESERVED:
-                        choice.append((rest, 'ns:'+ns))
+                if t.startswith(ns+'.') and rest and not rest[0].isdigit() and not _refused(ns, rest):
+                    choice.append((rest, 'ns:'+ns))
             if choice:
                 options[t] = choice
         rank = dict.fromkeys(options, 0)
@@ -336,7 +379,9 @@ def _extent(items: tuple, start: int) -> int | None:
     """End of a maximal term (a lambda or binder body) at ``start``, or ``None``.
 
     The term ends at the region end or at a terminator that no pending binder,
-    lambda or ``if`` consumes. Constructs of unknown extent bail out.
+    lambda or ``if`` consumes. Constructs of unknown extent bail out, among them
+    brackets the parser does not pair (``⟪f x, v⟫``: its comma is not a
+    terminator) and Π/Σ notations other than the plain binders (``Π₀ i, β i``).
     """
     expect: list[str] = []
     for i in range(start, len(items)):
@@ -344,6 +389,8 @@ def _extent(items: tuple, start: int) -> int | None:
         if isinstance(t, Group) or t.kind == 'ws':
             continue
         x = t.text
+        if (t.kind == 'op' and _foreign_bracket(x)) or (t.kind == 'id' and x[0] in 'ΠΣ' and x not in _BINDER_IDS):
+            return None
         if t.kind == 'id':
             if x in _NO_EXTENT:
                 return None
@@ -420,6 +467,31 @@ def _lambda(items: tuple) -> tuple[str, tuple] | None:
     return None
 
 
+def _ascribed(items: tuple) -> tuple[tuple, str] | None:
+    """``x : T`` (the inside of ``(x : T)``) with one type name ``T``, as the whole of ``items``."""
+    items = _strip(items)
+    if len(items) >= 5 and _is(items[-1], 'id') and _is(items[-2], 'ws') and _is(items[-3], 'op', ':') \
+            and _is(items[-4], 'ws') and ':' not in [t.text for t in items[:-3] if isinstance(t, Tok) and t.kind == 'op']:
+        return _strip(items[:-3]), items[-1].text
+    return None
+
+
+def _typed_lambda(items: tuple) -> tuple[str, str, tuple] | None:
+    """``fun (x : T) => body`` with one plain binder and its printed type, as the whole of ``items``."""
+    items = _strip(items)
+    if not (len(items) >= 7 and _is(items[0], 'id', 'fun') and _is(items[1], 'ws') and isinstance(items[2], Group)
+            and items[2].open == '(' and _is(items[3], 'ws') and _is(items[4], 'op', '=>') and _is(items[5], 'ws')
+            and _extent(items, 6) == len(items)):
+        return None
+    binder = _ascribed(items[2].items)
+    if binder is None or len(binder[0]) != 1 or not _is(binder[0][0], 'id'):
+        return None
+    x = binder[0][0].text
+    if '.' in x or x in KEYWORDS:
+        return None
+    return x, binder[1], items[5:]
+
+
 def _ids(items: Iterable) -> Iterable[str]:
     for t in items:
         if isinstance(t, Group):
@@ -428,12 +500,16 @@ def _ids(items: Iterable) -> Iterable[str]:
             yield t.text
 
 
-def _render(items: tuple, r: Reading, used: set[str], paren: bool = False) -> str:
-    """``paren``: ``items`` is the whole content of a parenthesized group."""
+def _render(items: tuple, r: Reading, used: set[str], paren: bool = False, region: bool = True) -> str:
+    """``paren``: ``items`` is the whole content of a parenthesized group.
+
+    ``region``: ``items`` is a whole formula or the whole content of a bracket
+    group, not part of a rewritten form such as a lambda body.
+    """
     out: list[str] = []
     i = 0
     while i < len(items):
-        hit = _rule(items, i, r, used, paren)
+        hit = _rule(items, i, r, used, paren, region)
         if hit is not None:
             out.append(hit[0]); i = hit[1]
             continue
@@ -448,17 +524,18 @@ def _render(items: tuple, r: Reading, used: set[str], paren: bool = False) -> st
     return ''.join(out)
 
 
-def _wrap(items: tuple, start: int, end: int, text: str) -> str:
+def _wrap(items: tuple, start: int, end: int, text: str, region: bool = True) -> str:
     """Parenthesize a low-precedence display form unless it fills its region."""
-    alone = _prev(items, start) < 0 and _next(items, end) >= len(items)
+    alone = region and _prev(items, start) < 0 and _next(items, end) >= len(items)
     return text if alone else '('+text+')'
 
 
-def _rule(items: tuple, i: int, r: Reading, used: set[str], paren: bool = False) -> tuple[str, int] | None:
+def _rule(items: tuple, i: int, r: Reading, used: set[str], paren: bool = False,
+          region: bool = True) -> tuple[str, int] | None:
     it = items[i]
     if not _is(it, 'id'):
         return None
-    sub = lambda part: _render(tuple(part), r, used)
+    sub = lambda part: _render(tuple(part), r, used, region=False)
     if it.text == 'fun':
         end = _extent(items, i)
         if end is None or '↦' in r.ops or (i and _is(items[i-1], 'op') and items[i-1].text in _PREFIX | {'@', '.'}):
@@ -471,27 +548,37 @@ def _rule(items: tuple, i: int, r: Reading, used: set[str], paren: bool = False)
         x, body = found
         used.add('lambda')
         return _wrap(items, i, end, x+' ↦'+sub(body)), end
-    # Not when the reading prints ∞ itself (ENNReal or EReal ⊤): there atTop and
-    # 𝓝 ∞ are different filters, and both would read as "→ ∞".
+    # Not when the reading prints ∞ itself (ENNReal ∞, ℕ∞): there atTop and 𝓝 ∞
+    # are different filters, and both would read as "→ ∞".
     if it.text == 'Filter.Tendsto' and 'as' not in r.words and '∞' not in r.ops:
         args = _app(items, i, 'Filter.Tendsto', 3)
         if args is None:
             return None
         (a0, a1), (b0, b1), (c0, c1) = args
         f, source, target = items[a0], items[b0:b1], items[c0:c1]
-        found = _lambda(f.items) if isinstance(f, Group) and a1 == a0+1 and f.open == '(' else None
+        found = _typed_lambda(f.items) if isinstance(f, Group) and a1 == a0+1 and f.open == '(' else None
         if found is None or not (len(source) == 1 and _is(source[0], 'id', 'Filter.atTop')) or len(target) != 1:
             return None
-        x, body = found
+        # "x → ∞" is the usual limit only on these number systems; on Finset,
+        # say, atTop is a different filter. Formula strings record the binder's
+        # type only when Lean prints it, so an untyped lambda stays as printed.
+        x, domain, body = found
+        if domain not in _NUMERIC:
+            return None
         # In `Tendsto (fun n => f n) atTop (nhds (g n))` the limit's n is not
         # the bound one; "as n → ∞" would bind it, so such a limit stays as printed.
         if any(t == x or t.startswith(x+'.') for t in _ids(target)):
             return None
         target = target[0]
-        if _is(target, 'id', 'Filter.atTop'):
-            limit = '∞'
-        elif _is(target, 'id', 'Filter.atBot'):
-            limit = '−∞'
+        if _is(target, 'id', 'Filter.atTop') or _is(target, 'id', 'Filter.atBot'):
+            # On a type with a top element, atTop means "eventually equal to ⊤",
+            # not "→ ∞": the value's type must be printed and be a number system.
+            value = _strip(body)
+            typed = (_ascribed(value[0].items) if len(value) == 1 and isinstance(value[0], Group)
+                     and value[0].open == '(' else None)
+            if typed is None or typed[1] not in _NUMERIC:
+                return None
+            limit = '∞' if target.text == 'Filter.atTop' else '−∞'
         elif isinstance(target, Group) and target.open == '(':
             inner = _strip(target.items)
             if not (len(inner) >= 3 and _is(inner[0], 'id', 'nhds') and _is(inner[1], 'ws')
@@ -506,7 +593,9 @@ def _rule(items: tuple, i: int, r: Reading, used: set[str], paren: bool = False)
         if not _simple(body):
             shown = '('+shown+')'
         used.add('tendsto')
-        return _wrap(items, i, c1, shown+' → '+limit+' as '+x+' → ∞'), c1
+        # Parenthesized unless it is a whole formula or bracket group: in
+        # `x ↦ (e → a as n → ∞)` the parentheses fix how far each form reaches.
+        return _wrap(items, i, c1, shown+' → '+limit+' as '+x+' → ∞', region), c1
     if it.text == 'nhdsWithin' and r.names.get('nhds') == '𝓝':
         args = _app(items, i, 'nhdsWithin', 2)
         if args is None:
@@ -543,12 +632,14 @@ def _rule(items: tuple, i: int, r: Reading, used: set[str], paren: bool = False)
 # --- per-reading context and legend -----------------------------------------
 
 def displayed_text(declaration: Any) -> str:
-    """The text a reader is shown: parameters, statement, step texts and conclusions."""
+    """The text a reader is shown: parameters, statement, step texts, conclusions
+    and step details (the step inspector shows details, which may hold display
+    notation, such as the statements of absorbed instance facts)."""
     shown = [p.get('text', '') for p in declaration.parameters] + [declaration.statement]
     stack = list(declaration.steps)
     while stack:
         s = stack.pop()
-        shown += [s.text, s.conclusion or '']
+        shown += [s.text, s.conclusion or '', s.detail or '']
         stack.extend(s.children)
     return '\n'.join(shown)
 
@@ -577,12 +668,12 @@ LEGEND_TITLE = 'Notation (display only; the recorded Lean formulas are unchanged
 
 
 def attach(document: Any, r: Reading) -> None:
-    """Record the reading's legend in ``axes['notation']``, which the UI can read.
+    """Record the reading's legend in ``axes['notation']``.
 
-    The same legend is appended to the declaration's warnings, which the reader
-    page and the Markdown view already display, so no view shows shortened
-    names without it. Warnings are outside the reading binding; the bound
-    ``axes['notation']`` is what ``check_reading`` compares.
+    The reader page shows it beside the statement; ``prose`` prints it before
+    the statement. The same legend is also appended to the declaration's
+    warnings (the reader's Evidence tab). Warnings are outside the reading
+    binding; the bound ``axes['notation']`` is what ``check_reading`` compares.
     """
     d = document.declarations[0]
     s = summary(r, displayed_text(d))
