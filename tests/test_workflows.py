@@ -186,7 +186,7 @@ def test_ci_installs_yaml_and_compares_every_tracked_file(flows):
     # No pathspec: the comparison covers the whole tracked tree.
     assert build < drift and 'git diff --quiet;' in runs[drift]
     for folder in ('proofreader/data', 'artifacts/openai-sample', 'artifacts/v0.2', 'artifacts/v0.3'):
-        assert folder in runs[drift].split('git status', 1)[1]
+        assert folder in runs[drift].split('git ls-files --others', 1)[1]
 
 
 def test_path_filters_include_the_command_line_entry_point(flows):

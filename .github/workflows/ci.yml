@@ -33,7 +33,7 @@ jobs:
             echo '::error::Tracked files differ after the demo build and tests. Rebuild them with scripts/build_demo.py, scripts/build_typed_demo.py and scripts/build_narrative_demo.py and commit the result.'
             exit 1
           fi
-          untracked="$(git status --porcelain --untracked-files=all -- proofreader/data artifacts/openai-sample artifacts/v0.2 artifacts/v0.3)"
+          untracked="$(git ls-files --others --exclude-standard -- proofreader/data artifacts/openai-sample artifacts/v0.2 artifacts/v0.3)"
           if [ -n "$untracked" ]; then
             printf '%s\n' "$untracked"
             echo '::error::The demo build wrote files that are not committed.'
