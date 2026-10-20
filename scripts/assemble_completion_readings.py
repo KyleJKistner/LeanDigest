@@ -13,7 +13,7 @@ sys.path.insert(0,str(Path(__file__).resolve().parents[1]))
 from proofreader.original_project import read, write, file_hash, child
 from proofreader.original_status import build_status, attach_status
 from proofreader.original_attempts import reconcile_attempts
-from proofreader.proof_campaign import reconcile as reconcile_proofs
+from proofreader.proof_attempts import reconcile as reconcile_proofs
 from proofreader.completion_results import join_status, ORIGINAL_WORKFLOW
 from proofreader.completion_sets import gather
 from proofreader.catalog_inputs import config_inventory, load_proofs
