@@ -139,8 +139,19 @@ def _name(token: str | None) -> bool:
     return token is not None and IDENT.fullmatch(token) is not None and token not in KEYWORDS and '«' not in token
 
 
+def reexported(module_file: bool, modifiers: set[str]) -> bool:
+    """Whether an import puts the imported declarations into every importer's environment.
+
+    Lean's module system (a header that starts with ``module``) passes an import
+    on to importers only when it is ``public``; a ``meta`` import is for
+    compile-time code. Neither kind of edge is recorded, so reachability never
+    rests on one.
+    """
+    return 'meta' not in modifiers and (not module_file or 'public' in modifiers)
+
+
 def header_imports(source: str) -> list[str]:
-    """The imports of a module header, read without scanning the module body.
+    """The re-exported imports of a module header, read without scanning the module body.
 
     Agrees with scan() wherever both succeed. An import that is not followed by
     one readable module name and then a line break or comment raises ValueError,
@@ -149,9 +160,11 @@ def header_imports(source: str) -> list[str]:
     return _header(source)[0]
 
 
-def _header(source: str) -> tuple[list[str], int]:
-    """Header imports and the offset after the last one, where commands can start."""
-    n, out, body = len(source), [], 0
+def _header(source: str) -> tuple[list[str], int, list[str]]:
+    """Re-exported header imports, the offset after the last import, where commands
+    can start, and the imports that are not re-exported (see ``reexported``)."""
+    n, out, hidden, body = len(source), [], [], 0
+    module_file, modifiers = False, set()
     def skip(i: int, *, lines: bool = True) -> int:
         while i < n:
             if source[i] in LINE_BREAKS and not lines: return i
@@ -169,6 +182,8 @@ def _header(source: str) -> tuple[list[str], int]:
     i = skip(0)
     while (m := IDENT.match(source, i)) is not None:
         if m[0] in HEADER_WORDS:
+            if m[0] == 'module': module_file = True
+            elif m[0] != 'prelude': modifiers.add(m[0])
             i = skip(m.end()); continue
         if m[0] != 'import': break
         name = IDENT.match(source, skip(m.end()))
@@ -177,8 +192,9 @@ def _header(source: str) -> tuple[list[str], int]:
         end = skip(name.end(), lines=False) if name is not None else 0
         if name is None or not _name(name[0]) or (end < n and source[end] not in LINE_BREAKS):
             raise ValueError('Unsupported import syntax in the module header')
-        out.append(name[0]); body = name.end(); i = skip(end)
-    return out, body
+        (out if reexported(module_file, modifiers) else hidden).append(name[0])
+        modifiers = set(); body = name.end(); i = skip(end)
+    return out, body, hidden
 
 
 def scan(source: str, module: str) -> dict:
@@ -186,7 +202,7 @@ def scan(source: str, module: str) -> dict:
     text = mask(source); line = _lines(source)
     toks = [(m.group(), m.start(), m.end()) for m in TOKEN.finditer(text)]
     found, skipped, imports, scopes, stack, pending = [], [], [], [], [], []
-    header, prev = True, None
+    header, prev, module_file, modifiers = True, None, False, set()
     def same_line(k: int, i: int) -> bool:
         return k < len(toks) and line(toks[k][1]) == line(toks[i][1])
     i = 0
@@ -205,8 +221,11 @@ def scan(source: str, module: str) -> dict:
         if header:
             k = i+1+(i+1 < len(toks) and toks[i+1][0] == 'all')
             if t == 'import' and k < len(toks) and _name(toks[k][0]):
-                imports.append(toks[k][0]); i = k+1; continue
-            if t not in {'prelude', 'module', 'public', 'meta'}: header = False
+                if reexported(module_file, modifiers): imports.append(toks[k][0])
+                modifiers = set(); i = k+1; continue
+            if t not in HEADER_WORDS: header = False
+            elif t == 'module': module_file = True
+            elif t != 'prelude': modifiers.add(t)
         if t in KEYWORDS and start and text[start-1] in '.`':
             # A name literal (`instance) or dot notation (.structure, x.1.end) is a term, not a command.
             pending, prev = [], text[start-1]+t; i += 1; continue
@@ -465,7 +484,7 @@ def walk_imports(roots: list[str], known: dict[str, str], load: Callable[[str], 
     last: dict[str, list[tuple[str, frozenset[str]]]] = {}
     for n in sorted(wanted):
         parts = searched_components(n, namespace); last.setdefault(parts[-1], []).append((n, frozenset(parts)))
-    headers, unused, declares, unindexed, failed, sizes = {}, {}, {}, {}, {}, {}
+    headers, unused, declares, unindexed, failed, sizes, not_followed = {}, {}, {}, {}, {}, {}, {}
     external: set[str] = set(); hit: list[str] = []; read = scanned = visited = 0
     frontier = sorted(set(roots)); seen = set(frontier)
     while frontier:
@@ -490,10 +509,12 @@ def walk_imports(roots: list[str], known: dict[str, str], load: Callable[[str], 
                     unused[m] = why if why in UNUSED else 'unreadable-source'; continue
                 size = len(text.encode('utf-8')); read += size; sizes[m] = size
             try:
-                imports, body = _header(text)
+                imports, body, hidden = _header(text)
             except ValueError:
                 unused[m] = 'unreadable-header'; continue
             headers[m] = imports
+            external.update(x for x in hidden if not x.startswith(prefix))
+            if project := [x for x in hidden if x.startswith(prefix)]: not_followed[m] = project
             if m in known and m not in failed_known: candidates = []
             else:
                 # Declarations and namespaces follow the header; comments and literals declare nothing.
@@ -521,9 +542,11 @@ def walk_imports(roots: list[str], known: dict[str, str], load: Callable[[str], 
         frontier = sorted(following)
     return {'headers': headers, 'unused': dict(sorted(unused.items())), 'declares': declares,
             'unindexed': unindexed, 'failed': dict(sorted(failed.items())), 'sizes': sizes,
+            'imports_not_followed': dict(sorted(not_followed.items())),
             'caps': caps, 'caps_hit': hit, 'prefix': prefix, 'namespace': namespace,
             'counts': {'roots': len(set(roots)), 'modules_visited': visited, 'bytes_read': read,
                        'modules_scanned': scanned, 'modules_failed_to_index': len(failed),
+                       'modules_with_imports_not_followed': len(not_followed),
                        'external_imports': len(external)}}
 
 
@@ -576,7 +599,8 @@ def select_dependencies(walk: dict, citing: dict[str, set[str]], base: dict, *,
     for root in sorted(citing):
         parent = _paths(graph, root) if root in graph else {root: None}
         gaps = sorted({walk['unused'][x] for m in parent for x in graph.get(m, []) if x in walk['unused']} |
-                      ({walk['unused'][root]} if root in walk['unused'] else set()))
+                      ({walk['unused'][root]} if root in walk['unused'] else set()) |
+                      ({'import-not-re-exported'} if any(m in walk['imports_not_followed'] for m in parent) else set()))
         if gaps: incomplete[root] = gaps
         for name in sorted(citing[root]):
             entries = declared(name)
@@ -663,6 +687,7 @@ def dependency_report(walk: dict, selection: dict, payloads: list[dict], index: 
             'project_names_by_search': tally('search', True),
             'modules': selection['modules'], 'dropped': selection['dropped'],
             'modules_not_used': walk['unused'], 'modules_failed_to_index': walk['failed'],
+            'imports_not_followed': walk['imports_not_followed'],
             'incomplete_closures': selection['incomplete_closures'], 'names': names,
             'scope': 'Lexical selection of bundled source pages. A cited dependency page is the exact upstream '
                      'file; it is not an English explanation, and a link to it does not check the citation.'}

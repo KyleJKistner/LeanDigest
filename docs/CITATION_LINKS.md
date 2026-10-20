@@ -41,6 +41,15 @@ constant. The recorded import headers are those of the bundled modules and the
 header-only records (`header_imports` in the declaration index) of upstream
 modules that the builder read while following imports.
 
+An import is recorded only when it puts the imported declarations into the
+environment of every module that imports the importer. In a file that uses
+Lean's module system (its header starts with `module`), that is a `public`
+import; an import without `public`, and any `meta` import, is not recorded.
+Leaving out an edge never attaches a wrong link, because every declaration that
+stays reachable is in the citing module's environment. Of the upstream files
+fetched for the local build described below, two use the module system, and
+neither imports an `OAI.` module.
+
 Each link records its `basis`:
 
 | Basis | Meaning |
@@ -130,8 +139,12 @@ records changes no link.
 | `not-visited-cap` | A walk cap was reached before the module was read. |
 
 A citing module that imports such a module, directly or through visited
-modules, has an incomplete closure. Its cited names carry
-`import_closure_complete: false`.
+modules, has an incomplete closure. So does a citing module whose closure has
+an `OAI.` import that is not recorded because a module-system file does not
+re-export it (`import-not-re-exported`; the record lists these imports under
+`imports_not_followed`). The walk does not follow such an import, not even
+one in the citing module itself. The cited names of a citing module with an
+incomplete closure carry `import_closure_complete: false`.
 
 | Search outcome | Meaning |
 | --- | --- |

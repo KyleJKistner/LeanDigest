@@ -63,7 +63,10 @@ def walk_and_select(tree=TREE, cites=CITES, caps=None, statuses=None, log=None, 
 
 @pytest.mark.parametrize('source,imports', [
     ('import A\nimport B.C\n', ['A', 'B.C']),
-    ('/- copyright /- nested -/ -/\nmodule\n\npublic import A -- why\nmeta import B\nimport all C\n\nnamespace X\nimport D\n', ['A', 'B', 'C']),
+    # In a module-system file only a public, non-meta import reaches every importer's environment.
+    ('/- copyright /- nested -/ -/\nmodule\n\npublic import A -- why\nmeta import B\nimport all C\n\nnamespace X\nimport D\n', ['A']),
+    ('module\npublic import A\nimport B\npublic meta import C\npublic import all D\n', ['A', 'D']),
+    ('import A\nimport all B\n', ['A', 'B']),
     ('import\n  A\ntheorem t : True := trivial\n', ['A']),
     ('prelude\nimport Init.Core\n', ['Init.Core']),
     ('theorem t : True := trivial\n', []),
@@ -227,6 +230,22 @@ def test_two_visible_declarations_are_ambiguous_and_not_selected():
     walk, selection = walk_and_select(tree, cites={A: ['OAI.Shared.twin']})
     assert selection['names']['OAI.Shared.twin']['search'] == 'ambiguous-in-visible-modules'
     assert selection['modules'] == {}
+
+
+def test_an_import_that_a_module_system_file_does_not_re_export_is_never_followed():
+    root, public, private = 'OAI.Sys.Main', 'OAI.Sys.Public', 'OAI.Sys.Private'
+    tree = {root: 'module\n\npublic import OAI.Sys.Public\nimport OAI.Sys.Private\nimport Mathlib.Logic.Basic\n\n'
+                  'namespace OAI.S\ntheorem main : True := trivial\nend OAI.S\n',
+            public: 'namespace OAI.S\ntheorem seen : True := trivial\nend OAI.S\n',
+            private: 'namespace OAI.S\ntheorem hidden : True := trivial\nend OAI.S\n'}
+    walk, selection = walk_and_select(tree, {root: ['OAI.S.seen', 'OAI.S.hidden']})
+    assert set(walk['headers']) == {root, public} and walk['imports_not_followed'] == {root: [private]}
+    # Imports outside the project are still counted, whether or not they are re-exported.
+    assert walk['counts']['modules_with_imports_not_followed'] == 1 and walk['counts']['external_imports'] == 1
+    assert set(selection['modules']) == {public} and selection['incomplete_closures'] == {root: ['import-not-re-exported']}
+    assert selection['names']['OAI.S.hidden'] == {'search': 'not-declared-in-visited-modules', 'citing_modules': 1,
+                                                  'import_closure_complete': False}
+    assert build_index({root: tree[root]})['imports'][root] == [public]
 
 
 def test_unusable_modules_are_recorded_with_their_reason():
