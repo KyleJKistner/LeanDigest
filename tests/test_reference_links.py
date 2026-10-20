@@ -73,7 +73,7 @@ def test_each_citation_resolves_to_a_reading_a_source_line_or_a_stated_reason():
                                          'module': ALPHA, 'line': 5, 'basis': 'same-module'}
     # Declared in a bundled module the citing module does not visibly import: not guessed.
     assert names['OAI.Gamma.hidden'] == {'status': 'unresolved', 'reason': 'not-visibly-imported'}
-    assert names['Nat.succ_le'] == {'status': 'unresolved', 'reason': 'not-declared-in-bundled-source'}
+    assert names['Nat.succ_le'] == {'status': 'unresolved', 'reason': 'not-in-declaration-index'}
     assert names['OAI.Alpha.main._proof_1_1'] == {'status': 'unresolved', 'reason': 'compiler-generated-auxiliary'}
     assert set(names) == set(alpha_document().declarations[0].dependencies)
     assert links['counts'] == {'reading': 1, 'source': 1, 'unresolved': 3}
@@ -98,6 +98,22 @@ def test_a_reading_never_links_to_itself():
     document = Narrative(self_citing).document(source=SOURCES[ALPHA], file=FILE)
     entry = alpha_links(document)['names']['OAI.Alpha.main']
     assert entry['status'] == 'source' and entry['line'] == 7
+    # Without an indexed source line the reason names the self-citation, not a missing import.
+    unindexed = {**SOURCES, ALPHA: SOURCES[ALPHA].replace('theorem main', 'theorem «main»')}
+    assert alpha_links(document, unindexed)['names']['OAI.Alpha.main'] == {'status': 'unresolved', 'reason': 'this-reading'}
+
+
+def test_unresolved_reasons_prefer_what_the_bundle_shows_over_name_shape():
+    # A bundled but unreachable declaration whose name looks like an auxiliary is not called generated.
+    sources = {**SOURCES, GAMMA: SOURCES[GAMMA].replace('theorem hidden', 'theorem hidden.proof_1')}
+    cited = record(THEOREMS[ALPHA], 'OAI.Gamma.hidden.proof_1', ['OAI.Other.proof_2'])
+    names = alpha_links(Narrative(cited).document(source=SOURCES[ALPHA], file=FILE), sources)['names']
+    assert names['OAI.Gamma.hidden.proof_1'] == {'status': 'unresolved', 'reason': 'not-visibly-imported'}
+    assert names['OAI.Other.proof_2'] == {'status': 'unresolved', 'reason': 'compiler-generated-auxiliary'}
+    # A reading of the name in an unreachable module is reported the same way, without a source entry.
+    readings = {(ALPHA, THEOREMS[ALPHA]): ident(ALPHA), (GAMMA, 'OAI.Other.proof_2'): ident(GAMMA)}
+    names = alpha_links(Narrative(cited).document(source=SOURCES[ALPHA], file=FILE), sources, readings)['names']
+    assert names['OAI.Other.proof_2'] == {'status': 'unresolved', 'reason': 'not-visibly-imported'}
 
 
 @pytest.mark.parametrize('entry', [
@@ -112,6 +128,9 @@ def test_a_reading_never_links_to_itself():
     {'status': 'unresolved', 'reason': 'x', 'href': '../' + 'a' * 24 + '/reader.html'},
     {'status': 'reading'},
     {'status': 'linked', 'href': '../' + 'a' * 24 + '/reader.html'},
+    {'status': 'reading', 'href': '../' + 'a' * 24 + '/reader.html', 'source': '../../sources/x.html#L1'},
+    {'status': 'unresolved'},
+    {'status': 'unresolved', 'reason': 'looks-fine'},
 ])
 def test_unsafe_or_malformed_links_are_rejected(entry):
     with pytest.raises(ValueError):
@@ -144,7 +163,8 @@ def test_links_stay_outside_the_checked_reading(tmp_path):
 
 def test_link_island_cannot_terminate_its_script():
     attack = '</script><script>globalThis.PWNED=1</script>'
-    links = {'schema': 'leanglish.citation-links/v1', 'names': {attack: {'status': 'unresolved', 'reason': attack}}}
+    links = {'schema': 'leanglish.citation-links/v1',
+             'names': {attack: {'status': 'unresolved', 'reason': 'not-in-declaration-index', 'note': attack}}}
     page = html_document(alpha_document(), links=links)
     assert attack not in page and page.count('<script') == 3
     island = re.search(r'<script id="proofreader-links" type="application/json">(.*?)</script>', page, re.S)[1]
@@ -159,6 +179,10 @@ def write(path, value):
 
 @pytest.fixture
 def catalog(tmp_path):
+    return make_catalog(tmp_path)
+
+
+def make_catalog(tmp_path):
     """Three synthetic configurations; Alpha and Beta have synthetic consistency-check readings."""
     upstream = tmp_path / 'upstream'; lean = upstream / 'lean'; proofs = tmp_path / 'proofs'; proofs.mkdir()
     statements = tmp_path / 'statements'; statements.mkdir()
@@ -207,7 +231,7 @@ def test_catalog_links_readings_and_source_lines_and_passes_audit(catalog):
     assert cl['names'] == {'cited': 6, 'linked_to_reading': 1, 'linked_to_source': 1, 'unresolved': 4}
     assert cl['project_names'] == {'cited': 4, 'linked_to_reading': 1, 'linked_to_source': 1, 'unresolved': 2}
     assert cl['citations']['unresolved_by_reason'] == {'compiler-generated-auxiliary': 1,
-        'not-declared-in-bundled-source': 2, 'not-visibly-imported': 1}
+        'not-in-declaration-index': 2, 'not-visibly-imported': 1}
     assert cl['links_in_checked_reading'] is False and cl['citations_checked'] is False
     assert json.loads((site / 'coverage.json').read_text())['citation_links'] == cl
     index = json.loads((site / 'evidence/declaration-index.json').read_text())
@@ -221,6 +245,23 @@ def test_catalog_links_readings_and_source_lines_and_passes_audit(catalog):
     # The target line really is the declaration on the bundled source page.
     page = (site / 'sources' / source_name(ALPHA)).read_text()
     assert re.search(r'id="L5"><a href="#L5">5</a> theorem helper', page)
+
+
+def test_a_reading_that_fails_to_render_is_never_a_link_target(tmp_path, monkeypatch):
+    import proofreader.finding_catalog as finding_catalog
+    original = finding_catalog.write_bundle
+    def failing(record, *args, **kwargs):
+        if record['theorem'] == THEOREMS[BETA]: raise ValueError('synthetic rendering failure')
+        return original(record, *args, **kwargs)
+    monkeypatch.setattr(finding_catalog, 'write_bundle', failing)
+    site, summary = make_catalog(tmp_path)
+    assert [f['name'] for f in summary['rendering_failures']] == [THEOREMS[BETA]] and summary['proof_readings'] == 1
+    links = json.loads((site / 'proofs' / ident(ALPHA) / 'links.json').read_text())
+    # The rebuilt bundle falls back to the declaration line; no link names the missing reading.
+    assert links['names']['OAI.Beta.target'] == {'status': 'source', 'href': f'../../sources/{source_name(BETA)}#L5',
+                                                 'module': BETA, 'line': 5, 'basis': 'imported-bundled-module'}
+    assert ident(BETA) not in (site / 'proofs' / ident(ALPHA) / 'reader.html').read_text()
+    assert summary['citation_links']['readings_linking_another_reading'] == 0
 
 
 def rewrite(site, module, change):
@@ -253,7 +294,9 @@ def test_audit_rejects_broken_citation_targets(catalog, href, error):
 
 @pytest.mark.parametrize('names,error', [({'X.y': 5}, 'malformed citation entry'),
                                           ({'X.y': {'href': 7}}, 'malformed citation entry'),
-                                          ([], 'malformed citation links')])
+                                          ([], 'malformed citation links'),
+                                          ({'X.y': {'status': 'unresolved', 'reason': 'guess'}}, 'citation links fail validation'),
+                                          ({'X.y': {'status': 'source', 'href': '../../coverage.html'}}, 'citation links fail validation')])
 def test_audit_reports_malformed_link_data_without_crashing(catalog, names, error):
     from proofreader.render import embedded_json
     site, _ = catalog
@@ -264,6 +307,12 @@ def test_audit_reports_malformed_link_data_without_crashing(catalog, names, erro
     island = re.compile(r'(<script id="proofreader-links" type="application/json">).*?(</script>)', re.S)
     (folder / 'reader.html').write_text(island.sub(lambda m: m[1] + embedded_json(data) + m[2], page))
     assert any(e['error'] == error for e in audit(site)['errors'])
+
+
+def test_audit_reports_unparsable_links_json_without_crashing(catalog):
+    site, _ = catalog
+    (site / 'proofs' / ident(ALPHA) / 'links.json').write_text('{not json')
+    assert {'page': f'proofs/{ident(ALPHA)}/reader.html', 'error': 'malformed citation links'} in audit(site)['errors']
 
 
 def test_summary_keeps_every_cited_name_in_the_denominator():
@@ -319,6 +368,14 @@ def test_citations_render_as_links_in_the_document_harness(page):
     cited = page.locator('#inspector-citations')
     assert cited.locator('a[data-citation="OAI.Beta.target"]').count() == 1
     assert cited.locator('a.citation-source').get_attribute('href') == f'../../sources/{source_name(BETA)}#L5'
+
+
+def test_exact_dependency_names_never_match_a_declaration_by_suffix(page):
+    # 'Alpha.main' is a different constant from the reading's OAI.Alpha.main.
+    document = Narrative(record(THEOREMS[ALPHA], 'Alpha.main')).document(source=SOURCES[ALPHA], file=FILE)
+    page.set_content(html_document(document))
+    assert page.locator('#dependencies button').count() == 0
+    assert page.locator('#dependencies .unresolved', has_text='Alpha.main').count() == 1
 
 
 def test_reader_without_link_data_marks_names_unlinked(page):

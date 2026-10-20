@@ -63,6 +63,19 @@ def test_comments_strings_chars_and_quotations_declare_nothing():
     assert 'in_string' not in masked and 'inner' not in masked and 'quoted' not in masked
 
 
+def test_name_literals_and_dot_notation_are_not_commands():
+    src = ('namespace N\n'
+           'def k : Lean.Name := `instance\n'
+           'def l : Lean.Name := ``theorem\n'
+           'def m : Foo := .structure bogus\n'
+           'def p (x : Nat × Nat) := x.1.end\n'
+           'theorem real : True := trivial\n'
+           'end N\n')
+    result = scan(src, 'M')
+    assert {d['name']: d['line'] for d in result['declarations']} == {'N.k': 2, 'N.l': 3, 'N.m': 4, 'N.p': 5, 'N.real': 6}
+    assert not result['skipped']
+
+
 def test_anonymous_generated_and_unsupported_names_are_reported_not_indexed():
     src = ('instance : Inhabited Nat := ⟨0⟩\n'
            'instance [Inhabited α] : Inhabited (List α) := ⟨[]⟩\n'

@@ -34,12 +34,21 @@ it through the `import` headers of bundled modules, so the cited name denotes th
 target constant. An import path through an unbundled module is not visible to the
 builder; such a citation stays unresolved as `not-visibly-imported`.
 
+The reasons are checked in this order:
+
 | Reason | Meaning |
 | --- | --- |
-| `not-declared-in-bundled-source` | No bundled reading or declaration has this name (for example, Mathlib or an unbundled project module). |
 | `ambiguous-in-bundled-source` | Several bundled declarations have this name. |
 | `not-visibly-imported` | A bundled declaration or reading has this name, but the import headers do not show it is the cited constant. |
-| `compiler-generated-auxiliary` | A Lean auxiliary such as `_proof_1` or `match_1`, which has no source declaration. |
+| `this-reading` | The theorem of the citing reading, which does not link to itself, and no bundled source line is indexed for it. |
+| `compiler-generated-auxiliary` | The name has the form of a Lean auxiliary, such as `_proof_1` or `match_1`, which has no source declaration. |
+| `not-in-declaration-index` | No bundled reading has this name and the lexical index records no declaration of it. |
+
+`not-in-declaration-index` does not mean that no bundled module declares the
+constant. It covers names from Mathlib and unbundled modules, but also names that
+Lean generates from a bundled declaration, such as constructors, structure
+fields, automatically named instances and `_simp_N` auxiliaries, and declarations
+the index skipped.
 
 ## Storage and checks
 
@@ -53,9 +62,10 @@ The catalog build indexes the bundled solution modules once, writes
 `evidence/declaration-index.json`, and adds a `citation_links` summary to
 `coverage.json`. Name counts use the best link from any citing reading; citation
 counts keep every reading-and-name pair, with unresolved citations by reason.
-`audit-catalog` checks that each embedded island equals `links.json` and that
-every target file and line anchor exists. The gap inventory regenerates every
-reader page with its links.
+`audit-catalog` checks that each embedded island equals `links.json`, that it
+passes the writer's validation, and that every target file and line anchor
+exists. It does not recompute the links from the declaration index. The gap
+inventory regenerates every reader page with its links.
 
 ## Limitations
 
@@ -66,8 +76,10 @@ not elaborate them here.
 
 A local rebuild of the 492 published readings, using the published bundled
 modules, indexed 7,438 names in 413 modules with no failed module and no ambiguous
-name. Of the 1,762 distinct cited `OAI.*` names, 346 are declared in a bundled
-module. 30 link to a proof reading, 320 only to a source line, and 1,412 stay
-unresolved, mostly because they are declared in modules the catalog does not
-bundle. 25 readings link to another reading. This was a local measurement, not a
-published catalog.
+name. Of the 1,762 distinct cited `OAI.*` names, the index records 346 as
+declared in a bundled module. 30 link to a proof reading, 320 only to a source line, and 1,412 stay
+unresolved: 1,302 are not in the declaration index, 109 have the form of Lean
+auxiliaries, and 1 is not visibly imported. The catalog bundles only the 413
+solution modules, so most of the 1,302 are presumably declared in project modules
+it does not bundle; the index cannot confirm that. 25 readings link to another
+reading. This was a local measurement, not a published catalog.

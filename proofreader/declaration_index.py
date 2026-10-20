@@ -42,6 +42,8 @@ NAME_END = re.compile(r'(?:\s|[(\[{⦃:]|\.\{|\Z)')
 READING_HREF, SOURCE_HREF = '../{}/reader.html', '../../sources/{}#L{}'
 SAFE_HREF = re.compile(r'\.\./(?:[a-f0-9]{24}/reader\.html|\.\./sources/[a-f0-9]{24}\.html#L[1-9][0-9]*)')
 STATUSES = ('reading', 'source', 'unresolved')
+REASONS = ('ambiguous-in-bundled-source', 'not-visibly-imported', 'this-reading',
+           'compiler-generated-auxiliary', 'not-in-declaration-index')
 # Lean-generated auxiliaries (abstracted proofs, matchers) have no source declaration.
 AUXILIARY = re.compile(r"\.(?:_proof|proof|match)_\d+(?:_\d+)*$")
 
@@ -139,6 +141,9 @@ def scan(source: str, module: str) -> dict:
             if t == 'import' and k < len(toks) and _name(toks[k][0]):
                 imports.append(toks[k][0]); i = k+1; continue
             if t not in {'prelude', 'module', 'public', 'meta'}: header = False
+        if t in KEYWORDS and start and text[start-1] in '.`':
+            # A name literal (`instance) or dot notation (.structure, x.1.end) is a term, not a command.
+            pending, prev = [], text[start-1]+t; i += 1; continue
         if t in MODIFIERS:
             pending.append(t); prev = t; i += 1; continue
         if t == 'namespace':
@@ -263,10 +268,14 @@ def citation_links(document, module: str, index: dict, readings: dict[str, list[
             names[name] = {'status': 'source', **source,
                            'basis': 'same-module' if source['module'] == module else 'imported-bundled-module'}
         else:
+            # State only what the bundle shows: a known but unreachable target comes
+            # before name-shape guesses, and "not indexed" is not "not declared".
+            others = [m for m, _ in readings.get(name, []) if not (m == module and name in own)]
             reason = ('ambiguous-in-bundled-source' if name in index['ambiguous'] else
+                      'not-visibly-imported' if entry or others else
+                      'this-reading' if name in own else
                       'compiler-generated-auxiliary' if AUXILIARY.search(name) else
-                      'not-visibly-imported' if entry or name in readings else
-                      'not-declared-in-bundled-source')
+                      'not-in-declaration-index')
             names[name] = {'status': 'unresolved', 'reason': reason}
     counts = {s: sum(v['status'] == s for v in names.values()) for s in STATUSES}
     return {'schema': LINKS_SCHEMA, 'module': module, 'names': names, 'counts': counts,
@@ -282,13 +291,16 @@ def validate_links(links: Any) -> dict:
     for name, v in links['names'].items():
         if not isinstance(name, str) or not name or not isinstance(v, dict) or v.get('status') not in STATUSES:
             raise ValueError('Invalid citation link entry')
-        hrefs = [v.get('href'), (v.get('source') or {}).get('href')] if v['status'] != 'unresolved' else []
-        if v['status'] == 'unresolved' and ('href' in v or 'source' in v):
-            raise ValueError('An unresolved citation cannot carry a link')
-        for href in hrefs:
+        if v['status'] == 'unresolved':
+            if 'href' in v or 'source' in v: raise ValueError('An unresolved citation cannot carry a link')
+            if v.get('reason') not in REASONS: raise ValueError('An unresolved citation needs a stated reason')
+            continue
+        source = v.get('source', {})
+        if not isinstance(source, dict): raise ValueError('Invalid citation source')
+        for href in (v.get('href'), source.get('href')):
             if href is not None and (not isinstance(href, str) or not SAFE_HREF.fullmatch(href)):
                 raise ValueError('Citation link is not a relative catalog target')
-        if v['status'] != 'unresolved' and not isinstance(v.get('href'), str):
+        if not isinstance(v.get('href'), str):
             raise ValueError('A resolved citation needs a link')
     return links
 

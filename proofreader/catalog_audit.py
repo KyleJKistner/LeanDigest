@@ -7,6 +7,8 @@ from pathlib import Path
 import re
 from urllib.parse import unquote, urlsplit
 
+from .declaration_index import validate_links
+
 class Links(HTMLParser):
     def __init__(self):
         super().__init__();self.refs=[];self.ids=[];self.resources=[]
@@ -52,9 +54,12 @@ def audit(site: Path) -> dict:
     for reader in sorted((site/'proofs').glob('*/reader.html')):
         island=re.findall(r'<script id="proofreader-links" type="application/json">(.*?)</script>',reader.read_text(),re.S)
         saved=reader.parent/'links.json'
-        if len(island)>1 or bool(island)!=saved.is_file() or (island and json.loads(island[0])!=json.loads(saved.read_text())):
+        try:data=json.loads(saved.read_text()) if saved.is_file() else None;same=not island or json.loads(island[0])==data
+        except ValueError:
+            errors.append({'page':str(reader.relative_to(site)),'error':'malformed citation links'});continue
+        if len(island)>1 or bool(island)!=saved.is_file() or not same:
             errors.append({'page':str(reader.relative_to(site)),'error':'citation links differ from links.json'});continue
-        data=json.loads(saved.read_text()) if island else {'names':{}}
+        data=data if island else {'names':{}}
         entries=data.get('names') if isinstance(data,dict) else None
         if not isinstance(entries,dict):
             errors.append({'page':str(reader.relative_to(site)),'error':'malformed citation links'});continue
@@ -69,6 +74,9 @@ def audit(site: Path) -> dict:
                     errors.append({'page':str(reader.relative_to(site)),'citation':name,'url':ref,'error':'broken or escaping citation link'});continue
                 if parts.fragment and unquote(parts.fragment) not in ids.setdefault(target,set(parsed[target].ids) if target in parsed else set()):
                     errors.append({'page':str(reader.relative_to(site)),'citation':name,'url':ref,'error':'missing citation anchor'})
+        if island:  # The writer's own rules: relative catalog targets and a stated reason for every unresolved name.
+            try:validate_links(data)
+            except ValueError as exc:errors.append({'page':str(reader.relative_to(site)),'error':'citation links fail validation','detail':str(exc)})
     expected={f['id']+'.html' for f in catalog}
     require(expected=={p.name for p in (site/'findings').glob('*.html')},'Finding page inventory mismatch')
     require(len(list((site/'evidence/statements').glob('*.json')))==summary['elaborated_statement_entries'],'Statement file inventory mismatch')
