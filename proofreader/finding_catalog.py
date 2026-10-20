@@ -19,7 +19,7 @@ from .model import canonical_json, digest
 from .narrative import Narrative, Snapshot
 from .narrative_io import write_bundle
 from .declaration_index import (build_index, citation_links, cited_names, reading_map, summarize,
-    walk_imports, select_dependencies, dependency_report, reachable_headers, CAPS)
+    walk_imports, select_dependencies, dependency_report, reachable_headers, validate_caps, CAPS)
 from .catalog_inputs import (PIN, read_json, write_json, safe_child, upstream_url,
     config_inventory, load_statements, load_proofs, families, verify_metadata)
 
@@ -133,6 +133,7 @@ def build(upstream: Path, lean: Path, statement_roots: list[Path], proof_roots: 
           output: Path, *, math_assets: Path | None = None, source_inventory: Path | None = None,
           dependency_caps: dict | None = None) -> dict:
     if output.exists(): raise ValueError('Use a new output directory')
+    validate_caps(dependency_caps)  # Before anything is written.
     verify_metadata(upstream,lean,source_inventory)
     configs=config_inventory(lean);fs=families(upstream,configs)
     statements,statement_attempts=load_statements(statement_roots,configs,lean)
@@ -163,7 +164,7 @@ def build(upstream: Path, lean: Path, statement_roots: list[Path], proof_roots: 
     def load(module):  # Cited dependency modules are read only from the verified upstream tree.
         relative=module.replace('.','/')+'.lean'
         try: path=safe_child(lean,relative)
-        except ValueError: return None,'unsupported-module-name'
+        except ValueError: return None,'path-outside-tree'  # The walk accepts only plain module names.
         if not path.is_file(): return None,'missing-file'
         data=path.read_bytes();entry=manifest.get('lean/'+relative) if manifest is not None else None
         if manifest is not None and (not entry or digest(data)!=entry['sha256']): return None,'unverified-source'
@@ -179,7 +180,7 @@ def build(upstream: Path, lean: Path, statement_roots: list[Path], proof_roots: 
     log=lambda message:print(message,file=sys.stderr)
     base=build_index(sources)
     roots=sorted({k[0] for k in cited})
-    walk=walk_imports(roots,sources,load,set().union(*cited.values()),caps=dependency_caps,log=log)
+    walk=walk_imports(roots,sources,load,set().union(*cited.values()),caps=dependency_caps,failed_known=base['failed_modules'],log=log)
     def prepare(available):
         citing={}
         for key in sorted(available & cited.keys()): citing.setdefault(key[0],set()).update(cited[key])
@@ -290,9 +291,9 @@ def build(upstream: Path, lean: Path, statement_roots: list[Path], proof_roots: 
     (output/'index.html').write_text(shell('OpenAI findings',body,page='catalog'),encoding='utf-8')
     body='<p class="eyebrow">Coverage is multidimensional</p><h1>What is accessible.<br>What is checked.</h1><p class="lede">An upstream scope note, an elaborated specification, a source-bound proof reading, and a faithful English proof are different deliverables.</p><table><thead><tr><th>Layer</th><th>Observed result</th></tr></thead><tbody>'
     cl=summary['citation_links'];pn=cl['project_names'];dc=summary['cited_dependency_sources']
-    for label,value in [('Documented findings indexed',f"{summary['documented_findings']} / {summary['documented_findings']}"),('Comparison configurations',str(len(configs))),('Statement entries',f'{len(statements)} / {total_occurrences}'),('Unique formal targets',str(summary['unique_formal_targets'])),('Theorem targets with a proof reading',f'{len(reading_rows)} / {len(targets)}'),('Definition references (separate denominator)',str(len(definitions))),('Solution source modules included',str(len(modules))),('Cited dependency source modules included',str(len(extra))),('Project modules read to follow import headers',str(dc['counts']['modules_visited'])),('Cited dependency caps reached',', '.join(dc['caps_hit']) or 'None'),('Selected proof frames checked',str(summary['selected_checked_frames'])),('Explicit explanation gaps',str(summary['explicit_explanation_gaps'])),('Cited project names (OAI.*) in the readings',str(pn['cited'])),('… linked to a proof reading of the same constant',str(pn['linked_to_reading'])),('… linked only to a declaration line in bundled source',str(pn['linked_to_source'])),('… unresolved (not in the bundled declaration index, Lean-generated, ambiguous, or not visibly imported)',str(pn['unresolved'])),('Whole original project / Comparator execution','Not completed'),('Formally certified English proofs','0'),('Human comprehension benchmark','Not performed')]:
+    for label,value in [('Documented findings indexed',f"{summary['documented_findings']} / {summary['documented_findings']}"),('Comparison configurations',str(len(configs))),('Statement entries',f'{len(statements)} / {total_occurrences}'),('Unique formal targets',str(summary['unique_formal_targets'])),('Theorem targets with a proof reading',f'{len(reading_rows)} / {len(targets)}'),('Definition references (separate denominator)',str(len(definitions))),('Solution source modules included',str(len(modules))),('Cited dependency source modules included',str(len(extra))),('Project modules visited while following import headers',str(dc['counts']['modules_visited'])),('Cited dependency caps reached',', '.join(dc['caps_hit']) or 'None'),('Selected proof frames checked',str(summary['selected_checked_frames'])),('Explicit explanation gaps',str(summary['explicit_explanation_gaps'])),('Cited project names (OAI.*) in the readings',str(pn['cited'])),('… linked to a proof reading of the same constant',str(pn['linked_to_reading'])),('… linked only to a declaration line in bundled source',str(pn['linked_to_source'])),('… unresolved (not in the bundled declaration index, Lean-generated, ambiguous, or not visibly imported)',str(pn['unresolved'])),('Whole original project / Comparator execution','Not completed'),('Formally certified English proofs','0'),('Human comprehension benchmark','Not performed')]:
         body+='<tr><td>'+label+'</td><td>'+value+'</td></tr>'
-    body+='</tbody></table><section><h2>Interpretation</h2><p>The statements were elaborated from comparison specifications. These specifications intentionally contain placeholders. They are not solution proofs. The linked proof readings instead use retained native Lean observations, with source hashes and original-proof paths checked. The runs used original solution modules with the recorded shared dependency pins, not a complete replay of the original project or its Comparator checks.</p><p>Imported evidence is an unsigned observation. The Lean compiler, source, pretty-printer, extraction code, transport and English renderer remain within the trust boundary. A missing explanation is shown as a gap, not replaced by plausible prose.</p><p>Scope notes are reproduced without changing their claims or limitations. Neither indexing a finding nor reading its statement establishes the correctness of the paper.</p><p>Citation links are navigation aids outside each checked reading. A cited Lean name links to a bundled proof reading of the same constant, else to its declaration line in bundled source, only when the recorded import headers show it is that constant. A cited dependency source page is an exact upstream file that declares a cited name and that a citing solution module imports, directly or through other modules; the import headers read to establish this are recorded with the declaration index. Ambiguous names, Lean-generated names and names the lexical index of the bundled modules does not record stay visibly unresolved, each with its reason. A link does not mean the citation is explained or checked.</p></section><p><a href="coverage.json">Machine-readable coverage</a> · <a href="catalog.json">Finding inventory</a> · <a href="evidence/declaration-index.json">Declaration index for citation links</a> · <a href="evidence/cited-dependency-sources.json">Cited dependency sources</a> · <a href="evidence/attempts.json">Every retained attempt</a> · <a href="OPENAI-LICENSE.txt">Upstream license</a></p>'
+    body+='</tbody></table><section><h2>Interpretation</h2><p>The statements were elaborated from comparison specifications. These specifications intentionally contain placeholders. They are not solution proofs. The linked proof readings instead use retained native Lean observations, with source hashes and original-proof paths checked. The runs used original solution modules with the recorded shared dependency pins, not a complete replay of the original project or its Comparator checks.</p><p>Imported evidence is an unsigned observation. The Lean compiler, source, pretty-printer, extraction code, transport and English renderer remain within the trust boundary. A missing explanation is shown as a gap, not replaced by plausible prose.</p><p>Scope notes are reproduced without changing their claims or limitations. Neither indexing a finding nor reading its statement establishes the correctness of the paper.</p><p>Citation links are navigation aids outside each checked reading. A cited Lean name links to a bundled proof reading of the same constant, else to its declaration line in bundled source, only when the recorded import headers show it is that constant. A cited dependency source page is an exact upstream file in which the lexical index locates a cited name and that a citing solution module imports, directly or through other modules; the import headers read to establish this are recorded with the declaration index. Ambiguous names, Lean-generated names and names the lexical index of the bundled modules does not record stay visibly unresolved, each with its reason. A link does not mean the citation is explained or checked.</p></section><p><a href="coverage.json">Machine-readable coverage</a> · <a href="catalog.json">Finding inventory</a> · <a href="evidence/declaration-index.json">Declaration index for citation links</a> · <a href="evidence/cited-dependency-sources.json">Cited dependency sources</a> · <a href="evidence/attempts.json">Every retained attempt</a> · <a href="OPENAI-LICENSE.txt">Upstream license</a></p>'
     (output/'coverage.html').write_text(shell('Coverage and evidence',body),encoding='utf-8')
     write_json(output/'coverage.json',summary);write_json(output/'catalog.json',ledger)
     write_json(output/'evidence/attempts.json',{'statements':statement_attempts,'proofs':proof_attempts})
@@ -309,8 +310,8 @@ def main(argv: list[str] | None = None, *, prog: str | None = None):
     p.add_argument('--output','-o',required=True,type=Path);p.add_argument('--math-assets',type=Path);p.add_argument('--source-inventory',type=Path)
     p.add_argument('--dependency-caps',type=json.loads,help='JSON object overriding the cited dependency caps: '+', '.join(CAPS))
     a=p.parse_args(argv)
-    if a.dependency_caps is not None and (not isinstance(a.dependency_caps,dict) or not set(a.dependency_caps)<=set(CAPS)):
-        p.error('Unknown cited dependency cap')
+    try: validate_caps(a.dependency_caps)
+    except ValueError as exc: p.error(str(exc))
     result=build(a.upstream,a.lean,a.statements,a.proofs,a.output,math_assets=a.math_assets,source_inventory=a.source_inventory,dependency_caps=a.dependency_caps)
     print(json.dumps(result,indent=2));return 0 if result['all_specification_entries_accessible'] and not result['rendering_failures'] else 2
 if __name__=='__main__':raise SystemExit(main())

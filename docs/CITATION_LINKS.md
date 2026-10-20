@@ -76,7 +76,8 @@ imports. The catalog build bundles those modules, not the whole upstream tree:
    breadth-first through `OAI.*` modules, resolving `OAI.A.B` to
    `lean/OAI/A/B.lean`. A file's imports come from its header
    (`header_imports`), never from its body. Imports outside `OAI.` are counted
-   and not followed.
+   and not followed. The walk visits a module when it tries to read the
+   module's file; the solution modules are already read and are not counted.
 3. It scans a visited module with the declaration indexer only when the text
    after its imports, with comments and literals masked, contains every
    component of a cited `OAI.*` name as an identifier. A declaration that the
@@ -125,6 +126,7 @@ records changes no link.
 | `unreadable-source` | The file is not UTF-8 text. |
 | `unreadable-header` | The header has an unterminated comment or an import that the reader does not parse, such as two module names after one `import`. |
 | `unsupported-module-name` | The name is not a sequence of unquoted identifiers, so it has no file path. |
+| `path-outside-tree` | The module's file path resolves outside the upstream tree, for example through a symbolic link. |
 | `not-visited-cap` | A walk cap was reached before the module was read. |
 
 A citing module that imports such a module, directly or through visited
@@ -139,26 +141,29 @@ modules, has an incomplete closure. Its cited names carry
 | `ambiguous-in-visible-modules` | A citing module can see more than one declaration of the name. |
 | `declared-only-in-modules-not-imported` | Visited or solution modules declare the name, but no citing module imports them. |
 | `outside-searched-namespace` | The name is outside `OAI.` or has a quoted component, so it was not searched, and no visible solution module declares it. |
-| `candidate-module-not-indexed` | A visited module spells the name but failed to index. |
-| `parent-type-in-bundled-source` | No visited module declares the name. The name without its last component is a structure, class or inductive type in a bundled module that a citing module imports. Lean generates fields, constructors and some instance names from such declarations; the index does not record them, and no link is made. |
-| `not-declared-in-visited-modules` | No visited module declares the name. |
+| `candidate-module-not-indexed` | A visited module or a solution module spells the name but failed to index. |
+| `parent-type-in-bundled-source` | The conditions of `not-declared-in-visited-modules` hold, and the name without its last component is a structure, class or inductive type in a bundled module that a citing module imports. Lean generates fields, constructors and some instance names from such declarations; the index does not record them, and no link is made. |
+| `not-declared-in-visited-modules` | No indexed solution module and no visited module that the walk could use declares the name. A module that could not be used is not searched; when one is in a citing module's closure, `import_closure_complete` is false. |
 
 ### Caps
 
 | Cap | Default | Bound |
 | --- | ---: | --- |
-| `max_visited_modules` | 100,000 | Modules read by the walk. |
-| `max_read_bytes` | 1,200,000,000 | Bytes read by the walk. |
+| `max_visited_modules` | 100,000 | Modules visited by the walk. |
+| `max_read_bytes` | 1,200,000,000 | Bytes read by the walk. The bound is checked before each read, so the last module read can cross it. |
 | `max_seconds` | None | Wall-clock time of the walk. It is opt-in, because whether it is reached depends on the machine. |
 | `max_selected_modules` | 3,000 | Dependency modules bundled. |
 | `max_selected_bytes` | 40,000,000 | Source bytes of the dependency modules bundled. |
 
 `leanglish catalog --dependency-caps '{"max_selected_modules": 100}'` overrides
-a cap. When a walk cap is reached, the walk reads no further modules and records
-the rest as `not-visited-cap`. A selection cap keeps the modules that resolve the
-most cited names, then orders by module name, and records the others as
-dropped. Each cap that is reached is printed once to standard error and listed
-in `caps_hit`, in `coverage.json` and on the coverage page.
+a cap. Each value is a non-negative integer, except that `max_seconds` can also
+be `null` or a non-integer number. The command rejects an unknown cap or an
+invalid value before it writes any output. When a walk cap is reached, the walk
+reads no further modules and records the rest as `not-visited-cap`. A selection
+cap keeps the modules that resolve the most cited names, then orders by module
+name, and records the others as dropped. Each cap that is reached is printed
+once to standard error and listed in `caps_hit`, in `coverage.json` and on the
+coverage page.
 
 ## Storage and checks
 
@@ -231,12 +236,15 @@ the static audit passed.
 | `not-visibly-imported` | 1 | 0 |
 
 Of the 96 names that stay `not-in-declaration-index`, 50 are
-`parent-type-in-bundled-source`, and 46 are not declared in any visited module.
-These 46 include automatically named instances (`inst…`), `casesOn` recursors
-and fields of structures whose modules are not bundled. Project citations, which
+`parent-type-in-bundled-source`, and 46 are `not-declared-in-visited-modules`.
+These 46 are 12 automatically named instances (`inst…`), 2 `casesOn` recursors
+and 32 other names. For each of the 32, a text search of the fetched tree finds
+a `structure` or `class` with the short name of its parent in a module that is
+not bundled. Project citations, which
 count each reading-and-name pair, linked to a source line rose from 328 to
 1,638. Of the 1,669 linked project citations, 654 have the basis
-`imported-via-recorded-headers`. Each of the 1,671 source-line links in the
+`imported-via-recorded-headers`. Readings that link to another reading rose
+from 25 to 26. Each of the 1,671 source-line links in the
 built site, including those attached to reading links, points to a line that
 contains the last component of the cited name. Real Chromium followed five of
 these links by `file://` navigation to the declaration lines.

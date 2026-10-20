@@ -256,6 +256,20 @@ def test_a_candidate_module_that_fails_to_index_is_reported():
     assert A_DEEP not in selection['modules']
 
 
+def test_a_solution_module_that_failed_to_index_is_not_reported_as_declaring_nothing():
+    broken = {**TREE, A: TREE[A].replace('theorem main : True := trivial', 'theorem main : True := (trivial\ntheorem own : True := trivial')}
+    known = {m: broken[m] for m in CITES}; base = build_index(known)
+    assert A in base['failed_modules']
+    walk = walk_imports(sorted(CITES), known, loader(broken), {'OAI.A.own'}, failed_known=base['failed_modules'])
+    assert walk['failed'] == {A: base['failed_modules'][A]} and walk['unindexed'] == {'OAI.A.own': [A]}
+    assert walk['counts']['modules_scanned'] == 0
+    selection = select_dependencies(walk, {A: {'OAI.A.own'}}, base)
+    assert selection['names']['OAI.A.own']['search'] == 'candidate-module-not-indexed'
+    # Without the bundled index's failures, the name would read as declared nowhere.
+    walk = walk_imports(sorted(CITES), known, loader(broken), {'OAI.A.own'})
+    assert select_dependencies(walk, {A: {'OAI.A.own'}}, base)['names']['OAI.A.own']['search'] == 'not-declared-in-visited-modules'
+
+
 def test_visit_caps_are_logged_and_recorded():
     messages = []
     walk, selection = walk_and_select(caps={'max_visited_modules': 2}, log=messages.append)
@@ -285,18 +299,33 @@ def test_selection_caps_keep_the_most_useful_modules_and_record_the_rest():
 
 
 @pytest.mark.parametrize('caps', [{'max_modules': 3}, {'max_visited_modules': -1}, {'max_read_bytes': True},
-                                  {'max_selected_modules': None}, {'max_seconds': '5'}])
+                                  {'max_selected_modules': None}, {'max_seconds': '5'}, {'max_selected_bytes': 1.5},
+                                  {'max_read_bytes': float('nan')}, {'max_seconds': float('nan')},
+                                  {'max_seconds': float('inf')}])
 def test_invalid_caps_are_rejected(caps):
+    # A NaN bound would compare false forever and silently disable its cap.
     with pytest.raises(ValueError):
         walk_and_select(caps=caps)
 
 
-@pytest.mark.parametrize('value', ['{"max_modules": 3}', '[1]', 'not json'])
-def test_the_catalog_command_rejects_unknown_caps_before_building(tmp_path, value):
+def test_a_fractional_time_bound_is_accepted():
+    walk, _ = walk_and_select(caps={'max_seconds': 3600.5})
+    assert walk['caps']['max_seconds'] == 3600.5 and walk['caps_hit'] == []
+
+
+@pytest.mark.parametrize('value', ['{"max_modules": 3}', '[1]', 'not json', 'NaN', '{"max_visited_modules": -1}',
+                                   '{"max_seconds": "5"}', '{"max_read_bytes": NaN}'])
+def test_the_catalog_command_rejects_invalid_caps_before_building(tmp_path, value):
     from proofreader.finding_catalog import main
     with pytest.raises(SystemExit):
         main(['--upstream', str(tmp_path), '--lean', str(tmp_path), '--statements', str(tmp_path), '--proofs', str(tmp_path),
               '--output', str(tmp_path/'site'), '--dependency-caps', value])
+    assert not (tmp_path/'site').exists()
+
+
+def test_the_catalog_build_rejects_an_invalid_cap_before_writing_output(tmp_path):
+    with pytest.raises(ValueError, match='cited dependency cap'):
+        make_site(tmp_path, caps={'max_selected_modules': -1})
     assert not (tmp_path/'site').exists()
 
 
@@ -452,6 +481,17 @@ def test_an_unverified_file_is_never_bundled_or_followed(tmp_path, change, unuse
     assert report['names']['OAI.A.deep']['search'] == 'not-declared-in-visited-modules'
     assert report['names']['OAI.A.deep']['import_closure_complete'] is False
     assert audit(site)['passed']
+
+
+def test_a_module_file_that_resolves_outside_the_tree_is_never_read(tmp_path):
+    make_site(tmp_path, name='first')
+    outside = tmp_path/'outside.lean'; outside.write_text(TREE[A_DEEP])
+    deep = tmp_path/'upstream/lean/OAI/Alg/A/Deep.lean'; deep.unlink(); deep.symlink_to(outside)
+    site, summary = make_site(tmp_path, name='second')
+    report = json.loads((site/'evidence/cited-dependency-sources.json').read_text())
+    assert report['modules_not_used'] == {A_DEEP: 'path-outside-tree', 'OAI.Alg.B.Gone': 'missing-file'}
+    assert A_DEEP not in report['modules'] and not (site/'sources'/source_name(A_DEEP)).exists()
+    assert links_of(site, A)['OAI.A.deep'] == {'status': 'unresolved', 'reason': 'not-in-declaration-index'}
 
 
 def test_without_an_inventory_the_report_says_hashes_were_not_checked(tmp_path):

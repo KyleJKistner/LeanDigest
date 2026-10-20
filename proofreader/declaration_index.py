@@ -24,6 +24,7 @@ they could not use, and every cap they hit, is recorded with its reason.
 from __future__ import annotations
 from bisect import bisect_right
 from collections import deque
+import math
 import re
 import time
 from typing import Any, Callable
@@ -69,7 +70,7 @@ MODULE_NAME = re.compile(r"(?![λΠΣ])[^\W\d][\w'!?]*(?:\.(?![λΠΣ])[^\W\d][\
 ATOM = re.compile(r"(?![λΠΣ])[^\W\d][\w'!?]*")
 TYPE_KINDS = frozenset(('structure', 'class', 'inductive', 'class inductive'))
 UNUSED = ('missing-file', 'unverified-source', 'unreadable-source', 'unreadable-header',
-          'unsupported-module-name', 'not-visited-cap')
+          'unsupported-module-name', 'path-outside-tree', 'not-visited-cap')
 # Deterministic default bounds; a time bound is opt-in because hitting it depends on the machine.
 CAPS = {'max_visited_modules': 100_000, 'max_read_bytes': 1_200_000_000, 'max_seconds': None,
         'max_selected_modules': 3_000, 'max_selected_bytes': 40_000_000}
@@ -427,14 +428,31 @@ def searched_components(name: str, namespace: str = 'OAI.') -> list[str] | None:
     return parts if name.startswith(namespace) and all(ATOM.fullmatch(p) for p in parts) else None
 
 
+def validate_caps(caps: dict | None) -> dict:
+    """CAPS with ``caps`` applied. Counts and byte bounds are non-negative integers;
+    ``max_seconds`` is None or a finite non-negative number. Anything else raises."""
+    if caps is not None and not isinstance(caps, dict): raise ValueError('Cited dependency caps must be an object')
+    merged = {**CAPS, **(caps or {})}
+    def valid(k: str, v: Any) -> bool:
+        if k == 'max_seconds' and v is None: return True
+        number = (int, float) if k == 'max_seconds' else (int,)
+        return not isinstance(v, bool) and isinstance(v, number) and math.isfinite(v) and v >= 0
+    if set(merged) != set(CAPS) or not all(valid(k, v) for k, v in merged.items()):
+        raise ValueError('Unknown or invalid cited dependency cap')
+    return merged
+
+
 def walk_imports(roots: list[str], known: dict[str, str], load: Callable[[str], tuple[str | None, str]],
                  wanted: set[str], *, prefix: str = 'OAI.', namespace: str = 'OAI.', caps: dict | None = None,
-                 log: Callable[[str], None] | None = None) -> dict:
+                 failed_known: dict[str, str] | None = None, log: Callable[[str], None] | None = None) -> dict:
     """Follow import headers breadth-first from ``roots`` through ``prefix`` modules.
 
     ``known`` maps modules already bundled to their text; they are traversed but
-    not scanned. ``load(module)`` returns ``(text, 'read')`` or ``(None, reason)``
-    with a reason from UNUSED. Imports outside ``prefix`` are counted, not followed.
+    not scanned. ``failed_known`` lists the known modules that the bundled index
+    could not read, with the error; a wanted name that such a module spells is
+    recorded as unindexed there. ``load(module)`` returns ``(text, 'read')`` or
+    ``(None, reason)`` with a reason from UNUSED. Imports outside ``prefix`` are
+    counted, not followed.
 
     The walk searches for the ``wanted`` names in ``namespace``. A visited module
     is scanned only when the comment-free text after its imports has every
@@ -442,11 +460,7 @@ def walk_imports(roots: list[str], known: dict[str, str], load: Callable[[str], 
     indexes spells each component in a namespace or name token there, so none is
     skipped. Other names are not searched (``outside-searched-namespace``).
     """
-    caps = {**CAPS, **(caps or {})}; start = time.monotonic()
-    if set(caps) != set(CAPS) or any(not (v is None and k == 'max_seconds') and
-                                     (isinstance(v, bool) or not isinstance(v, (int, float)) or v < 0)
-                                     for k, v in caps.items()):
-        raise ValueError('Unknown or invalid cited dependency cap')
+    caps = validate_caps(caps); start = time.monotonic(); failed_known = failed_known or {}
     wanted = {n for n in wanted if searched_components(n, namespace)}
     last: dict[str, list[tuple[str, frozenset[str]]]] = {}
     for n in sorted(wanted):
@@ -480,13 +494,17 @@ def walk_imports(roots: list[str], known: dict[str, str], load: Callable[[str], 
             except ValueError:
                 unused[m] = 'unreadable-header'; continue
             headers[m] = imports
-            if m in known: candidates = []
+            if m in known and m not in failed_known: candidates = []
             else:
                 # Declarations and namespaces follow the header; comments and literals declare nothing.
                 try: atoms = set(ATOM.findall(mask(text), body))
                 except ValueError: atoms = set(ATOM.findall(text, body))  # scan() fails on it too.
                 candidates = [n for a in atoms & last.keys() for n, parts in last[a] if parts <= atoms]
-            if candidates:
+            if m in known and m in failed_known:
+                # The bundled index already failed on this module; its names stay unknown, not absent.
+                failed[m] = failed_known[m]
+                for n in sorted(candidates): unindexed.setdefault(n, []).append(m)
+            elif candidates:
                 scanned += 1
                 try:
                     rows = scan(text, m)['declarations']
