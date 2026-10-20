@@ -187,25 +187,43 @@ artifacts and the plan artifact were downloaded, their digests matched the
 values GitHub records, and `scripts/plan_dependency_cone.py reconcile` on them
 reproduced the CI summary byte for byte.
 
-| Environment module | Readings | Checked frames | Displayed steps | Gap steps | Shard job time |
-| --- | ---: | ---: | ---: | ---: | ---: |
-| `OAI.Probability.ContinuumTransition.Main` | 30 | 1,107 | 606 | 295 | 24 min |
-| `OAI.Combinatorics.UniformKServer.Main` | 21 | 814 | 554 | 244 | 26 min |
-| `OAI.Probability.GaussianInformation.Main` | 21 | 1,472 | 1,008 | 547 | 11 min |
-| `OAI.Probability.CoordinateSweeps.Main` | 18 | 1,419 | 1,130 | 561 | 10 min |
-| `OAI.Probability.UnimodularPercolation.CayleyMain` | 17 | 936 | 588 | 224 | 18 min |
-| `OAI.MathematicalPhysics.SheetFlows.SheetProgram` | 15 | 397 | 281 | 113 | 9 min |
-| `OAI.Probability.ProjectionMoments.Main` | 15 | 2,248 | 1,324 | 402 | 11 min |
-| `OAI.MathematicalPhysics.NavierStokes.BalancedTransport.MainResult` | 14 | 917 | 721 | 268 | 11 min |
-| Total | 151 | 9,310 | 6,212 | 2,654 | |
+The run's 11 artifacts (the plan, the preflight record, the 8 shards and the
+summary) are the only copy of these readings that the repository can name.
+GitHub deletes all 11 on 2027-01-18 (their recorded `expires_at`,
+2027-01-18T05:16:06Z). `scripts/preserve_inputs.py` does not copy them, and no
+cone reading is committed. After that date the readings can be restored only
+by a new run, which needs a source bundle that has not expired (see
+[External inputs](#external-inputs)).
+
+| Environment module | Readings | Checked frames | Displayed steps | Gap steps | Job time | Build and extraction step |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: |
+| `OAI.Probability.ContinuumTransition.Main` | 30 | 1,107 | 584 | 296 | 25 min | 24 min |
+| `OAI.Combinatorics.UniformKServer.Main` | 21 | 814 | 515 | 256 | 27 min | 26 min |
+| `OAI.Probability.GaussianInformation.Main` | 21 | 1,472 | 999 | 585 | 13 min | 11 min |
+| `OAI.Probability.CoordinateSweeps.Main` | 18 | 1,419 | 1,080 | 601 | 12 min | 10 min |
+| `OAI.Probability.UnimodularPercolation.CayleyMain` | 17 | 936 | 546 | 228 | 19 min | 18 min |
+| `OAI.MathematicalPhysics.SheetFlows.SheetProgram` | 15 | 397 | 261 | 115 | 11 min | 9 min |
+| `OAI.Probability.ProjectionMoments.Main` | 15 | 2,248 | 1,253 | 403 | 12 min | 11 min |
+| `OAI.MathematicalPhysics.NavierStokes.BalancedTransport.MainResult` | 14 | 917 | 751 | 270 | 13 min | 11 min |
+| Total | 151 | 9,310 | 5,989 | 2,754 | | |
 
 The frame, step and gap counts come from `leanglish reading-kpis` with renderer
-`source-math-en/0.5.0` on the downloaded snapshots. The gap step share is 0.43
-and the gap frame share is 0.46. No pilot reading is free of gaps. By rule, the
-gap steps are 1,337 library citations, 508 project citations, 239 instance-fact
-groups, 201 rewrites, 166 restatements, 129 automation summaries and 74 others.
-Library lemmas are the largest gap category in these supporting lemmas, unlike
-the documented targets, where project citations dominate.
+`source-math-en/0.7.0` (commit `bbc90ac`) on the downloaded snapshots, grouped
+by the `module` of each shard report. A later renderer changes the step and gap
+counts; the checked frames do not change. The gap step share is 0.46 and the
+gap frame share is 0.48. No pilot reading is free of gaps. By rule, the gap
+steps are 1,334 library citations, 508 project citations, 239 instance-fact
+groups, 201 rewrites, 166 restatements, 129 automation summaries, 87 unchecked
+calculations and 90 others. Library lemmas are the largest gap category in
+these supporting lemmas, unlike the documented targets, where project citations
+dominate. When the pilot ran, renderer `source-math-en/0.5.0` gave 6,212
+displayed steps and 2,654 gap steps for the same snapshots.
+
+The two time columns come from the run's job records: a job's time runs from
+its start to its completion, and the step is "Build this environment module
+once and extract every planned lemma". Both are rounded to the minute. The rest
+of each job restores the original source (42 to 70 seconds) and sets up the
+runner and the Lean toolchain.
 
 These are unsigned retained observations, and they do not count toward the 536
 documented targets. The catalog preview includes them as supporting lemma
@@ -215,14 +233,23 @@ readings; see [Entering the catalog](#entering-the-catalog).
 
 The workflow `.github/workflows/dependency-cone.yml` runs on pushes to
 `claude/keen-archimedes-ihorkq` that change the workflow or
-`benchmarks/dependency-cone/`, and on `workflow_dispatch`. A push runs the pilot.
-The Actions page offers a dispatch button only for workflows on the default
-branch; from this branch, dispatch with
-`gh workflow run dependency-cone.yml --ref claude/keen-archimedes-ihorkq -f scope=full-1`.
-The scopes are:
+`benchmarks/dependency-cone/`, and on `workflow_dispatch`. A push always runs
+the pilot, because a push has no inputs. The scopes are:
 
 - `pilot` (default): the 8 pilot shards.
 - `full-1`, then `full-2`: all 379 shards in two dispatches.
+
+The full scopes can be started only by a dispatch, and no dispatch has been
+tested. GitHub's documentation states that a workflow must be in the default
+branch for the `workflow_dispatch` event to trigger it. `main`, the default
+branch, does not contain `dependency-cone.yml`. GitHub has registered the file
+(workflow 390162521) from its push run, but on 2026-10-20 the Actions API listed
+no `workflow_dispatch` run of any workflow in this repository. The documented
+route is to put `dependency-cone.yml` on `main` first and then dispatch it, for
+example with `gh workflow run dependency-cone.yml --ref BRANCH -f scope=full-1`,
+where `BRANCH` holds the version to run. A dispatch of the file from a branch
+other than `main` is untested until a run records it; see
+[Dispatch](../.github/workflow-archive/README.md#dispatch).
 
 Each run has four jobs:
 
@@ -527,7 +554,9 @@ checked, and no English fidelity is claimed.
 - **Private names.** The two private lemmas cannot be addressed by the current
   exporter.
 - **External inputs.** The source artifact of run 38822475057 expires on
-  2026-11-14. Outside the cache's branch scope, each shard spends a few minutes
+  2026-11-14, and the 11 artifacts of pilot run 39373979494, which hold the only
+  copy of the 151 pilot readings, expire on 2027-01-18. Outside the cache's
+  branch scope, each shard spends a few minutes
   re-creating the dependency tree. Route `resolve` relies on `lake update`
   resolving to the pinned revisions. The preflight checks this once per run, and
   every shard checks it again with the environment audit. In the pilot run both
