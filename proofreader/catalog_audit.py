@@ -4,6 +4,7 @@ import argparse
 from html.parser import HTMLParser
 import json
 from pathlib import Path
+import re
 from urllib.parse import unquote, urlsplit
 
 class Links(HTMLParser):
@@ -45,6 +46,29 @@ def audit(site: Path) -> dict:
                 anchors+=1
                 if unquote(parts.fragment) not in parsed[target].ids:
                     errors.append({'page':str(page.relative_to(site)),'url':ref,'error':'missing local anchor'})
+    # Citation links are created by the reader script, so audit their data island
+    # statically: it must equal links.json and every target must exist.
+    citations=0;ids={}
+    for reader in sorted((site/'proofs').glob('*/reader.html')):
+        island=re.findall(r'<script id="proofreader-links" type="application/json">(.*?)</script>',reader.read_text(),re.S)
+        saved=reader.parent/'links.json'
+        if len(island)>1 or bool(island)!=saved.is_file() or (island and json.loads(island[0])!=json.loads(saved.read_text())):
+            errors.append({'page':str(reader.relative_to(site)),'error':'citation links differ from links.json'});continue
+        data=json.loads(saved.read_text()) if island else {'names':{}}
+        entries=data.get('names') if isinstance(data,dict) else None
+        if not isinstance(entries,dict):
+            errors.append({'page':str(reader.relative_to(site)),'error':'malformed citation links'});continue
+        for name,v in entries.items():
+            refs=[v.get('href'),(v.get('source') or {}).get('href')] if isinstance(v,dict) and isinstance(v.get('source') or {},dict) else [0]
+            if any(r is not None and not isinstance(r,str) for r in refs):
+                errors.append({'page':str(reader.relative_to(site)),'citation':name,'error':'malformed citation entry'});continue
+            for ref in refs:
+                if not ref:continue
+                citations+=1;parts=urlsplit(ref);target=(reader.parent/unquote(parts.path)).resolve()
+                if parts.scheme or parts.netloc or not parts.path or not target.is_relative_to(site) or not target.is_file():
+                    errors.append({'page':str(reader.relative_to(site)),'citation':name,'url':ref,'error':'broken or escaping citation link'});continue
+                if parts.fragment and unquote(parts.fragment) not in ids.setdefault(target,set(parsed[target].ids) if target in parsed else set()):
+                    errors.append({'page':str(reader.relative_to(site)),'citation':name,'url':ref,'error':'missing citation anchor'})
     expected={f['id']+'.html' for f in catalog}
     require(expected=={p.name for p in (site/'findings').glob('*.html')},'Finding page inventory mismatch')
     require(len(list((site/'evidence/statements').glob('*.json')))==summary['elaborated_statement_entries'],'Statement file inventory mismatch')
@@ -53,7 +77,7 @@ def audit(site: Path) -> dict:
     fonts=[str(p.relative_to(site)) for p in site.rglob('*') if p.suffix.lower() in {'.ttf','.otf','.woff','.woff2'}]
     if fonts:errors.append({'error':'font files included','paths':fonts})
     return {'schema':'leanglish.catalog-audit/v1','pages':len(parsed),'local_links_checked':links,
-        'local_anchors_checked':anchors,'finding_page_denominator_reconciled':True,
+        'local_anchors_checked':anchors,'citation_links_checked':citations,'finding_page_denominator_reconciled':True,
         'statement_files_reconciled':True,'proof_reader_files_reconciled':True,
         'font_files':len(fonts),'errors':errors,'passed':not errors}
 

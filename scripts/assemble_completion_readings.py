@@ -125,6 +125,7 @@ def assemble(evidence: Path, completion: Path, seed: Path, inputs: Path,
         'static_audit':checks,'native_lean_executed_by_builder':False,
         'observations_authenticated':False,'english_formally_verified':False}
     write(site/'release.json',release);write(site/'static-audit.json',checks)
+    links=coverage['citation_links']['project_names']
     (site/'RELEASE-NOTES.md').write_text(
         '# Original-project proof readings\n\n'
         f"{len(selected)} of {coverage['expected_theorem_targets']} documented theorem targets have readings. "
@@ -133,6 +134,8 @@ def assemble(evidence: Path, completion: Path, seed: Path, inputs: Path,
         'See original-verification.html for every obligation and its retained history. '
         'Earlier reading receipts retain their original execution scope. '
         'Failed or missing jobs remain outstanding, and explanation gaps remain visible. '
+        f"Of {links['cited']} cited project names, {links['linked_to_reading']} link to a proof reading and "
+        f"{links['linked_to_source']} only to a bundled source line; the rest stay unresolved. "
         'These readings are not formally verified English.\n',encoding='utf-8')
     compact={'proof_readings':len(selected),'new_readings':status['completion']['new_readings'],
              'theorem_targets':coverage['expected_theorem_targets'],
@@ -142,6 +145,7 @@ def assemble(evidence: Path, completion: Path, seed: Path, inputs: Path,
              'findings_with_all_target_readings':coverage['findings_with_all_target_readings'],
              'selected_checked_frames':coverage['selected_checked_frames'],
              'explicit_explanation_gaps':coverage['explicit_explanation_gaps'],
+             'citation_links':links,
              'static_audit_passed':checks['passed'], 'status_sha256':status['status_sha256'],
              'original_obligations_and_readings_complete':status['original_obligations_and_readings_complete']}
     write(output/'summary.json',compact)

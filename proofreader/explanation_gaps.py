@@ -73,7 +73,9 @@ def collect(site: Path) -> dict:
         original_source = safe_child(originals, module.replace('.', '/') + '.lean')
         if original_source.read_text(encoding='utf-8') != declaration.source:
             raise ValueError('Reading source differs from original solution module')
-        if safe_child(site, f'proofs/{ident}/reader.html').read_text(encoding='utf-8') != html_document(document):
+        links = safe_child(site, f'proofs/{ident}/links.json')
+        links = read_json(links) if links.is_file() else None
+        if safe_child(site, f'proofs/{ident}/reader.html').read_text(encoding='utf-8') != html_document(document, links=links):
             raise ValueError('Proof reader page differs from its validated reading')
         identities.add(key)
         frames_checked += len(snapshot.frames)
