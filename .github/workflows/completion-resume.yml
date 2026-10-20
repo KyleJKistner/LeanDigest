@@ -1,9 +1,9 @@
 name: Resume interrupted original-project worker
 on:
   workflow_dispatch:
-  pull_request:
-    branches: [work/full-original-project]
-    types: [labeled]
+  push:
+    branches: [work/completion-evidence-retries]
+    paths: ['.github/workflows/completion-resume.yml']
 permissions: {contents: read, actions: read}
 concurrency:
   group: original-nuclear-checkpoint-resume-v1
@@ -12,9 +12,8 @@ env:
   GLIBC_TUNABLES: glibc.malloc.mmap_max=0:glibc.malloc.arena_max=1
 jobs:
   resume:
-    if: github.event_name == 'workflow_dispatch' || (github.event.pull_request.number == 8 && github.head_ref == 'work/completion-evidence-retries' && github.event.label.name == 'enhancement')
     runs-on: ubuntu-latest
-    timeout-minutes: 210
+    timeout-minutes: 240
     steps:
       - uses: actions/checkout@v4
         with: {persist-credentials: false}
@@ -22,7 +21,7 @@ jobs:
         with: {python-version: '3.12'}
       - uses: leanprover/lean-action@v1
         with: {lake-package-directory: lean, auto-config: false, build: false, test: false, lint: false, use-mathlib-cache: false, use-github-cache: false}
-      - name: Require a stopped original worker and the successful independent restore check
+      - name: Require stopped predecessors and the successful independent restore check
         env: {GH_TOKEN: '${{ github.token }}'}
         run: |
           mkdir -p /tmp/acquired /tmp/inputs/source
@@ -34,6 +33,8 @@ jobs:
           job=api(repo,'actions/jobs/118274980446')
           assert job['run_id']==39315174445 and job['status']=='completed' and job['conclusion']=='failure'
           assert job['name']=='modules (142c3d0f555a25666bb36dd1) / recover'
+          prior=api(repo,'actions/runs/39321225048')
+          assert prior['head_sha']=='b717efc98e0cde96181c493b982814b2cdaa9394' and prior['status']=='completed'
           gate=api(repo,'actions/runs/39319564118')
           assert gate['head_sha']=='f6931795f8462193046372e8a6dd49383ec0366c'
           assert gate['status']=='completed' and gate['conclusion']=='success'
@@ -78,7 +79,7 @@ jobs:
           path: /tmp/original-project/lean/.lake/packages
           key: original-openai-deps-1581d4cb-4341-full-v1
           fail-on-cache-miss: true
-      - name: Independently restore the exact checkpoint before continuing compilation
+      - name: Restore the exact checked checkpoint without changing the original source
         run: |
           sudo sysctl -w vm.max_map_count=1048576
           python scripts/check_original_checkpoint.py --project /tmp/original-project/lean --seed /tmp/recovery-plan --checkpoint /tmp/acquired/checkpoint --output /tmp/resume-check --trust-project
@@ -94,31 +95,45 @@ jobs:
               'previous_worker':read(Path('/tmp/acquired/previous-worker.json')),
               'proof_acceptance_from_checkpoint':False})
           PY
-      - name: Continue in a ten-minute bounded stage
+      - name: Allow an atomic module up to one hour and record resource observations
         id: first
         run: |
-          python scripts/run_completion_worker.py round --kind module --id 142c3d0f555a25666bb36dd1 --seed /tmp/recovery-plan --project /tmp/original-project/lean --state /tmp/resume-check/state --output /tmp/worker --round 2 --seconds 600 --trust-project
+          (while true; do date -u; ps -C lean,lake -o pid,etimes,pcpu,rss,args || true; free -b; sleep 60; done) > /tmp/worker/build-health-2.log &
+          observer=$!
+          trap 'kill "$observer" 2>/dev/null || true' EXIT
+          python scripts/run_completion_worker.py round --kind module --id 142c3d0f555a25666bb36dd1 --seed /tmp/recovery-plan --project /tmp/original-project/lean --state /tmp/resume-check/state --output /tmp/worker --round 2 --seconds 3600 --trust-project
           python scripts/run_completion_worker.py pack --kind module --id 142c3d0f555a25666bb36dd1 --seed /tmp/recovery-plan --project /tmp/original-project/lean --state /tmp/resume-check/state --output /tmp/worker --round 2 --trust-project
       - uses: actions/upload-artifact@v4
-        with: {name: resumed-checkpoint-142c3d0f555a25666bb36dd1-2, path: /tmp/worker/checkpoint-2/, compression-level: 0, retention-days: 14, if-no-files-found: error}
-      - name: Preserve further compilation before another interruption
+        if: always()
+        with:
+          name: resumed-checkpoint-142c3d0f555a25666bb36dd1-2
+          path: |
+            /tmp/worker/checkpoint-2/
+            /tmp/worker/build-health-2.log
+            /tmp/worker/round-2/
+          compression-level: 0
+          retention-days: 14
+          if-no-files-found: warn
+      - name: Continue only when the first full-hour build was incomplete
         if: steps.first.outputs.status == 'timeout'
-        id: second
         run: |
-          python scripts/run_completion_worker.py round --kind module --id 142c3d0f555a25666bb36dd1 --seed /tmp/recovery-plan --project /tmp/original-project/lean --state /tmp/resume-check/state --output /tmp/worker --round 3 --seconds 600 --trust-project
+          (while true; do date -u; ps -C lean,lake -o pid,etimes,pcpu,rss,args || true; free -b; sleep 60; done) > /tmp/worker/build-health-3.log &
+          observer=$!
+          trap 'kill "$observer" 2>/dev/null || true' EXIT
+          python scripts/run_completion_worker.py round --kind module --id 142c3d0f555a25666bb36dd1 --seed /tmp/recovery-plan --project /tmp/original-project/lean --state /tmp/resume-check/state --output /tmp/worker --round 3 --seconds 3600 --trust-project
           python scripts/run_completion_worker.py pack --kind module --id 142c3d0f555a25666bb36dd1 --seed /tmp/recovery-plan --project /tmp/original-project/lean --state /tmp/resume-check/state --output /tmp/worker --round 3 --trust-project
       - uses: actions/upload-artifact@v4
-        if: steps.first.outputs.status == 'timeout'
-        with: {name: resumed-checkpoint-142c3d0f555a25666bb36dd1-3, path: /tmp/worker/checkpoint-3/, compression-level: 0, retention-days: 14, if-no-files-found: error}
-      - name: Final bounded compilation stage for this attempt
-        if: steps.second.outputs.status == 'timeout'
-        run: |
-          python scripts/run_completion_worker.py round --kind module --id 142c3d0f555a25666bb36dd1 --seed /tmp/recovery-plan --project /tmp/original-project/lean --state /tmp/resume-check/state --output /tmp/worker --round 4 --seconds 600 --trust-project
-          python scripts/run_completion_worker.py pack --kind module --id 142c3d0f555a25666bb36dd1 --seed /tmp/recovery-plan --project /tmp/original-project/lean --state /tmp/resume-check/state --output /tmp/worker --round 4 --trust-project
-      - uses: actions/upload-artifact@v4
-        if: steps.second.outputs.status == 'timeout'
-        with: {name: resumed-checkpoint-142c3d0f555a25666bb36dd1-4, path: /tmp/worker/checkpoint-4/, compression-level: 0, retention-days: 14, if-no-files-found: error}
-      - name: Execute the original independent proof and comparison gates
+        if: always() && steps.first.outputs.status == 'timeout'
+        with:
+          name: resumed-checkpoint-142c3d0f555a25666bb36dd1-3
+          path: |
+            /tmp/worker/checkpoint-3/
+            /tmp/worker/build-health-3.log
+            /tmp/worker/round-3/
+          compression-level: 0
+          retention-days: 14
+          if-no-files-found: warn
+      - name: Execute the original proof and comparison gates independently
         run: python scripts/run_completion_worker.py verify --kind module --id 142c3d0f555a25666bb36dd1 --seed /tmp/recovery-plan --project /tmp/original-project/lean --state /tmp/resume-check/state --output /tmp/worker --tools /tmp/tools --trust-project
       - uses: actions/upload-artifact@v4
         if: always()
@@ -129,6 +144,7 @@ jobs:
             /tmp/worker/resume.json
             /tmp/worker/final-status.json
             /tmp/worker/round-*/
+            /tmp/worker/build-health-*.log
             /tmp/worker/proofs/
             /tmp/worker/comparisons/
           retention-days: 90
