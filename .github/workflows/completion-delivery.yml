@@ -16,8 +16,8 @@ jobs:
         with: {python-version: '3.12'}
       - run: python -m pip install '.[dev,webtest]'
       - run: python -m playwright install --with-deps chromium
-      - name: Require collection, continuation, status and scope regression tests
-        run: python -m pytest -q tests/test_completion_results.py tests/test_completion_resume.py tests/test_completion_sets.py tests/test_original_attempts.py tests/test_completion_recovery_plan.py
+      - name: Require collection, continuation, diagnostics, status and scope regression tests
+        run: python -m pytest -q tests/test_completion_results.py tests/test_completion_resume.py tests/test_completion_sets.py tests/test_completion_diagnostics.py tests/test_original_attempts.py tests/test_completion_recovery_plan.py
       - name: Restore the frozen original evidence, exact recovery plan and documented sources
         env: {GH_TOKEN: '${{ github.token }}'}
         run: |
@@ -51,6 +51,9 @@ jobs:
       - name: Independently validate every result and generate the complete offline catalog
         run: |
           python scripts/assemble_completion_readings.py --evidence /tmp/evidence --completion /tmp/completion --seed /tmp/recovery-plan --inputs /tmp/inputs --source /tmp/original-project/lean --inventory /tmp/inputs/source/source-inventory.json --output /tmp/delivery --run-id 39315174445 --expected-head 4f9c1e823dd65023cfa7d8b9afe5e08390b8d2ad --continuations /tmp/continuations.json
+      - name: Report exact unresolved obligations and retained execution diagnostics
+        if: always()
+        run: python scripts/completion_diagnostics.py --collections /tmp/completion /tmp/continuation --output /tmp/delivery
       - name: Exercise real offline file navigation and original-verification pages
         run: |
           python scripts/audit_finding_browser.py /tmp/delivery/site --screenshots /tmp/delivery/screenshots > /tmp/delivery/browser-audit.json
@@ -79,6 +82,8 @@ jobs:
             /tmp/delivery/summary.json
             /tmp/delivery/browser-audit.json
             /tmp/delivery/original-browser-audit.json
+            /tmp/delivery/remaining-obligations.json
+            /tmp/delivery/execution-diagnostics.json
           retention-days: 90
           if-no-files-found: warn
       - uses: actions/upload-artifact@v4

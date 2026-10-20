@@ -3,56 +3,69 @@ on:
   workflow_dispatch:
   pull_request:
     branches: [work/full-original-project]
-    types: [opened, reopened]
-    paths: ['.github/workflows/completion-recovery.yml']
+    types: [labeled]
 permissions: {contents: read, actions: read}
-concurrency:
-  group: original-completion-recovery-v1
-  cancel-in-progress: false
+concurrency: {group: original-stopped-worker-retry-v1, cancel-in-progress: false}
 jobs:
   plan:
-    if: github.event_name == 'workflow_dispatch' || github.head_ref == 'work/completion-evidence-retries'
+    if: github.event_name == 'workflow_dispatch' || (github.event.pull_request.number == 8 && github.head_ref == 'work/completion-evidence-retries' && github.event.label.name == 'bug')
     runs-on: ubuntu-latest
     timeout-minutes: 15
     outputs:
       modules: ${{ steps.matrix.outputs.modules }}
-      libraries: ${{ steps.matrix.outputs.libraries }}
+      count: ${{ steps.matrix.outputs.count }}
     steps:
       - uses: actions/checkout@v4
         with: {persist-credentials: false}
       - uses: actions/setup-python@v5
         with: {python-version: '3.12'}
-      - uses: leanprover/lean-action@v1
-        with: {lake-package-directory: lean, auto-config: false, build: false, test: false, lint: false, use-mathlib-cache: false, use-github-cache: false}
       - run: python -m pip install '.[dev]'
-      - name: Require native checkpoint and exact-complement regression tests
-        env: {PROOFREADER_REQUIRE_LEAN: '1'}
-        run: python -m pytest -q tests/test_build_resume.py tests/test_original_attempts.py tests/test_completion_recovery_plan.py
-      - name: Restore the independently validated immutable recovery plan
+      - name: Test stopped-worker selection and the complete original denominator
+        run: python -m pytest -q tests/test_stopped_recovery.py tests/test_original_attempts.py tests/test_completion_recovery_plan.py
+      - name: Restore the unchanged complete recovery plan
         env: {GH_TOKEN: '${{ github.token }}'}
         run: |
           gh api repos/$GITHUB_REPOSITORY/actions/artifacts/12197582957/zip > /tmp/recovery-plan.zip
           echo '8164869bdd4972b89c7481be210ab559493017cdf9c563e834f65362f36b4d6a  /tmp/recovery-plan.zip' | sha256sum -c -
           python -c "from pathlib import Path;from scripts.collect_original_evidence import unpack;unpack(Path('/tmp/recovery-plan.zip'),Path('/tmp/recovery-plan'))"
-      - name: Retain all outstanding targets in the worker matrix
+      - name: Select only stopped executions with no retained native proof report
         id: matrix
+        env: {GH_TOKEN: '${{ github.token }}'}
         run: |
           python - <<'PY'
-          import os,json
+          import json,os
+          from datetime import datetime,timezone
           from pathlib import Path
-          from proofreader.original_project import read,digest,validate_plan
-          from proofreader.proof_campaign import validate_campaign,check_environment
-          root=Path('/tmp/recovery-plan');r=read(root/'recovery.json');p=read(root/'plan.json');e=read(root/'environment.json')
-          validate_plan(p);check_environment(p,e);validate_campaign(p,e,r['campaign'])
-          assert r['recovery_plan_sha256']==digest({k:v for k,v in r.items() if k!='recovery_plan_sha256'})
-          assert r['expected_theorem_targets']==536 and r['expected_comparators']==416
-          modules={'include':[{'id':j['id']} for j in r['module_jobs']]}
-          libraries={'include':[{'id':j['library']} for j in r['library_jobs']]}
-          assert 0<len(modules['include'])<=256 and 0<len(libraries['include'])<=25
+          from scripts.collect_original_evidence import api,stable_artifacts,retain
+          from proofreader.original_project import read,write
+          from proofreader.stopped_recovery import select
+          repo='KyleJKistner/LeanDigest';run_id=39315174445;head='4f9c1e823dd65023cfa7d8b9afe5e08390b8d2ad'
+          requested=['604adfdff08e061d541e14d1','3bdd7cf5e6ff4454d74bf523','63ad272fc1b4c48d24641199',
+                     'ce41dcef4f68480cfb92f8f8','c38e9e97346c003b36046841','17e9e130d027b6f1aca231c2']
+          run=api(repo,f'actions/runs/{run_id}');assert run['head_sha']==head
+          assert run['path']=='.github/workflows/completion-recovery.yml'
+          pages=api(repo,f'actions/runs/{run_id}/jobs?per_page=100',paged=True)
+          jobs=[j for page in pages for j in page['jobs']]
+          cutoff=datetime.now(timezone.utc).strftime('%Y-%m-%dT%H:%M:%SZ')
+          artifacts=stable_artifacts(repo,run_id,('completion-result-',),cutoff)
+          names={a['name']:a for a in artifacts};prior=Path('/tmp/prior-output');prior.mkdir()
+          proof_reports=set();acquisitions=[]
+          for ident in requested:
+            name='completion-result-'+ident
+            if name in names:
+              acquisition=retain(repo,run,names[name],prior);acquisitions.append(acquisition)
+              if (prior/name/'proofs/original-proof-worker.json').is_file():proof_reports.add(ident)
+          seed=Path('/tmp/recovery-plan')
+          plan,env,recovery=[read(seed/(n+'.json')) for n in ('plan','environment','recovery')]
+          selection=select(plan,env,recovery,jobs,requested,proof_reports,run_id=run_id,source_commit=head)
+          write(seed/'stopped-selection.json',selection)
+          write(seed/'stopped-acquisition.json',{'cutoff':cutoff,'prior_result_acquisitions':acquisitions,
+               'previous_jobs':[j for j in jobs if any(j['name']=='modules ('+i+') / recover' for i in requested)]})
+          matrix={'include':[{'id':r['id']} for r in selection['selected']]}
           with open(os.environ['GITHUB_OUTPUT'],'a') as out:
-            out.write('modules='+json.dumps(modules,separators=(',',':'))+'\n')
-            out.write('libraries='+json.dumps(libraries,separators=(',',':'))+'\n')
-          print('RECOVERY_DENOMINATORS',read(root/'summary.json'))
+            out.write('modules='+json.dumps(matrix,separators=(',',':'))+'\n')
+            out.write('count='+str(len(selection['selected']))+'\n')
+          print('STOPPED_RETRY_SELECTION',json.dumps(selection,sort_keys=True),flush=True)
           PY
       - uses: actions/upload-artifact@v4
         with:
@@ -62,40 +75,30 @@ jobs:
             /tmp/recovery-plan/environment.json
             /tmp/recovery-plan/recovery.json
             /tmp/recovery-plan/campaign.json
-            /tmp/recovery-plan/attempts.json
-            /tmp/recovery-plan/summary.json
+            /tmp/recovery-plan/stopped-selection.json
+            /tmp/recovery-plan/stopped-acquisition.json
           retention-days: 90
           if-no-files-found: error
   modules:
     needs: plan
+    if: needs.plan.outputs.count != '0'
     strategy:
       fail-fast: false
-      max-parallel: 12
+      max-parallel: 6
       matrix: ${{ fromJSON(needs.plan.outputs.modules) }}
-    uses: ./.github/workflows/completion-worker.yml
-    with: {kind: module, id: '${{ matrix.id }}'}
-  libraries:
-    needs: plan
-    strategy:
-      fail-fast: false
-      max-parallel: 3
-      matrix: ${{ fromJSON(needs.plan.outputs.libraries) }}
-    uses: ./.github/workflows/completion-worker.yml
-    with: {kind: library, id: '${{ matrix.id }}'}
+    uses: ./.github/workflows/atomic-completion-worker.yml
+    with: {id: '${{ matrix.id }}'}
   inventory:
     if: always()
-    needs: [plan, modules, libraries]
+    needs: [plan, modules]
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-        with: {persist-credentials: false}
-      - name: Preserve final job and artifact metadata without declaring proof success
+      - name: Preserve result inventory without declaring mathematical success
         env: {GH_TOKEN: '${{ github.token }}'}
         run: |
           mkdir -p /tmp/run-evidence
           gh api --paginate --slurp repos/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID/jobs?per_page=100 > /tmp/run-evidence/jobs.json
           gh api --paginate --slurp repos/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID/artifacts?per_page=100 > /tmp/run-evidence/artifacts.json
-          git rev-parse HEAD > /tmp/run-evidence/application-commit.txt
-          printf '%s\n' 'Job metadata is not mathematical acceptance. Reconcile retained native worker reports and their source-bound receipts independently.' > /tmp/run-evidence/README.txt
+          printf '%s\n' 'Reconcile source-bound proof and Comparator reports separately. These job states are not mathematical acceptance.' > /tmp/run-evidence/README.txt
       - uses: actions/upload-artifact@v4
         with: {name: completion-run-inventory, path: /tmp/run-evidence/, retention-days: 90, if-no-files-found: error}
