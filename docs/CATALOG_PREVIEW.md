@@ -259,6 +259,40 @@ published site has 8,361 files and 659.3 MB; its zip is 49.1 MB. The run from th
 release zip, including both browser audits and the zip, took about 165 s on
 four CPU cores. Two runs from the same checkout produced byte-identical zips.
 
+## Pinned release with the pilot supporting lemma readings
+
+A local run at application commit `171ab5e` (renderer `source-math-en/0.6.0`)
+used the pinned release zip and the artifacts of dependency-cone run
+39373979494, downloaded with `scripts/download_cone_artifacts.py`. All 10
+artifact digests matched the GitHub API. The table compares it with a run of
+the same application code without `--cone-shards`.
+
+| Measure | Without supporting readings | With them |
+| --- | ---: | ---: |
+| Target readings re-rendered | 492 | 492 |
+| Explicit explanation gaps (target readings) | 4,961 | 4,961 |
+| Supporting lemma readings | — | 151 of 1,722 planned |
+| Cited project names linked to a target reading | 30 | 30 |
+| … linked to a supporting lemma reading | — | 151 |
+| … linked only to a source line | 320 | 314 |
+| … unresolved | 1,412 | 1,267 |
+| Static audit: pages | 1,282 | 1,433 |
+| Static audit: local links | 9,328 | 9,480 |
+| Static audit: citation links | 385 | 593 |
+| Site files | 8,858 | 10,520 |
+| Site size | 624.2 MB | 731.4 MB |
+| Zip size | 52.1 MB | 60.0 MB |
+
+Both static audits passed; the second also checked 151 supporting lemma pages
+and 202 supporting lemma links. Real Chromium file navigation passed for the
+catalog, the original-verification pages, the preview pages and the supporting
+lemma checks. The target readings' gap counts, in total and by rule, equal
+`benchmarks/reading-kpis/current.json` in both runs. The packaged zip was
+extracted, checked against its `SHA256SUMS.json` and audited again. The run with
+supporting readings took 219 s, including both browser audits and the zip.
+[Pilot readings in the preview](DEPENDENCY_CONE.md#pilot-readings-in-the-preview)
+lists the supporting lemma counts.
+
 ## Limitations
 
 A preview is a rendering of retained, unsigned observations. It does not
