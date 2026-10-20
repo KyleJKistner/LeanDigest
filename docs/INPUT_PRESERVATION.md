@@ -14,7 +14,9 @@ release asset has been attached, and no consumer file has been repinned.
 ## Pinned inputs
 
 The Actions API reported these values on 2026-10-20 at about 07:00 UTC, in a
-read-only listing. **Bytes** is the size of the artifact ZIP. For a group of
+read-only listing. A second read-only listing at about 08:30 UTC returned the
+same ID, name, run, commit, digest, size and expiry for every artifact in the
+registry, and none had expired. **Bytes** is the size of the artifact ZIP. For a group of
 artifacts, **Expires** is the earliest expiry in the group. **Digest recorded
 in** names the files that record a SHA-256 of the input independently of the
 Actions API. For inputs with no recorded digest, only the digest that GitHub
