@@ -91,9 +91,9 @@ resumes one stopped worker of recovery run 39315174445. Two earlier runs of
   118274980446 and runs 39319564118, 39321225048 and 39352981910). These are
   not artifacts. Whether they remain readable is not established here.
 - **Original evidence runs 39141760623 and 39144564607.** The first holds 84
-  artifacts, which expire on 2027-01-16. The second holds 144; the 100 on the
-  first listing page expire on 2027-01-16, and the rest were not read. Only
-  archived workflows run the collection mode of
+  artifacts and the second 144. Both listing pages of the second run were
+  read on 2026-10-20 at about 08:30 UTC. Every artifact of the two runs expires
+  on 2027-01-16. Only archived workflows run the collection mode of
   `scripts/collect_original_evidence.py`.
 - **Acceptance run 38792262410** (2 artifacts, expiring on 2027-01-13).
   `docs/MATHEMATICIAN_PREVIEW.md` cites it, and only archived workflows
@@ -116,8 +116,10 @@ artifact of the selected set, one matrix job does the following:
    named `original-<artifact ID>.zip`, so the recorded `sha256sum -c` checks
    still apply to the restored file. Extraction rejects absolute paths, `..`,
    links, repeated paths, more than 25,000 entries and oversized contents.
-4. Uploads the payload under the original name with `retention-days: 90`, the
-   maximum for this public repository. Hidden files are included.
+4. Uploads the payload under the original name with `retention-days: 90`.
+   GitHub's documentation on repository Actions settings states that a public
+   repository's retention period is 1 to 90 days, and the repository API
+   reported this repository as public on 2026-10-20. Hidden files are included.
 5. Downloads the new artifact through the API, requires a reported digest that
    matches the downloaded bytes, and compares its extracted file list (paths,
    sizes and SHA-256) with the staged payload.
@@ -131,10 +133,15 @@ digest, size, creation and expiry times, with requested and observed retention.
 It lists missing and failed copies, and the job fails if any exist. The record
 has `release_published: false` and `consumers_repinned: false`.
 
-Copies expire 90 days after their upload, so this option must be repeated. Each
-repetition copies the current copy, checks it against the content digest of
-the first copy, and needs another repin. Empty directories are not preserved;
-the record lists any that the original contained.
+Copies expire at most 90 days after their upload, so this option must be
+repeated. Each repetition copies the current copy, checks it against the
+content digest of the first copy, and needs another repin. Empty directories
+are not preserved; the record lists any that the original contained. For
+extracted contents, file modes are not compared. Four such originals were
+downloaded on 2026-10-20 for this review (the observations, the breadth
+observations, `finding-statement-retry-CoarseAssembly` and
+`finding-proof-retry-2`), and every entry had mode 0644; the others were not
+inspected. A copied ZIP keeps the original bytes, modes included.
 
 ### Size
 
@@ -169,10 +176,11 @@ already follows this pattern as an asset of `leanglish-original-project-317dc31`
 The source artifact can also be rebuilt from `openai/math` at the pinned commit
 with the archived `lean-source-bundle.yml`. That workflow runs `tar -czf`
 without fixed timestamps or file order, so a rebuilt archive is not expected to
-have the same SHA-256. Both recorded source digests would change, although
-`unpack_source` would still check every file against the source inventory. The
-checkpoint, observations and toolchain cannot be rebuilt without rerunning the
-jobs that produced them.
+have the same SHA-256. Both recorded source digests would change.
+`unpack_source` would still check every extracted file against
+`source-inventory.json`, which that workflow regenerates after checking each
+file against the Git blob of the pinned commit. The checkpoint, observations
+and toolchain cannot be rebuilt without rerunning the jobs that produced them.
 
 ## Dispatch
 
@@ -182,7 +190,11 @@ must be on the default branch for the `workflow_dispatch` event to trigger it.
 there. To copy the checkpoint before 2026-11-02 20:14 UTC, the owner must
 first put the workflow on `main`. The run then uses the files of the ref passed
 to the dispatch. `scripts/preserve_inputs.py` uses only the Python standard
-library and no other module of this repository.
+library and no other module of this repository, and the copy and record jobs
+run it without installing the application. The plan job installs the package
+with `pip install '.[dev]'` before it runs the tests, because
+`tests/conftest.py` imports `proofreader`, so the dispatched ref must contain
+the package as well as the script.
 
 ```sh
 gh workflow run preserve-inputs.yml --ref <branch> -f set=expiring-2026-11
@@ -218,6 +230,16 @@ does not apply them.
    `main` for the release workflows, the PR #8 head branch
    `work/completion-evidence-retries` for the completion workflows, and
    `claude/keen-archimedes-ihorkq` for `dependency-cone.yml`.
+   Pushing the commit runs every consumer whose push filter matches an edited
+   file. On `main`, `all-findings-release.yml` and `breadth-release.yml` filter
+   on their own files and on `proofreader/**`, so both run their build jobs.
+   Their publish jobs create a release only when the tag
+   (`leanglish-all-findings-v0.4.0` or `leanglish-all-findings-v0.4.1`) does not
+   exist; both tags existed on 2026-10-20. On
+   `work/completion-evidence-retries`, `completion-delivery.yml` runs. On
+   `claude/keen-archimedes-ihorkq`, an edit to `dependency-cone.yml` starts a
+   run of that workflow with its default `pilot` scope. Decide whether those
+   runs are wanted before pushing.
 7. Before the copies expire, dispatch the same set again and repeat these steps.
 
 The printed edits, by set, against this checkout:
@@ -251,18 +273,26 @@ followed by a `mv` of the original ZIP to the same path, so the following
 the checkpoint metadata assertions name the copy, and the acquisition record
 keeps the original checkpoint's artifact ID, run, commit and digest.
 `proofreader/completion_results.py` and `scripts/check_original_checkpoint.py`
-require that identity; the copied bytes are checked against its digest. The
-repin leaves `INPUT_RUNS` in `scripts/assemble_finding_release.py` unchanged:
-it records the runs that produced the inputs, which a copy does not change.
+require that identity; the copied bytes are checked against its digest. After
+the repin, the acquisition record therefore does not name the copy that the
+bytes came from. The copy is named only in the repinned workflow and in the
+preservation record. Recording it in the acquisition record would need a
+reviewed change to both checks. The repin leaves `INPUT_RUNS` in
+`scripts/assemble_finding_release.py` unchanged: it records the runs that
+produced the inputs, which a copy does not change.
 
 ## Verification
 
 `tests/test_preserve_inputs.py` runs on synthetic artifacts, synthetic records
 and fake `gh` calls. It covers the copy checks, rejected archives and metadata,
 the round trip, the merge of item and failure records, the printed edits, a
-second copy of a copy, and drift reports. The tests whose names contain
-`checkout` also run the repin against this checkout's consumer files with a
-synthetic record. They require every reference to be found and no scanned file
+second copy of a copy, drift reports, and records whose run, commit or copy
+identity is not a plain number or digest, which repin refuses. The trigger and
+permission checks of `preserve-inputs.yml` read the workflow text, because
+neither `ci.yml` nor the plan job installs PyYAML; a further structural test
+runs only where PyYAML is installed. The tests whose names contain `checkout`
+also run the repin against this checkout's consumer files with a synthetic
+record. They require every reference to be found and no scanned file
 to name a replaced run or artifact outside the edits and the listed unchanged
 references. No test downloads an artifact or contacts GitHub.
 

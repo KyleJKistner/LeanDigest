@@ -144,6 +144,9 @@ check. After 2026-11-14, a push to `main` that matches the path filters of
 `all-findings-release.yml` or `breadth-release.yml` fails at the source
 download unless that input is preserved and the workflows are repinned.
 docs/INPUT_PRESERVATION.md describes the dispatch-only
-`preserve-inputs.yml`, which copies these inputs into new 90-day artifacts, and
-the alternative of release assets. It also describes the consumer edits, which
+`preserve-inputs.yml`, which can copy the inputs in this table from the
+checkpoint through `validated-completion-plan` into new 90-day artifacts, and
+the alternative of release assets. It does not copy `cancellation-env-a`, the
+`completion-result-*` artifacts or `completion-reading-delivery`; that page
+gives the reasons. It also describes the consumer edits, which
 `scripts/preserve_inputs.py repin` prints. Neither option has been carried out.

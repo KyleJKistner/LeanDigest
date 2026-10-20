@@ -449,6 +449,30 @@ def test_repin_refuses_partial_changed_or_unverified_records(tmp_path):
         pi.plan_repin(unverified, tmp_path, current={})
 
 
+@pytest.mark.parametrize('field,value', [
+    ('preservation_run_id', '40000000001; gh release create x'),
+    ('preservation_run_id', 0),
+    ('preservation_head_sha', 'A'*40),
+    ('artifact_id', '13000000000'),
+    ('digest', "0'}; import os  #"+'0'*40),
+    ('content_sha256', None),
+    ('expires_at', None),
+    ('set', 'everything'),
+])
+def test_repin_refuses_values_that_would_be_printed_unquoted(tmp_path, field, value):
+    """Synthetic records whose run, commit or copy identity is not a plain number or digest."""
+    synthetic_tree(tmp_path, ('statement-retries',))
+    record = synthetic_record('statement-retries')
+    if field in record:
+        record[field] = value
+    else:
+        item = record['artifacts'][0]
+        (item['content'] if field == 'content_sha256' else item['preserved'])[field] = value
+    record['record_sha256'] = pi.digest({k: v for k, v in record.items() if k != 'record_sha256'})
+    with pytest.raises(ValueError, match='malformed'):
+        pi.plan_repin(record, tmp_path, current={})
+
+
 def scratch_checkout(destination: Path) -> None:
     for pattern in pi.SCANNED:
         for path in ROOT.glob(pattern):
@@ -487,14 +511,32 @@ def test_repin_covers_every_reference_in_this_checkout(tmp_path, name):
 
 # Workflow ---------------------------------------------------------------
 
+def top_level_block(text: str, key: str) -> list[str]:
+    """The lines under a top-level YAML key, read without a YAML parser."""
+    lines = text.split('\n')
+    start = lines.index(key+':')
+    end = next((i for i in range(start+1, len(lines)) if lines[i] and not lines[i][0].isspace()), len(lines))
+    return [line for line in lines[start+1:end] if line.strip() and not line.lstrip().startswith('#')]
+
+
 def test_workflow_is_dispatch_only_and_never_publishes():
+    # PyYAML is not among the dev or webtest extras that ci.yml and the plan
+    # job install, so the trigger and permission checks read the text.
     text = (ROOT/'.github/workflows/preserve-inputs.yml').read_text()
     for forbidden in ('push:', 'schedule:', 'pull_request', 'contents: write', 'actions: write', 'gh release',
                       'git push', 'actions/cache', 'workflow_run'):
         assert forbidden not in text, forbidden
     assert text.count('retention-days: 90') == text.count('actions/upload-artifact@v4') == 3
     assert "-k 'not checkout'" in text and '--allow-download' in text
+    triggers = [line for line in top_level_block(text, 'on') if not line.startswith('   ')]
+    assert triggers == ['  workflow_dispatch:']
+    assert top_level_block(text, 'permissions') == ['  contents: read', '  actions: read']
+    assert text.count('permissions:') == 1 and 'secrets.' not in text
+
+
+def test_workflow_structure_when_yaml_is_available():
     yaml = pytest.importorskip('yaml')
+    text = (ROOT/'.github/workflows/preserve-inputs.yml').read_text()
     flow = yaml.safe_load(text)
     assert set(flow[True]) == {'workflow_dispatch'}
     choice = flow[True]['workflow_dispatch']['inputs']['set']

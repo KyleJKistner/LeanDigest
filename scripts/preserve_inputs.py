@@ -9,8 +9,10 @@ the preservation record. `matrix`, `inventory` and `repin` use no network;
 `repin` prints, and never applies, the edits that consumer files need.
 
 Nothing here publishes a release, pushes, or edits a file. GH_TOKEN is consumed
-by gh and never recorded. The module uses only the standard library, so it runs
-from a branch that lacks the rest of the application (docs/INPUT_PRESERVATION.md).
+by gh and never recorded. The module uses only the standard library and no
+other module of this repository; the workflow's copy and record jobs run it
+without installing the application, while its plan job installs the package to
+run the tests (docs/INPUT_PRESERVATION.md).
 """
 from __future__ import annotations
 
@@ -177,7 +179,8 @@ class Keep(NamedTuple):
 PRODUCER = 'Records the run that produced the input; a copy does not change that.'
 SAME_BYTES = 'Checks the original archive bytes, which the copy contains unchanged.'
 ORIGINAL_IDENTITY = ('Checks the identity of the original checkpoint, which the acquisition '
-                     'record keeps; the copied bytes are checked against its digest.')
+                     'record keeps; the copied bytes are checked against its digest. The '
+                     'record then does not name the copy that the bytes came from.')
 
 
 def _gh_download(option: str) -> tuple[Ref, ...]:
@@ -537,12 +540,37 @@ def render_current(current: dict) -> str:
     return 'CURRENT: dict[str, dict] = {\n'+'\n'.join(rows)+'\n}'
 
 
+def _identifier(value) -> bool:
+    return type(value) is int and value > 0
+
+
+def _hex(value, length: int) -> bool:
+    return isinstance(value, str) and re.fullmatch('[0-9a-f]{%d}' % length, value) is not None
+
+
+def _well_formed_copy(item) -> bool:
+    preserved = item.get('preserved') if isinstance(item, dict) else None
+    content = item.get('content') if isinstance(item, dict) else None
+    return (isinstance(preserved, dict) and isinstance(content, dict) and
+            _identifier(preserved.get('artifact_id')) and _hex(preserved.get('digest'), 64) and
+            isinstance(preserved.get('expires_at'), str) and _hex(content.get('content_sha256'), 64) and
+            isinstance(content.get('empty_directories'), list))
+
+
 def check_record(record: dict, current: dict) -> None:
     if record.get('schema') != SCHEMA or record.get('record_sha256') != digest(
             {k: v for k, v in record.items() if k != 'record_sha256'}):
         raise ValueError('Not an unchanged preservation record')
     if record.get('repository') != REPOSITORY or record.get('workflow') != WORKFLOW:
         raise ValueError('The record comes from another repository or workflow')
+    # Repin prints these values into workflow, Python and test text; anything
+    # but plain identifiers and digests is refused rather than quoted.
+    if not isinstance(record.get('set'), str) or record['set'] not in SETS:
+        raise ValueError('The record names an unknown or malformed artifact set')
+    if not (_identifier(record.get('preservation_run_id')) and _hex(record.get('preservation_head_sha'), 40)):
+        raise ValueError('The record names a malformed preservation run or commit')
+    if not all(_well_formed_copy(item) for item in record.get('artifacts') or []):
+        raise ValueError('The record holds a malformed copy identity')
     if record.get('failed') or record.get('missing') or not record.get('artifacts'):
         raise ValueError('The preservation run did not copy every selected artifact')
     keys = [a['key'] for a in record['artifacts']]
