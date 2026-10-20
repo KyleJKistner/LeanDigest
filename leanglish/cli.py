@@ -14,12 +14,16 @@ def main(argv: list[str] | None = None) -> int:
         if args and args[0] == 'audit-catalog':
             from proofreader.catalog_audit import main as audit_main
             return audit_main(args[1:], prog='leanglish audit-catalog')
+        if args and args[0] == 'reading-kpis':
+            from proofreader.reading_kpis import main as kpi_main
+            return kpi_main(args[1:], prog='leanglish reading-kpis')
         if args in [['--help'], ['-h']]:
             parser = proofreader_parser('leanglish')
             parser.formatter_class = argparse.RawDescriptionHelpFormatter
             parser.epilog = ('Finding-level catalog commands:\n'
                 '  leanglish catalog --help       Build from frozen local observations\n'
-                '  leanglish audit-catalog SITE   Check every local link and inventory\n')
+                '  leanglish audit-catalog SITE   Check every local link and inventory\n'
+                '  leanglish reading-kpis DIR     Re-render every snapshot and measure the readings\n')
             parser.print_help()
             return 0
         return proofreader_main(args, prog='leanglish')
