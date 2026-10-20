@@ -1,19 +1,16 @@
-name: Broader documented proof readings
+name: Rebuild the 0.4.1 catalog inputs
+
+# Re-assembles the frozen inputs of release leanglish-all-findings-v0.4.1 with
+# the application at the dispatched commit, then runs the real offline browser
+# audit. The renderer has changed since that release, so the output is a
+# rebuild, not the release: release.json records release_version
+# 'rebuild-of-0.4.1' and the printer versions of the readings it wrote, and the
+# artifact is named as a rebuild. Dispatch only, so no push rebuilds it. The
+# release exists and is immutable; this workflow never publishes a release,
+# pushes or saves a cache. Its inputs are artifacts that expire
+# (docs/INPUT_PRESERVATION.md); a missing or expired one fails the first check.
 on:
   workflow_dispatch:
-  push:
-    branches: [work/breadth-recovery, main]
-    paths:
-      - '.github/workflows/breadth-release.yml'
-      - 'proofreader/**'
-      - 'leanglish/**'
-      - 'lean/**'
-      - 'pyproject.toml'
-      - 'artifacts/openai-sample/**'
-      - 'scripts/assemble_finding_release.py'
-      - 'scripts/audit_finding_browser.py'
-      - 'tests/test_finding_catalog.py'
-      - 'docs/BREADTH_V0_4_1.md'
 permissions:
   contents: read
   actions: read
@@ -29,6 +26,41 @@ jobs:
         with: {persist-credentials: false}
       - uses: actions/setup-python@v5
         with: {python-version: '3.12'}
+      - name: Require every pinned input to be listed and unexpired
+        # Reads the run IDs and artifact names from the download step below, so a
+        # repin (scripts/preserve_inputs.py repin) edits only that step.
+        env:
+          GH_TOKEN: ${{ github.token }}
+          WORKFLOW_FILE: .github/workflows/breadth-release.yml
+        run: |
+          python - <<'PY'
+          import fnmatch, json, os, re, subprocess, sys
+          text = open(os.environ['WORKFLOW_FILE']).read()
+          pins = re.findall(r"gh run download ([0-9]+) (?:-n (\S+)|-p '([^']+)')", text)
+          if not pins:
+              sys.exit('No pinned download was found in ' + os.environ['WORKFLOW_FILE'])
+          problems = []
+          for run, name, pattern in pins:
+              wanted = name or pattern
+              try:
+                  listing = json.loads(subprocess.check_output(['gh', 'api',
+                      'repos/%s/actions/runs/%s/artifacts?per_page=100' % (os.environ['GITHUB_REPOSITORY'], run)]))
+              except subprocess.CalledProcessError as exc:
+                  problems.append('run %s (%s): the artifact listing failed (exit %d)' % (run, wanted, exc.returncode))
+                  continue
+              if listing['total_count'] > 100:
+                  problems.append('run %s: %d artifacts; this check reads only the first 100' % (run, listing['total_count']))
+              found = [a for a in listing['artifacts'] if fnmatch.fnmatchcase(a['name'], wanted)]
+              expired = [a['name'] for a in found if a['expired']]
+              if not found or expired:
+                  problems.append('run %s (%s): %d listed, expired: %s' % (run, wanted, len(found), ', '.join(expired) or 'none'))
+              else:
+                  print('run %s (%s): %d listed, none expired' % (run, wanted, len(found)))
+          if problems:
+              for p in problems:
+                  print('::error::Pinned input unavailable: ' + p)
+              sys.exit('See docs/INPUT_PRESERVATION.md for preserved copies and the repin steps.')
+          PY
       - run: python -m pip install '.[dev,webtest]'
       - run: python -m playwright install --with-deps chromium
       - name: Read the frozen source and native observations
@@ -58,41 +90,11 @@ jobs:
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: leanglish-breadth-delivery
+          name: leanglish-breadth-rebuild
           path: |
             /tmp/catalog-delivery/dist/
             /tmp/catalog-delivery/screenshots/
             /tmp/catalog-delivery/browser-audit.json
             /tmp/catalog-delivery/application/
-          retention-days: 90
+          retention-days: 30
           if-no-files-found: error
-  publish:
-    if: github.ref == 'refs/heads/main' && github.repository == 'KyleJKistner/LeanDigest'
-    needs: build
-    permissions:
-      contents: write
-      actions: read
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
-    steps:
-      - uses: actions/checkout@v4
-        with: {persist-credentials: false}
-      - uses: actions/download-artifact@v4
-        with:
-          name: leanglish-breadth-delivery
-          path: /tmp/delivery
-      - name: Publish immutable all-findings research preview
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          set -eu
-          tag=leanglish-all-findings-v0.4.1
-          if gh release view "$tag" >/dev/null 2>&1; then
-            echo 'This frozen release already exists; no asset is overwritten.'
-            exit 0
-          fi
-          gh release create "$tag" /tmp/delivery/dist/leanglish-all-findings.zip \
-            /tmp/delivery/dist/coverage.json /tmp/delivery/dist/release.json /tmp/delivery/dist/breadth.json \
-            /tmp/delivery/dist/SHA256SUMS /tmp/delivery/application/leanglish-application.zip \
-            --target "$GITHUB_SHA" --title 'Leanglish 0.4.1: 216 documented theorem readings' \
-            --notes-file docs/BREADTH_V0_4_1.md --prerelease

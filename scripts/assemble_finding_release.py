@@ -1,4 +1,6 @@
-"""Build the frozen all-findings catalog and verify its complete access inventory.
+"""Rebuild the all-findings catalog from frozen inputs and verify its complete access inventory.
+
+The output is labelled as a rebuild of the frozen release's inputs, not as that release.
 
 Only the surrounding GitHub workflow downloads inputs. This program reads local
 artifacts, never executes Lean, and never upgrades a statement into a proof.
@@ -22,6 +24,32 @@ SOURCE_SHA256='7f596ba4fe17fe0d7d55655e6e82d99d4d87181e0a9032721c048d7385163f3c'
 INPUT_RUNS={'source':38822475057,'observations':39049596449,
             'statement_retries':39050823104,'proof_retries':39065371645}
 FONT_SUFFIXES={'.ttf','.otf','.woff','.woff2'}
+# The published releases whose frozen inputs this program re-assembles.
+FROZEN_RELEASES={False:('0.4.0','leanglish-all-findings-v0.4.0'),True:('0.4.1','leanglish-all-findings-v0.4.1')}
+
+
+def rebuild_label(site: Path, breadth: bool) -> dict:
+    """Label a build as a rebuild of a frozen release's inputs, never as that release.
+
+    The published assets were rendered at their tagged commits. A later renderer
+    writes different readings from the same inputs, so the label names the inputs
+    and the printer versions recorded in the readings this build wrote. Nothing
+    here compares the build with the published assets."""
+    version,tag=FROZEN_RELEASES[breadth]
+    printers=sorted({str(d.get('axes',{}).get('printer_version','unrecorded'))
+                     for p in sorted(site.glob('proofs/*/reading.json'))
+                     for d in read_json(p).get('declarations',[])})
+    return {'release_version':'rebuild-of-'+version,
+            'rebuild':{'inputs_of_release':tag,'printer_versions':printers,
+                       'compared_with_published_assets':False}}
+
+
+def rebuild_notice(identity: dict) -> str:
+    r=identity['rebuild']
+    return ('> This archive is a rebuild of the frozen inputs of release `%s` by application commit `%s`, '
+            'with printer versions %s. It is not that release and was not compared with its assets. '
+            'The notes of that release follow unchanged.\n\n'
+            % (r['inputs_of_release'],identity['application_commit'],', '.join('`%s`'%p for p in r['printer_versions']) or 'none recorded'))
 
 
 def unpack_source(inputs: Path, destination: Path) -> Path:
@@ -106,14 +134,15 @@ def assemble(inputs: Path, output: Path, *, breadth_inputs: Path | None = None) 
         'application_commit':commit,'application_tracked_tree_clean':not subprocess.check_output(['git','status','--porcelain','--untracked-files=no'],cwd=repo,text=True).strip(),
         'application_source_hashes':{p.relative_to(repo).as_posix():sha256(p.read_bytes()).hexdigest() for folder in ('proofreader','leanglish','scripts') for p in sorted((repo/folder).rglob('*')) if p.is_file() and p.suffix in {'.py','.js','.css','.html','.lean'}},
         'input_workflow_runs':dict(INPUT_RUNS,**({'breadth_collection':39076207515,'breadth_native':39067324637} if ledger else {})),
-        'release_version':'0.4.1' if ledger else '0.4.0',
+        **rebuild_label(site,ledger is not None),
         'breadth_report':ledger,
         'original_source_archive_sha256':SOURCE_SHA256,'coverage':coverage,
         'static_audit':checks,'proof_retry_targets_recovered':28,
         'native_lean_executed_by_builder':False,'observations_authenticated':False}
     write_json(site/'release.json',identity)
     write_json(site/'static-audit.json',checks)
-    shutil.copy2(repo/('docs/BREADTH_V0_4_1.md' if ledger else 'docs/ALL_FINDINGS.md'),site/'RELEASE-NOTES.md')
+    notes=(repo/('docs/BREADTH_V0_4_1.md' if ledger else 'docs/ALL_FINDINGS.md')).read_text(encoding='utf-8')
+    (site/'RELEASE-NOTES.md').write_text(rebuild_notice(identity)+notes,encoding='utf-8')
     return identity
 
 

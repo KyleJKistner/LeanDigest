@@ -11,9 +11,11 @@ jobs:
     timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
+        with: {persist-credentials: false}
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
+      # The dev extra includes PyYAML, so the workflow-structure tests run here.
       - run: python -m pip install '.[dev,webtest]'
       - run: python -m playwright install --with-deps chromium
       - run: python scripts/build_demo.py && python scripts/build_typed_demo.py && python scripts/build_narrative_demo.py
@@ -21,8 +23,22 @@ jobs:
         env:
           PROOFREADER_REQUIRE_BROWSER: '1'
         run: python -m pytest -q --ignore=tests/test_lean_integration.py --ignore=tests/test_kernel_integration.py --ignore=tests/test_narrative_integration.py --ignore=tests/test_narrative_batch_integration.py --ignore=tests/test_narrative_context_integration.py --junitxml=artifacts/ci-python.xml
-      - name: Assert packaged source assets have no drift
-        run: git diff --exit-code -- proofreader/data artifacts/openai-sample
+      - name: Assert the demo build and tests leave every tracked file unchanged
+        # The build scripts rewrite files in proofreader/data, artifacts/openai-sample,
+        # artifacts/v0.2 and artifacts/v0.3; any of them can drift, so the whole
+        # tracked tree is compared, and new files in those directories fail too.
+        run: |
+          if ! git diff --quiet; then
+            git diff --stat
+            echo '::error::Tracked files differ after the demo build and tests. Rebuild them with scripts/build_demo.py, scripts/build_typed_demo.py and scripts/build_narrative_demo.py and commit the result.'
+            exit 1
+          fi
+          untracked="$(git status --porcelain --untracked-files=all -- proofreader/data artifacts/openai-sample artifacts/v0.2 artifacts/v0.3)"
+          if [ -n "$untracked" ]; then
+            printf '%s\n' "$untracked"
+            echo '::error::The demo build wrote files that are not committed.'
+            exit 1
+          fi
       - uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -33,6 +49,7 @@ jobs:
     timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
+        with: {persist-credentials: false}
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'

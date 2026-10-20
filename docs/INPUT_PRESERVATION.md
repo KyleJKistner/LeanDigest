@@ -52,7 +52,7 @@ expires 17:06). The recorded source digests are of the artifact ZIP
 | Date (UTC) | Input expires | Consequence |
 | --- | --- | --- |
 | 2026-11-02 20:14 | Checkpoint 12217614568 | `completion-resume.yml` fails at its checkpoint metadata check. |
-| 2026-11-14 23:16 | Source 12012738377 | The seven source consumers can no longer download the source. `dependency-cone.yml` fails in its preflight job. A push to `main` that matches the path filters of `all-findings-release.yml` or `breadth-release.yml` fails its build job. |
+| 2026-11-14 23:16 | Source 12012738377 | The seven source consumers can no longer download the source. `dependency-cone.yml` fails in its preflight job. A dispatch of `all-findings-release.yml` or `breadth-release.yml` fails at its input check, which names the expired input. Until the consolidation branch reaches `main`, a push to `main` that matches the path filters of the earlier versions there fails their build jobs. |
 | 2026-11-16 16:52 and 17:06 | Statement retries | `all-findings-release.yml`, `breadth-release.yml` and `completion-delivery.yml` can no longer download the two retries. |
 | 2027-01-15 to 2027-01-17 | The `expiring-2027-01` set | Their consumers can no longer download them. |
 
@@ -73,9 +73,9 @@ resumes one stopped worker of recovery run 39315174445. Two earlier runs of
   results as `completion-frozen-observations` (12234538263) and
   `continuation-frozen-observations` (12234168598), which expire on 2027-01-18.
 - **`completion-reading-delivery` (12234627856, run 39353736010, 49,209,060
-  bytes, expires 2027-01-18 01:29).** `publish-completion.yml` passes it to
-  `scripts/publish_completion_release.py`, which requires a successful
-  `completion-delivery.yml` run at application commit 2149131. A copy cannot
+  bytes, expires 2027-01-18 01:29).** The archived `publish-completion.yml`
+  passed it to `scripts/publish_completion_release.py`, which requires a
+  successful `completion-delivery.yml` run at application commit 2149131. A copy cannot
   meet that check. Release `leanglish-original-project-2149131` already exists.
 - **`cancellation-env-a` (12202194378, run 39285448721, 193,506,791 bytes,
   expires 2026-10-20 16:27).** Only the optional `--retained-environment` path
@@ -187,13 +187,18 @@ and toolchain cannot be rebuilt without rerunning the jobs that produced them.
 ## Dispatch
 
 GitHub's documentation on manually running a workflow states that the workflow
-must be on the default branch for the `workflow_dispatch` event to trigger it.
+must be on the default branch for the `workflow_dispatch` event to trigger it,
+and shows `gh workflow run --ref` for running the version on another branch.
 `main` does not contain `preserve-inputs.yml`, and this change does not add it
-there. To copy the checkpoint before 2026-11-02 20:14 UTC, the owner must
-first put the workflow on `main`. The run then uses the files of the ref passed
-to the dispatch. `scripts/preserve_inputs.py` uses only the Python standard
-library and no other module of this repository, and the copy and record jobs
-run it without installing the application. The plan job installs the package
+there. On 2026-10-20 the Actions workflows API returned 404 for the file, and
+the repository had no recorded `workflow_dispatch` run of any workflow, so no
+dispatch route has been tested here
+(`.github/workflow-archive/README.md#dispatch`). To copy the checkpoint before
+2026-11-02 20:14 UTC, the documented route is to put the workflow on `main`
+first. The run then uses the files of the ref passed to the dispatch.
+`scripts/preserve_inputs.py` uses only the Python standard library and no
+other module of this repository, and the copy and record jobs run it without
+installing the application. The plan job installs the package
 with `pip install '.[dev]'` before it runs the tests, because
 `tests/conftest.py` imports `proofreader`, so the dispatched ref must contain
 the package as well as the script.
@@ -229,19 +234,21 @@ does not apply them.
    `tests/test_dependency_cone.py` and `tests/test_completion_resume.py`.
 6. Apply the same commit on every branch from which a consumer is triggered. A
    workflow runs the file version of the ref that triggers it: for example
-   `main` for the release workflows, the PR #8 head branch
+   the dispatched ref for the release workflows, the PR #8 head branch
    `work/completion-evidence-retries` for the completion workflows, and
    `claude/keen-archimedes-ihorkq` for `dependency-cone.yml`.
    Pushing the commit runs every consumer whose push filter matches an edited
-   file. On `main`, `all-findings-release.yml` and `breadth-release.yml` filter
-   on their own files and on `proofreader/**`, so both run their build jobs.
-   Their publish jobs create a release only when the tag
-   (`leanglish-all-findings-v0.4.0` or `leanglish-all-findings-v0.4.1`) does not
-   exist; both tags existed on 2026-10-20. On
-   `work/completion-evidence-retries`, `completion-delivery.yml` runs. On
-   `claude/keen-archimedes-ihorkq`, an edit to `dependency-cone.yml` starts a
-   run of that workflow with its default `pilot` scope. Decide whether those
-   runs are wanted before pushing.
+   file. `all-findings-release.yml` and `breadth-release.yml` are dispatch-only
+   and have no publish job, so a push does not run them. `main` still holds
+   their earlier versions, which filter on their own files and on
+   `proofreader/**`; a repin pushed to `main` before the consolidation branch
+   reaches it runs both build jobs there. Those versions' publish jobs create a
+   release only when the tag (`leanglish-all-findings-v0.4.0` or
+   `leanglish-all-findings-v0.4.1`) does not exist; both tags existed on
+   2026-10-20. On `work/completion-evidence-retries`, `completion-delivery.yml`
+   runs. On `claude/keen-archimedes-ihorkq`, an edit to `dependency-cone.yml`
+   starts a run of that workflow with its default `pilot` scope. Decide whether
+   those runs are wanted before pushing.
 7. Before the copies expire, dispatch the same set again and repeat these steps.
 
 The printed edits, by set, against this checkout:
@@ -290,11 +297,11 @@ and fake `gh` calls. It covers the copy checks, rejected archives and metadata,
 the round trip, the merge of item and failure records, the printed edits, a
 second copy of a copy, drift reports, and records whose run, commit or copy
 identity is not a plain number or digest, which repin refuses. The trigger and
-permission checks of `preserve-inputs.yml` read the workflow text, because
-neither `ci.yml` nor the plan job installs PyYAML; a further structural test
-runs only where PyYAML is installed. The tests whose names contain `checkout`
-also run the repin against this checkout's consumer files with a synthetic
-record. They require every reference to be found and no scanned file
+permission checks of `preserve-inputs.yml` read the workflow text. A further
+structural test needs PyYAML, which the `dev` extra installs since 2026-10-20,
+so `ci.yml` and the plan job run it too. The tests whose names contain
+`checkout` also run the repin against this checkout's consumer files with a
+synthetic record. They require every reference to be found and no scanned file
 to name a replaced run or artifact outside the edits and the listed unchanged
 references. No test downloads an artifact or contacts GitHub.
 

@@ -7,9 +7,11 @@ name: Reading quality (whole retained corpus)
 # English-fidelity or human-comprehension results.
 on:
   push:
-    paths: ['proofreader/**', 'benchmarks/reading-kpis/**', 'scripts/fetch_reading_corpus.py', '.github/workflows/reading-kpis.yml']
+    paths: ['proofreader/**', 'leanglish/**', 'pyproject.toml', 'benchmarks/reading-kpis/**', 'scripts/fetch_reading_corpus.py',
+            '.github/workflows/reading-kpis.yml']
   pull_request:
-    paths: ['proofreader/**', 'benchmarks/reading-kpis/**', 'scripts/fetch_reading_corpus.py', '.github/workflows/reading-kpis.yml']
+    paths: ['proofreader/**', 'leanglish/**', 'pyproject.toml', 'benchmarks/reading-kpis/**', 'scripts/fetch_reading_corpus.py',
+            '.github/workflows/reading-kpis.yml']
   workflow_dispatch:
 permissions:
   contents: read
@@ -19,6 +21,7 @@ jobs:
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
+        with: {persist-credentials: false}
       - uses: actions/setup-python@v5
         with: {python-version: '3.12'}
       - run: python -m pip install .

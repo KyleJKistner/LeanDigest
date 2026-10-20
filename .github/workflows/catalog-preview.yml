@@ -12,7 +12,8 @@ name: Catalog preview (published readings re-rendered)
 on:
   push:
     branches: [claude/keen-archimedes-ihorkq]
-    paths: ['proofreader/**', 'scripts/rerender_catalog.py', 'scripts/assemble_finding_release.py',
+    # leanglish/** is hashed into the preview's application identity; pyproject.toml sets the install.
+    paths: ['proofreader/**', 'leanglish/**', 'pyproject.toml', 'scripts/rerender_catalog.py', 'scripts/assemble_finding_release.py',
             'scripts/collect_original_evidence.py', 'scripts/fetch_reading_corpus.py', 'scripts/audit_finding_browser.py',
             'scripts/audit_original_browser.py', 'scripts/download_cone_artifacts.py', 'tests/test_rerender_catalog.py',
             'tests/test_cone_catalog.py', 'benchmarks/reading-kpis/**', 'benchmarks/dependency-cone/**',

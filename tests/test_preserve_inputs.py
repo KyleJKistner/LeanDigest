@@ -520,8 +520,8 @@ def top_level_block(text: str, key: str) -> list[str]:
 
 
 def test_workflow_is_dispatch_only_and_never_publishes():
-    # PyYAML is not among the dev or webtest extras that ci.yml and the plan
-    # job install, so the trigger and permission checks read the text.
+    # These trigger and permission checks read the text, so they also run where
+    # PyYAML is missing; the structural test below parses the YAML.
     text = (ROOT/'.github/workflows/preserve-inputs.yml').read_text()
     for forbidden in ('push:', 'schedule:', 'pull_request', 'contents: write', 'actions: write', 'gh release',
                       'git push', 'actions/cache', 'workflow_run'):

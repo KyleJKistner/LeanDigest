@@ -7,6 +7,8 @@ name: Dependency-cone readings (level 1) in the original environment
 # input before any shard starts. Every shard uploads its outcomes, including
 # failures. Cone readings are a separate denominator from the 536 documented
 # targets. This workflow never publishes, releases, pushes or saves a cache.
+# No dispatch of it has been recorded; GitHub documents workflow_dispatch for a
+# file on the default branch (.github/workflow-archive/README.md, Dispatch).
 on:
   workflow_dispatch:
     inputs:
@@ -79,7 +81,7 @@ jobs:
         env: {GH_TOKEN: '${{ github.token }}'}
         run: |
           if ! gh api "repos/$GITHUB_REPOSITORY/actions/artifacts/$SOURCE_ARTIFACT" > /tmp/source-artifact.json; then
-            echo "::error::Source artifact $SOURCE_ARTIFACT (complete-openai-lean-source, run $SOURCE_RUN) is not available. Re-run lean-source-bundle.yml and pin the new artifact."
+            echo "::error::Source artifact $SOURCE_ARTIFACT (complete-openai-lean-source, run $SOURCE_RUN) is not available. docs/INPUT_PRESERVATION.md describes preserved copies, the rebuild with the archived lean-source-bundle.yml, and the repin."
             exit 1
           fi
           if ! python scripts/plan_dependency_cone.py source-artifact --metadata /tmp/source-artifact.json; then
@@ -104,13 +106,17 @@ jobs:
       - uses: leanprover/lean-action@v1
         if: steps.deps.outputs.cache-hit != 'true'
         with: {lake-package-directory: lean, auto-config: false, build: false, test: false, lint: false, use-mathlib-cache: false, use-github-cache: false}
-      - name: Re-create the dependencies once and require the pinned environment audit
+      - name: Restore unchanged original source for the dependency check
         if: steps.deps.outputs.cache-hit != 'true'
         env: {GH_TOKEN: '${{ github.token }}'}
         run: |
           mkdir -p /tmp/inputs/source
           gh run download "$SOURCE_RUN" -R "$GITHUB_REPOSITORY" -n complete-openai-lean-source -D /tmp/inputs/source
           python -c "from pathlib import Path; from scripts.assemble_finding_release import unpack_source; unpack_source(Path('/tmp/inputs'),Path('/tmp/original-project'))"
+      - name: Re-create the dependencies once and require the pinned environment audit
+        # No token in this step: lake update and lake exe cache get run project code.
+        if: steps.deps.outputs.cache-hit != 'true'
+        run: |
           sudo sysctl -w vm.max_map_count=1048576
           if ! python scripts/plan_dependency_cone.py dependencies --project /tmp/original-project/lean \
                --original-plan /tmp/cone/original-plan.json --environment /tmp/cone/environment.json \
@@ -155,12 +161,12 @@ jobs:
         # Runs after an earlier failure too, so the shard still records why nothing was read.
         # Without a restored cache the worker re-creates the dependencies and records both logs.
         if: ${{ !cancelled() }}
-        env: {DEPENDENCIES: "${{ steps.deps.outputs.cache-hit == 'true' && 'cache' || 'resolve' }}"}
+        env: {DEPENDENCIES: "${{ steps.deps.outputs.cache-hit == 'true' && 'cache' || 'resolve' }}", SHARD: '${{ matrix.id }}'}
         run: |
           sudo sysctl -w vm.max_map_count=1048576
           python scripts/plan_dependency_cone.py run --project /tmp/original-project/lean --cone-plan /tmp/cone/plan.json \
             --original-plan /tmp/cone/original-plan.json --environment /tmp/cone/environment.json \
-            --shard '${{ matrix.id }}' --dependencies "$DEPENDENCIES" \
+            --shard "$SHARD" --dependencies "$DEPENDENCIES" \
             --output /tmp/cone-output --trust-project
       - uses: actions/upload-artifact@v4
         if: always()
