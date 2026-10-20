@@ -179,6 +179,16 @@ def test_instance_classifier_boundary_on_synthetic_frames(premise, instance):
     check_reading(record, d)
 
 
+def test_instance_resting_on_a_project_lemma_is_not_called_standard():
+    record = real('instance_from_project_lemma')
+    n, d = rendered(record)
+    step = owner(n, d, next(f['id'] for f in record['frames'] if f['head'] == 'inferInstance'))
+    assert step.rule == 'instance-facts' and step.fallback
+    assert step.text == 'Instance fact used, derived using the premise below: FiniteDimensional ℂ ↥E.'
+    assert [c.text for c in step.children] == ['By the project lemma OAI.HilbertCrouzeix.iterateSpace_finiteDimensional:']
+    assert not any(s.text.startswith('Standard') for s in walk_steps(d.declarations[0].steps))
+
+
 def test_project_instance_is_cited_as_a_project_instance():
     # Synthetic: project instances are project content, not standard facts.
     record = synthetic(app('Foo.lemma', 'P x', (1, app('OAI.Space.instCompleteSpaceFree', 'CompleteSpace Free', role='named')), objects=['x']))
@@ -254,7 +264,9 @@ def test_frontier_rewrites_say_what_their_head_does():
     n, d = rendered(real('of_eq_true'))
     [step] = d.declarations[0].steps
     assert step.rule == 'rewrite' and step.fallback
-    assert step.text == 'Simplification reduces this proposition to True; the simplification steps are not expanded.'
+    # of_eq_true (h : p = True) : p. The frontier records no tactic, so the
+    # sentence does not claim that simp produced the equation.
+    assert step.text == 'This proposition is proved equal to True; that equation is not expanded.'
     record = real('cast_with_instances')
     n, d = rendered(record)
     congruence = owner(n, d, next(f['id'] for f in record['frames'] if f['head'] == "congrFun'"))
@@ -469,6 +481,27 @@ def test_substitution_and_restatement_are_named_gaps():
     assert step.rule == 'restatement' and step.fallback
 
 
+def test_substitution_names_the_objects_it_is_specialized_to():
+    # Eq.ndrec … (h : 0 = s) L hL hd: the rewritten statement is a ∀ over L.
+    n, d = rendered(real('substitution_specialized'))
+    step = d.declarations[0].steps[0]
+    assert step.rule == 'substitution' and step.fallback
+    assert step.text == ('Rewrite the statement proved below along the equation 0 = s, then specialize the result to L '
+                         'and apply it to the further premises below; which occurrences are rewritten is not displayed.')
+
+
+def test_substitution_prints_the_recorded_equation_not_joined_objects():
+    # Synthetic, after a real corpus case: joining a = fun … and b with "="
+    # would print fun x => f x = g, which Lean reads as fun x => (f x = g).
+    record = synthetic(app('Eq.ndrec', 'P g', (3, given('hp', 'P fun x => f x')), (5, given('h', '(fun x => f x) = g')),
+                           objects=['ℕ → ℕ', 'fun x => f x', 'fun g => P g', 'g']))
+    n, d = rendered(record)
+    step = d.declarations[0].steps[0]
+    assert step.rule == 'substitution' and step.fallback
+    assert step.text.startswith('Rewrite the statement proved below along the equation (fun x => f x) = g;')
+    check_reading(record, d)
+
+
 def test_witness_for_a_named_goal_is_a_labelled_gap():
     # Synthetic: Exists.intro proving a definition that Lean unfolds to ∃.
     record = synthetic(app('Exists.intro', 'Main', (3, given('h', '0 < 1 / 2')),
@@ -489,5 +522,17 @@ def test_check_reading_accepts_only_a_listed_earlier_label_on_identical_output()
         check_reading(record, d)
     d.declarations[0].axes['printer_version'] = 'source-math-en/0.4.2'
     d.declarations[0].steps[0].text += ' Changed.'
+    with pytest.raises(InvalidExport, match='regeneration'):
+        check_reading(record, d)
+
+
+@pytest.mark.parametrize('label', ['source-math-en/0.4.2', ['source-math-en/0.4.2'], None])
+def test_earlier_label_is_refused_for_a_snapshot_without_a_retained_reading(label):
+    # The text is exactly the 0.5.0 regeneration; only the label claims 0.4.2.
+    # This real subtree has no listed retained 0.4.2 reading, so it is refused.
+    record = real('norm_num')
+    d = Narrative(record).document()
+    check_reading(record, d)
+    d.declarations[0].axes['printer_version'] = label
     with pytest.raises(InvalidExport, match='regeneration'):
         check_reading(record, d)

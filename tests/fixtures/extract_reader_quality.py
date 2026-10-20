@@ -38,6 +38,8 @@ FIXTURES = [
     ('anonymous_have', '18159986a68f8f5a56a4ee28', 70),
     ('of_eq_true', '2e1f01c9a8dfcfd39dc1eeba', 17),
     ('rcases_chain', '8593c0757421b0bc36918c20', 8),
+    ('instance_from_project_lemma', '4a72a3f89a6e3a114dd76c34', 25),
+    ('substitution_specialized', '130628592a176216f3d3f4e9', 33),
 ]
 
 

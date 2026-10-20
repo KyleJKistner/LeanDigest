@@ -522,6 +522,208 @@
     "theorem": "OAI.DirectionalTransience.positive_probability_transience_velocity_hemisphere"
    }
   },
+  "instance_from_project_lemma": {
+   "provenance": {
+    "corpus_snapshot": "4a72a3f89a6e3a114dd76c34",
+    "recorded_frames": [
+     25,
+     26,
+     27,
+     28,
+     29,
+     30,
+     31
+    ],
+    "root_frame": 25,
+    "snapshot_file_sha256": "1bc4c8790cf30bddc1ad778f8bedb9cf449576074a374bee340bed3def7dc8b8",
+    "snapshot_sha256": "0a0fa740eddd7db2b6d7eb68bc92aac24efbcae9c2b0a880dc9bad2f2375a93a",
+    "theorem": "OAI.HilbertCrouzeix.exists_finite_compression"
+   },
+   "record": {
+    "axioms": [
+     "propext",
+     "Classical.choice",
+     "Quot.sound"
+    ],
+    "formula_backend": "Lean pretty-printer",
+    "frames": [
+     {
+      "budget_cut": false,
+      "children": [
+       1,
+       3
+      ],
+      "context": [],
+      "head": "Exists.intro",
+      "id": 0,
+      "objects": [
+       "FiniteDimensional ℂ ↥E",
+       "fun hE =>\n  ∃ η,\n    (OAI.HilbertCrouzeix.tensorInclusion E m) η = ↑(∑ j, x j ⊗ₜ[ℂ] v j) ∧\n      (OAI.HilbertCrouzeix.tensorInclusion E m)\n          ((OAI.HilbertCrouzeix.polynomialEval (OAI.HilbertCrouzeix.compression A E) B) η) =\n        (OAI.HilbertCrouzeix.polynomialEval A B) ↑(∑ j, x j ⊗ₜ[ℂ] v j)"
+      ],
+      "path": [],
+      "premises": [
+       {
+        "argument": 2,
+        "frame": 1,
+        "statement": "FiniteDimensional ℂ ↥E"
+       },
+       {
+        "argument": 3,
+        "frame": 3,
+        "statement": "∃ η,\n  (OAI.HilbertCrouzeix.tensorInclusion E m) η = ↑(∑ j, x j ⊗ₜ[ℂ] v j) ∧\n    (OAI.HilbertCrouzeix.tensorInclusion E m)\n        ((OAI.HilbertCrouzeix.polynomialEval (OAI.HilbertCrouzeix.compression A E) B) η) =\n      (OAI.HilbertCrouzeix.polynomialEval A B) ↑(∑ j, x j ⊗ₜ[ℂ] v j)"
+       }
+      ],
+      "role": "witness",
+      "statement": "∃ (hE : FiniteDimensional ℂ ↥E),\n  ∃ η,\n    (OAI.HilbertCrouzeix.tensorInclusion E m) η = ↑(∑ j, x j ⊗ₜ[ℂ] v j) ∧\n      (OAI.HilbertCrouzeix.tensorInclusion E m)\n          ((OAI.HilbertCrouzeix.polynomialEval (OAI.HilbertCrouzeix.compression A E) B) η) =\n        (OAI.HilbertCrouzeix.polynomialEval A B) ↑(∑ j, x j ⊗ₜ[ℂ] v j)"
+     },
+     {
+      "budget_cut": false,
+      "children": [
+       2
+      ],
+      "context": [],
+      "head": "inferInstance",
+      "id": 1,
+      "objects": [
+       "FiniteDimensional ℂ ↥E"
+      ],
+      "path": [
+       0,
+       1
+      ],
+      "premises": [
+       {
+        "argument": 1,
+        "frame": 2,
+        "statement": "FiniteDimensional ℂ ↥(OAI.HilbertCrouzeix.iterateSpace A d x)"
+       }
+      ],
+      "role": "application",
+      "statement": "FiniteDimensional ℂ ↥E"
+     },
+     {
+      "budget_cut": false,
+      "children": [],
+      "context": [],
+      "head": "OAI.HilbertCrouzeix.iterateSpace_finiteDimensional",
+      "id": 2,
+      "objects": [
+       "H",
+       "inst✝¹",
+       "inst✝",
+       "q",
+       "A",
+       "d",
+       "x"
+      ],
+      "path": [
+       0,
+       1,
+       1
+      ],
+      "premises": [],
+      "role": "application",
+      "statement": "FiniteDimensional ℂ ↥(OAI.HilbertCrouzeix.iterateSpace A d x)"
+     },
+     {
+      "budget_cut": false,
+      "children": [
+       4
+      ],
+      "context": [],
+      "head": "Exists.intro",
+      "id": 3,
+      "objects": [
+       "OAI.HilbertCrouzeix.Amplification (↥E) m",
+       "fun η =>\n  (OAI.HilbertCrouzeix.tensorInclusion E m) η = ↑(∑ j, x j ⊗ₜ[ℂ] v j) ∧\n    (OAI.HilbertCrouzeix.tensorInclusion E m)\n        ((OAI.HilbertCrouzeix.polynomialEval (OAI.HilbertCrouzeix.compression A E) B) η) =\n      (OAI.HilbertCrouzeix.polynomialEval A B) ↑(∑ j, x j ⊗ₜ[ℂ] v j)",
+       "η"
+      ],
+      "path": [
+       1
+      ],
+      "premises": [
+       {
+        "argument": 3,
+        "frame": 4,
+        "statement": "(OAI.HilbertCrouzeix.tensorInclusion E m) η = ↑(∑ j, x j ⊗ₜ[ℂ] v j) ∧\n  (OAI.HilbertCrouzeix.tensorInclusion E m)\n      ((OAI.HilbertCrouzeix.polynomialEval (OAI.HilbertCrouzeix.compression A E) B) η) =\n    (OAI.HilbertCrouzeix.polynomialEval A B) ↑(∑ j, x j ⊗ₜ[ℂ] v j)"
+       }
+      ],
+      "role": "witness",
+      "statement": "∃ η,\n  (OAI.HilbertCrouzeix.tensorInclusion E m) η = ↑(∑ j, x j ⊗ₜ[ℂ] v j) ∧\n    (OAI.HilbertCrouzeix.tensorInclusion E m)\n        ((OAI.HilbertCrouzeix.polynomialEval (OAI.HilbertCrouzeix.compression A E) B) η) =\n      (OAI.HilbertCrouzeix.polynomialEval A B) ↑(∑ j, x j ⊗ₜ[ℂ] v j)"
+     },
+     {
+      "budget_cut": false,
+      "children": [
+       5,
+       6
+      ],
+      "context": [],
+      "head": "And.intro",
+      "id": 4,
+      "objects": [
+       "(OAI.HilbertCrouzeix.tensorInclusion E m) η = ↑(∑ j, x j ⊗ₜ[ℂ] v j)",
+       "(OAI.HilbertCrouzeix.tensorInclusion E m)\n    ((OAI.HilbertCrouzeix.polynomialEval (OAI.HilbertCrouzeix.compression A E) B) η) =\n  (OAI.HilbertCrouzeix.polynomialEval A B) ↑(∑ j, x j ⊗ₜ[ℂ] v j)"
+      ],
+      "path": [
+       1,
+       1
+      ],
+      "premises": [
+       {
+        "argument": 2,
+        "frame": 5,
+        "statement": "(OAI.HilbertCrouzeix.tensorInclusion E m) η = ↑(∑ j, x j ⊗ₜ[ℂ] v j)"
+       },
+       {
+        "argument": 3,
+        "frame": 6,
+        "statement": "(OAI.HilbertCrouzeix.tensorInclusion E m)\n    ((OAI.HilbertCrouzeix.polynomialEval (OAI.HilbertCrouzeix.compression A E) B) η) =\n  (OAI.HilbertCrouzeix.polynomialEval A B) ↑(∑ j, x j ⊗ₜ[ℂ] v j)"
+       }
+      ],
+      "role": "combine",
+      "statement": "(OAI.HilbertCrouzeix.tensorInclusion E m) η = ↑(∑ j, x j ⊗ₜ[ℂ] v j) ∧\n  (OAI.HilbertCrouzeix.tensorInclusion E m)\n      ((OAI.HilbertCrouzeix.polynomialEval (OAI.HilbertCrouzeix.compression A E) B) η) =\n    (OAI.HilbertCrouzeix.polynomialEval A B) ↑(∑ j, x j ⊗ₜ[ℂ] v j)"
+     },
+     {
+      "budget_cut": false,
+      "children": [],
+      "context": [],
+      "head": "Eq.mpr",
+      "id": 5,
+      "objects": [],
+      "path": [
+       1,
+       1,
+       0,
+       1
+      ],
+      "premises": [],
+      "role": "rewrite",
+      "statement": "(OAI.HilbertCrouzeix.tensorInclusion E m) η = ↑(∑ j, x j ⊗ₜ[ℂ] v j)"
+     },
+     {
+      "budget_cut": false,
+      "children": [],
+      "context": [],
+      "head": "Eq.mpr",
+      "id": 6,
+      "objects": [],
+      "path": [
+       1,
+       1,
+       1
+      ],
+      "premises": [],
+      "role": "rewrite",
+      "statement": "(OAI.HilbertCrouzeix.tensorInclusion E m)\n    ((OAI.HilbertCrouzeix.polynomialEval (OAI.HilbertCrouzeix.compression A E) B) η) =\n  (OAI.HilbertCrouzeix.polynomialEval A B) ↑(∑ j, x j ⊗ₜ[ℂ] v j)"
+     }
+    ],
+    "judgements_checked": 7,
+    "lean_version": "4.34.1",
+    "schema": "proofreader.narrative/v1",
+    "statement": "∃ (hE : FiniteDimensional ℂ ↥E),\n  ∃ η,\n    (OAI.HilbertCrouzeix.tensorInclusion E m) η = ↑(∑ j, x j ⊗ₜ[ℂ] v j) ∧\n      (OAI.HilbertCrouzeix.tensorInclusion E m)\n          ((OAI.HilbertCrouzeix.polynomialEval (OAI.HilbertCrouzeix.compression A E) B) η) =\n        (OAI.HilbertCrouzeix.polynomialEval A B) ↑(∑ j, x j ⊗ₜ[ℂ] v j)",
+    "theorem": "OAI.HilbertCrouzeix.exists_finite_compression"
+   }
+  },
   "instance_named_project_lemma": {
    "provenance": {
     "corpus_snapshot": "2394c557e6965a76614641cc",
@@ -3446,6 +3648,288 @@
     "schema": "proofreader.narrative/v1",
     "statement": "dist p 0 = 0",
     "theorem": "OAI.EuclideanRamsey.ramsey_cospherical"
+   }
+  },
+  "substitution_specialized": {
+   "provenance": {
+    "corpus_snapshot": "130628592a176216f3d3f4e9",
+    "recorded_frames": [
+     33,
+     34,
+     35,
+     36,
+     37,
+     38,
+     39,
+     40,
+     41
+    ],
+    "root_frame": 33,
+    "snapshot_file_sha256": "d5175cdc458c90f8d062bd195b0b86e45eb16b56552b881eb74b7c41889ca730",
+    "snapshot_sha256": "cc068a3bf037c5ac7f16d1b799ad49a3c828854a03fa74a7e87f8daafef7c159",
+    "theorem": "OAI.PlanarL1.planar_graph_metrics_embed_L1"
+   },
+   "record": {
+    "axioms": [
+     "propext",
+     "Classical.choice",
+     "Quot.sound"
+    ],
+    "formula_backend": "Lean pretty-printer",
+    "frames": [
+     {
+      "budget_cut": false,
+      "children": [
+       1,
+       5,
+       7,
+       8
+      ],
+      "context": [],
+      "head": "Eq.ndrec",
+      "id": 0,
+      "objects": [
+       "ℕ",
+       "0",
+       "fun s =>\n  ∀ (L : (OAI.PlanarL1.Weighted.EnlargedTree.tree hc hs hl o).Layout s),\n    OAI.PlanarL1.Weighted.EnlargedTree.ExactPairs L →\n      (∀ (u v : Fin n),\n          (L.point (Sum.inl u)).distance (L.point (Sum.inl v)) = OAI.PlanarL1.graphDistance G length u v) →\n        ∃ Ω measurable μ f,\n          ∀ (x y : Fin n),\n            OAI.PlanarL1.graphDistance G length x y ≤ ‖f x - f y‖ ∧\n              ‖f x - f y‖ ≤\n                max 1 (2 / (OAI.PlanarL1.Parameters.scheduleGain / ↑q)) * OAI.PlanarL1.graphDistance G length x y",
+       "s",
+       "L"
+      ],
+      "path": [],
+      "premises": [
+       {
+        "argument": 3,
+        "frame": 1,
+        "statement": "∀ (L : (OAI.PlanarL1.Weighted.EnlargedTree.tree hc hs hl o).Layout 0),\n  OAI.PlanarL1.Weighted.EnlargedTree.ExactPairs L →\n    (∀ (u v : Fin n), (L.point (Sum.inl u)).distance (L.point (Sum.inl v)) = OAI.PlanarL1.graphDistance G length u v) →\n      ∃ Ω measurable μ f,\n        ∀ (x y : Fin n),\n          OAI.PlanarL1.graphDistance G length x y ≤ ‖f x - f y‖ ∧\n            ‖f x - f y‖ ≤\n              max 1 (2 / (OAI.PlanarL1.Parameters.scheduleGain / ↑q)) * OAI.PlanarL1.graphDistance G length x y"
+       },
+       {
+        "argument": 5,
+        "frame": 5,
+        "statement": "0 = s"
+       },
+       {
+        "argument": 7,
+        "frame": 7,
+        "statement": "OAI.PlanarL1.Weighted.EnlargedTree.ExactPairs L"
+       },
+       {
+        "argument": 8,
+        "frame": 8,
+        "statement": "∀ (u v : Fin n), (L.point (Sum.inl u)).distance (L.point (Sum.inl v)) = OAI.PlanarL1.graphDistance G length u v"
+       }
+      ],
+      "role": "application",
+      "statement": "∃ Ω measurable μ f,\n  ∀ (x y : Fin n),\n    OAI.PlanarL1.graphDistance G length x y ≤ ‖f x - f y‖ ∧\n      ‖f x - f y‖ ≤ max 1 (2 / (OAI.PlanarL1.Parameters.scheduleGain / ↑q)) * OAI.PlanarL1.graphDistance G length x y"
+     },
+     {
+      "binder": "L_1",
+      "budget_cut": false,
+      "children": [
+       2
+      ],
+      "context": [],
+      "domain": "(OAI.PlanarL1.Weighted.EnlargedTree.tree hc hs hl o).Layout 0",
+      "head": "",
+      "id": 1,
+      "objects": [],
+      "path": [
+       0,
+       0,
+       0,
+       0,
+       0,
+       1
+      ],
+      "premises": [],
+      "role": "introduce",
+      "statement": "∀ (L : (OAI.PlanarL1.Weighted.EnlargedTree.tree hc hs hl o).Layout 0),\n  OAI.PlanarL1.Weighted.EnlargedTree.ExactPairs L →\n    (∀ (u v : Fin n), (L.point (Sum.inl u)).distance (L.point (Sum.inl v)) = OAI.PlanarL1.graphDistance G length u v) →\n      ∃ Ω measurable μ f,\n        ∀ (x y : Fin n),\n          OAI.PlanarL1.graphDistance G length x y ≤ ‖f x - f y‖ ∧\n            ‖f x - f y‖ ≤\n              max 1 (2 / (OAI.PlanarL1.Parameters.scheduleGain / ↑q)) * OAI.PlanarL1.graphDistance G length x y"
+     },
+     {
+      "binder": "hL_1",
+      "budget_cut": false,
+      "children": [
+       3
+      ],
+      "context": [
+       {
+        "name": "L_1",
+        "type": "(OAI.PlanarL1.Weighted.EnlargedTree.tree hc hs hl o).Layout 0"
+       }
+      ],
+      "domain": "OAI.PlanarL1.Weighted.EnlargedTree.ExactPairs L_1",
+      "head": "",
+      "id": 2,
+      "objects": [],
+      "path": [
+       0,
+       0,
+       0,
+       0,
+       0,
+       1,
+       1
+      ],
+      "premises": [],
+      "role": "assume",
+      "statement": "OAI.PlanarL1.Weighted.EnlargedTree.ExactPairs L_1 →\n  (∀ (u v : Fin n),\n      (L_1.point (Sum.inl u)).distance (L_1.point (Sum.inl v)) = OAI.PlanarL1.graphDistance G length u v) →\n    ∃ Ω measurable μ f,\n      ∀ (x y : Fin n),\n        OAI.PlanarL1.graphDistance G length x y ≤ ‖f x - f y‖ ∧\n          ‖f x - f y‖ ≤\n            max 1 (2 / (OAI.PlanarL1.Parameters.scheduleGain / ↑q)) * OAI.PlanarL1.graphDistance G length x y"
+     },
+     {
+      "binder": "hd_1",
+      "budget_cut": false,
+      "children": [
+       4
+      ],
+      "context": [
+       {
+        "name": "L_1",
+        "type": "(OAI.PlanarL1.Weighted.EnlargedTree.tree hc hs hl o).Layout 0"
+       },
+       {
+        "name": "hL_1",
+        "type": "OAI.PlanarL1.Weighted.EnlargedTree.ExactPairs L_1"
+       }
+      ],
+      "domain": "∀ (u v : Fin n), (L_1.point (Sum.inl u)).distance (L_1.point (Sum.inl v)) = OAI.PlanarL1.graphDistance G length u v",
+      "head": "",
+      "id": 3,
+      "objects": [],
+      "path": [
+       0,
+       0,
+       0,
+       0,
+       0,
+       1,
+       1,
+       1
+      ],
+      "premises": [],
+      "role": "assume",
+      "statement": "(∀ (u v : Fin n), (L_1.point (Sum.inl u)).distance (L_1.point (Sum.inl v)) = OAI.PlanarL1.graphDistance G length u v) →\n  ∃ Ω measurable μ f,\n    ∀ (x y : Fin n),\n      OAI.PlanarL1.graphDistance G length x y ≤ ‖f x - f y‖ ∧\n        ‖f x - f y‖ ≤ max 1 (2 / (OAI.PlanarL1.Parameters.scheduleGain / ↑q)) * OAI.PlanarL1.graphDistance G length x y"
+     },
+     {
+      "budget_cut": false,
+      "children": [],
+      "context": [
+       {
+        "name": "L_1",
+        "type": "(OAI.PlanarL1.Weighted.EnlargedTree.tree hc hs hl o).Layout 0"
+       },
+       {
+        "name": "hL_1",
+        "type": "OAI.PlanarL1.Weighted.EnlargedTree.ExactPairs L_1"
+       },
+       {
+        "name": "hd_1",
+        "type": "∀ (u v : Fin n), (L_1.point (Sum.inl u)).distance (L_1.point (Sum.inl v)) = OAI.PlanarL1.graphDistance G length u v"
+       }
+      ],
+      "head": "Fin.elim0",
+      "id": 4,
+      "objects": [
+       "∃ Ω measurable μ f,\n  ∀ (x y : Fin n),\n    OAI.PlanarL1.graphDistance G length x y ≤ ‖f x - f y‖ ∧\n      ‖f x - f y‖ ≤ max 1 (2 / (OAI.PlanarL1.Parameters.scheduleGain / ↑q)) * OAI.PlanarL1.graphDistance G length x y",
+       "L_1.column (OAI.PlanarL1.Weighted.EnlargedTree.tree hc hs hl o).root"
+      ],
+      "path": [
+       0,
+       0,
+       0,
+       0,
+       0,
+       1,
+       1,
+       1,
+       1
+      ],
+      "premises": [],
+      "role": "application",
+      "statement": "∃ Ω measurable μ f,\n  ∀ (x y : Fin n),\n    OAI.PlanarL1.graphDistance G length x y ≤ ‖f x - f y‖ ∧\n      ‖f x - f y‖ ≤ max 1 (2 / (OAI.PlanarL1.Parameters.scheduleGain / ↑q)) * OAI.PlanarL1.graphDistance G length x y"
+     },
+     {
+      "budget_cut": false,
+      "children": [
+       6
+      ],
+      "context": [],
+      "head": "Eq.symm",
+      "id": 5,
+      "objects": [
+       "ℕ",
+       "s",
+       "0"
+      ],
+      "path": [
+       0,
+       0,
+       0,
+       1
+      ],
+      "premises": [
+       {
+        "argument": 3,
+        "frame": 6,
+        "statement": "s = 0"
+       }
+      ],
+      "role": "application",
+      "statement": "0 = s"
+     },
+     {
+      "binder": "h_2",
+      "budget_cut": false,
+      "children": [],
+      "context": [],
+      "head": "",
+      "id": 6,
+      "objects": [],
+      "path": [
+       0,
+       0,
+       0,
+       1,
+       1
+      ],
+      "premises": [],
+      "role": "given",
+      "statement": "s = 0"
+     },
+     {
+      "binder": "hL",
+      "budget_cut": false,
+      "children": [],
+      "context": [],
+      "head": "",
+      "id": 7,
+      "objects": [],
+      "path": [
+       0,
+       1
+      ],
+      "premises": [],
+      "role": "given",
+      "statement": "OAI.PlanarL1.Weighted.EnlargedTree.ExactPairs L"
+     },
+     {
+      "binder": "hd",
+      "budget_cut": false,
+      "children": [],
+      "context": [],
+      "head": "",
+      "id": 8,
+      "objects": [],
+      "path": [
+       1
+      ],
+      "premises": [],
+      "role": "given",
+      "statement": "∀ (u v : Fin n), (L.point (Sum.inl u)).distance (L.point (Sum.inl v)) = OAI.PlanarL1.graphDistance G length u v"
+     }
+    ],
+    "judgements_checked": 9,
+    "lean_version": "4.34.1",
+    "schema": "proofreader.narrative/v1",
+    "statement": "∃ Ω measurable μ f,\n  ∀ (x y : Fin n),\n    OAI.PlanarL1.graphDistance G length x y ≤ ‖f x - f y‖ ∧\n      ‖f x - f y‖ ≤ max 1 (2 / (OAI.PlanarL1.Parameters.scheduleGain / ↑q)) * OAI.PlanarL1.graphDistance G length x y",
+    "theorem": "OAI.PlanarL1.planar_graph_metrics_embed_L1"
    }
   },
   "unfolded_projection": {

@@ -36,17 +36,19 @@ the first row) cannot be disabled; that row is the difference between 0.4.2 and
 | Steps reading "Apply X to the supplied arguments." (wording) | 7,616 | 37 |
 | Readings with more than half gap steps | 225 | 191 |
 | Readings without gaps | 0 | 0 |
-| Words | 393,664 | 311,107 |
+| Words | 393,664 | 311,412 |
 | Qualified names per 1,000 characters | 15.48 | 15.19 |
 | `fun`, `=>`, `↑` per 1,000 characters | 3.91 | 4.48 |
 
-The gap frame share **rose**. Grouping and collapsing moved frames that 0.4.2
-displayed as separate, non-gap lines (numeral reflexivity checks inside norm_num
-certificates, binders over instance families, instance hypotheses under a
-library instance) into steps that are explanation gaps. Fewer unexplained lines
-are shown, but more of the checked proof sits inside an unexplained step. The
-Lean-marker density also rose: the formulas are unchanged while the surrounding
-text is shorter.
+The gap frame share **rose**. Grouping and collapsing moved 606 frames that
+0.4.2 displayed as separate, non-gap lines into steps that are explanation
+gaps: 440 numeral reflexivity checks inside norm_num (269) and positivity (171)
+certificates, 122 binders over instance families, and 44 instance hypotheses
+under a library instance derivation. In the other direction, 70 frames became
+explained (42 `cast`, 28 `Nonempty.casesOn`); the net is +536 gap frames.
+Fewer unexplained lines are shown, but more of the checked proof sits inside an
+unexplained step. The Lean-marker density also rose: the formulas are unchanged
+while the surrounding text is shorter.
 
 ## Per-change effect
 
@@ -55,8 +57,8 @@ is compared with 0.4.2).
 
 | Change | Δ displayed steps | Δ gap steps | Δ gap frames | Citation gap steps | Instance frames | Δ words |
 |---|---:|---:|---:|---:|---:|---:|
-| Changes without a switch point: Nonempty elimination, unfolded projections, substitution, restatement, named-goal witness, anonymous `have`, `Subtype.property`, `ring` wording | −28 | −28 | −28 | — | — | +8,639 |
-| 1. Typeclass side conditions grouped | −1,888 | −1,588 | +166 | — | 2,791 | −16,371 |
+| Changes without a switch point: Nonempty elimination, unfolded projections, substitution, restatement, named-goal witness, anonymous `have`, `Subtype.property`, `ring` wording | −28 | −28 | −28 | — | — | +8,744 |
+| 1. Typeclass side conditions grouped | −1,888 | −1,588 | +166 | — | 2,791 | −16,171 |
 | 2. norm_num, positivity and linarith certificates collapsed | −1,319 | −879 | +440 | — | 2,791 | −9,807 |
 | 3. Rewrite frontiers described by their head | 0 | 0 | 0 | — | 2,791 | +4,081 |
 | 4. Citations reworded and tagged | 0 | 0 | 0 | 3,550 | 2,791 | −6,957 |
@@ -79,16 +81,16 @@ displayed step, and `check_reading` still regenerates the reading.
 
 | Rule | Recognized from | Sentence | Gap |
 |---|---|---|---|
-| `instance-facts` | A frame that is a typeclass side condition (below), grouped per parent after the mathematical premises | "Standard instance fact(s) used: S₁; S₂." listing the root statements; the detail lists every absorbed frame and head. Non-instance premises of an instance derivation stay visible as children. | Yes |
+| `instance-facts` | A frame that is a typeclass side condition (below), grouped per parent after the mathematical premises | "Standard instance fact(s) used: S₁; S₂." listing the root statements; the detail lists every absorbed frame and head. Non-instance premises of an instance derivation (a project lemma, a local fact) stay visible as children, and then the step reads "Instance fact(s) used, derived using the premise(s) below: S." instead of "Standard". | Yes |
 | `instance-assumptions` | A hypothesis whose binder is Lean's automatic instance name (`inst`, `inst_2`, `inst✝¹`) and whose statement is a plain proposition | "Instance assumption(s) used: S." | No |
 | `automation` | An application whose head is in `Mathlib.Meta.NormNum.`, `Mathlib.Meta.Positivity.` or `Mathlib.Tactic.Linarith.` | "Numerical evaluation (norm_num) verifies this", "Sign analysis (positivity) proves this", "Linear arithmetic (linarith) proves this" or, for a conclusion False, "derives a contradiction"; each ends "the computation/certificate is not expanded" | Yes |
-| `rewrite` | A frontier rewrite without a polynomial certificate | `Eq.mpr`: rewrite the goal to an equal proposition and prove that; `Eq.mp`: obtain this by rewriting another proposition; `of_eq_true`: simplification reduces this to True; `congrArg`, `congrFun`, `congrFun'`, `congr`: congruence from equations that are not expanded | Yes |
+| `rewrite` | A frontier rewrite without a polynomial certificate | `Eq.mpr`: rewrite the goal to an equal proposition and prove that; `Eq.mp`: obtain this by rewriting another proposition; `of_eq_true`: this proposition is proved equal to True (no tactic is named: the frontier does not record one); `congrArg`, `congrFun`, `congrFun'`, `congr`: congruence from equations that are not expanded | Yes |
 | `citation`, `project-citation` | Any other application or constant with a head; `project-citation` when the head is in `OAI.` | "By X:" or "By the project lemma X:" (or "project instance" for an `instX` name), with the conclusion and premises below. `X._simp_n` reads "By X (in the equational form generated for simp):"; `X._proof_n` reads "By an auxiliary proof that Lean extracted while elaborating X:". `Subtype.property` names the element. | Yes |
 | `transport` | `cast` with exactly two objects α, β and premises at argument slots 2 and 3, where the premises print as `α = β` (one outer `=`) and α, and the conclusion prints as β | "From α, obtain β by rewriting with the equation of propositions below." | No |
 | `choose-element` | `Nonempty.casesOn` with exact argument paths, a premise printed `Nonempty α`, a binder over α and a body proving the same printed statement (constant motive) | "Since Nonempty α, choose a ∈ α." | No |
 | `unpack-conjunction` (named) | An existing exact `And.casesOn` destructuring whose major premise is a hypothesis printed as the two displayed parts joined by ∧ with the right precedence | "From h, obtain a: A and b: B." A part destructured again in the same way, and used nowhere else, is replaced by its own parts: "From h, obtain a: A, c: C and d: D." | No |
 | `unchecked-projection` | `And.left`/`And.right` with exact argument paths whose conclusion is the recorded component, but whose premise is printed differently (for example `s ∈ Set.Ioc 0 1`) | "Take the first conjunct, P, of the premise below; its second conjunct is Q. That the premise has this form is not checked here." | Yes |
-| `substitution` | `Eq.ndrec` or `Eq.rec` with proof arguments at slots 3 and 5 | "Rewrite the statement proved below along the equation a = b; which occurrences are rewritten is not displayed." | Yes |
+| `substitution` | `Eq.ndrec` or `Eq.rec` with proof arguments at slots 3 and 5 | "Rewrite the statement proved below along the equation a = b; which occurrences are rewritten is not displayed." The equation is the recorded statement of the slot-5 premise, not the objects a and b joined by `=` (that would misread an a such as `fun x => t`). Further object arguments are named ("then specialize the result to x"), and further premises are mentioned. | Yes |
 | `restatement` | `id` with one type argument and one proof printed differently | "Restate this in the definitionally equal form proved below; the unfolding is not expanded." | Yes |
 | `witness` (named goal) | `Exists.intro` with three objects whose goal is printed as a definition rather than `∃` | "Provide the witness w; the property it must satisfy is proved below. That the goal unfolds to an existential statement is not checked here." | Yes |
 | `have` (anonymous) | A `have` whose binder is `this` or `this_n` | "Establish S." without "call this fact this"; a later use of that hypothesis reads "Use the fact S established above." only when the nearest enclosing binder of that name is that `have` | No |
@@ -126,8 +128,8 @@ unchanged; the Bézout reading is reproduced exactly.
 |---|---:|---|
 | `project-citation` | 2,068 | A project lemma cited without its own proof in this reading |
 | `citation` | 1,440 | A library or other non-project constant cited without proof |
-| `instance-facts` | 522 | Library typeclass instances (2,132 frames) |
-| `rewrite` | 346 | Rewrites and simplifications whose equations are not exported |
+| `instance-facts` | 522 | Typeclass instance derivations (2,132 frames); 50 of these steps rest on a visible premise such as a project lemma |
+| `rewrite` | 346 | Rewrites whose equations are not exported (including 30 `of_eq_true` frontiers) |
 | `automation` | 260 | norm_num, positivity and linarith certificates (1,723 frames) |
 | `unchecked-projection` | 224 | A conjunct of a premise printed in unfolded form |
 | `restatement` | 124 | Definitional restatements |
@@ -145,9 +147,13 @@ dictionary sentence.
 
 - `check_reading` still requires byte-identical regeneration of the reading
   binding. The one exception: a saved reading labelled `source-math-en/0.4.2`
-  (the only entry in `EARLIER_PRINTERS`) is accepted when regeneration is
-  identical except for that label. The retained native Bézout companion reading
-  depends on this; 0.5.0 reproduces its text exactly.
+  (the only label in `EARLIER_PRINTERS`) is accepted when regeneration is
+  identical except for that label, and only for the two snapshots listed with
+  it: the Bézout demo snapshot (`dad8ef23…`) and the native companion snapshot
+  (`e93e0455…`), whose retained 0.4.2 readings 0.5.0 reproduces exactly. The
+  companion, source-text and source-equation builds depend on this. For any
+  other snapshot the 0.4.2 label is refused even when the text is identical,
+  because no retained 0.4.2 reading of that snapshot shows the label to be true.
 - Frames absorbed into a grouped step add their heads to the reading's
   dependency list. Earlier versions listed only the first frame's head of a
   multi-frame step.

@@ -21,10 +21,11 @@ from .polynomial import certify, verify as verify_polynomial, certificate_text
 
 SCHEMA = 'proofreader.narrative/v1'
 PRINTER_VERSION = 'source-math-en/0.5.0'
-# Earlier labels of this renderer. check_reading accepts a saved reading that
-# carries one only if regeneration is otherwise identical: the retained native
-# Bézout companion reading (0.4.2) is reproduced exactly by 0.5.0.
-EARLIER_PRINTERS = ('source-math-en/0.4.2',)
+# Earlier labels, each with the only snapshots whose retained reading under it
+# this renderer reproduces exactly (the Bézout demo and native companion).
+EARLIER_PRINTERS = {'source-math-en/0.4.2': frozenset({
+    'dad8ef23a231904f37b73979f8284ea3662ffe8f8cd30c79066856f2095b4dd7',
+    'e93e0455259fc3283983f3a47f956cdac4b1a28869bc5027bcc694b4a124d8d0'})}
 ROLES = {'introduce','assume','have','define','witness','choose','cases','combine','chain',
          'reflexivity','cancel','identity','given','named','application','ring','rewrite','unexpanded','induction','congruence','local-application','specialize'}
 _HEAD_ROLES = {'Exists.intro':'witness','Exists.casesOn':'choose','Exists.elim':'choose',
@@ -84,7 +85,7 @@ _NUMERAL_CASTS = {'Nat.cast_zero','Nat.cast_one'}
 _REWRITE_TEXT = {
     'Eq.mpr': 'Rewrite the goal to an equal proposition and prove that instead; neither the rewriting equation nor that proof is expanded.',
     'Eq.mp': 'Obtain this by rewriting another proposition into it; neither the rewriting equation nor the earlier proof is expanded.',
-    'of_eq_true': 'Simplification reduces this proposition to True; the simplification steps are not expanded.',
+    'of_eq_true': 'This proposition is proved equal to True; that equation is not expanded.',
     'congrArg': 'Apply the same function to both sides of an equation that is not expanded.',
     'congrFun': 'Evaluate both sides of an equation between functions at the same argument; that equation is not expanded.',
     "congrFun'": 'This equation follows by congruence from an equation that is not expanded.',
@@ -555,11 +556,14 @@ class Narrative:
         return covered, visible
 
     def instance_step(self, roots: list[int]) -> Step:
-        """One displayed line for a parent's typeclass side conditions, in recorded order."""
+        """One line for a parent's typeclass side conditions; not "Standard" if a premise stays visible."""
         covered, visible = self.instance_parts(roots)
         assumed = all(self.frames[r]['role'] == 'given' for r in roots)
         facts = list(dict.fromkeys(math_text(self.frames[r]['statement']) for r in roots))
-        label = ('Instance assumption' if assumed else 'Standard instance fact')+('s' if len(facts) > 1 else '')+' used: '
+        plural = 's' if len(facts) > 1 else ''
+        label = ('Instance assumption'+plural+' used: ' if assumed else
+                 'Instance fact'+plural+' used, derived using the premise'+('s' if len(visible) > 1 else '')+' below: ' if visible else
+                 'Standard instance fact'+plural+' used: ')
         lines = [math_text(self.frames[j]['statement'])+' — '+(self.frames[j]['head'] or
                  ('hypothesis '+_name(self.frames[j]['binder']) if self.frames[j]['role'] == 'given' else 'for each '+_name(self.frames[j]['binder'])))
                  for j in covered]
@@ -882,12 +886,15 @@ class Narrative:
                 step = self.step(i, text, rule='choose-element', children=self.sequence(ch[0]), covered=[i, intro['id']])
                 return [step] + self.sequence(body)
         # Eq.ndrec/Eq.rec {α} {a} {motive} (m : motive a) {b} (h : a = b) …: the
-        # motive is not displayed, so the substitution stays an explicit gap.
+        # motive is not displayed, so this stays a gap. The equation is h's own
+        # statement: joining a and b with = misreads a = fun x => t.
         if (role == 'application' and f['head'] in {'Eq.ndrec', 'Eq.rec'} and len(f['objects']) >= 4
                 and [p['argument'] for p in f['premises']][:2] == [3, 5]):
-            text = ('Rewrite the statement proved below along the equation ' + math_text(f['objects'][1]) + ' = '
-                    + math_text(f['objects'][3]) + (', then apply the result to the further premises below' if len(f['premises']) > 2 else '')
-                    + '; which occurrences are rewritten is not displayed.')
+            extra = ', '.join(math_text(v) for v in f['objects'][4:]); more = len(f['premises']) > 2
+            then = ((', then specialize the result to '+extra+(' and apply it to the further premises below' if more else ''))
+                    if extra else ', then apply the result to the further premises below' if more else '')
+            text = ('Rewrite the statement proved below along the equation ' + math_text(f['premises'][1]['statement'])
+                    + then + '; which occurrences are rewritten is not displayed.')
             return [self.step(i, text, rule='substitution', conclusion=con, fallback=True, children=self.subproofs(ch))]
         # id has exactly one type argument and one proof argument here. Other,
         # oversaturated identity applications retain the existing explicit gap.
@@ -1113,9 +1120,10 @@ def check_reading(record: dict, document: Document) -> None:
     require(len(document.declarations)==1, 'Expected one reading')
     d=document.declarations[0]
     expected=Narrative(record).document(source=d.source,file=d.file)
-    # Only the version label may differ, and only to a listed earlier label.
-    if d.axes.get('printer_version') in EARLIER_PRINTERS:
-        expected.declarations[0].axes['printer_version']=d.axes['printer_version']
+    # Only the label may differ: to a listed earlier label, for a listed snapshot.
+    label=d.axes.get('printer_version'); e=expected.declarations[0].axes
+    if isinstance(label,str) and e['snapshot_sha256'] in EARLIER_PRINTERS.get(label,()):
+        e['printer_version']=label
     require(reading_binding(expected)==reading_binding(document), 'Reading differs from deterministic regeneration')
 
 
