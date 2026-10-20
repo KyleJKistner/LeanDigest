@@ -37,23 +37,28 @@
   const linkTarget = name => {const v=linkEntry(name);return v && (v.status==="reading" || v.status==="source") && typeof v.href==="string" && SAFE_HREF.test(v.href) ? v : null;};
   const linkTitle = v => v.status==="reading" ? `Proof reading of this exact Lean name (${v.module}). Navigation only; the citation itself is not checked here.` : `Declaration at line ${v.line} of ${v.module}: exact bundled source, not an English explanation.`;
   const unresolvedTitle = name => {const v=linkEntry(name);return v ? "Unresolved citation. "+(UNRESOLVED[v.reason] || "No link target is recorded.") : links ? "The attached citation links record nothing for this name." : "No citation link data is attached to this reading.";};
-  function citation(name, cls="citation") {
+  function citation(name, cls="citation", label=name) {
     const v=linkTarget(name);
-    if(!v){const span=text("span",name,cls+" unresolved");span.title=unresolvedTitle(name);return span;}
-    const a=text("a",name,cls+" citation-"+v.status);a.href=v.href;a.title=linkTitle(v);a.dataset.citation=name;return a;
+    if(!v){const span=text("span",label,cls+" unresolved");span.title=unresolvedTitle(name);return span;}
+    const a=text("a",label,cls+" citation-"+v.status);a.href=v.href;a.title=(label===name?"":name+" · ")+linkTitle(v);a.dataset.citation=name;return a;
   }
+  // Shown (namespace-shortened) forms of cited names, recorded in the checked reading.
+  const shownNames = () => (current?.axes?.notation?.names && typeof current.axes.notation.names==="object") ? current.axes.notation.names : {};
   const NAME_CHAR = /[\p{L}\p{N}_'!?]/u;
-  function linkedText(node, value, names) {
-    // Link whole-name occurrences of resolved citations; every other character stays text.
+  function linkedText(node, value, names, shown={}) {
+    // Link whole-name occurrences of resolved citations (full or shown form); every other character stays text.
     const s=String(value ?? ""), hits=[];
+    const find=word=>{let i=s.indexOf(word);
+      while(i>=0 && ((i>0 && (NAME_CHAR.test(s[i-1]) || s[i-1]===".")) || NAME_CHAR.test(s[i+word.length] || "") || (s[i+word.length]==="." && NAME_CHAR.test(s[i+word.length+1] || ""))))i=s.indexOf(word,i+1);
+      return i;};
     for(const name of new Set((names || []).filter(linkTarget))) {
-      let i=s.indexOf(name);
-      while(i>=0 && ((i>0 && (NAME_CHAR.test(s[i-1]) || s[i-1]===".")) || NAME_CHAR.test(s[i+name.length] || "") || (s[i+name.length]==="." && NAME_CHAR.test(s[i+name.length+1] || ""))))i=s.indexOf(name,i+1);
-      if(i>=0)hits.push([i,name]);
+      let word=name, i=find(name);
+      if(i<0 && typeof shown[name]==="string" && shown[name]){word=shown[name];i=find(word);}
+      if(i>=0)hits.push([i,name,word]);
     }
     hits.sort((a,b)=>a[0]-b[0]);
     let at=0;const placed=new Set();
-    for(const [i,name] of hits){if(i<at)continue;node.append(document.createTextNode(s.slice(at,i)),citation(name));at=i+name.length;placed.add(name);}
+    for(const [i,name,word] of hits){if(i<at)continue;node.append(document.createTextNode(s.slice(at,i)),citation(name,"citation",word));at=i+word.length;placed.add(name);}
     node.append(document.createTextNode(s.slice(at)));
     return placed;
   }
@@ -159,7 +164,7 @@
     const root=text("div","","step"+(s.fallback?" fallback":""));root.dataset.stepId=s.id;root.dataset.stepNumber=num;
     const head=text("div","","step-header");head.append(text("span",num,"step-number"));
     const title=text("span","","step-title"+(s.text.length>240?" long":""));head.append(title);
-    const placed=linkedText(title,s.text,s.references);
+    const placed=linkedText(title,s.text,s.references,shownNames());
     const inspect=text("button",s.span?`L${s.span.line}`:"Inspect","step-inspect");inspect.setAttribute("aria-label",`Inspect step ${num}`);inspect.addEventListener("click",()=>inspectStep(s,{focus:true}));head.append(inspect);root.append(head);
     const unplaced=(s.references||[]).filter(n=>linkTarget(n) && !placed.has(n));
     if(unplaced.length){const row=text("div","Cites ","step-citations");unplaced.forEach(n=>row.append(citation(n)));root.append(row);}

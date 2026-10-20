@@ -586,7 +586,14 @@ def attach(document: Any, r: Reading) -> None:
     """
     d = document.declarations[0]
     s = summary(r, displayed_text(d))
-    if s['omitted_namespaces'] or s['symbols']:
+    # Shown forms of cited names, so the reader page can link a shortened citation.
+    stack, cited = list(d.steps), set()
+    while stack:
+        step = stack.pop(); cited.update(step.references); stack.extend(step.children)
+    names = {full: r.names[full] for full in sorted(cited) if r.names.get(full, full) != full}
+    if names:
+        s['names'] = names
+    if s['omitted_namespaces'] or s['symbols'] or names:
         d.axes['notation'] = s
         d.warnings.append(LEGEND_TITLE+' '+' '.join(_entries(s)))
 

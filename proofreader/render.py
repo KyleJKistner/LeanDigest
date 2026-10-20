@@ -83,7 +83,7 @@ def write_html(document: Document, destination: Path | str, coverage: dict | Non
 def markdown_document(document: Document) -> str:
     out = [f"# {document.title}", "", "Evidence-labelled reading view. Source outlines are not checked English proofs.", ""]
     for d in document.declarations:
-        out += [f"## {d.name}", "", f"Evidence: `{d.evidence}`. English fidelity: **not certified**.", "", "### Statement", "", "```lean", d.statement, "```", ""]
+        out += [f"## {d.name}", "", f"Evidence: `{d.evidence}`. English fidelity: **not certified**.", "", "### Statement", "", "```text", d.statement, "```", ""]
         if d.parameters:
             out += ["Parameters: " + "; ".join(p.get("text") or f"`{p['names']} : {p['type']}`" for p in d.parameters), ""]
         for warning in d.warnings: out += [f"> {warning}", ""]

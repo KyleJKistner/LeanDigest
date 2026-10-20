@@ -67,6 +67,7 @@ does not contain it. The PR #8 branch still holds its own copy.
 | --- | --- |
 | `ci.yml` | Python, browser and native Lean tests on every push and pull request. It runs `tests/test_artifact_budget.py`. |
 | `reading-kpis.yml` | Re-renders the 492-snapshot corpus and fails when `benchmarks/reading-kpis/current.json` is stale. |
+| `dependency-cone.yml` | Bounded native pilot (8 environment modules, 151 cited lemmas) for level-1 dependency-cone readings, triggered by pushes to `claude/keen-archimedes-ihorkq` that change the workflow or `benchmarks/dependency-cone/**`; full scopes by dispatch. See docs/DEPENDENCY_CONE.md. |
 | `all-findings-release.yml`, `breadth-release.yml` | A push to `main` that touches `proofreader/**`, `lean/**` or other listed paths rebuilds the 0.4.0 and 0.4.1 catalogs from frozen inputs and runs the browser audit. Recorded `main` runs: 39070872779 and 39079463266 for the first, 39079463255 for the second. Their publish steps exit successfully without uploading because both tags exist. README.md and docs/ALL_FINDINGS.md name the first file. Their inputs expire; see docs/REPOSITORY_STATE.md. |
 | `acceptance.yml` | General native pinned-slice acceptance with no hard-coded run inputs. Its push trigger names `work/realization-v0.4`, the head of merged PR #1; otherwise it runs only when dispatched. |
 | `development-runtime.yml` | Dispatchable packaging of the pinned Lean 4.34.1 runtime, with no hard-coded inputs. Kept for sessions without a local Lean toolchain. |

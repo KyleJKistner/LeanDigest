@@ -54,7 +54,9 @@
         "tests/test_browser.py",
         "proofreader/narrative.py",
         "proofreader/polynomial.py",
-        "docs/NARRATIVE.md"
+        "docs/NARRATIVE.md",
+        "proofreader/formula_surface.py",
+        "proofreader/notation.py"
       ],
       "allowed_paths": [
         "proofreader/english.py",
@@ -67,7 +69,9 @@
         "tests/reader/",
         "proofreader/narrative.py",
         "proofreader/polynomial.py",
-        "tests/test_narrative.py"
+        "tests/test_narrative.py",
+        "proofreader/formula_surface.py",
+        "proofreader/notation.py"
       ],
       "acceptance": [
         "python -m pytest tests/test_kernel.py tests/test_normalization.py tests/test_browser.py tests/test_render_cli.py -q",

@@ -354,7 +354,9 @@ def test_citations_render_as_links_in_the_document_harness(page):
     page.locator('#expand-btn').click()
     reading = page.locator('#proof-steps a[data-citation="OAI.Beta.target"]')
     assert reading.count() == 1 and reading.get_attribute('href') == f'../{ident(BETA)}/reader.html'
-    assert reading.inner_text() == 'OAI.Beta.target' and 'citation-reading' in reading.get_attribute('class')
+    # The sentence shows the namespace-shortened name; the link keeps the full Lean name.
+    assert reading.inner_text() == 'Beta.target' and 'citation-reading' in reading.get_attribute('class')
+    assert reading.get_attribute('title').startswith('OAI.Beta.target · ')
     source = page.locator('#proof-steps a[data-citation="OAI.Alpha.helper"]')
     assert source.get_attribute('href') == f'../../sources/{source_name(ALPHA)}#L5'
     # Unresolved names remain plain text with the recorded reason.

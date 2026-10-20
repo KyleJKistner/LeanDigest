@@ -114,7 +114,8 @@ def test_instance_assumptions_are_grouped_but_remain_hypotheses():
     n, d = rendered(real('instance_assumption'))
     step = next(s for s in walk_steps(d.declarations[0].steps) if s.rule == 'instance-assumptions')
     assert not step.fallback
-    assert step.text == 'Instance assumption used: MeasureTheory.IsProbabilityMeasure ν.'
+    # The notation layer omits the opened MeasureTheory namespace in the display.
+    assert step.text == 'Instance assumption used: IsProbabilityMeasure ν.'
     assert 'hypothesis inst' in step.detail
 
 
@@ -185,7 +186,7 @@ def test_instance_resting_on_a_project_lemma_is_not_called_standard():
     step = owner(n, d, next(f['id'] for f in record['frames'] if f['head'] == 'inferInstance'))
     assert step.rule == 'instance-facts' and step.fallback
     assert step.text == 'Instance fact used, derived using the premise below: FiniteDimensional ℂ ↥E.'
-    assert [c.text for c in step.children] == ['By the project lemma OAI.HilbertCrouzeix.iterateSpace_finiteDimensional:']
+    assert [c.text for c in step.children] == ['By the project lemma iterateSpace_finiteDimensional:']
     assert not any(s.text.startswith('Standard') for s in walk_steps(d.declarations[0].steps))
 
 
@@ -224,7 +225,9 @@ def test_linarith_contradiction_absorbs_only_its_certificate():
     record = real('linarith')
     n, d = rendered(record)
     root = owner(n, d, 0)
-    assert root.rule == 'citation' and root.text == 'By lt_of_not_ge:'
+    # A top-level citation proving the theorem itself does not reprint the statement.
+    assert root.rule == 'citation' and root.text == 'The statement follows from lt_of_not_ge, applied to the facts below.'
+    assert root.conclusion is None
     step = next(s for s in walk_steps(d.declarations[0].steps) if s.rule == 'automation')
     assert step.text == 'Linear arithmetic (linarith) derives a contradiction; the certificate is not expanded.'
     assert step.conclusion is None
@@ -311,8 +314,10 @@ def test_citations_read_as_mathematics_and_stay_gaps():
     n, d = rendered(record)
     step = owner(n, d, 0)
     assert step.rule == 'project-citation' and step.fallback
-    assert step.text == 'By the project lemma OAI.MatchingEntropy.entropyDefect_attains_max:'
-    assert step.conclusion and step.references == ['OAI.MatchingEntropy.entropyDefect_attains_max']
+    assert step.text == 'The statement follows from the project lemma entropyDefect_attains_max, applied to the facts below.'
+    # The cited lemma's full name stays in references; its proved statement is the theorem's, shown above.
+    assert step.conclusion is None and step.references == ['OAI.MatchingEntropy.entropyDefect_attains_max']
+    assert d.declarations[0].axes['notation']['names'] == {'OAI.MatchingEntropy.entropyDefect_attains_max': 'entropyDefect_attains_max'}
     assert [c.rule for c in step.children] == ['given', 'given']
     record = real('cast_with_instances')
     n, d = rendered(record)
@@ -392,7 +397,7 @@ def test_nested_destructuring_of_a_named_hypothesis_is_one_step():
     step = d.declarations[0].steps[0]
     assert step.rule == 'unpack-conjunction' and not step.fallback and not step.children
     assert step.text == ('From h, obtain hF: F ≠ 0, hhom: MvPolynomial.IsHomogeneous F (MvPolynomial.totalDegree F) '
-                         'and hcycle: OAI.Nagata.Workers.W30.equationIdealCycle F = D.')
+                         'and hcycle: equationIdealCycle F = D.')
     assert sorted(owned(step)) == list(range(8))
 
 
@@ -448,7 +453,7 @@ def test_projection_from_an_unfolded_premise_is_labelled_unchecked():
     assert step.rule == 'unchecked-projection' and step.fallback
     assert step.text == ('Take the first conjunct, 0 < s, of the premise below; its second conjunct is s ≤ 1. '
                          'That the premise has this form is not checked here.')
-    assert [c.text for c in step.children] == ['Use the hypothesis hs: s ∈ Set.Ioc 0 1.']
+    assert [c.text for c in step.children] == ['Use the hypothesis hs: s ∈ Ioc 0 1.']
 
 
 def test_nonempty_elimination_chooses_an_element():
@@ -456,7 +461,7 @@ def test_nonempty_elimination_chooses_an_element():
     n, d = rendered(record)
     step = d.declarations[0].steps[0]
     assert step.rule == 'choose-element' and not step.fallback
-    assert step.text.startswith('Since Nonempty (OAI.PerfectCompleteness.FixedParameters.Parameters δ positive), choose parameters ∈ ')
+    assert step.text.startswith('Since Nonempty (FixedParameters.Parameters δ positive), choose parameters ∈ ')
     assert sorted(owned(step)) == [0, record['frames'][0]['children'][1]]
 
 
@@ -498,7 +503,7 @@ def test_substitution_prints_the_recorded_equation_not_joined_objects():
     n, d = rendered(record)
     step = d.declarations[0].steps[0]
     assert step.rule == 'substitution' and step.fallback
-    assert step.text.startswith('Rewrite the statement proved below along the equation (fun x => f x) = g;')
+    assert step.text.startswith('Rewrite the statement proved below along the equation (x ↦ f x) = g;')
     check_reading(record, d)
 
 
