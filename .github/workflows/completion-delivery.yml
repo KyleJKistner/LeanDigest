@@ -1,0 +1,102 @@
+name: Package original-project recovery readings
+on:
+  workflow_dispatch:
+  push:
+    branches: [work/completion-evidence-retries]
+    paths: ['.github/workflows/completion-delivery.yml']
+permissions: {contents: read, actions: read}
+jobs:
+  delivery:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+        with: {persist-credentials: false}
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: python -m pip install '.[dev,webtest]'
+      - run: python -m playwright install --with-deps chromium
+      - name: Require collection, continuation, diagnostics, status and scope regression tests
+        run: python -m pytest -q tests/test_completion_results.py tests/test_completion_resume.py tests/test_completion_sets.py tests/test_completion_diagnostics.py tests/test_original_attempts.py tests/test_completion_recovery_plan.py
+      - name: Restore the frozen original evidence, exact recovery plan and documented sources
+        env: {GH_TOKEN: '${{ github.token }}'}
+        run: |
+          gh api repos/$GITHUB_REPOSITORY/actions/artifacts/12195158110/zip > /tmp/completed.zip
+          echo '4275b3fabc03eca1a4b7daa7a30121bf6b81ef1849f36f1a3392b755ad7cb5df  /tmp/completed.zip' | sha256sum -c -
+          gh api repos/$GITHUB_REPOSITORY/actions/artifacts/12197582957/zip > /tmp/plan.zip
+          echo '8164869bdd4972b89c7481be210ab559493017cdf9c563e834f65362f36b4d6a  /tmp/plan.zip' | sha256sum -c -
+          python - <<'PY'
+          from pathlib import Path
+          from scripts.collect_original_evidence import unpack
+          unpack(Path('/tmp/completed.zip'),Path('/tmp/evidence'))
+          unpack(Path('/tmp/plan.zip'),Path('/tmp/recovery-plan'))
+          PY
+          mkdir -p /tmp/inputs/source
+          gh run download 38822475057 -R "$GITHUB_REPOSITORY" -n complete-openai-lean-source -D /tmp/inputs/source
+          gh run download 39049596449 -R "$GITHUB_REPOSITORY" -n leanglish-all-finding-observations -D /tmp/inputs/observations
+          gh run download 39050823104 -R "$GITHUB_REPOSITORY" -p 'finding-statement-retry-*' -D /tmp/inputs/statement-retries
+          python -c "from pathlib import Path;from scripts.assemble_finding_release import unpack_source;unpack_source(Path('/tmp/inputs'),Path('/tmp/original-project'))"
+      - name: Freeze the original and resumed observations under their separate execution identities
+        env: {GH_TOKEN: '${{ github.token }}'}
+        run: |
+          python scripts/collect_completion_results.py --run-id 39315174445 --expected-head 4f9c1e823dd65023cfa7d8b9afe5e08390b8d2ad --recovery /tmp/recovery-plan/recovery.json --output /tmp/completion --allow-download
+          python scripts/collect_completion_results.py --run-id 39321225048 --expected-head b717efc98e0cde96181c493b982814b2cdaa9394 --workflow-path .github/workflows/completion-resume.yml --recovery /tmp/recovery-plan/recovery.json --output /tmp/continuation --allow-download
+          python - <<'PY'
+          from pathlib import Path
+          from proofreader.original_project import write
+          write(Path('/tmp/continuations.json'),[{'root':'/tmp/continuation','run_id':39321225048,
+              'source_commit':'b717efc98e0cde96181c493b982814b2cdaa9394',
+              'workflow_path':'.github/workflows/completion-resume.yml'}])
+          PY
+      - name: Independently validate every result and generate the complete offline catalog
+        run: |
+          python scripts/assemble_completion_readings.py --evidence /tmp/evidence --completion /tmp/completion --seed /tmp/recovery-plan --inputs /tmp/inputs --source /tmp/original-project/lean --inventory /tmp/inputs/source/source-inventory.json --output /tmp/delivery --run-id 39315174445 --expected-head 4f9c1e823dd65023cfa7d8b9afe5e08390b8d2ad --continuations /tmp/continuations.json
+      - name: Report exact unresolved obligations and retained execution diagnostics
+        if: always()
+        run: python scripts/completion_diagnostics.py --collections /tmp/completion /tmp/continuation --output /tmp/delivery
+      - name: Exercise real offline file navigation and original-verification pages
+        run: |
+          python scripts/audit_finding_browser.py /tmp/delivery/site --screenshots /tmp/delivery/screenshots > /tmp/delivery/browser-audit.json
+          python scripts/audit_original_browser.py /tmp/delivery/site > /tmp/delivery/original-browser-audit.json
+      - name: Package the checked catalog without changing the published release
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          from scripts.assemble_finding_release import package
+          from proofreader.original_project import read,write
+          root=Path('/tmp/delivery')
+          result=read(root/'original-browser-audit.json');assert result['passed']
+          write(root/'site/original-browser-audit.json',result)
+          package(root)
+          PY
+          git archive --format=zip --prefix=Leanglish/ -o /tmp/delivery/dist/leanglish-application.zip HEAD
+          cp /tmp/delivery/summary.json /tmp/delivery/dist/summary.json
+          cp /tmp/delivery/site/original-verification.json /tmp/delivery/dist/
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: completion-reading-delivery
+          path: |
+            /tmp/delivery/dist/
+            /tmp/delivery/screenshots/
+            /tmp/delivery/summary.json
+            /tmp/delivery/browser-audit.json
+            /tmp/delivery/original-browser-audit.json
+            /tmp/delivery/remaining-obligations.json
+            /tmp/delivery/execution-diagnostics.json
+          retention-days: 90
+          if-no-files-found: warn
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: completion-frozen-observations
+          path: /tmp/completion/
+          retention-days: 90
+          if-no-files-found: warn
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: continuation-frozen-observations
+          path: /tmp/continuation/
+          retention-days: 90
+          if-no-files-found: warn

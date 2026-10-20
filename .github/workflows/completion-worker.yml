@@ -1,0 +1,108 @@
+name: One original-project recovery worker
+on:
+  workflow_call:
+    inputs:
+      kind: {type: string, required: true}
+      id: {type: string, required: true}
+permissions: {contents: read, actions: read}
+env:
+  GLIBC_TUNABLES: glibc.malloc.mmap_max=0:glibc.malloc.arena_max=1
+jobs:
+  recover:
+    runs-on: ubuntu-latest
+    timeout-minutes: 355
+    steps:
+      - uses: actions/checkout@v4
+        with: {persist-credentials: false}
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - uses: leanprover/lean-action@v1
+        with: {lake-package-directory: lean, auto-config: false, build: false, test: false, lint: false, use-mathlib-cache: false, use-github-cache: false}
+      - uses: actions/download-artifact@v4
+        with: {name: completion-recovery-plan, path: /tmp/recovery-plan}
+      - name: Acquire unchanged original files and recorded verification binaries
+        env:
+          GH_TOKEN: ${{ github.token }}
+          WORKER_KIND: ${{ inputs.kind }}
+        run: |
+          mkdir -p /tmp/inputs/source
+          gh run download 38822475057 -R "$GITHUB_REPOSITORY" -n complete-openai-lean-source -D /tmp/inputs/source
+          python -c "from pathlib import Path;from scripts.assemble_finding_release import unpack_source;unpack_source(Path('/tmp/inputs'),Path('/tmp/original-project'))"
+          if [ "$WORKER_KIND" = module ]; then
+            gh api repos/$GITHUB_REPOSITORY/actions/artifacts/12152481984/zip > /tmp/tools.zip
+            echo '869b77fe322f2394edc12aa3bf9780809424e512eccce5f45982ffde619c069a  /tmp/tools.zip' | sha256sum -c -
+            python -c "from pathlib import Path;from scripts.collect_original_evidence import unpack;unpack(Path('/tmp/tools.zip'),Path('/tmp/tools'))"
+            chmod +x /tmp/tools/bin/*
+          fi
+      - uses: actions/cache/restore@v4
+        with:
+          path: /tmp/original-project/lean/.lake/packages
+          key: original-openai-deps-1581d4cb-4341-full-v1
+          fail-on-cache-miss: true
+      - name: Audit original sources and record the complete seed build inventory
+        env: {WORKER_KIND: '${{ inputs.kind }}', WORKER_ID: '${{ inputs.id }}'}
+        run: |
+          sudo sysctl -w vm.max_map_count=1048576
+          nproc; free -b; df -h /tmp
+          python scripts/run_completion_worker.py initialize --kind "$WORKER_KIND" --id "$WORKER_ID" --seed /tmp/recovery-plan --project /tmp/original-project/lean --state /tmp/resume-state --output /tmp/worker --trust-project
+      - name: First bounded compilation stage
+        id: first
+        env: {WORKER_KIND: '${{ inputs.kind }}', WORKER_ID: '${{ inputs.id }}'}
+        run: python scripts/run_completion_worker.py round --kind "$WORKER_KIND" --id "$WORKER_ID" --seed /tmp/recovery-plan --project /tmp/original-project/lean --state /tmp/resume-state --output /tmp/worker --round 1 --seconds 600 --trust-project
+      - name: Preserve the first compilation checkpoint
+        env: {WORKER_KIND: '${{ inputs.kind }}', WORKER_ID: '${{ inputs.id }}'}
+        run: python scripts/run_completion_worker.py pack --kind "$WORKER_KIND" --id "$WORKER_ID" --seed /tmp/recovery-plan --project /tmp/original-project/lean --state /tmp/resume-state --output /tmp/worker --round 1 --trust-project
+      - uses: actions/upload-artifact@v4
+        with: {name: 'checkpoint-${{ inputs.id }}-1', path: /tmp/worker/checkpoint-1/, compression-level: 0, retention-days: 14, if-no-files-found: error}
+      - name: Continue compilation from the existing build cache
+        if: steps.first.outputs.status == 'timeout'
+        id: second
+        env: {WORKER_KIND: '${{ inputs.kind }}', WORKER_ID: '${{ inputs.id }}'}
+        run: python scripts/run_completion_worker.py round --kind "$WORKER_KIND" --id "$WORKER_ID" --seed /tmp/recovery-plan --project /tmp/original-project/lean --state /tmp/resume-state --output /tmp/worker --round 2 --seconds 1800 --trust-project
+      - name: Preserve the second compilation checkpoint
+        if: steps.first.outputs.status == 'timeout'
+        env: {WORKER_KIND: '${{ inputs.kind }}', WORKER_ID: '${{ inputs.id }}'}
+        run: python scripts/run_completion_worker.py pack --kind "$WORKER_KIND" --id "$WORKER_ID" --seed /tmp/recovery-plan --project /tmp/original-project/lean --state /tmp/resume-state --output /tmp/worker --round 2 --trust-project
+      - uses: actions/upload-artifact@v4
+        if: steps.first.outputs.status == 'timeout'
+        with: {name: 'checkpoint-${{ inputs.id }}-2', path: /tmp/worker/checkpoint-2/, compression-level: 0, retention-days: 14, if-no-files-found: error}
+      - name: Third bounded compilation stage
+        if: steps.second.outputs.status == 'timeout'
+        id: third
+        env: {WORKER_KIND: '${{ inputs.kind }}', WORKER_ID: '${{ inputs.id }}'}
+        run: python scripts/run_completion_worker.py round --kind "$WORKER_KIND" --id "$WORKER_ID" --seed /tmp/recovery-plan --project /tmp/original-project/lean --state /tmp/resume-state --output /tmp/worker --round 3 --seconds 1800 --trust-project
+      - name: Preserve the third compilation checkpoint
+        if: steps.second.outputs.status == 'timeout'
+        env: {WORKER_KIND: '${{ inputs.kind }}', WORKER_ID: '${{ inputs.id }}'}
+        run: python scripts/run_completion_worker.py pack --kind "$WORKER_KIND" --id "$WORKER_ID" --seed /tmp/recovery-plan --project /tmp/original-project/lean --state /tmp/resume-state --output /tmp/worker --round 3 --trust-project
+      - uses: actions/upload-artifact@v4
+        if: steps.second.outputs.status == 'timeout'
+        with: {name: 'checkpoint-${{ inputs.id }}-3', path: /tmp/worker/checkpoint-3/, compression-level: 0, retention-days: 14, if-no-files-found: error}
+      - name: Fourth bounded compilation stage
+        if: steps.third.outputs.status == 'timeout'
+        id: fourth
+        env: {WORKER_KIND: '${{ inputs.kind }}', WORKER_ID: '${{ inputs.id }}'}
+        run: python scripts/run_completion_worker.py round --kind "$WORKER_KIND" --id "$WORKER_ID" --seed /tmp/recovery-plan --project /tmp/original-project/lean --state /tmp/resume-state --output /tmp/worker --round 4 --seconds 1800 --trust-project
+      - name: Preserve the fourth compilation checkpoint
+        if: steps.third.outputs.status == 'timeout'
+        env: {WORKER_KIND: '${{ inputs.kind }}', WORKER_ID: '${{ inputs.id }}'}
+        run: python scripts/run_completion_worker.py pack --kind "$WORKER_KIND" --id "$WORKER_ID" --seed /tmp/recovery-plan --project /tmp/original-project/lean --state /tmp/resume-state --output /tmp/worker --round 4 --trust-project
+      - uses: actions/upload-artifact@v4
+        if: steps.third.outputs.status == 'timeout'
+        with: {name: 'checkpoint-${{ inputs.id }}-4', path: /tmp/worker/checkpoint-4/, compression-level: 0, retention-days: 14, if-no-files-found: error}
+      - name: Execute original final verification, never substitute cache existence
+        env: {WORKER_KIND: '${{ inputs.kind }}', WORKER_ID: '${{ inputs.id }}'}
+        run: python scripts/run_completion_worker.py verify --kind "$WORKER_KIND" --id "$WORKER_ID" --seed /tmp/recovery-plan --project /tmp/original-project/lean --state /tmp/resume-state --output /tmp/worker --tools /tmp/tools --trust-project
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: completion-result-${{ inputs.id }}
+          path: |
+            /tmp/worker/identity.json
+            /tmp/worker/final-status.json
+            /tmp/worker/round-*/
+            /tmp/worker/proofs/
+            /tmp/worker/comparisons/
+            /tmp/worker/library/
+          retention-days: 90
+          if-no-files-found: warn

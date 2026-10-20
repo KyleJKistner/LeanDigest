@@ -1,0 +1,25 @@
+name: Validate original build checkpointing
+on:
+  workflow_dispatch:
+  push:
+    branches: [work/completion-evidence-retries]
+    paths: ['proofreader/build_resume.py','scripts/build_resume.py','tests/test_build_resume.py','.github/workflows/build-resume-validation.yml']
+permissions: {contents: read}
+jobs:
+  checkpoint:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with: {persist-credentials: false}
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - uses: leanprover/lean-action@v1
+        with: {lake-package-directory: lean, auto-config: false, build: false, test: false, lint: false, use-mathlib-cache: false, use-github-cache: false}
+      - run: python -m pip install '.[dev]'
+      - name: Native build/restore/rebuild, timeout retention, and adversarial archive controls
+        env: {PROOFREADER_REQUIRE_LEAN: '1'}
+        run: python -m pytest -q tests/test_build_resume.py --junitxml=/tmp/checkpoint-tests.xml
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with: {name: checkpoint-test-results, path: /tmp/checkpoint-tests.xml, if-no-files-found: error}
