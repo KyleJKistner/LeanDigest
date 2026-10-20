@@ -43,9 +43,10 @@ def test_existing_proof_wrapper_is_not_silently_replaced(tmp_path):
 
 
 def test_unplanned_or_duplicate_modules_are_rejected(tmp_path):
-    args=list(case(tmp_path));args[4]=['not-in-plan']
+    args=list(case(tmp_path));requested=list(args[4])
+    args[4]=['not-in-plan']
     with pytest.raises(ValueError):run(args)
-    args=list(case(tmp_path));args[4]*=2
+    args[4]=requested*2
     with pytest.raises(ValueError):run(args)
 
 
