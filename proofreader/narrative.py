@@ -21,9 +21,10 @@ from .polynomial import certify, verify as verify_polynomial, certificate_text
 from .formula_surface import (_same_formula, _plain_proposition, _joins_conjunction, _equation_sides, _binary_formula, _negated_operand, _negation_formula, _implication_formula)
 from . import notation
 from . import glossary as _glossary
+from .narrative_rules import ReadingRules
 
 SCHEMA = 'proofreader.narrative/v1'
-PRINTER_VERSION = 'source-math-en/0.5.0'
+PRINTER_VERSION = 'source-math-en/0.6.0'
 # Earlier labels, each with the only snapshots whose retained reading under it
 # this renderer reproduces exactly (the Bézout demo and native companion).
 EARLIER_PRINTERS = {'source-math-en/0.4.2': frozenset({
@@ -297,7 +298,7 @@ def _citation(head: str) -> tuple[str,str]:
 
 
 
-class Narrative:
+class Narrative(ReadingRules):
     def __init__(self, record: dict, glossary: str | _glossary.Selection = _glossary.DEFAULT):
         self.snapshot = Snapshot(record)
         # Reviewed glosses only, unless a reviewer opts in to the marked preview.
@@ -390,14 +391,19 @@ class Narrative:
         assumed = all(self.frames[r]['role'] == 'given' for r in roots)
         facts = list(dict.fromkeys(math_text(self.frames[r]['statement']) for r in roots))
         plural = 's' if len(facts) > 1 else ''
+        # A derivation through a local instance hypothesis is not called standard.
+        local = [] if assumed else self.local_instances(covered)
         label = ('Instance assumption'+plural+' used: ' if assumed else
                  'Instance fact'+plural+' used, derived using the premise'+('s' if len(visible) > 1 else '')+' below: ' if visible else
+                 'Instance fact'+plural+' used: ' if local else
                  'Standard instance fact'+plural+' used: ')
+        note = (' The derivation '+('also ' if visible else '')+'uses the local instance hypothes'+('es ' if len(local) > 1 else 'is ')
+                +'; '.join(local)+'.' if local else '')
         lines = [math_text(self.frames[j]['statement'])+' — '+(self.frames[j]['head'] or
                  ('hypothesis '+_name(self.frames[j]['binder']) if self.frames[j]['role'] == 'given' else 'for each '+_name(self.frames[j]['binder'])))
                  for j in covered]
         heads = list(dict.fromkeys(self.frames[j]['head'] for j in covered if self.frames[j]['head']))
-        return self.step(roots[0], label+'; '.join(facts)+'.', rule='instance-assumptions' if assumed else 'instance-facts',
+        return self.step(roots[0], label+'; '.join(facts)+'.'+note, rule='instance-assumptions' if assumed else 'instance-facts',
                          covered=covered, fallback=not assumed, references=heads,
                          children=[s for j in visible for s in self.sequence(j)],
                          detail='Typeclass derivations (not expanded):\n'+'\n'.join(lines))
@@ -507,11 +513,11 @@ class Narrative:
         a,ai = self.flat_conjunction(f['children'][0]);b,bi = self.flat_conjunction(f['children'][1])
         return a+b,[i]+ai+bi
 
-    def logical_application(self, i: int, object_count: int, premise_slots: list[int]) -> bool:
+    def logical_application(self, i: int, object_count: int, premise_slots: list[int], role: str = 'application') -> bool:
         """Recognize a fully applied rule at the exact original argument paths."""
         f = self.frames[i]
         arity = object_count + len(premise_slots)
-        return (f['role'] == 'application' and not f['budget_cut']
+        return (f['role'] == role and not f['budget_cut']
                 and len(f['objects']) == object_count
                 and [p['argument'] for p in f['premises']] == premise_slots
                 and f['children'] == [p['frame'] for p in f['premises']]
@@ -554,8 +560,7 @@ class Narrative:
         if head in {'And.left', 'And.right'} and self.logical_application(i, 2, [2]):
             left, right = objects
             component = left if head == 'And.left' else right
-            if (_binary_formula(self.frames[ch[0]]['statement'], '∧', left, right)
-                    and _same_formula(f['statement'], component)):
+            if self.projected(self.frames[ch[0]]['statement'], left, right) and _same_formula(f['statement'], component):
                 side = 'first' if head == 'And.left' else 'second'
                 return [self.step(i, 'Take the ' + side + ' conjunct, ' + con + '.',
                                   rule='conjunction-projection', children=self.sequence(ch[0]))]
@@ -569,7 +574,7 @@ class Narrative:
                                   rule='unchecked-projection', fallback=True, children=self.sequence(ch[0]))]
         if head == 'Iff.mpr' and self.logical_application(i, 2, [2,3]):
             left, right = objects
-            if (_binary_formula(self.frames[ch[0]]['statement'], '↔', left, right)
+            if (self.equivalent(self.frames[ch[0]]['statement'], left, right)
                     and _same_formula(self.frames[ch[1]]['statement'], right)
                     and _same_formula(f['statement'], left)):
                 text = ('Use the reverse direction of ' + math_text(self.frames[ch[0]]['statement'])
@@ -655,6 +660,9 @@ class Narrative:
         if family and role == 'application':
             return [self.automation_step(i, family)]
         logical = self.logical_steps(i)
+        if logical is None and role in {'witness', 'choose', 'application'}:
+            logical = (self.proof_witness(i) if role == 'witness' else self.proof_cases(i) if role == 'choose'
+                       else self.applied_projection(i) or self.nonempty_element(i))
         if logical is not None:
             return logical
         if role in {'define','have'}:
@@ -871,6 +879,10 @@ class Narrative:
             text='Ring normalization (ring) proves this identity; the normalization is not expanded.'
         elif f['head']=='Subtype.property' and len(f['objects'])==3 and not ch:
             text='By the defining property of the subtype element '+math_text(f['objects'][2])+':'; rule=_citation(f['head'])[1]
+        elif f['head']=='Nonempty.intro' and len(f['objects'])==2 and not ch:
+            # Still a counted gap: the element is shown, its construction is not.
+            text=('Exhibit the element '+math_text(f['objects'][1])+' of '+math_text(f['objects'][0])
+                  +'; its construction is not expanded here.'); rule=_citation(f['head'])[1]
         elif role in {'application','named'} and f['head']:
             # A cited constant: its own proof is outside this reading. The rule
             # tag keeps these countable whatever the sentence says.
@@ -915,7 +927,7 @@ class Narrative:
             i=f['children'][0]
         for j in prefix:
             self.owners[j]='statement'
-        steps=self.sequence(i)
+        steps=self.grouped(self.sequence(i))
         require(set(self.owners)==set(range(len(self.frames))), 'Display omitted an exported frame')
         statement=math_text(self.frames[i]['statement'])
         for st in steps:
@@ -975,7 +987,10 @@ def prose(document: Document) -> str:
          '',*notation.legend(d),*(p['text'] for p in d.parameters),'Then '+d.statement+'.','','Proof.']
     def emit(steps,depth=0):
         for s in steps:
-            out.append('  '*depth+('[Explanation gap] ' if s.fallback else '')+s.text)
+            first,*rest=s.text.split('\n')
+            out.append('  '*depth+('[Explanation gap] ' if s.fallback else '')+first)
+            # Later lines of a multi-line sentence stay inside the step's nesting level.
+            out.extend('  '*(depth+1)+line for line in rest)
             if s.conclusion:
                 out.extend('  '*(depth+1)+line for line in s.conclusion.split('\n'))
             emit(s.children,depth+1)

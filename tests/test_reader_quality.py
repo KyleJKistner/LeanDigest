@@ -1,4 +1,4 @@
-"""Reader-quality rules added in source-math-en/0.5.0.
+"""Reader-quality rules added in source-math-en/0.5.0 and 0.6.0.
 
 Fixtures in tests/fixtures/reader_quality.json are subtrees of real retained
 snapshots from the pinned 492-snapshot corpus; each records its source
@@ -124,7 +124,10 @@ def test_instance_family_binder_is_absorbed_with_its_body():
     n, d = rendered(record)
     family = next(f['id'] for f in record['frames'] if f['role'] == 'introduce')
     step = owner(n, d, family)
-    assert step.rule == 'instance-facts' and step.text == 'Standard instance fact used: Nonempty (ℕ → ι).'
+    # The family is built from a local instance hypothesis, so it is not called standard.
+    assert step.rule == 'instance-facts' and step.fallback
+    assert step.text == ('Instance fact used: Nonempty (ℕ → ι). '
+                         'The derivation uses the local instance hypothesis inst_1: Nonempty ι.')
     assert owner(n, d, 0).rule == 'citation'
 
 
@@ -132,7 +135,7 @@ def test_instance_family_binder_is_absorbed_with_its_body():
     # Real frames: a named hypothesis with a class statement, a structure
     # projection resting on a theorem-level premise, a project lemma whose name
     # starts with "inst", and a constructor of a class.
-    ('project_citation', None, 'given'),
+    ('project_citation', None, 'hypotheses'),
     ('ergodic_projection', 'Ergodic.toMeasurePreserving', 'citation'),
     ('instance_named_project_lemma', 'OAI.UniformSparsestCut.SourceUniform.instance_exists', 'project-citation'),
     ('nonempty_intro', 'Nonempty.intro', 'citation'),
@@ -142,7 +145,7 @@ def test_mathematical_frames_resembling_instances_stay_visible(name, head, rule)
     n, d = rendered(record)
     if head is None:
         frame = next(f['id'] for f in record['frames'] if f.get('binder') == 'hPM')
-        assert owner(n, d, frame).text == 'Use the hypothesis hPM: Nonempty G.Matching.'
+        assert owner(n, d, frame).text == 'Use the hypotheses heven: Even (Fintype.card V); hPM: Nonempty G.Matching.'
     else:
         frame = next(f['id'] for f in record['frames'] if f['head'] == head)
     assert owner(n, d, frame).rule == rule
@@ -203,7 +206,8 @@ def test_dictionary_instances_keep_the_certified_bezout_reading():
     n, d = rendered(record)
     steps = list(walk_steps(d.declarations[0].steps))
     assert not any(s.fallback for s in steps)
-    assert not {s.rule for s in steps} & {'instance-facts', 'instance-assumptions', 'automation', 'citation', 'project-citation'}
+    assert not {s.rule for s in steps} & {'instance-facts', 'instance-assumptions', 'automation', 'citation', 'project-citation',
+                                          'hypotheses', 'unchecked-application', 'witness-proof', 'unpack-existential'}
     assert sum(s.rule == 'polynomial-identity' for s in steps) == len(n.certificates) > 0
     assert 'R is an integral domain' in prose(d)
     assert 'x = 0 ∧ z = 0\n' in prose(d)  # the dictionary step keeps its conclusion under hxz
@@ -318,7 +322,7 @@ def test_citations_read_as_mathematics_and_stay_gaps():
     # The cited lemma's full name stays in references; its proved statement is the theorem's, shown above.
     assert step.conclusion is None and step.references == ['OAI.MatchingEntropy.entropyDefect_attains_max']
     assert d.declarations[0].axes['notation']['names'] == {'OAI.MatchingEntropy.entropyDefect_attains_max': 'entropyDefect_attains_max'}
-    assert [c.rule for c in step.children] == ['given', 'given']
+    assert [c.rule for c in step.children] == ['hypotheses']
     record = real('cast_with_instances')
     n, d = rendered(record)
     simp = owner(n, d, next(f['id'] for f in record['frames'] if f['head'] == 'Nat.cast_lt._simp_1'))
@@ -515,6 +519,341 @@ def test_witness_for_a_named_goal_is_a_labelled_gap():
     assert step.fallback and step.rule == 'witness' and step.text.startswith('Provide the witness 1 / 2;')
 
 
+# 6. Rules added in source-math-en/0.6.0.
+
+def gaps(record):
+    """Gap steps and gap frames of a rendering, the two counts a regrouping must not change."""
+    n, d = rendered(record)
+    steps = list(walk_steps(d.declarations[0].steps))
+    return sum(s.fallback for s in steps), sum(len(owned(s)) for s in steps if s.fallback), len(steps)
+
+
+def test_adjacent_hypotheses_are_one_step_in_their_original_order():
+    record = real('hypotheses_mixed')
+    n, d = rendered(record)
+    root = owner(n, d, 0)
+    assert [c.rule for c in root.children] == ['project-citation', 'hypotheses', 'project-citation', 'given']
+    group = root.children[1]
+    assert not group.fallback and owned(group) == [2, 3]
+    assert group.text == 'Use the hypotheses hv: Geometry.JointSmooth v; hc: Geometry.TimeCollars v.'
+    assert 'hv : OAI.BalancedTransport.Geometry.JointSmooth v' in group.detail
+    assert root.children[3].text == 'Use the hypothesis hd: ∀ (t : ℝ) (x : Space), div v t x = 0.'
+
+
+@pytest.mark.parametrize('name', ['hypotheses_mixed', 'project_citation', 'applied_projection', 'unpack_existential',
+                                  'unchecked_application'])
+def test_grouping_hypotheses_changes_no_gap_count(name, monkeypatch):
+    record = real(name)
+    gap_steps, gap_frames, shown = gaps(record)
+    monkeypatch.setattr(Narrative, 'grouped', lambda self, steps: steps)
+    before_steps, before_frames, before_shown = gaps(record)
+    assert (gap_steps, gap_frames) == (before_steps, before_frames)
+    assert shown < before_shown
+
+
+def test_hypothesis_groups_keep_other_premises_separate():
+    # Synthetic: a hypothesis, a cited lemma, then two hypotheses.
+    record = synthetic(app('Foo.lemma', 'P x', (1, given('h1', 'A')), (2, app('Bar.b', 'B', role='named')),
+                           (3, given('h2', 'C')), (4, given('h3', 'D')), objects=['x']))
+    n, d = rendered(record)
+    root = d.declarations[0].steps[0]
+    assert [c.text for c in root.children] == ['Use the hypothesis h1: A.', 'By Bar.b:', 'Use the hypotheses h2: C; h3: D.']
+    assert owned(root.children[2]) == [3, 4] and root.children[2].rule == 'hypotheses'
+    check_reading(record, d)
+
+
+def test_budget_cut_hypothesis_is_not_merged():
+    # Synthetic: the middle hypothesis is a budget cut, so no two mergeable lines are adjacent.
+    cut = dict(given('h2', 'B'), cut=True)
+    record = synthetic(app('Foo.lemma', 'P x', (1, given('h1', 'A')), (2, cut), (3, given('h3', 'C')), objects=['x']))
+    n, d = rendered(record)
+    children = d.declarations[0].steps[0].children
+    assert [c.rule for c in children] == ['given', 'given', 'given']
+    assert [c.fallback for c in children] == [False, True, False]
+
+
+def test_hypotheses_from_different_scopes_are_not_merged():
+    # Synthetic: ⟨fun x => h x, h2⟩; h lives under the binder x, h2 does not.
+    record = synthetic(app('And.intro', '(∀ x, P x) ∧ Q',
+                           (2, dict(role='introduce', binder='x', domain='T', statement='∀ x, P x', body=given('h', 'P x'))),
+                           (3, given('h2', 'Q')), objects=['∀ x, P x', 'Q'], role='combine'))
+    n, d = rendered(record)
+    [step] = d.declarations[0].steps
+    assert [c.text for c in step.children] == ['Let x ∈ T be arbitrary.', 'Use the hypothesis h: P x.', 'Use the hypothesis h2: Q.']
+    check_reading(record, d)
+
+
+def test_fact_from_an_anonymous_have_is_not_merged():
+    # Synthetic: have : A := Foo.a; Foo.lemma this h2.
+    frames = [dict(id=0, path=[], role='have', head='', statement='P', context=[], children=[1, 2], premises=[],
+                   objects=[], budget_cut=False, binder='this', domain='A'),
+              dict(id=1, path=[1], role='named', head='Foo.a', statement='A', context=[], children=[], premises=[],
+                   objects=[], budget_cut=False),
+              dict(id=2, path=[2], role='application', head='Foo.lemma', statement='P', context=[dict(name='this', type='A')],
+                   children=[3, 4], premises=[dict(argument=0, frame=3, statement='A'), dict(argument=1, frame=4, statement='B')],
+                   objects=[], budget_cut=False),
+              dict(id=3, path=[2, 0, 1], role='given', head='', statement='A', context=[dict(name='this', type='A')],
+                   children=[], premises=[], objects=[], budget_cut=False, binder='this'),
+              dict(id=4, path=[2, 1], role='given', head='', statement='B', context=[dict(name='this', type='A')],
+                   children=[], premises=[], objects=[], budget_cut=False, binder='h2')]
+    record = dict(schema='proofreader.narrative/v1', theorem='Synthetic.anonymous', lean_version='4.34.1', axioms=[],
+                  statement='P', frames=frames, judgements_checked=5, formula_backend='Lean pretty-printer')
+    n, d = rendered(record)
+    citation = owner(n, d, 2)
+    assert [c.text for c in citation.children] == ['Use the fact A established above.', 'Use the hypothesis h2: B.']
+    check_reading(record, d)
+
+
+@pytest.mark.parametrize('node,labels', [
+    # Synthetic: both directions of an equivalence, and both branches of an
+    # induction, are hypotheses in the same context. Each line keeps its label.
+    (app('Iff.intro', 'A ↔ B', (2, given('h1', 'A → B')), (3, given('h2', 'B → A')), objects=['A', 'B']),
+     ['Forward direction. Use the hypothesis h1: A → B.', 'Reverse direction. Use the hypothesis h2: B → A.']),
+    (app('Nat.rec', 'P n', (1, given('h0', 'P 0')), (2, given('hs', '∀ (n : ℕ), P n → P (n + 1)')),
+         objects=['fun n => P n', 'n'], role='induction'),
+     ['Base case (zero). Use the hypothesis h0: P 0.', 'Successor step. Use the hypothesis hs: ∀ (n : ℕ), P n → P (n + 1).']),
+])
+def test_labelled_hypothesis_lines_are_not_merged(node, labels):
+    record = synthetic(node)
+    n, d = rendered(record)
+    [step] = d.declarations[0].steps
+    assert [c.text for c in step.children] == labels and [c.rule for c in step.children] == ['given', 'given']
+    check_reading(record, d)
+
+
+def test_hypotheses_printed_over_several_lines_get_one_line_each():
+    # Synthetic: a statement that Lean's pretty-printer broke across lines.
+    record = synthetic(app('Foo.lemma', 'P x', (1, given('h1', '∀ (k : ℕ),\n  f k ≤ g k')), (2, given('h2', 'A')), objects=['x']))
+    d = Narrative(record).document()
+    [child] = d.declarations[0].steps[0].children
+    assert child.text == 'Use the hypotheses:\nh1: ∀ (k : ℕ),\n  f k ≤ g k;\nh2: A.'
+    # Plain text keeps every line of the sentence inside the step's nesting level.
+    assert '\n  Use the hypotheses:\n    h1: ∀ (k : ℕ),\n      f k ≤ g k;\n    h2: A.\n' in prose(d)
+
+
+def test_projection_reads_a_premise_with_a_binder_conjunct():
+    n, d = rendered(real('binder_conjunct_projection'))
+    step = owner(n, d, 0)
+    assert step.rule == 'conjunction-projection' and not step.fallback
+    assert step.text == 'Take the first conjunct, ↑(n t) / ↑g → ∞ as t → ∞.'
+    # A binder as the right conjunct takes the rest of the formula (A ∧ ∀ G, … → …).
+    n, d = rendered(real('binder_right_projection'))
+    assert owner(n, d, 0).rule == 'conjunction-projection' and not owner(n, d, 0).fallback
+    assert owner(n, d, 1).rule == 'unchecked-projection' and owner(n, d, 1).fallback
+
+
+@pytest.mark.parametrize('premise,left,right,checked', [
+    # Synthetic precedence traps: only a premise that Lean parses as left ∧ right is a checked projection.
+    ('A ∧ ∃ p, P p', 'A', '∃ p, P p', True),
+    ('A ∧ ∀ x, P x → Q x', 'A', '∀ x, P x → Q x', True),
+    ('A ∧ ∃ x, P x ∨ Q', 'A', '∃ x, P x ∨ Q', True),
+    ('(∃ p, P p) ∧ B', '∃ p, P p', 'B', True),
+    ('(∀ x, P x) ∧ ∀ y, Q y', '∀ x, P x', '∀ y, Q y', True),
+    ('A ∧ B ∧ C', 'A', 'B ∧ C', True),
+    ('¬A ∧ B', '¬A', 'B', True),
+    ('A ∧ ∑ i, f i ≤ 1', 'A', '∑ i, f i ≤ 1', True),
+    ('∃ p, P p ∧ B', '∃ p, P p', 'B', False),
+    ('∀ x, P x ∧ B', '∀ x, P x', 'B', False),
+    ('A ∨ B ∧ C', 'A ∨ B', 'C', False),
+    ('A ∧ B → C', 'A', 'B → C', False),
+    ('A ∧ B ∨ C', 'A', 'B ∨ C', False),
+    ('A ∧ B ∧ C', 'A ∧ B', 'C', False),
+    ('A ∧ (∃ x, P x) ∨ Q', 'A', '(∃ x, P x) ∨ Q', False),
+    ('f fun x => x ∧ R', 'f fun x => x', 'R', False),
+    ('A ∧ ∑ i, f i ≤ 1 → B', 'A', '∑ i, f i ≤ 1 → B', False),
+])
+def test_projection_premise_precedence(premise, left, right, checked):
+    record = synthetic(app('And.left', left, (2, given('h', premise)), objects=[left, right]))
+    n, d = rendered(record)
+    [step] = d.declarations[0].steps
+    assert step.rule == ('conjunction-projection' if checked else 'unchecked-projection')
+    assert step.fallback is not checked
+    check_reading(record, d)
+
+
+def test_reverse_direction_reads_an_equivalence_with_a_binder_side():
+    n, d = rendered(real('equivalence_binder'))
+    step = owner(n, d, 0)
+    assert step.rule == 'equivalence-reverse' and not step.fallback
+    assert step.text.startswith('Use the reverse direction of SetFormula.Realize N.sets')
+
+
+@pytest.mark.parametrize('iff,left,right,checked', [
+    # Synthetic precedence traps for ↔ (precedence 20, non-associative).
+    ('A ↔ ∀ x, P x → Q x', 'A', '∀ x, P x → Q x', True),
+    ('(∀ x, P x) ↔ Q', '∀ x, P x', 'Q', True),
+    ('A → B ↔ C', 'A → B', 'C', True),
+    ('A ∧ B ↔ C ∨ D', 'A ∧ B', 'C ∨ D', True),
+    ('A ↔ (B ↔ C)', 'A', 'B ↔ C', True),
+    ('¬A ↔ B', '¬A', 'B', True),
+    ('∀ x, P x ↔ Q', '∀ x, P x', 'Q', False),
+    ('∃ x, P x ↔ Q', '∃ x, P x', 'Q', False),
+    ('A ↔ B ↔ C', 'A', 'B ↔ C', False),
+    ('A ↔ ∀ x, P x ↔ Q x', 'A', '∀ x, P x ↔ Q x', False),
+    ('if c then A else B ↔ C', 'if c then A else B', 'C', False),
+])
+def test_equivalence_premise_precedence(iff, left, right, checked):
+    record = synthetic(app('Iff.mpr', left, (2, given('h', iff)), (3, given('hb', right)), objects=[left, right]))
+    n, d = rendered(record)
+    [step] = d.declarations[0].steps
+    assert (step.rule == 'equivalence-reverse') is checked and step.fallback is not checked
+    check_reading(record, d)
+
+
+def test_proof_witness_names_the_proposition_and_the_remaining_claim():
+    record = real('witness_proof_named')
+    n, d = rendered(record)
+    step = owner(n, d, 0)
+    assert step.rule == 'witness-proof' and not step.fallback and owned(step) == [0]
+    assert step.text == 'Prove hc: LocalLabels G v c, and then the remaining claim, which may depend on the proof hc.'
+    assert [c.rule for c in step.children] == ['given', 'project-citation']
+    n, d = rendered(real('witness_proof_anonymous'))
+    step = owner(n, d, 0)
+    assert step.text == 'Prove Group.FG Prescribed.G, and then the remaining claim.' and not step.fallback
+    assert [c.rule for c in step.children] == ['instance-facts', 'verify-conclusions']
+
+
+def proof_witness(statement='∃ (_ : A) (_ : B), C', inner='∃ (_ : B), C'):
+    """Synthetic: Exists.intro ⟨a, Exists.intro ⟨b, hc⟩⟩ for ∃ (_ : A) (_ : B), C."""
+    second = app('Exists.intro', inner, (2, app('Foo.b', 'B', role='named')), (3, given('hc', 'C')),
+                 objects=['B', 'fun x => C'], role='witness')
+    return synthetic(app('Exists.intro', statement, (2, app('Foo.a', 'A', role='named')), (3, second),
+                         objects=['A', 'fun x => ∃ (_ : B), C'], role='witness'))
+
+
+def test_chain_of_proof_witnesses_is_one_step():
+    # Synthetic format fixture.
+    record = proof_witness()
+    n, d = rendered(record)
+    [step] = d.declarations[0].steps
+    assert step.rule == 'witness-proof' and not step.fallback and owned(step) == [0, 2]
+    assert step.text == 'Prove A, then B, and then the remaining claim.'
+    assert [c.text for c in step.children] == ['By Foo.a:', 'By Foo.b:', 'Use the hypothesis hc: C.']
+    check_reading(record, d)
+
+
+@pytest.mark.parametrize('statement,inner', [
+    # Synthetic: the leading binder is printed with another type, or the remaining
+    # claim of an anonymous binder is not printed as the rest of the statement.
+    ('∃ (_ : A′) (_ : B), C', '∃ (_ : B), C'),
+    ('∃ (_ : A) (_ : B), C', '∃ (_ : B), C′'),
+    ('Main', '∃ (_ : B), C'),
+])
+def test_proof_witness_with_mismatched_printing_keeps_the_gap(statement, inner):
+    # The synthetic record is valid, so the rule itself must decline it.
+    n, d = rendered(proof_witness(statement, inner))
+    step = owner(n, d, 0)
+    assert step.fallback and step.rule == 'witness'
+
+
+def test_existential_over_a_proposition_is_unpacked_from_the_hypothesis():
+    record = real('unpack_existential')
+    n, d = rendered(record)
+    step = owner(n, d, 0)
+    assert step.rule == 'unpack-existential' and not step.fallback and owned(step) == [0, 1, 2, 3]
+    assert step.text.startswith('From h_3, obtain hb: ContMDiff ') and ' and hnear: ∀ (k : ℕ),' in step.text
+    assert owner(n, d, 4).rule == 'project-citation'
+
+
+def proof_cases(body='Q', major=('h', '∃ (_ : A), B')):
+    """Synthetic: Exists.casesOn h (fun ha hb => …) with a proposition A as the bound type."""
+    inner = dict(role='assume', binder='hb', domain='B', statement='B → '+body, body=app('Foo.q', body, (1, given('hb', 'B'))))
+    outer = dict(role='assume', binder='ha', domain='A', statement='∀ (ha : A), B → '+body, body=inner)
+    return synthetic(app('Exists.casesOn', 'Q', (3, given(*major)), (4, outer), objects=['A', 'fun x => B', 'fun x => Q'],
+                         role='choose'))
+
+
+def test_unpack_existential_on_synthetic_frames():
+    # Synthetic format fixture.
+    record = proof_cases()
+    n, d = rendered(record)
+    step = d.declarations[0].steps[0]
+    assert step.rule == 'unpack-existential' and not step.fallback and step.text == 'From h, obtain ha: A and hb: B.'
+    check_reading(record, d)
+
+
+@pytest.mark.parametrize('body,major', [
+    # Synthetic: a body that proves another statement (a dependent motive), and a
+    # major premise printed as a named definition rather than ∃ over A.
+    ('Q′', ('h', '∃ (_ : A), B')),
+    ('Q', ('h', 'Main')),
+    ('Q', ('h', '∃ (_ : A′), B')),
+    # The rest of the major premise is printed differently from the second binder's domain.
+    ('Q', ('h', '∃ (_ : A), B′')),
+])
+def test_unpack_existential_keeps_the_gap_without_exact_printing(body, major):
+    # The synthetic record is valid, so the rule itself must decline it.
+    n, d = rendered(proof_cases(body, major))
+    step = owner(n, d, 0)
+    assert step.fallback and step.rule == 'choose'
+
+
+def test_instance_derived_from_a_local_instance_hypothesis_is_not_called_standard():
+    n, d = rendered(real('local_instance'))
+    [step] = d.declarations[0].steps
+    assert step.rule == 'instance-facts' and step.fallback and owned(step) == [0, 1]
+    assert step.text == 'Instance fact used: Countable U. The derivation uses the local instance hypothesis inst_1: Finite U.'
+
+
+def test_local_instance_hypothesis_next_to_a_visible_premise():
+    # Synthetic: inferInstance resting on a project lemma and a local instance hypothesis.
+    record = synthetic(app('Foo.lemma', 'P x', (1, app('inferInstance', 'Thing X',
+                                                     (1, app('OAI.Foo.bar', 'Lattice X', role='named')),
+                                                     (2, given('inst_2', 'Nontrivial X')), objects=['Thing X'])), objects=['x']))
+    n, d = rendered(record)
+    step = owner(n, d, 1)
+    assert step.rule == 'instance-facts' and step.fallback
+    assert step.text == ('Instance fact used, derived using the premise below: Thing X. '
+                         'The derivation also uses the local instance hypothesis inst_2: Nontrivial X.')
+
+
+def test_applied_projection_is_explained_only_for_exact_modus_ponens():
+    n, d = rendered(real('applied_projection'))
+    step = owner(n, d, 0)
+    assert step.rule == 'applied-projection' and not step.fallback
+    assert step.text.startswith('Take the second conjunct, 1 < stateCount n d → hasSpectralGapAtLeast')
+    # Real: the premise is printed in unfolded form, so the application is not checked.
+    n, d = rendered(real('unchecked_application'))
+    step = owner(n, d, 0)
+    assert step.rule == 'unchecked-application' and step.fallback
+    assert step.text.endswith('; that this gives the statement shown is not checked here.')
+
+
+@pytest.mark.parametrize('objects,extra,explained', [
+    # Synthetic: modus ponens with exact printing, an instantiation, and a premise printed differently.
+    (['P → Q', 'R'], [(3, given('hp', 'P'))], True),
+    (['∀ n, f n ≤ 1', 'R', 'm'], [], False),
+    (['P → Q', 'R'], [(3, given('hp', 'P′'))], False),
+])
+def test_applied_projection_on_synthetic_frames(objects, extra, explained):
+    statement = 'Q' if objects[0] == 'P → Q' else 'f m ≤ 1'
+    record = synthetic(app('And.left', statement, (2, given('h', '(' + objects[0] + ') ∧ R')), *extra, objects=objects))
+    n, d = rendered(record)
+    [step] = d.declarations[0].steps
+    assert step.rule == ('applied-projection' if explained else 'unchecked-application')
+    assert step.fallback is not explained
+    check_reading(record, d)
+
+
+def test_exhibited_element_is_described_and_stays_a_gap():
+    n, d = rendered(real('nonempty_construction'))
+    [step] = d.declarations[0].steps
+    assert step.rule == 'citation' and step.fallback
+    assert step.text == 'Exhibit the element Machine.MainReduction.reduction m hm of GapReduction m; its construction is not expanded here.'
+    # Synthetic: an element that is a variable of the local context is explained.
+    record = synthetic(dict(role='introduce', binder='f', domain='T', statement='∀ (f : T), Nonempty T',
+                            body=app('Nonempty.intro', 'Nonempty T', objects=['T', 'f'])))
+    n, d = rendered(record)
+    step = owner(n, d, 1)
+    assert step.rule == 'nonempty-intro' and not step.fallback and step.text == 'Since f ∈ T, Nonempty T holds.'
+    # Synthetic: the innermost f has another type, so the element is not that variable.
+    record = synthetic(dict(role='introduce', binder='f', domain='T', statement='∀ (f : T) (f : S), Nonempty T',
+                            body=dict(role='introduce', binder='f', domain='S', statement='∀ (f : S), Nonempty T',
+                                      body=app('Nonempty.intro', 'Nonempty T', objects=['T', 'f']))))
+    n, d = rendered(record)
+    assert owner(n, d, 2).rule == 'citation' and owner(n, d, 2).fallback
+
+
 # Regeneration across the version label.
 
 def test_check_reading_accepts_only_a_listed_earlier_label_on_identical_output():
@@ -533,7 +872,7 @@ def test_check_reading_accepts_only_a_listed_earlier_label_on_identical_output()
 
 @pytest.mark.parametrize('label', ['source-math-en/0.4.2', ['source-math-en/0.4.2'], None])
 def test_earlier_label_is_refused_for_a_snapshot_without_a_retained_reading(label):
-    # The text is exactly the 0.5.0 regeneration; only the label claims 0.4.2.
+    # The text is exactly the current regeneration; only the label claims 0.4.2.
     # This real subtree has no listed retained 0.4.2 reading, so it is refused.
     record = real('norm_num')
     d = Narrative(record).document()
