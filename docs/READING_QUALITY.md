@@ -247,6 +247,12 @@ the recorded data of these snapshots.
   is identical, because no retained 0.4.2 reading of that snapshot shows the
   label to be true. No reading saved under the 0.5.0 label is retained, so that
   label is not listed; such a reading must be regenerated.
+- In plain text (`prose`, `proof.txt`), every later line of a step whose
+  sentence spans several lines is indented one level below the step, like its
+  conclusion. Before 0.6.0 those lines started at the left margin, so a
+  grouped hypothesis or a multi-line formula inside a nested step appeared to
+  be at the top level. The reading binding does not include plain text, and
+  the KPIs measure step texts, so neither changes.
 - Frames absorbed into a grouped step add their heads to the reading's
   dependency list. Earlier versions listed only the first frame's head of a
   multi-frame step.

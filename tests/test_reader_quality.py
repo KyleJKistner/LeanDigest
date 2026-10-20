@@ -624,8 +624,11 @@ def test_labelled_hypothesis_lines_are_not_merged(node, labels):
 def test_hypotheses_printed_over_several_lines_get_one_line_each():
     # Synthetic: a statement that Lean's pretty-printer broke across lines.
     record = synthetic(app('Foo.lemma', 'P x', (1, given('h1', '∀ (k : ℕ),\n  f k ≤ g k')), (2, given('h2', 'A')), objects=['x']))
-    [child] = Narrative(record).document().declarations[0].steps[0].children
+    d = Narrative(record).document()
+    [child] = d.declarations[0].steps[0].children
     assert child.text == 'Use the hypotheses:\nh1: ∀ (k : ℕ),\n  f k ≤ g k;\nh2: A.'
+    # Plain text keeps every line of the sentence inside the step's nesting level.
+    assert '\n  Use the hypotheses:\n    h1: ∀ (k : ℕ),\n      f k ≤ g k;\n    h2: A.\n' in prose(d)
 
 
 def test_projection_reads_a_premise_with_a_binder_conjunct():

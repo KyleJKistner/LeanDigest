@@ -979,7 +979,10 @@ def prose(document: Document) -> str:
          '',*notation.legend(d),*(p['text'] for p in d.parameters),'Then '+d.statement+'.','','Proof.']
     def emit(steps,depth=0):
         for s in steps:
-            out.append('  '*depth+('[Explanation gap] ' if s.fallback else '')+s.text)
+            first,*rest=s.text.split('\n')
+            out.append('  '*depth+('[Explanation gap] ' if s.fallback else '')+first)
+            # Later lines of a multi-line sentence stay inside the step's nesting level.
+            out.extend('  '*(depth+1)+line for line in rest)
             if s.conclusion:
                 out.extend('  '*(depth+1)+line for line in s.conclusion.split('\n'))
             emit(s.children,depth+1)
