@@ -63,6 +63,8 @@ def test_every_workflow_file_loads(yaml):
 def test_no_kept_workflow_publishes_pushes_or_runs_on_a_schedule(flows):
     for name, flow in flows.items():
         assert not triggers(flow) & {'schedule', 'workflow_run', 'release', 'pull_request_target'}, name
+        # Without a workflow-level block the token gets the repository default, which can be write.
+        assert isinstance(flow.get('permissions'), dict), name
         for scope in [flow, *flow['jobs'].values()]:
             permissions = scope.get('permissions', {})
             assert isinstance(permissions, dict), name
@@ -225,7 +227,9 @@ def test_rebuild_label_names_the_frozen_inputs_and_the_printers(tmp_path):
                          'rebuild': {'inputs_of_release': 'leanglish-all-findings-v'+version,
                                      'printer_versions': ['synthetic-printer/1', 'synthetic-printer/2'],
                                      'compared_with_published_assets': False}}
-        notice = rebuild_notice({**label, 'application_commit': 'c'*40})
+        notice = rebuild_notice({**label, 'application_commit': 'c'*40}, 'docs/SYNTHETIC.md')
         assert 'leanglish-all-findings-v'+version in notice and 'c'*40 in notice
         assert 'It is not that release' in notice and notice.endswith('\n\n')
+        # The notice names where the notes were read, and claims no equality with the published notes.
+        assert 'The text below is `docs/SYNTHETIC.md` at that commit.' in notice and 'unchanged' not in notice
     assert rebuild_label(tmp_path/'empty', False)['rebuild']['printer_versions'] == []

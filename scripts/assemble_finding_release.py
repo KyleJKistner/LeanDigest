@@ -44,12 +44,15 @@ def rebuild_label(site: Path, breadth: bool) -> dict:
                        'compared_with_published_assets':False}}
 
 
-def rebuild_notice(identity: dict) -> str:
+def rebuild_notice(identity: dict, notes_source: str) -> str:
+    """State what the packaged notes are. They are read at the application commit;
+    nothing compares them with the notes published with the release."""
     r=identity['rebuild']
     return ('> This archive is a rebuild of the frozen inputs of release `%s` by application commit `%s`, '
             'with printer versions %s. It is not that release and was not compared with its assets. '
-            'The notes of that release follow unchanged.\n\n'
-            % (r['inputs_of_release'],identity['application_commit'],', '.join('`%s`'%p for p in r['printer_versions']) or 'none recorded'))
+            'The text below is `%s` at that commit.\n\n'
+            % (r['inputs_of_release'],identity['application_commit'],', '.join('`%s`'%p for p in r['printer_versions']) or 'none recorded',
+               notes_source))
 
 
 def unpack_source(inputs: Path, destination: Path) -> Path:
@@ -141,8 +144,9 @@ def assemble(inputs: Path, output: Path, *, breadth_inputs: Path | None = None) 
         'native_lean_executed_by_builder':False,'observations_authenticated':False}
     write_json(site/'release.json',identity)
     write_json(site/'static-audit.json',checks)
-    notes=(repo/('docs/BREADTH_V0_4_1.md' if ledger else 'docs/ALL_FINDINGS.md')).read_text(encoding='utf-8')
-    (site/'RELEASE-NOTES.md').write_text(rebuild_notice(identity)+notes,encoding='utf-8')
+    notes_source='docs/BREADTH_V0_4_1.md' if ledger else 'docs/ALL_FINDINGS.md'
+    notes=(repo/notes_source).read_text(encoding='utf-8')
+    (site/'RELEASE-NOTES.md').write_text(rebuild_notice(identity,notes_source)+notes,encoding='utf-8')
     return identity
 
 

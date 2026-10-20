@@ -69,9 +69,10 @@ The PR #8 branch still holds its own copy, as it does of
 ## Kept active
 
 The table lists every file in `.github/workflows/`. `tests/test_workflows.py`
-checks that it does, that every kept file loads with `yaml.safe_load`, and that
-no kept file has a schedule, a `contents: write` permission, a release or a
-push.
+checks that it does and that every kept file loads with `yaml.safe_load`. It
+also checks that no kept file runs on a `schedule`, `workflow_run`, `release`
+or `pull_request_target` event, grants a write permission or names a secret,
+and that no step runs `gh release`, `git push` or `gh workflow run`.
 
 | File | Reason it stays in `.github/workflows/` |
 | --- | --- |

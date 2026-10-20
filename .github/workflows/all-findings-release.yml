@@ -1,4 +1,4 @@
-name: Rebuild the 0.4.0 catalog inputs
+name: Catalog rebuild from the frozen 0.4.0 inputs
 
 # Re-assembles the frozen inputs of release leanglish-all-findings-v0.4.0 with
 # the application at the dispatched commit, then runs the real offline browser
