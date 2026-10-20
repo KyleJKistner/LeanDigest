@@ -1,0 +1,63 @@
+name: Catalog preview (published readings re-rendered)
+
+# Downloads the pinned published offline catalog, checks its digest, and
+# re-renders its 492 proof readings with the committed renderer. No Lean runs;
+# snapshots, receipts and run records stay byte-identical. The static audit and
+# real Chromium file navigation must pass before the preview zip is uploaded as a
+# workflow artifact. This workflow never publishes a release and never pushes.
+on:
+  push:
+    branches: [claude/keen-archimedes-ihorkq]
+    paths: ['proofreader/**', 'scripts/rerender_catalog.py', '.github/workflows/catalog-preview.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: catalog-preview-${{ github.ref }}
+  cancel-in-progress: true
+env:
+  # Pinned in scripts/fetch_reading_corpus.py (CORPUS); tests/test_rerender_catalog.py checks both.
+  RELEASE_URL: https://github.com/KyleJKistner/LeanDigest/releases/download/leanglish-original-project-317dc31/leanglish-all-findings.zip
+  RELEASE_SHA256: 57f9e481a83ff64b7ae01e9cdf0b4b47919adf1899d28313ab3b7e7cf5be0e2b
+jobs:
+  preview:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+        with: {persist-credentials: false}
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: python -m pip install '.[dev,webtest,catalog]'
+      - run: python -m playwright install --with-deps chromium
+      - name: Preview builder tests (synthetic fixtures)
+        env: {PROOFREADER_REQUIRE_BROWSER: '1'}
+        run: python -m pytest -q tests/test_rerender_catalog.py
+      - name: Download the pinned published catalog and check its digest
+        run: |
+          curl -fsSL --retry 3 -o "$RUNNER_TEMP/release.zip" "$RELEASE_URL"
+          echo "$RELEASE_SHA256  $RUNNER_TEMP/release.zip" | sha256sum -c -
+      - name: Re-render, audit statically and navigate the files in Chromium
+        run: |
+          python scripts/rerender_catalog.py "$RUNNER_TEMP/release.zip" "$RUNNER_TEMP/preview" \
+            --archive-sha256 "$RELEASE_SHA256" --browser real
+      - name: Audit the packaged zip again after extraction
+        run: |
+          cd "$RUNNER_TEMP/preview" && sha256sum -c SHA256SUMS
+          mkdir "$RUNNER_TEMP/unpacked" && unzip -q leanglish-catalog-preview.zip -d "$RUNNER_TEMP/unpacked"
+          cd "$GITHUB_WORKSPACE"
+          python -m proofreader.catalog_audit "$RUNNER_TEMP/unpacked/Leanglish" > "$RUNNER_TEMP/preview/packaged-static-audit.json"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: leanglish-catalog-preview
+          path: |
+            ${{ runner.temp }}/preview/leanglish-catalog-preview.zip
+            ${{ runner.temp }}/preview/SHA256SUMS
+            ${{ runner.temp }}/preview/summary.json
+            ${{ runner.temp }}/preview/browser-audit.json
+            ${{ runner.temp }}/preview/packaged-static-audit.json
+            ${{ runner.temp }}/preview/screenshots/
+            ${{ runner.temp }}/preview/*.png
+          retention-days: 30
+          if-no-files-found: warn
