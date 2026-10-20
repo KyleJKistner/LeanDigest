@@ -1,3 +1,40 @@
+# Canonical proof-document checkpoint — 2026-10-19
+
+Work is isolated on `work/proof-document-20261019`, based on PR #9 at
+`84fa7ff3691631cc9e7519b65e4fd62bc1c9d9e7`. Do not change the other session's
+`work/full-original-project` branch or merge main without review.
+
+The new `docs/companion/checked-proof.html` displays a complete canonical
+Bézout document, not the old authored explanation with added badges. See
+`docs/PROOF_DOCUMENT.md`. The native certificate covers the fixed statement,
+definitions, both scoped branches, the existing fourteen passages, and the
+conclusion. `text_implies_statement` derives the original existential from the
+document meaning. The original proof's `hxz`, `hbez`, `hrel`, and applied
+identity-lambda aliases are restored as definitions before closing the branches.
+They do not remain additional assumptions of the complete document certificate.
+
+The first full local native gate passed all 31 commands, including sixteen
+expected source mutations. Eleven universal contracts and thirty executable
+guards are checked. The 99 new static tests passed. Local real-file browser
+navigation was administrator-blocked; the in-memory preview is not acceptance.
+Check the final commit's GitHub workflow and retained artifacts for remote results.
+
+Canonical text SHA-256:
+`d3daeabb618085d61e1ba8c9babb44a429062f4548aa60ba68514b59d7d31cf8`.
+Positive record SHA-256:
+`a616f24f83f634bedd4ae329623141eae02d4176f77d87ef5339ad834d634a5d`.
+Native evidence is `artifacts/source-document`; the gate uses a fresh workspace.
+
+The scope is one defined document grammar. The separately authored companion,
+arbitrary English, general Lean import, full original-project replay, and browser
+semantics are not newly certified. No independent agents ran for this extension.
+Do not paraphrase the native proof text after certification. Future notation or
+wording changes need their own grammar/semantic contract. The next product work
+is to improve the mathematical notation within that checked boundary and extend
+source-bound document schemas beyond the fixed Bézout case split.
+
+---
+
 # Equation and witness checkpoint — 2026-10-19
 
 The isolated branch `work/source-bound-equations-20261019` extends

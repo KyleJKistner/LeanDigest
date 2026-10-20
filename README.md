@@ -1,5 +1,10 @@
 # Leanglish
 
+The [canonical Bézout proof](docs/companion/checked-proof.html) includes a
+source-bound certificate for its complete fixed-language document. See
+[the document contract and reproduction](docs/PROOF_DOCUMENT.md) for its scope.
+The separately authored companion is not covered by that certificate.
+
 Leanglish connects the OpenAI mathematics findings to their formalization scope,
 explicit statements, original Lean source, and the structured proof readings
 available so far. The renderer is deterministic and makes no language-model API
