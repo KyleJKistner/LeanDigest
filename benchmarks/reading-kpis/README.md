@@ -8,7 +8,7 @@ and digest-checked by `scripts/fetch_reading_corpus.py`.
 | File | Meaning |
 |---|---|
 | `baseline-source-math-en-0.4.1.json` | The renderer that produced the published release (reproduces its 7,587 gaps). |
-| `current.json` | The committed renderer. CI (`reading-kpis.yml`) fails if it is stale. |
+| `current.json` | The committed renderer. CI (`reading-kpis.yml`) fails if it is stale. Earlier renderers' values are in its history, for example `git show 04df977:benchmarks/reading-kpis/current.json` for `source-math-en/0.4.2`. |
 
 Headline measures:
 

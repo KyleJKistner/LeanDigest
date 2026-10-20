@@ -282,7 +282,11 @@ reading. With the 151 supporting lemma readings of the dependency-cone pilot
 preview built at `a9e98ba` with `scripts/rerender_catalog.py --cone-shards`
 passed the static audit. The counts and every link are the same at commit
 `f787dae`, except that a reading link's `source` entry now has a `basis`. This
-was a local measurement, not a published catalog.
+was a local measurement, not a published catalog. Under renderer
+`source-math-en/0.7.0`, the catalog-preview workflow run 39456773394 at commit
+`bbc90ac` and a local preview of the same code give the same counts without
+and with the supporting lemma readings (see
+[Catalog preview](CATALOG_PREVIEW.md#pinned-release-with-the-pilot-supporting-lemma-readings)).
 
 ## Local measurement of cited dependency sources
 
@@ -313,6 +317,11 @@ scanned 1,649 of them, and found no unusable module and no incomplete closure.
 The build selected 873 dependency modules with 10.2 MB of source. No cap was
 reached, and the static audit passed. The walk, the selection and every link
 are the same at commit `f787dae`, except for the `basis` of `source` entries.
+Two builds of the application code of commit `bbc90ac` (renderer
+`source-math-en/0.7.0`) with the same inputs gave the same walk and selection,
+and the `links.json` of all 492 readings is byte-identical to that of a build
+at `04e8202`, whose application code equals `a9e98ba`'s. Both `bbc90ac` builds
+produced sites and zips of the same sizes.
 
 | Cited `OAI.*` names (1,762) | Solution modules only | With cited dependencies |
 | --- | ---: | ---: |
@@ -338,20 +347,21 @@ that contains the last component of the cited name. Real Chromium, opening the
 pages by `file://`, followed four source-line links, which cover all three
 bases, to their declaration lines, and one link to a proof reading.
 
-| Local build | `4c072f1` | `a9e98ba` |
-| --- | ---: | ---: |
-| Build time on the local machine | 112 s | 239 s |
-| Static audit time | 15 s | 26 s |
-| Source pages | 413 | 1,286 |
-| Site size | 589.1 MB | 619.7 MB |
-| `evidence/declaration-index.json` | 1.3 MB | 5.9 MB |
-| `evidence/cited-dependency-sources.json` | None | 1.2 MB |
-| Deterministic release-style zip | 40.6 MB | 49.8 MB |
+| Local build | `4c072f1` | `a9e98ba` | `bbc90ac` |
+| --- | ---: | ---: | ---: |
+| Build time on the local machine | 112 s | 239 s | 240 s and 220 s |
+| Static audit time | 15 s | 26 s | 26 s and 24 s |
+| Source pages | 413 | 1,286 | 1,286 |
+| Site size | 589.1 MB | 619.7 MB | 625.3 MB |
+| `evidence/declaration-index.json` | 1.3 MB | 5.9 MB | 5.9 MB |
+| `evidence/cited-dependency-sources.json` | None | 1.2 MB | 1.2 MB |
+| Deterministic release-style zip | 40.6 MB | 49.8 MB | 50.2 MB |
 
-Sizes are in units of 10^6 bytes. The two commits also differ in the renderer
-and the reader script, so not all of the difference comes from cited
-dependencies. In the `a9e98ba` build, the 873 cited dependency source pages
-take 25.5 MB and their copies under `originals/` 10.2 MB.
+Sizes are in units of 10^6 bytes. The commits also differ in the renderer
+(`4c072f1` and `a9e98ba` render with 0.5.0 and 0.6.0, `bbc90ac` with 0.7.0) and
+the reader script, so not all of the difference comes from cited dependencies.
+In the `a9e98ba` build, the 873 cited dependency source pages take 25.5 MB and
+their copies under `originals/` 10.2 MB.
 
 To repeat a build, fetch the pinned upstream tree into `UPSTREAM`, put the
 retained reading directories of the published catalog under `INPUTS/proofs`,

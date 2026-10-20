@@ -188,12 +188,19 @@ values GitHub records, and `scripts/plan_dependency_cone.py reconcile` on them
 reproduced the CI summary byte for byte.
 
 The run's 11 artifacts (the plan, the preflight record, the 8 shards and the
-summary) are the only copy of these readings that the repository can name.
-GitHub deletes all 11 on 2027-01-18 (their recorded `expires_at`,
-2027-01-18T05:16:06Z). `scripts/preserve_inputs.py` does not copy them, and no
-cone reading is committed. After that date the readings can be restored only
-by a new run, which needs a source bundle that has not expired (see
+summary) are the only recorded copy of these readings. GitHub deletes all 11 on
+2027-01-18 (their recorded `expires_at`, 2027-01-18T05:16:06Z).
+`scripts/preserve_inputs.py` does not copy them, and no cone reading is
+committed. After that date the readings can be restored only by a new run,
+which needs a source bundle that has not expired (see
 [External inputs](#external-inputs)).
+
+The push of commit `bbc90ac`, which changes `dependency-cone.yml` relative to
+the previous push (`f787dae`), started a second pilot run,
+[39456773610](https://github.com/KyleJKistner/LeanDigest/actions/runs/39456773610).
+It was in progress on 2026-10-20 at about 16:40 UTC, and its outcomes are not
+recorded here. `catalog-preview.yml` still downloads the artifacts of run
+39373979494 (`CONE_RUN`).
 
 | Environment module | Readings | Checked frames | Displayed steps | Gap steps | Job time | Build and extraction step |
 | --- | ---: | ---: | ---: | ---: | ---: | ---: |
@@ -549,8 +556,9 @@ checked, and no English fidelity is claimed.
 - **Level 1 only.** The plan covers constants that the 492 retained readings
   cite. Lemmas cited by cone readings form level 2. Level 2 is planned from level-1
   readings by the same rules, after level-1 results exist.
-- **Pilot only.** One workflow run (39373979494) read the 8 pilot shards; 1,571
-  planned lemmas are outside its scope. No Lean toolchain ran locally. Apart from
+- **Pilot only.** One completed workflow run (39373979494) read the 8 pilot
+  shards; 1,571 planned lemmas are outside its scope. A second pilot run
+  (39456773610) had not finished when this page was updated. No Lean toolchain ran locally. Apart from
   that run's artifacts, the planner, worker, loader and catalog code are tested
   only with synthetic fixtures.
 - **Name-based exclusions.** The constructor and compiler rules, and the
