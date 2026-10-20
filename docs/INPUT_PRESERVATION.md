@@ -102,13 +102,13 @@ before 2026-10-20 02:01 UTC: 39321225048 (pull request, success), 39352981910
 - **Acceptance run 38792262410** (2 artifacts, expiring on 2027-01-13).
   `docs/MATHEMATICIAN_PREVIEW.md` cites it, and only archived workflows
   download it.
-- **Dependency-cone pilot run 39373979494** (11 artifacts, all expiring on
-  2027-01-18 at 05:16, read on 2026-10-20 at about 16:40 UTC). They hold the
-  only copy of the 151 pilot readings (`docs/DEPENDENCY_CONE.md`).
-  `catalog-preview.yml` downloads 10 of them through
-  `scripts/download_cone_artifacts.py` and builds the preview without the
-  supporting lemma readings when they are missing. The registry of
-  `scripts/preserve_inputs.py` does not include them.
+- **Dependency-cone pilot runs 39373979494 and 39456773610** (11 artifacts
+  each, expiring on 2027-01-18 at 05:16 and 16:21, read on 2026-10-20 at about
+  16:40 and 17:00 UTC). They hold the 151 pilot readings
+  (`docs/DEPENDENCY_CONE.md`). `catalog-preview.yml` downloads 10 artifacts of
+  the first run through `scripts/download_cone_artifacts.py` and builds the
+  preview without the supporting lemma readings when they are missing. The
+  registry of `scripts/preserve_inputs.py` includes neither run.
 
 ## Copies as new artifacts
 

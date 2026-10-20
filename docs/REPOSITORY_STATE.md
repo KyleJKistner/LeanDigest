@@ -68,8 +68,9 @@ On 2026-10-20 the Actions listing showed the following PR #8 activity:
 
 On 2026-10-20 at about 14:30 UTC the Actions API listed no queued or
 in-progress run. At about 16:40 UTC the only in-progress run was
-dependency-cone run 39456773610 on bbc90ac; no PR #8 run was queued or in
-progress, and PR #8 was still an open draft with head efc679d.
+dependency-cone run 39456773610 on bbc90ac, which succeeded at 16:54 UTC; no
+PR #8 run was queued or in progress, and PR #8 was still an open draft with
+head efc679d.
 
 Merge 4c072f1 brought in the PR #8 versions of the five completion workflows
 it changes: `git diff --name-status -M 4c072f1^1 4c072f1 -- .github` lists
@@ -180,9 +181,9 @@ Native checks that did run on the consolidated tree:
   export, exact replay and tamper rejection". Commit beaf08d, on the remote
   branch after bbc90ac, changes `tests/test_narrative_batch_integration.py`;
   its run 39458302869 passed.
-- The `dependency-cone.yml` pilot at 4c072f1 (run 39373979494) succeeded. A
-  second pilot run on a push of bbc90ac (run 39456773610) was in progress at
-  about 16:40 UTC.
+- The `dependency-cone.yml` pilot at 4c072f1 (run 39373979494) succeeded, and
+  so did the second pilot run on a push of bbc90ac (run 39456773610, completed
+  at 16:54 UTC).
 
 Each of the five gates lists its own workflow file in its pull-request paths.
 The 2026-10-20 change that removed stored checkout credentials (06af274) edits
@@ -213,7 +214,7 @@ The **Downloaded by** column was updated on 2026-10-20, when
 | `validated-completion-plan` (12197582957) | 39276345053 | 2027-01-17 15:15 | `completion-delivery.yml`, `completion-recovery.yml`, `completion-resume.yml` |
 | `completion-result-*` (74 and 1 artifacts) | 39315174445 and 39321225048 | 2027-01-17 19:56 and 20:40 | `completion-delivery.yml` (through `scripts/collect_completion_results.py`), `completion-recovery.yml` (run 39315174445 only) |
 | `completion-reading-delivery` (12234627856) | 39353736010 | 2027-01-18 01:29 | No kept workflow. The archived `publish-completion.yml`. |
-| `dependency-cone-plan` (12242630994), `cone-summary-level-1` (12243920789) and the 8 `dependency-cone-<shard>` artifacts | 39373979494 | 2027-01-18 05:16 | `catalog-preview.yml`, through `scripts/download_cone_artifacts.py`. They hold the only copy of the 151 pilot readings (docs/DEPENDENCY_CONE.md). |
+| `dependency-cone-plan` (12242630994), `cone-summary-level-1` (12243920789) and the 8 `dependency-cone-<shard>` artifacts | 39373979494 | 2027-01-18 05:16 | `catalog-preview.yml`, through `scripts/download_cone_artifacts.py`. They hold the 151 pilot readings that docs/DEPENDENCY_CONE.md and the preview use. The second pilot run, 39456773610, has its own artifacts, which expire on 2027-01-18 at 16:21 and which no kept workflow downloads. |
 
 The last row was added on 2026-10-20 at about 16:40 UTC from a read-only
 listing of run 39373979494, which has 11 artifacts with the same expiry; the

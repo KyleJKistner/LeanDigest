@@ -6,8 +6,9 @@ mathematics. The retained readings show those lemmas only as cited names. This
 page describes the plan, the workflow and the loader that extend reading coverage
 to the lemmas that the retained readings cite.
 
-The [Denominator](#denominator) describes the plan. One workflow run has read the
-pilot scope; [Pilot results](#pilot-results) gives its outcomes, and
+The [Denominator](#denominator) describes the plan. Two workflow runs have read
+the pilot scope, and no run has read the full scopes;
+[Pilot results](#pilot-results) gives the outcomes, and
 [Entering the catalog](#entering-the-catalog) describes how a catalog includes
 the readings.
 
@@ -188,19 +189,23 @@ values GitHub records, and `scripts/plan_dependency_cone.py reconcile` on them
 reproduced the CI summary byte for byte.
 
 The run's 11 artifacts (the plan, the preflight record, the 8 shards and the
-summary) are the only recorded copy of these readings. GitHub deletes all 11 on
-2027-01-18 (their recorded `expires_at`, 2027-01-18T05:16:06Z).
-`scripts/preserve_inputs.py` does not copy them, and no cone reading is
-committed. After that date the readings can be restored only by a new run,
-which needs a source bundle that has not expired (see
-[External inputs](#external-inputs)).
+summary) are the artifacts that this page and the catalog preview use. GitHub
+deletes all 11 on 2027-01-18 (their recorded `expires_at`,
+2027-01-18T05:16:06Z). `scripts/preserve_inputs.py` does not copy them, and no
+cone reading is committed. After the artifacts of both pilot runs expire, the
+readings can be restored only by a new run, which needs a source bundle that
+has not expired (see [External inputs](#external-inputs)).
 
 The push of commit `bbc90ac`, which changes `dependency-cone.yml` relative to
 the previous push (`f787dae`), started a second pilot run,
-[39456773610](https://github.com/KyleJKistner/LeanDigest/actions/runs/39456773610).
-It was in progress on 2026-10-20 at about 16:40 UTC, and its outcomes are not
-recorded here. `catalog-preview.yml` still downloads the artifacts of run
-39373979494 (`CONE_RUN`).
+[39456773610](https://github.com/KyleJKistner/LeanDigest/actions/runs/39456773610),
+which succeeded on 2026-10-20 at 16:54 UTC. Its preflight re-created the
+dependency tree again, and all 8 shards took the `resolve` route. Its summary
+artifact (SHA-256 `2149b1d3…`, matching the API) holds a
+`dependency-cone-summary.json` byte-identical to that of run 39373979494: 151
+readings generated. Its shard artifacts, which expire on 2027-01-18 at 16:21,
+were not downloaded or compared with those of the first run.
+`catalog-preview.yml` downloads the artifacts of run 39373979494 (`CONE_RUN`).
 
 | Environment module | Readings | Checked frames | Displayed steps | Gap steps | Job time | Build and extraction step |
 | --- | ---: | ---: | ---: | ---: | ---: | ---: |
@@ -556,11 +561,11 @@ checked, and no English fidelity is claimed.
 - **Level 1 only.** The plan covers constants that the 492 retained readings
   cite. Lemmas cited by cone readings form level 2. Level 2 is planned from level-1
   readings by the same rules, after level-1 results exist.
-- **Pilot only.** One completed workflow run (39373979494) read the 8 pilot
-  shards; 1,571 planned lemmas are outside its scope. A second pilot run
-  (39456773610) had not finished when this page was updated. No Lean toolchain ran locally. Apart from
-  that run's artifacts, the planner, worker, loader and catalog code are tested
-  only with synthetic fixtures.
+- **Pilot only.** Two workflow runs (39373979494 and 39456773610) read the 8
+  pilot shards; 1,571 planned lemmas are outside the pilot scope. No Lean
+  toolchain ran locally. Apart from the artifacts of the first run, the
+  planner, worker, loader and catalog code are tested only with synthetic
+  fixtures.
 - **Name-based exclusions.** The constructor and compiler rules, and the
   instance hint, are conventions. The exporter does not record whether an
   accepted constant is a theorem, a proof-valued definition, an instance or a
@@ -569,8 +574,8 @@ checked, and no English fidelity is claimed.
 - **Private names.** The two private lemmas cannot be addressed by the current
   exporter.
 - **External inputs.** The source artifact of run 38822475057 expires on
-  2026-11-14, and the 11 artifacts of pilot run 39373979494, which hold the only
-  copy of the 151 pilot readings, expire on 2027-01-18. Outside the cache's
+  2026-11-14, and the artifacts of pilot runs 39373979494 and 39456773610,
+  which hold the 151 pilot readings, expire on 2027-01-18. Outside the cache's
   branch scope, each shard spends a few minutes
   re-creating the dependency tree. Route `resolve` relies on `lake update`
   resolving to the pinned revisions. The preflight checks this once per run, and
