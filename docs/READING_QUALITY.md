@@ -249,10 +249,11 @@ the recorded data of these snapshots.
   label is not listed; such a reading must be regenerated.
 - In plain text (`prose`, `proof.txt`), every later line of a step whose
   sentence spans several lines is indented one level below the step, like its
-  conclusion. Before 0.6.0 those lines started at the left margin, so a
-  grouped hypothesis or a multi-line formula inside a nested step appeared to
-  be at the top level. The reading binding does not include plain text, and
-  the KPIs measure step texts, so neither changes.
+  conclusion. Before 0.6.0 those lines kept only the pretty-printer's own
+  indentation, whatever the step's depth, so a grouped hypothesis or a
+  multi-line formula inside a nested step appeared to be at the top level.
+  The reading binding does not include plain text, and the KPIs measure step
+  texts, so neither changes.
 - Frames absorbed into a grouped step add their heads to the reading's
   dependency list. Earlier versions listed only the first frame's head of a
   multi-frame step.
