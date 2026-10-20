@@ -74,15 +74,16 @@ imports. The catalog build bundles those modules, not the whole upstream tree:
    document that `write_bundle` renders.
 2. From the solution modules of those readings, it follows import headers
    breadth-first through `OAI.*` modules, resolving `OAI.A.B` to
-   `lean/OAI/A/B.lean`. It reads only the header of each file
-   (`header_imports`). Imports outside `OAI.` are counted and not followed.
+   `lean/OAI/A/B.lean`. A file's imports come from its header
+   (`header_imports`), never from its body. Imports outside `OAI.` are counted
+   and not followed.
 3. It scans a visited module with the declaration indexer only when the text
    after its imports, with comments and literals masked, contains every
    component of a cited `OAI.*` name as an identifier. A declaration that the
    indexer records spells each component of its name there, so the filter skips
    no declaration that the indexer would find. A private name is searched by
    the name after Lean's `_private.<module>.0.` prefix. Cited names outside
-   `OAI.` are not searched.
+   `OAI.` or with a quoted component are not searched.
 4. It selects a module when, for some reading, the module holds the only
    declaration of a cited name that the reading's solution module can see.
 
@@ -137,7 +138,7 @@ modules, has an incomplete closure. Its cited names carry
 | `dropped-by-selection-cap` | The only visible declaration is in a module that a selection cap left out. |
 | `ambiguous-in-visible-modules` | A citing module can see more than one declaration of the name. |
 | `declared-only-in-modules-not-imported` | Visited or solution modules declare the name, but no citing module imports them. |
-| `outside-searched-namespace` | The name is not in `OAI.`, and no visible solution module declares it. |
+| `outside-searched-namespace` | The name is outside `OAI.` or has a quoted component, so it was not searched, and no visible solution module declares it. |
 | `candidate-module-not-indexed` | A visited module spells the name but failed to index. |
 | `parent-type-in-bundled-source` | No visited module declares the name. The name without its last component is a structure, class or inductive type in a bundled module that a citing module imports. Lean generates fields, constructors and some instance names from such declarations; the index does not record them, and no link is made. |
 | `not-declared-in-visited-modules` | No visited module declares the name. |
@@ -196,24 +197,30 @@ measurement, not a published catalog.
 
 ## Local measurement of cited dependency sources
 
-Two local runs read files fetched from the pinned upstream commit
-(`raw.githubusercontent.com`) into a scratch tree. No source inventory was
-available locally, so source hashes were not checked. The fetched copies of the
-388 citing solution modules equal the bundled originals. Both runs called the
-walk, selection, index and link functions on the 492 retained readings rendered
-by the current renderer. Neither ran the complete catalog build.
+These local runs read upstream files fetched from the pinned commit
+(`raw.githubusercontent.com`) into a scratch tree. The fetched copies of the
+388 solution modules with readings equal the bundled originals of the published
+0.4.1 catalog; the other 25 solution modules were copied from that catalog. No
+upstream source inventory was available locally. The build below
+used an inventory computed from the fetched files themselves, which exercises
+the verification code but does not authenticate the files.
 
 The sample run used the 20 solution modules whose readings had the most
-`not-in-declaration-index` project citations: 38 readings. Their closures had
-3,115 modules (28.5 MB). The run selected 150 dependency modules with 2.0 MB of
-source, 7.1 MB including their pages and copies. Of the 312 cited `OAI.*` names
-that were `not-in-declaration-index`, 261 link to a source line and 51 stay
+`not-in-declaration-index` project citations: 38 readings. It called the walk,
+selection, index and link functions directly. The closures had 3,115 modules
+(28.5 MB). The run selected 150 dependency modules with 2.0 MB of source,
+7.1 MB including their pages and copies. Of the 312 cited `OAI.*` names that
+were `not-in-declaration-index`, 261 link to a source line and 51 stay
 unresolved.
 
-The full run started from all 388 solution modules with readings. The walk read
-65,265 modules (579.7 MB) in 101 seconds on the local machine and scanned 1,649
-of them. No module was unusable and no closure was incomplete. The run selected
-873 dependency modules with 10.2 MB of source.
+The full build ran `finding_catalog.build` and `audit-catalog` on all 492
+retained readings of the published catalog, with the comparison configurations
+and scope notes of the pinned commit and without statement shards. The same
+inputs were also built with the code before this change. The walk started from
+the 388 solution modules with readings, read 65,265 modules (579.7 MB), scanned
+1,649 of them, and found no unusable module and no incomplete closure. The build
+selected 873 dependency modules with 10.2 MB of source. No cap was reached, and
+the static audit passed.
 
 | Cited `OAI.*` names (1,762) | Solution modules only | With cited dependencies |
 | --- | ---: | ---: |
@@ -229,10 +236,22 @@ These 46 include automatically named instances (`inst…`), `casesOn` recursors
 and fields of structures whose modules are not bundled. Project citations, which
 count each reading-and-name pair, linked to a source line rose from 328 to
 1,638. Of the 1,669 linked project citations, 654 have the basis
-`imported-via-recorded-headers`.
+`imported-via-recorded-headers`. Each of the 1,671 source-line links in the
+built site, including those attached to reading links, points to a line that
+contains the last component of the cited name. Real Chromium followed five of
+these links by `file://` navigation to the declaration lines.
 
-The added pages and copies total 35.8 MB, or 8.2 MB after deflate compression.
-The declaration index grows from 1.2 MB to 5.8 MB with 11,767 header-only
-records, and the dependency record is 1.2 MB. The published 0.4.1 archive is
-49 MB; the estimated archive growth is about 9 MB. This is an estimate from
-compressing the generated files one at a time, not a built archive.
+| Local build | Before | After |
+| --- | ---: | ---: |
+| Build time on the local machine | 119 s | 252 s |
+| Static audit time | 17 s | 26 s |
+| Source pages | 413 | 1,286 |
+| Site size | 589.1 MB | 631.0 MB |
+| `evidence/declaration-index.json` | 1.3 MB | 5.9 MB |
+| `evidence/cited-dependency-sources.json` | None | 1.2 MB |
+| Deterministic release-style zip | 40.6 MB | 49.8 MB |
+
+The local site has no statement records or original-project evidence, so it is
+smaller than the published archive (49.1 MB). Adding the same dependency files
+to that archive would add an estimated 9 MB. This is an estimate, not a
+measurement of a published catalog.
