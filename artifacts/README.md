@@ -22,7 +22,8 @@ in any of these cases:
 
 At 04df977 the directory held 1,022 tracked files and 19,659,106 bytes. The
 budget is 21,000,000 bytes. The test also fails when the budget exceeds 1.25
-times the measured total, so the headroom cannot quietly grow.
+times the measured total. The budget therefore cannot be set far above the
+tracked size, and it must be lowered after a large removal.
 
 ```sh
 python scripts/check_artifact_budget.py          # summary; exit 1 on a violation
@@ -45,9 +46,9 @@ Cite each one where it is used, with the following details:
 - The SHA-256 of the downloaded archive or asset. GitHub reports artifact digests
   as `sha256:...`.
 - The commit the run was built from.
-- For an Actions artifact, its expiry date. The workflows here set 30 or 90 days
-  of retention, or use the repository default. Evidence that must outlive that
-  period belongs in a release asset.
+- For an Actions artifact, its expiry date. The workflows here set 14, 30 or 90
+  days of retention, or use the repository default. Evidence that must outlive
+  that period belongs in a release asset.
 
 Small summaries may be committed here when a test or document needs them in
 the repository. Examples are a coverage or acceptance JSON file, a receipt, or a

@@ -105,7 +105,7 @@ deletions. The figures include the product contributions of PR #5.
 
 Measured against 04df977 instead, `git diff --stat 01dfd1e 04df977 -- '*.lean'`
 reports 92 files and 8,456 insertions. The two extra files and 48 lines are
-commit 153bc35 from the original-project line (PR #4), which changed
+commit 153bc35 on `work/full-original-project`, which changed
 `lean/Narrative.lean` and its packaged copy `proofreader/data/Narrative.lean`.
 
 The source-bound increments added their own Lean modules and native controls.
@@ -148,9 +148,16 @@ steps by the frames they own gives the following:
   first conjunct.” or “Take the second conjunct.”, to the checked
   conjunction-projection rule.
 - 239 `And.left` and `And.right` steps (120 and 119) that 0.4.1 described with
-  the fixed sentence became gaps. The checked rule could not match their
-  recorded formulas, and docs/LOGICAL_EXPLANATIONS.md describes why the fixed
-  sentence was not an explanation for some of them.
+  the fixed sentence became gaps. The checked rule does not accept them. In
+  224 the recorded premise does not print as the conjunction of the recorded
+  components. In 15 the projection is applied to further arguments.
+  docs/LOGICAL_EXPLANATIONS.md describes why the fixed sentence was not an
+  explanation for such steps.
+- 30 steps changed only by gaining a “Forward direction” or “Reverse
+  direction” label, and kept their gap status; 18 of them are gaps in both
+  versions.
+- The other 17,680 steps have the same rule, text and gap status in both
+  versions.
 
 The net change is 191 fewer gaps and 239 more, an increase of 48. The increase
 comes from no longer counting an unchecked, name-keyed sentence as an

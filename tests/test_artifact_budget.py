@@ -17,10 +17,11 @@ ROOT = Path(__file__).resolve().parents[1]
 
 
 def _git_checkout(root: Path) -> bool:
+    """True only when root is the top of its own work tree, not an unpacked copy inside another repository."""
     if not shutil.which('git'):
         return False
-    r = subprocess.run(['git', '-C', str(root), 'rev-parse', '--is-inside-work-tree'], capture_output=True, text=True)
-    return r.returncode == 0 and r.stdout.strip() == 'true'
+    r = subprocess.run(['git', '-C', str(root), 'rev-parse', '--show-toplevel'], capture_output=True, text=True)
+    return r.returncode == 0 and Path(r.stdout.strip()).resolve() == root.resolve()
 
 
 def test_committed_artifacts_fit_the_recorded_budget():
@@ -67,6 +68,9 @@ def test_a_subdirectory_is_not_measured_as_the_repository(tmp_path):
     root = repo(tmp_path, {'artifacts/a.json': 10, 'docs/x.md': 5})
     with pytest.raises(RuntimeError, match='not the top level'):
         budget.tracked_sizes(root/'docs')
+    # An unpacked source tree nested in another repository is not a checkout of this one.
+    assert _git_checkout(root) and not _git_checkout(root/'docs')
+    assert not _git_checkout(tmp_path)
 
 
 def test_empty_inventory_is_not_a_pass(tmp_path):

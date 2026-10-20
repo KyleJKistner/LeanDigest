@@ -42,7 +42,8 @@ GitHub reports a pull request as merged when its head is merged into its base.
 
 On 2026-10-20 the Actions listing showed the following PR #8 activity:
 
-- Recovery run 39315174445 (`completion-recovery.yml`) was still in progress.
+- Recovery run 39315174445 (`completion-recovery.yml`), started on 2026-10-19
+  at 19:56 UTC, concluded with failure on 2026-10-20 at 03:50 UTC.
 - Later recovery runs 39354572756 and 39356533826 concluded with failure.
 - Publication run 39356177518 (`publish-completion.yml`) succeeded. It created
   release `leanglish-original-project-2149131`, tagged at 2149131.
@@ -114,16 +115,27 @@ listing reported these expiry times for artifacts that kept workflows download.
 
 | Artifact | Run | Expires (UTC) | Downloaded by |
 | --- | --- | --- | --- |
+| `checkpoint-142c3d0f555a25666bb36dd1-1` (12217614568) | 39315174445 | 2026-11-02 20:14 | `completion-resume.yml` |
 | `complete-openai-lean-source` (12012738377) | 38822475057 | 2026-11-14 23:16 | `all-findings-release.yml`, `breadth-release.yml`, `completion-delivery.yml`, `completion-resume.yml`, `completion-worker.yml` |
 | `finding-statement-retry-*` (12107274354, 12108605282) | 39050823104 | 2026-11-16 16:52 and 17:06 | `all-findings-release.yml`, `breadth-release.yml`, `completion-delivery.yml` |
 | `leanglish-all-finding-observations` (12107445952) | 39049596449 | 2027-01-15 | `all-findings-release.yml`, `breadth-release.yml`, `completion-delivery.yml` |
-| `finding-proof-retry-*` (17 artifacts, 3 read) | 39065371645 | 2027-01-15 | `all-findings-release.yml`, `breadth-release.yml` |
+| `finding-proof-retry-*` (16 artifacts) | 39065371645 | 2027-01-15 | `all-findings-release.yml`, `breadth-release.yml` |
 | `leanglish-breadth-observations` (12116428595) | 39076207515 | 2027-01-15 | `breadth-release.yml` |
+| `original-nanoda-toolchain` (12152481984) | 39170206904 | 2027-01-16 21:58 | `completion-resume.yml`, `completion-worker.yml` |
 | `completed-original-campaigns` (12195158110) | 39270771889 | 2027-01-17 | `completion-delivery.yml` |
 | `validated-completion-plan` (12197582957) | 39276345053 | 2027-01-17 | `completion-recovery.yml`, `completion-resume.yml`, `completion-delivery.yml` |
+| `completion-reading-delivery` (12217842952) | 39316344259 | 2027-01-17 20:05 | `publish-completion.yml` |
 
-The expiry of checkpoint artifact 12217614568 and tools artifact 12152481984 was
-not read. After 2026-11-14, a push to `main` that matches the path filters of
+The checkpoint artifact expires first. `completion-worker.yml` produced it in
+recovery run 39315174445 and keeps checkpoints for 14 days. `completion-delivery.yml`
+also collects the `completion-result-*` artifacts of recovery runs 39315174445
+and 39321225048 through `scripts/collect_completion_results.py`. The first page
+of each run's artifact listing, which holds all of run 39321225048's artifacts
+and 100 of run 39315174445's 294, shows those results expiring on 2027-01-17;
+the remaining listing pages were not read.
+
+After 2026-11-02, a run of `completion-resume.yml` fails at the checkpoint
+download. After 2026-11-14, a push to `main` that matches the path filters of
 `all-findings-release.yml` or `breadth-release.yml` will fail at the source
 download unless that input is preserved elsewhere, for example as a release
 asset, and the workflows are updated to use it. The acceptance run 38792262410
