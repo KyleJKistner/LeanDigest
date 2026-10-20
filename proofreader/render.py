@@ -54,8 +54,12 @@ def embedded_json(data: Any) -> str:
     return json.dumps(data, ensure_ascii=False, sort_keys=True, separators=(",", ":"), allow_nan=False).replace("&", "\\u0026").replace("<", "\\u003c").replace(">", "\\u003e").replace("\u2028", "\\u2028").replace("\u2029", "\\u2029")
 
 
-def html_document(document: Document, coverage: dict | None = None) -> str:
+def html_document(document: Document, coverage: dict | None = None, links: dict | None = None) -> str:
+    """Citation links, when given, are a separate data island outside the checked reading."""
     template = (ASSETS / "index.html").read_text(encoding="utf-8")
+    if links is not None:
+        from .declaration_index import validate_links
+        validate_links(links)
     values = {
         "__PRODUCT_NAME__": html.escape(PRODUCT_NAME),
         "__TAGLINE__": html.escape(TAGLINE),
@@ -64,14 +68,15 @@ def html_document(document: Document, coverage: dict | None = None) -> str:
         "/*__STYLE__*/": (ASSETS / "style.css").read_text(encoding="utf-8"),
         "/*__APP__*/": (ASSETS / "app.js").read_text(encoding="utf-8"),
         "__DOCUMENT_DATA__": embedded_json({"document": document.to_dict(), "coverage": coverage if coverage is not None else report(document)}),
+        "<!--__LINKS__-->": "" if links is None else '<script id="proofreader-links" type="application/json">'+embedded_json(links)+"</script>",
     }
     # One pass over the trusted template: untrusted marker-looking text is not reprocessed.
     return re.sub("|".join(re.escape(k) for k in values), lambda m: values[m.group(0)], template)
 
 
-def write_html(document: Document, destination: Path | str, coverage: dict | None = None) -> Path:
+def write_html(document: Document, destination: Path | str, coverage: dict | None = None, links: dict | None = None) -> Path:
     p = Path(destination); p.parent.mkdir(parents=True, exist_ok=True)
-    p.write_text(html_document(document, coverage), encoding="utf-8")
+    p.write_text(html_document(document, coverage, links), encoding="utf-8")
     return p
 
 
