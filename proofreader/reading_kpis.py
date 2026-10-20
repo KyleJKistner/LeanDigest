@@ -12,6 +12,10 @@ Two opacity measures are reported because they answer different questions:
   unexplained step. Collapsing several opaque frames into one displayed gap
   lowers the first number but not the second, so tidier output cannot pass for
   a better explanation.
+
+Citation, instance and automation counts use the renderer's rule tags and
+frame classifier, not sentence patterns, so rewording a step cannot change
+them. ``opaque_apply_steps`` is kept as a wording measure only.
 """
 from __future__ import annotations
 import argparse
@@ -26,7 +30,10 @@ from .model import digest, walk_steps
 from .narrative import Narrative, PRINTER_VERSION
 
 SCHEMA = 'leanglish.reading-kpis/v1'
+# Wording measure: the 0.4 sentence for an unexplained application.
 OPAQUE_APPLY = re.compile(r'^Apply (.+) to the supplied arguments\.$')
+CITATION_RULES = {'citation', 'project-citation'}
+INSTANCE_RULES = {'instance-facts', 'instance-assumptions'}
 QUALIFIED = re.compile(r"(?<![\w.'])[A-Z][\w'₀-₉]*(?:\.[\w'₀-₉!?]+)+")
 LEAN_MARKERS = re.compile(r'(?<![\w.])fun\b|=>|↑')
 
@@ -44,7 +51,7 @@ def measure(record: dict) -> dict:
     d = n.document(title=record['theorem']).declarations[0]
     steps = list(walk_steps(d.steps))
     by_id = {s.id: s for s in steps}
-    frames_by_rule: Counter = Counter()
+    frames_by_rule: Counter = Counter(); gap_frames_by_rule: Counter = Counter()
     gap_frames = 0
     for owner in n.owners.values():
         if owner == 'statement':
@@ -53,6 +60,9 @@ def measure(record: dict) -> dict:
         s = by_id[owner]
         frames_by_rule[s.rule] += 1
         gap_frames += s.fallback
+        gap_frames_by_rule[s.rule] += s.fallback
+    gaps = [s for s in steps if s.fallback]
+    cited = {r for s in steps if s.rule == 'project-citation' for r in s.references}
     shown = [p['text'] for p in d.parameters] + ['Then '+d.statement+'.']
     for s in steps:
         shown.append(s.text)
@@ -61,14 +71,21 @@ def measure(record: dict) -> dict:
     text = '\n'.join(shown)
     return {'theorem': record['theorem'], 'snapshot_sha256': n.snapshot.sha256,
             'frames': len(n.frames), 'display_steps': len(steps),
-            'gap_steps': sum(s.fallback for s in steps), 'gap_frames': gap_frames,
+            'gap_steps': len(gaps), 'gap_frames': gap_frames,
+            'citation_gap_steps': sum(s.rule in CITATION_RULES for s in gaps),
+            'project_citation_gap_steps': sum(s.rule == 'project-citation' for s in gaps),
+            'other_gap_steps': sum(s.rule not in CITATION_RULES | INSTANCE_RULES | {'automation'} for s in gaps),
+            'instance_frames': sum(n.instance(i) for i in range(len(n.frames))),
+            'automation_frames': frames_by_rule['automation'],
+            'cited_project_constants': sorted(cited),
             'opaque_apply_steps': sum(bool(OPAQUE_APPLY.match(s.text)) for s in steps),
             'characters': len(text), 'words': len(text.split()),
             'qualified_names': len(QUALIFIED.findall(text)),
             'lean_markers': len(LEAN_MARKERS.findall(text)),
             'rules': dict(sorted(Counter(s.rule for s in steps).items())),
-            'gap_rules': dict(sorted(Counter(s.rule for s in steps if s.fallback).items())),
-            'frames_by_rule': dict(sorted(frames_by_rule.items()))}
+            'gap_rules': dict(sorted(Counter(s.rule for s in gaps).items())),
+            'frames_by_rule': dict(sorted(frames_by_rule.items())),
+            'gap_frames_by_rule': dict(sorted((k, v) for k, v in gap_frames_by_rule.items() if v))}
 
 
 def _ratio(a: int, b: int) -> float:
@@ -86,8 +103,10 @@ def _quantiles(values: list[float]) -> dict:
 def summarize(rows: list[dict], failures: list[dict], corpus_digest: str) -> dict:
     total = lambda k: sum(r[k] for r in rows)
     rules: Counter = Counter(); gap_rules: Counter = Counter(); frames_by_rule: Counter = Counter()
+    gap_frames_by_rule: Counter = Counter(); cited: set = set()
     for r in rows:
         rules.update(r['rules']); gap_rules.update(r['gap_rules']); frames_by_rule.update(r['frames_by_rule'])
+        gap_frames_by_rule.update(r['gap_frames_by_rule']); cited.update(r['cited_project_constants'])
     steps, frames, chars = total('display_steps'), total('frames'), total('characters')
     shares = [_ratio(r['gap_steps'], r['display_steps']) for r in rows]
     return {'schema': SCHEMA, 'printer_version': PRINTER_VERSION, 'corpus_sha256': corpus_digest,
@@ -96,6 +115,12 @@ def summarize(rows: list[dict], failures: list[dict], corpus_digest: str) -> dic
             'gap_steps': total('gap_steps'), 'gap_frames': total('gap_frames'),
             'gap_step_share': _ratio(total('gap_steps'), steps),
             'gap_frame_share': _ratio(total('gap_frames'), frames),
+            'citation_gap_steps': total('citation_gap_steps'),
+            'citation_gap_share': _ratio(total('citation_gap_steps'), steps),
+            'project_citation_gap_steps': total('project_citation_gap_steps'),
+            'distinct_cited_project_constants': len(cited),
+            'other_gap_steps': total('other_gap_steps'),
+            'instance_frames': total('instance_frames'), 'automation_frames': total('automation_frames'),
             'opaque_apply_steps': total('opaque_apply_steps'),
             'opaque_apply_share': _ratio(total('opaque_apply_steps'), steps),
             'readings_without_gaps': sum(r['gap_steps'] == 0 for r in rows),
@@ -107,6 +132,8 @@ def summarize(rows: list[dict], failures: list[dict], corpus_digest: str) -> dic
             'lean_markers_per_1000_characters': round(1000*total('lean_markers')/chars, 2) if chars else 0.0,
             'rules': dict(sorted(rules.items())), 'gap_rules': dict(sorted(gap_rules.items())),
             'frames_by_rule': dict(sorted(frames_by_rule.items())),
+            'gap_frames_by_rule': dict(sorted(gap_frames_by_rule.items())),
+            'measure_notes': MEASURE_NOTES,
             'interpretation': 'Displayed-reading measurements only; not English fidelity or human comprehension.'}
 
 
@@ -122,16 +149,24 @@ def measure_corpus(corpus: Path) -> tuple[dict, list[dict]]:
     return summarize(rows, failures, digest('\n'.join(sorted(hashes)))), rows
 
 
-HEADLINE = ['readings', 'display_steps', 'gap_steps', 'gap_step_share', 'gap_frame_share',
-            'opaque_apply_steps', 'opaque_apply_share', 'readings_without_gaps',
+HEADLINE = ['readings', 'display_steps', 'gap_steps', 'gap_step_share', 'gap_frames', 'gap_frame_share',
+            'citation_gap_steps', 'project_citation_gap_steps', 'other_gap_steps', 'instance_frames',
+            'automation_frames', 'opaque_apply_steps', 'opaque_apply_share', 'readings_without_gaps',
             'readings_over_half_gap_steps', 'words', 'qualified_names_per_1000_characters',
             'lean_markers_per_1000_characters']
+MEASURE_NOTES = {
+    'citation_gap_steps': 'Gap steps tagged citation or project-citation: a cited constant whose proof this reading does not expand.',
+    'other_gap_steps': 'Gap steps that are not citations, typeclass instance facts or automation certificates.',
+    'instance_frames': 'Frames the renderer classifies as typeclass side conditions, wherever they are displayed.',
+    'automation_frames': 'Frames owned by one collapsed norm_num, positivity or linarith certificate step.',
+    'opaque_apply_steps': 'Wording measure: steps reading "Apply <name> to the supplied arguments." Rewording lowers it without explaining anything.'}
+LABELS = {'opaque_apply_steps': 'opaque_apply_steps (wording)', 'opaque_apply_share': 'opaque_apply_share (wording)'}
 
 
 def comparison(old: dict, new: dict) -> str:
     lines = ['| Measure | '+old.get('printer_version', 'baseline')+' | '+new['printer_version']+' |', '|---|---:|---:|']
     for k in HEADLINE:
-        lines.append(f'| {k} | {old.get(k, "—")} | {new[k]} |')
+        lines.append(f'| {LABELS.get(k, k)} | {old.get(k, "—")} | {new[k]} |')
     if old.get('corpus_sha256') != new['corpus_sha256']:
         lines.append('\nWarning: the two measurements use different corpora.')
     return '\n'.join(lines)
