@@ -8,37 +8,53 @@ proof. The renderer is deterministic and makes no language-model calls.
 ## Example
 
 `OAI.CompleteCrouzeix.main`, as rendered by the current renderer
-(`source-math-en/0.6.0`) from its retained snapshot:
+(`source-math-en/0.7.0`) from its retained snapshot:
 
 ```text
 Then UniversalBound 2 ∧ ∀ (C : ℝ), UniversalBound C → 2 ≤ C.
 
 Proof.
 Verify the 2 required conclusions.
-  Let n ∈ ℕ be arbitrary.
-  Let m ∈ ℕ be arbitrary.
-  Let d ∈ ℕ be arbitrary.
-  Assume 0 < n.
-  Assume 0 < m.
-  Let A ∈ Matrix (Fin n) (Fin n) ℂ be arbitrary.
-  Let B ∈ Fin (d + 1) → Matrix (Fin m) (Fin m) ℂ be arbitrary.
-  [Explanation gap] By the project lemma complete_crouzeix_bound:
-    ‖polynomialAt A B‖ ≤ 2 · rangeMaximum A B
-    Use the hypotheses hn: 0 < n; hm: 0 < m.
-  Let C ∈ ℝ be arbitrary.
-  Assume UniversalBound C.
-  [Explanation gap] By the project lemma optimal_constant:
-    2 ≤ C
-    Use the hypothesis hC: UniversalBound C.
+  Prove ∀ (n m d : ℕ),
+      0 < n →
+        0 < m →
+          ∀ (A : Matrix (Fin n) (Fin n) ℂ) (B : Fin (d + 1) → Matrix (Fin m) (Fin m) ℂ),
+            ‖polynomialAt A B‖ ≤ 2 · rangeMaximum A B.
+    Let n ∈ ℕ be arbitrary.
+    Let m ∈ ℕ be arbitrary.
+    Let d ∈ ℕ be arbitrary.
+    Assume 0 < n.
+    Assume 0 < m.
+    Let A ∈ Matrix (Fin n) (Fin n) ℂ be arbitrary.
+    Let B ∈ Fin (d + 1) → Matrix (Fin m) (Fin m) ℂ be arbitrary.
+    [Explanation gap] By the project lemma complete_crouzeix_bound:
+      ‖polynomialAt A B‖ ≤ 2 · rangeMaximum A B
+      Use the hypotheses hn: 0 < n; hm: 0 < m.
+  Prove ∀ (C : ℝ), UniversalBound C → 2 ≤ C.
+    Let C ∈ ℝ be arbitrary.
+    Assume UniversalBound C.
+    [Explanation gap] By the project lemma optimal_constant:
+      2 ≤ C
+      Use the hypothesis hC: UniversalBound C.
 ```
 
 Names are shown relative to the theorem's namespace (`OAI.CompleteCrouzeix`), and
-each reading states which prefixes it omits. An explanation gap marks a step whose
-justification is not expanded in this reading; here, each gap cites a project
-lemma. In the catalog, a cited name links to that lemma's own reading or to its
-declaration line in the original source. The published release shows the same
-proof as `Apply OAI.CompleteCrouzeix.complete_crouzeix_bound to the supplied
-arguments.`
+each reading states which prefixes it omits. Each conclusion is proved inside its
+own block, so a variable or assumption introduced for one conclusion never
+appears to govern the next. An explanation gap marks a step whose justification
+is not expanded in this reading; here, each gap cites a project lemma. The
+published release shows the same step as `Apply
+OAI.CompleteCrouzeix.complete_crouzeix_bound to the supplied arguments.`
+
+Cited names become links in rebuilt catalogs: to the lemma's own reading where
+one exists, otherwise to its declaration line in the original source. How many
+resolve depends on what the catalog bundles. A full build from the upstream
+source tree links 1,557 of the 1,762 cited project names (local measurement).
+The catalog preview, which bundles only the solution modules and the pilot
+supporting-lemma readings, links 495 of them. The published release has no
+citation links. In the preview, `complete_crouzeix_bound` links to its
+declaration line; `optimal_constant` is declared in a module the preview does not
+bundle, so it links only in a full build.
 
 ## Coverage
 
@@ -47,19 +63,20 @@ arguments.`
 | Documented findings indexed | 242 of 242 |
 | Documented theorem targets with a reading (release `leanglish-original-project-317dc31`) | 492 of 536 |
 | Checked proof frames in those readings | 22,452 |
-| Explanation-gap steps in those readings, published renderer 0.4.1 → current 0.6.0 | 7,587 → 4,961 |
-| Words in those readings, 0.4.1 → 0.6.0 | 390,871 → 301,158 |
+| Explanation-gap steps in those readings, published renderer 0.4.1 → current 0.7.0 | 7,587 → 5,014 |
+| Words in those readings, 0.4.1 → 0.7.0 | 390,871 → 321,137 |
 | Readings without any explanation gap | 0 |
 | Supporting lemmas with a reading (dependency-cone pilot, not yet in a release) | 151 of 1,722 planned |
-| Cited project lemmas linked to a reading or source line (local full build) | 1,557 of 1,762 |
+| Cited project names linked to a reading or source line (local full build) | 1,557 of 1,762 |
 | Human comprehension study | Not yet performed |
 
-The numbers for renderer 0.6.0 come from re-rendering the 492 retained snapshots
+The numbers for renderer 0.7.0 come from re-rendering the 492 retained snapshots
 with `leanglish reading-kpis`; CI fails if
 `benchmarks/reading-kpis/current.json` disagrees with the committed renderer.
 Fewer gap steps does not mean fewer checked frames inside gaps: grouping
-instance facts and automation certificates raised that count from 7,587 to
-8,034. See [Reading quality](docs/READING_QUALITY.md).
+instance facts and automation certificates, and marking unchecked definitional
+unfoldings as gaps, raised that count from 7,587 to 8,175. See
+[Reading quality](docs/READING_QUALITY.md).
 
 Top-level theorems in this corpus mostly assemble project lemmas, so most of the
 mathematics is in the cited lemmas. The [dependency cone](docs/DEPENDENCY_CONE.md)
@@ -75,8 +92,9 @@ Lean runtime is needed for the included material.
 
 The published release uses renderer 0.4.1. The `catalog-preview.yml` workflow
 re-renders that release with the current renderer, notation and citation links,
-audits it, and uploads the result as a workflow artifact. It does not publish a
-release. See [Catalog preview](docs/CATALOG_PREVIEW.md).
+adds the 151 pilot supporting-lemma readings as a separate section, audits the
+result, and uploads it as a workflow artifact. It does not publish a release.
+See [Catalog preview](docs/CATALOG_PREVIEW.md).
 
 ## Verification
 

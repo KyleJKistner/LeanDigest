@@ -14,8 +14,11 @@ pull request from this branch. No pull request exists for this branch yet, and
 nothing was merged into `main`. See docs/REPOSITORY_STATE.md for every branch.
 
 No independent agents in the AGENTS.md sense ran. Work was split across
-parallel subagents in this session, each reviewed by a separate adversarial
-pass and then integrated and re-tested here.
+parallel subagents in this session. Each track had a separate adversarial
+self-check, and the integrated branch had a five-lens audit (fidelity, notation,
+links, documentation claims, workflows) whose 55 findings were each re-checked
+by an independent skeptic: 54 were confirmed (1 blocker, 24 major, 29 minor) and
+then fixed, with an independent check of each fix.
 
 ## What changed
 
@@ -24,68 +27,86 @@ pass and then integrated and re-tested here.
   digest-checked by `scripts/fetch_reading_corpus.py`). CI fails when
   `benchmarks/reading-kpis/current.json` is stale. The 0.4.1 baseline reproduces
   the release's 7,587 gaps. The merged 0.4.2 reader stack measured 7,635.
-- Renderer `source-math-en/0.6.0` (narrative.py, narrative_rules.py,
-  formula_surface.py): instance side conditions grouped, norm_num/positivity/
-  linarith certificates summarised, rewrite frontiers worded by head,
-  citations phrased as "By the project lemma X:", hypotheses grouped, several
-  logical shapes explained. All still-unexplained content remains a gap. Corpus:
-  gap steps 7,587 → 4,961, words 390,871 → 301,158, gap frames 7,587 → 8,034.
-  See docs/READING_QUALITY.md for the per-change table.
+- Renderer `source-math-en/0.7.0` (narrative.py, narrative_rules.py,
+  narrative_checks.py, formula_surface.py): instance side conditions grouped,
+  norm_num/positivity/linarith certificates summarised, rewrite frontiers worded
+  by head, citations phrased as "By the project lemma X:", hypotheses grouped,
+  several logical shapes explained, and unchecked definitional unfoldings marked
+  as gaps. Corpus: gap steps 7,587 → 5,014, words 390,871 → 321,137, gap frames
+  7,587 → 8,175. See docs/READING_QUALITY.md for the per-change table.
+- Binder scope (audit blocker EF-1, present since the published 0.4.1 renderer):
+  a premise, conjunct, case or motive proof that introduces a variable or
+  assumption is now nested in its own "Prove …" block. Before the fix, 126
+  corpus and 38 cone readings displayed later steps as if under an earlier
+  branch's assumptions. `document()` now refuses any reading that violates the
+  scope invariant.
 - Display notation (notation.py): collision-checked namespace shortening, a
-  legend per reading, and a bail-out parser for `x ↦ e`, Tendsto limits, 𝓝, #s,
-  √, binomials and Real functions. Qualified names per 1,000 characters
-  15.5 → 7.9. See docs/NOTATION.md.
+  legend per reading (shown in the reader's default view), and a bail-out parser
+  for `x ↦ e`, 𝓝, #s, √, binomials and Real functions. The Tendsto limit form
+  now requires evidence of the binder type and fires on no retained snapshot.
+  See docs/NOTATION.md.
 - Citation links and cited-source bundling (declaration_index.py,
   finding_catalog.py, app.js): links stay outside the checked reading. A local
-  full build links 1,557 of the 1,762 cited project names. See
-  docs/CITATION_LINKS.md.
-- Dependency cone (dependency_cone.py, dependency-cone.yml): level-1 plan of
-  1,722 cited lemmas in 379 environment modules. Pilot run 39373979494 produced
-  readings for all 151 pilot lemmas. See docs/DEPENDENCY_CONE.md.
+  full build links 1,557 of the 1,762 cited project names; the catalog preview
+  links 495 (30 to readings, 151 to supporting-lemma readings, 314 to source
+  lines). See docs/CITATION_LINKS.md.
+- Dependency cone (dependency_cone.py, cone_catalog.py, dependency-cone.yml):
+  level-1 plan of 1,722 cited lemmas in 379 environment modules. Pilot run
+  39373979494 produced readings for all 151 pilot lemmas; the catalog preview
+  includes them as a separate denominator. See docs/DEPENDENCY_CONE.md.
 - Reviewed-gloss mechanism (glossary.py): 85 proposals, none reviewed, so default
-  output is unchanged. All-reviewed projection: 4,064 gap steps. See
+  output is unchanged. All-reviewed projection at 0.7.0: 4,117 gap steps. See
   docs/GLOSSARY.md and docs/glossary-review/.
 - Catalog preview (scripts/rerender_catalog.py, catalog-preview.yml) and input
   preservation (scripts/preserve_inputs.py, preserve-inputs.yml, dispatch only).
-- Housekeeping: 24 one-shot workflows moved to .github/workflow-archive/, an
-  artifact size budget enforced by tests, docs/RESEARCH_TRACKS.md for the
-  certified-English line, and a README written for readers of the mathematics.
+- Housekeeping: one-shot workflows moved to .github/workflow-archive/, the two
+  frozen-release rebuild workflows can no longer mislabel a current-renderer
+  rebuild as 0.4.0 or 0.4.1, CI compares the whole tracked tree after the demo
+  builds, an artifact size budget is enforced by tests, docs/RESEARCH_TRACKS.md
+  covers the certified-English line, and the README is written for readers of
+  the mathematics.
 
 ## Owner actions
 
 1. Start the rest of the cone campaign. This session's GitHub token cannot
-   dispatch workflows (HTTP 403):
-   `gh workflow run dependency-cone.yml --ref claude/keen-archimedes-ihorkq -f scope=full-1`,
-   then `-f scope=full-2`. The pilot took 33 minutes for 8 shards.
+   dispatch workflows (HTTP 403), and no dispatch of dependency-cone.yml from a
+   non-default branch has been tested; the documented route is to put the
+   workflow on `main` and dispatch scopes `full-1`, then `full-2`. The pilot took
+   33 minutes for 8 shards.
 2. Preserve expiring inputs before 2026-11-02 (checkpoint artifact) and
    2026-11-14 (source artifact): put preserve-inputs.yml on `main` and dispatch
    it, or decide to attach the inputs to a release. See docs/INPUT_PRESERVATION.md.
 3. Review glossary proposals with `scripts/glossary_review.py`; only a named
    human reviewer may mark an entry reviewed.
 4. Decide on the certified-English line using the exit criteria in
-   docs/RESEARCH_TRACKS.md.
+   docs/RESEARCH_TRACKS.md. Its five native gates have not run on the
+   consolidated tree; a pull request that contains this branch runs them.
 5. Delete merged branches listed in docs/REPOSITORY_STATE.md if you agree.
 
 ## Next work
 
-- Bring the cone readings into a published catalog as their own denominator,
-  then plan level 2 from the level-1 readings.
+- Run the full cone campaign, publish a catalog with the cone readings as their
+  own denominator, then plan level 2 from the level-1 readings.
 - Flatten nested existential unpacking: `obtain ⟨r, δ, s, …⟩` currently restates
   the remaining existential at every layer (see
   `OAI.Yau.Target.yau_nodal_set_upper_bound_counterexample`).
-- Library citations are the largest gap category in cone readings (1,337 of
-  2,654 gap steps in the pilot); reviewed glosses address them directly.
+- Library citations are the largest gap category in cone readings (1,334 of
+  2,754 gap steps in the pilot at 0.7.0); reviewed glosses address them directly.
+- Record binder types in the exporter so display notation can show limits
+  without guessing.
 - Run the human comprehension study described in docs/ACCEPTANCE.md (A5).
 
 ## Validation at this checkpoint
 
-Local: 1,905 tests passed and 14 were skipped (Lean, or release files not
-supplied). `benchmarks/reading-kpis/current.json` regenerates byte-identically.
-The CI drift check for packaged demo assets was reproduced locally. Native
+Local, at the commit that integrated the audit fixes (bbc90ac): the CI sequence
+(demo builds, then the test suite without the Lean integration files) gave 2,146
+passed and 5 skipped, and left the tracked tree unchanged.
+`benchmarks/reading-kpis/current.json` regenerates byte-identically. Native
 tests run only in GitHub Actions; check the latest runs on this branch before
 claiming CI results.
 
 ---
+
 
 # Canonical proof-document checkpoint — 2026-10-19
 
