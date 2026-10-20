@@ -122,18 +122,18 @@ Default mode: `benchmarks/reading-kpis/current.json` and the per-reading rows
 are byte-identical to the measurement before the glossary was added.
 
 Preview mode (`docs/glossary-review/preview-kpis.json`, renderer
-`source-math-en/0.5.0`, corpus `9b34751d…55ae`):
+`source-math-en/0.6.0`, corpus `9b34751d…55ae`):
 
 | Measure | Default | Preview |
 |---|---:|---:|
-| Gap steps | 5,098 | 5,098 |
-| Gap frames | 8,171 | 8,171 |
-| Citation gap steps | 3,508 | 3,508 |
+| Gap steps | 4,961 | 4,961 |
+| Gap frames | 8,034 | 8,034 |
+| Citation gap steps | 3,488 | 3,488 |
 | Steps showing an unreviewed gloss | 0 | 897 |
 | Readings showing an unreviewed gloss | 0 | 135 |
 | Distinct glosses shown | 0 | 85 |
-| Words | 307,735 | 316,913 |
-| Qualified names per 1,000 characters | 7.78 | 7.59 |
+| Words | 301,158 | 310,336 |
+| Qualified names per 1,000 characters | 7.87 | 7.67 |
 
 The preview changes wording only; every count of gaps is unchanged.
 
@@ -141,19 +141,19 @@ Projection if all 85 proposals were reviewed as written:
 
 | Measure | Default | Projected |
 |---|---:|---:|
-| Gap steps | 5,098 | 4,201 |
-| Gap step share | 0.3533 | 0.2911 |
-| Gap frames | 8,171 | 7,274 |
-| Gap frame share | 0.3639 | 0.3240 |
-| Citation gap steps | 3,508 | 2,611 |
-| Readings with more than half gap steps | 191 | 174 |
+| Gap steps | 4,961 | 4,064 |
+| Gap step share | 0.3790 | 0.3105 |
+| Gap frames | 8,034 | 7,137 |
+| Gap frame share | 0.3578 | 0.3179 |
+| Citation gap steps | 3,488 | 2,591 |
+| Readings with more than half gap steps | 193 | 173 |
 | Readings without gaps | 0 | 0 |
 
 The projection is arithmetic on the preview rendering: each step that shows an
 unreviewed gloss is counted as explained unless its frame is a budget cut
 (none is). It was checked against a rendering in which every entry was marked
 reviewed by a synthetic reviewer, held only in memory: all the projected
-counts above matched, and that rendering had 315,953 words.
+counts above matched, and that rendering had 309,376 words.
 `tests/test_glossary.py` repeats this check on real fixture subtrees. No
 reading would become free of gaps: every reading that cites these lemmas also
 has other gaps.

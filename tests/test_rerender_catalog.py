@@ -115,7 +115,7 @@ def published_catalog(tmp_path):
         (site / name).unlink()
     text = (site / 'coverage.html').read_text()
     text = re.sub('<tr><td>' + re.escape(preview.CITATION_ROWS[0]) + '.*?' + re.escape(preview.CITATION_ROWS[3]) + r'</td><td>\d+</td></tr>', '', text)
-    (site / 'coverage.html').write_text(text.replace(preview.CITATION_NOTE, '').replace(preview.INDEX_LINK, ''), encoding='utf-8')
+    (site / 'coverage.html').write_text(re.sub(re.escape(preview.NOTE_PREFIX) + r'.*?</p>', '', text).replace(preview.INDEX_LINK, ''), encoding='utf-8')
     coverage = json.loads((site / 'coverage.json').read_text()); del coverage['citation_links']
     for module in RECORDS:
         folder = site / 'proofs' / ident(module); (folder / 'links.json').unlink()
@@ -175,7 +175,7 @@ def test_preview_rerenders_readings_and_updates_every_count(published, tmp_path)
     assert coverage['explicit_explanation_gaps'] == 4 and coverage['citation_links']['names']['linked_to_reading'] == 1
     assert '<span>4 checked frames · 3 explicit explanation gaps</span>' in (site / 'findings/001.html').read_text()
     page = (site / 'coverage.html').read_text()
-    assert preview.GAP_ROW.format(4) in page and preview.CITATION_NOTE in page and preview.INDEX_LINK in page
+    assert preview.GAP_ROW.format(4) in page and page.count(preview.NOTE_PREFIX) == 1 and preview.INDEX_LINK in page
     assert all(label in page for label in preview.CITATION_ROWS)
     links = json.loads((site / 'proofs' / ident(ALPHA) / 'links.json').read_text())
     assert links['names']['OAI.Beta.target']['href'] == f'../{ident(BETA)}/reader.html'
@@ -304,7 +304,8 @@ def test_bundled_original_html_is_never_rewritten(published, tmp_path):
 
 def test_coverage_page_text_matches_the_current_builder(tmp_path):
     page = (current_catalog(tmp_path) / 'coverage.html').read_text()
-    assert preview.CITATION_NOTE in page and preview.INDEX_LINK in page
+    # The builder's note may be reworded; the preview recognises it by its opening sentence.
+    assert preview.CITATION_NOTE.startswith(preview.NOTE_PREFIX) and page.count(preview.NOTE_PREFIX) == 1 and preview.INDEX_LINK in page
     assert all('<tr><td>' + label + '</td>' in page for label in preview.CITATION_ROWS)
     assert re.search(re.escape(preview.GAP_ROW).replace(r'\{\}', r'\d+'), page)
 
@@ -313,7 +314,7 @@ def test_a_current_catalog_is_updated_in_place_without_duplicates(tmp_path):
     site = current_catalog(tmp_path / 'input'); manifest(site)
     s = run(site, tmp_path / 'out')
     page = (tmp_path / 'out/Leanglish/coverage.html').read_text()
-    assert page.count(preview.CITATION_ROWS[0]) == 1 and page.count(preview.CITATION_NOTE) == 1
+    assert page.count(preview.CITATION_ROWS[0]) == 1 and page.count(preview.NOTE_PREFIX) == 1
     assert s['pages']['navigation_updated'] == 0 and s['files']['sources/*.html'] == {'unchanged': 2}
     notes = (tmp_path / 'out/Leanglish/RELEASE-NOTES.md').read_text()
     assert '`explanations.html` replaced, `explanation-gaps.json` unchanged.' in notes and 'main navigation' not in notes

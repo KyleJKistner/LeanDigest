@@ -58,6 +58,8 @@ CITATION_NOTE=('<p>Citation links are navigation aids outside each checked readi
     'else to its declaration line in bundled source, only when the bundled import headers show it is that constant. Ambiguous names, Lean-generated names '
     'and names the lexical index of the bundled modules does not record stay visibly unresolved, each with its reason. A link does not mean the citation is explained or checked.</p>')
 INDEX_LINK=' · <a href="evidence/declaration-index.json">Declaration index for citation links</a>'
+# Every builder version opens its citation note with this sentence; a page that has one keeps it.
+NOTE_PREFIX='<p>Citation links are navigation aids outside each checked reading.'
 
 
 def require(condition, message: str) -> None:
@@ -216,7 +218,7 @@ def update_coverage_page(site: Path, before: dict, after: dict) -> None:
     present=re.compile('<tr><td>'+re.escape(CITATION_ROWS[0])+r'</td>.*?'+re.escape(CITATION_ROWS[3])+r'</td><td>\d+</td></tr>')
     if present.search(text):text=present.sub(lambda m:rows,text,count=1)
     else:text=text.replace(GAP_ROW.format(after['explicit_explanation_gaps']),GAP_ROW.format(after['explicit_explanation_gaps'])+rows,1)
-    if CITATION_NOTE not in text:
+    if NOTE_PREFIX not in text:
         require(text.count('</section><p><a href="coverage.json">')==1,'Coverage interpretation section not found')
         text=text.replace('</section><p><a href="coverage.json">',CITATION_NOTE+'</section><p><a href="coverage.json">',1)
     if INDEX_LINK not in text:
