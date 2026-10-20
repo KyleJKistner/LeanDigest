@@ -16,8 +16,8 @@ jobs:
         with: {python-version: '3.12'}
       - run: python -m pip install '.[dev,webtest]'
       - run: python -m playwright install --with-deps chromium
-      - name: Require collection, continuation, status and scope regression tests
-        run: python -m pytest -q tests/test_completion_results.py tests/test_completion_resume.py tests/test_completion_sets.py tests/test_original_attempts.py tests/test_completion_recovery_plan.py
+      - name: Require collection, continuation, diagnostics, status and scope regression tests
+        run: python -m pytest -q tests/test_completion_results.py tests/test_completion_resume.py tests/test_completion_sets.py tests/test_completion_diagnostics.py tests/test_original_attempts.py tests/test_completion_recovery_plan.py
       - name: Restore the frozen original evidence, exact recovery plan and documented sources
         env: {GH_TOKEN: '${{ github.token }}'}
         run: |
@@ -53,46 +53,7 @@ jobs:
           python scripts/assemble_completion_readings.py --evidence /tmp/evidence --completion /tmp/completion --seed /tmp/recovery-plan --inputs /tmp/inputs --source /tmp/original-project/lean --inventory /tmp/inputs/source/source-inventory.json --output /tmp/delivery --run-id 39315174445 --expected-head 4f9c1e823dd65023cfa7d8b9afe5e08390b8d2ad --continuations /tmp/continuations.json
       - name: Report exact unresolved obligations and retained execution diagnostics
         if: always()
-        run: |
-          python - <<'PY'
-          import json
-          from pathlib import Path
-          from proofreader.original_project import read,write
-          root=Path('/tmp/delivery');root.mkdir(exist_ok=True)
-          status=root/'site/original-verification.json'
-          if status.is_file():
-            s=read(status)
-            pending={'theorems':[{'module':r['module'],'name':r['name']} for r in s['theorems'] if not r['reading_available']],
-              'tasks':[{'id':r['id'],'status':r['status'],'diagnosis':r['diagnosis']} for r in s['tasks'] if r['status']!='passed']}
-            write(root/'remaining-obligations.json',pending)
-            print('REMAINING_OBLIGATIONS',json.dumps(pending,sort_keys=True),flush=True)
-          diagnostics=[]
-          for folder in (Path('/tmp/completion'),Path('/tmp/continuation')):
-            for p in sorted(folder.glob('completion-result-*')):
-              identity=read(p/'identity.json')
-              rows=[]
-              for f in sorted(p.glob('round-*/execution.json')):
-                r=read(f)
-                rows.append({'round':f.parent.name,'status':r.get('status'),'reason':r.get('reason'),
-                  'exit_code':r.get('exit_code'),'stdout_tail':r.get('stdout','')[-2400:],'stderr_tail':r.get('stderr','')[-1200:]})
-              final=read(p/'final-status.json') if (p/'final-status.json').is_file() else None
-              if final is None or final.get('status')=='prebuild-incomplete' or any(r['status']!='passed' for r in rows):
-                diagnostics.append({'worker':identity,'final':final,'rounds':rows})
-              for f in sorted(p.rglob('original-proof-worker.json')):
-                r=read(f)
-                if r.get('status')!='complete':
-                  print('PROOF_WORKER_REVIEW',json.dumps(r,sort_keys=True),flush=True)
-              for f in sorted(p.rglob('worker.json')):
-                r=read(f)
-                for t in r.get('targets',[]):
-                  if t['status']!='passed' and t.get('log'):
-                    from proofreader.original_project import child
-                    log=read(child(f.parent,t['log']))
-                    print('ORIGINAL_CHECK_REVIEW',json.dumps({'id':t['id'],'status':t['status'],
-                      'stdout_tail':log.get('stdout','')[-3500:],'stderr_tail':log.get('stderr','')[-1800:]},sort_keys=True),flush=True)
-          write(root/'execution-diagnostics.json',diagnostics)
-          print('RETAINED_BUILD_DIAGNOSTICS',len(diagnostics),flush=True)
-          PY
+        run: python scripts/completion_diagnostics.py --collections /tmp/completion /tmp/continuation --output /tmp/delivery
       - name: Exercise real offline file navigation and original-verification pages
         run: |
           python scripts/audit_finding_browser.py /tmp/delivery/site --screenshots /tmp/delivery/screenshots > /tmp/delivery/browser-audit.json
