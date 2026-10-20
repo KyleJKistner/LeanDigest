@@ -1,0 +1,2583 @@
+{
+ "schema": "leanglish.glossary/v1",
+ "description": "One-line glosses for frequently cited library lemmas, frozen for deterministic rendering. Each entry records who proposed it. An entry with status proposed has not been reviewed; only entries with status reviewed and a named reviewer change a default reading. Statements are quoted exactly from the listed sources; see docs/GLOSSARY.md.",
+ "sources": {
+  "mathlib4": {
+   "repository": "https://github.com/leanprover-community/mathlib4",
+   "revision": "d13f23b723b8a846827a245b89c10fc7d3f11612"
+  },
+  "lean4": {
+   "repository": "https://github.com/leanprover/lean4",
+   "revision": "v4.34.1"
+  }
+ },
+ "entries": [
+  {
+   "name": "ContinuousLinearMap.integrable_comp",
+   "gloss": "integrability of a continuous linear map applied to an integrable function",
+   "statement": {
+    "source": "mathlib4",
+    "path": "Mathlib/MeasureTheory/Function/L1Space/Integrable.lean",
+    "line": 1196,
+    "text": "theorem ContinuousLinearMap.integrable_comp {φ : α → H} (L : H →SL[σ] E) (φ_int : Integrable φ μ) :\n    Integrable (fun a : α => L (φ a)) μ :=",
+    "context": [
+     {
+      "source": "mathlib4",
+      "path": "Mathlib/MeasureTheory/Function/L1Space/Integrable.lean",
+      "line": 48,
+      "text": "variable {α β γ δ ε ε' : Type*} {m : MeasurableSpace α} {μ ν : Measure α} [MeasurableSpace δ]"
+     },
+     {
+      "source": "mathlib4",
+      "path": "Mathlib/MeasureTheory/Function/L1Space/Integrable.lean",
+      "line": 49,
+      "text": "variable [NormedAddCommGroup β] [NormedAddCommGroup γ]\n  [TopologicalSpace ε] [ContinuousENorm ε] [TopologicalSpace ε'] [ContinuousENorm ε']"
+     },
+     {
+      "source": "mathlib4",
+      "path": "Mathlib/MeasureTheory/Function/L1Space/Integrable.lean",
+      "line": 1188,
+      "text": "variable {E H : Type*} [NormedAddCommGroup E] [NormedAddCommGroup H]\n  {𝕜 𝕜' : Type*} [NontriviallyNormedField 𝕜] [NontriviallyNormedField 𝕜']\n  [NormedSpace 𝕜' E] [NormedSpace 𝕜 H]"
+     },
+     {
+      "source": "mathlib4",
+      "path": "Mathlib/MeasureTheory/Function/L1Space/Integrable.lean",
+      "line": 1192,
+      "text": "variable {σ : 𝕜 →+* 𝕜'} {σ' : 𝕜' →+* 𝕜} [RingHomIsometric σ] [RingHomIsometric σ']\n  [RingHomInvPair σ σ'] [RingHomInvPair σ' σ]"
+     }
+    ]
+   },
+   "status": "proposed",
+   "proposed_by": "model",
+   "reviewed_by": null,
+   "notes": "L is a continuous semilinear map H →SL[σ] E; the conclusion is integrability of a ↦ L (φ a)."
+  },
+  {
+   "name": "ENNReal.add_ne_top",
+   "gloss": "the criterion that a sum in [0, ∞] is finite iff both summands are",
+   "statement": {
+    "source": "mathlib4",
+    "path": "Mathlib/Basic/ENNReal/Operations.lean",
+    "line": 176,
+    "text": "theorem add_ne_top : a + b ≠ ∞ ↔ a ≠ ∞ ∧ b ≠ ∞ := by simpa only [lt_top_iff_ne_top] using add_lt_top",
+    "context": [
+     {
+      "source": "mathlib4",
+      "path": "Mathlib/Basic/ENNReal/Operations.lean",
+      "line": 31,
+      "text": "variable {a b c d : ℝ≥0∞} {r p q : ℝ≥0}"
+     },
+     {
+      "source": "mathlib4",
+      "path": "Mathlib/Basic/ENNReal/Operations.lean",
+      "line": 147,
+      "text": "variable {α : Type*} {n : ℕ}"
+     }
+    ]
+   },
+   "status": "proposed",
+   "proposed_by": "model",
+   "reviewed_by": null,
+   "notes": ""
+  },
+  {
+   "name": "ENNReal.ofReal_le_ofReal",
+   "gloss": "monotonicity of ENNReal.ofReal",
+   "statement": {
+    "source": "mathlib4",
+    "path": "Mathlib/Basic/ENNReal/Real.lean",
+    "line": 137,
+    "text": "theorem ofReal_le_ofReal {p q : ℝ} (h : p ≤ q) : ENNReal.ofReal p ≤ ENNReal.ofReal q := by",
+    "context": [
+     {
+      "source": "mathlib4",
+      "path": "Mathlib/Basic/ENNReal/Real.lean",
+      "line": 39,
+      "text": "variable {a b c : ℝ≥0∞} {r p q : ℝ≥0}"
+     }
+    ]
+   },
+   "status": "proposed",
+   "proposed_by": "model",
+   "reviewed_by": null,
+   "notes": ""
+  },
+  {
+   "name": "ENNReal.ofReal_ne_top",
+   "gloss": "finiteness of ENNReal.ofReal r",
+   "statement": {
+    "source": "mathlib4",
+    "path": "Mathlib/Basic/ENNReal/Basic.lean",
+    "line": 345,
+    "text": "theorem ofReal_ne_top {r : ℝ} : ENNReal.ofReal r ≠ ∞ := coe_ne_top",
+    "context": [
+     {
+      "source": "mathlib4",
+      "path": "Mathlib/Basic/ENNReal/Basic.lean",
+      "line": 98,
+      "text": "variable {α : Type*}"
+     },
+     {
+      "source": "mathlib4",
+      "path": "Mathlib/Basic/ENNReal/Basic.lean",
+      "line": 179,
+      "text": "variable {a b c : ℝ≥0∞} {r p q : ℝ≥0} {n : ℕ}"
+     }
+    ]
+   },
+   "status": "proposed",
+   "proposed_by": "model",
+   "reviewed_by": null,
+   "notes": "ENNReal.ofReal r ≠ ∞ for every real r."
+  },
+  {
+   "name": "ENNReal.toReal_le_toReal",
+   "gloss": "comparison of finite elements of [0, ∞] through their real values",
+   "statement": {
+    "source": "mathlib4",
+    "path": "Mathlib/Basic/ENNReal/Real.lean",
+    "line": 61,
+    "text": "theorem toReal_le_toReal (ha : a ≠ ∞) (hb : b ≠ ∞) : a.toReal ≤ b.toReal ↔ a ≤ b := by",
+    "context": [
+     {
+      "source": "mathlib4",
+      "path": "Mathlib/Basic/ENNReal/Real.lean",
+      "line": 39,
+      "text": "variable {a b c : ℝ≥0∞} {r p q : ℝ≥0}"
+     }
+    ]
+   },
+   "status": "proposed",
+   "proposed_by": "model",
+   "reviewed_by": null,
+   "notes": "a.toReal ≤ b.toReal ↔ a ≤ b when a ≠ ∞ and b ≠ ∞."
+  },
+  {
+   "name": "ENNReal.toReal_nonneg",
+   "gloss": "nonnegativity of the real value of an element of [0, ∞]",
+   "statement": {
+    "source": "mathlib4",
+    "path": "Mathlib/Basic/ENNReal/Basic.lean",
+    "line": 275,
+    "text": "@[simp] theorem toReal_nonneg {a : ℝ≥0∞} : 0 ≤ a.toReal := a.toNNReal.2",
+    "context": [
+     {
+      "source": "mathlib4",
+      "path": "Mathlib/Basic/ENNReal/Basic.lean",
+      "line": 98,
+      "text": "variable {α : Type*}"
+     },
+     {
+      "source": "mathlib4",
+      "path": "Mathlib/Basic/ENNReal/Basic.lean",
+      "line": 179,
+      "text": "variable {a b c : ℝ≥0∞} {r p q : ℝ≥0} {n : ℕ}"
+     }
+    ]
+   },
+   "status": "proposed",
+   "proposed_by": "model",
+   "reviewed_by": null,
+   "notes": "ENNReal.toReal sends ∞ to 0; the statement is 0 ≤ a.toReal for every a."
+  },
+  {
+   "name": "Filter.Eventually.mono",
+   "gloss": "monotonicity of eventually under implication",
+   "statement": {
+    "source": "mathlib4",
+    "path": "Mathlib/Order/Filter/Basic.lean",
+    "line": 687,
+    "text": "theorem Eventually.mono {p q : α → Prop} {f : Filter α} (hp : ∀ᶠ x in f, p x)\n    (hq : ∀ x, p x → q x) : ∀ᶠ x in f, q x :=",
+    "context": [
+     {
+      "source": "mathlib4",
+      "path": "Mathlib/Order/Filter/Basic.lean",
+      "line": 150,
+      "text": "variable {α : Type u} {β : Type v} {γ : Type w} {δ : Type*} {ι : Sort x}"
+     }
+    ]
+   },
+   "status": "proposed",
+   "proposed_by": "model",
+   "reviewed_by": null,
+   "notes": "If p holds eventually and p x → q x for every x, then q holds eventually."
+  },
+  {
+   "name": "Filter.Tendsto.comp",
+   "gloss": "composition of limits",
+   "statement": {
+    "source": "mathlib4",
+    "path": "Mathlib/Order/Filter/Tendsto.lean",
+    "line": 123,
+    "text": "theorem Tendsto.comp {f : α → β} {g : β → γ} {x : Filter α} {y : Filter β} {z : Filter γ}\n    (hg : Tendsto g y z) (hf : Tendsto f x y) : Tendsto (g ∘ f) x z := fun _ hs => hf (hg hs)",
+    "context": [
+     {
+      "source": "mathlib4",
+      "path": "Mathlib/Order/Filter/Tendsto.lean",
+      "line": 27,
+      "text": "variable {α β γ : Type*} {ι : Sort*}"
+     }
+    ]
+   },
+   "status": "proposed",
+   "proposed_by": "model",
+   "reviewed_by": null,
+   "notes": "Tendsto g y z and Tendsto f x y give Tendsto (g ∘ f) x z."
+  },
+  {
+   "name": "Filter.Tendsto.const_mul_atTop",
+   "gloss": "divergence to atTop after multiplying by a positive constant on the left",
+   "statement": {
+    "source": "mathlib4",
+    "path": "Mathlib/Order/Filter/AtTopBot/Field.lean",
+    "line": 72,
+    "text": "theorem Tendsto.const_mul_atTop (hr : 0 < r) (hf : Tendsto f l atTop) :\n    Tendsto (fun x => r * f x) l atTop :=",
+    "context": [
+     {
+      "source": "mathlib4",
+      "path": "Mathlib/Order/Filter/AtTopBot/Field.lean",
+      "line": 19,
+      "text": "variable {α β : Type*}"
+     },
+     {
+      "source": "mathlib4",
+      "path": "Mathlib/Order/Filter/AtTopBot/Field.lean",
+      "line": 23,
+      "text": "variable [Semifield α] [LinearOrder α] [IsStrictOrderedRing α]\n  {l : Filter β} {f : β → α} {r c : α} {n : ℕ}"
+     }
+    ]
+   },
+   "status": "proposed",
+   "proposed_by": "model",
+   "reviewed_by": null,
+   "notes": "Hypotheses 0 < r and Tendsto f l atTop."
+  },
+  {
+   "name": "Filter.Tendsto.eventually",
+   "gloss": "pulling back an eventually true property along a limit",
+   "statement": {
+    "source": "mathlib4",
+    "path": "Mathlib/Order/Filter/Tendsto.lean",
+    "line": 47,
+    "text": "theorem Tendsto.eventually {f : α → β} {l₁ : Filter α} {l₂ : Filter β} {p : β → Prop}\n    (hf : Tendsto f l₁ l₂) (h : ∀ᶠ y in l₂, p y) : ∀ᶠ x in l₁, p (f x) :=",
+    "context": [
+     {
+      "source": "mathlib4",
+      "path": "Mathlib/Order/Filter/Tendsto.lean",
+      "line": 27,
+      "text": "variable {α β γ : Type*} {ι : Sort*}"
+     }
+    ]
+   },
+   "status": "proposed",
+   "proposed_by": "model",
+   "reviewed_by": null,
+   "notes": "If f tends to l₂ along l₁ and p holds eventually in l₂, then p (f x) holds eventually in l₁."
+  },
+  {
+   "name": "Filter.Tendsto.eventually_ge_atTop",
+   "gloss": "the fact that a function tending to atTop is eventually at least c",
+   "statement": {
+    "source": "mathlib4",
+    "path": "Mathlib/Order/Filter/AtTopBot/Tendsto.lean",
+    "line": 39,
+    "text": "protected theorem Tendsto.eventually_ge_atTop [Preorder β] {f : α → β} {l : Filter α}\n    (hf : Tendsto f l atTop) (c : β) : ∀ᶠ x in l, c ≤ f x :=",
+    "context": [
+     {
+      "source": "mathlib4",
+      "path": "Mathlib/Order/Filter/AtTopBot/Tendsto.lean",
+      "line": 22,
+      "text": "variable {ι ι' α β γ : Type*}"
+     }
+    ]
+   },
+   "status": "proposed",
+   "proposed_by": "model",
+   "reviewed_by": null,
+   "notes": ""
+  },
+  {
+   "name": "Filter.eventually_atTop",
+   "gloss": "the description of ∀ᶠ x in atTop, p x as ∃ a, ∀ b ≥ a, p b",
+   "statement": {
+    "source": "mathlib4",
+    "path": "Mathlib/Order/Filter/AtTopBot/Basic.lean",
+    "line": 79,
+    "text": "lemma eventually_atTop : (∀ᶠ x in atTop, p x) ↔ ∃ a, ∀ b, a ≤ b → p b := mem_atTop_sets",
+    "context": [
+     {
+      "source": "mathlib4",
+      "path": "Mathlib/Order/Filter/AtTopBot/Basic.lean",
+      "line": 23,
+      "text": "variable {ι ι' α β : Type*}"
+     },
+     {
+      "source": "mathlib4",
+      "path": "Mathlib/Order/Filter/AtTopBot/Basic.lean",
+      "line": 30,
+      "text": "variable [Preorder α] [IsDirectedOrder α] {p : α → Prop}"
+     },
+     {
+      "source": "mathlib4",
+      "path": "Mathlib/Order/Filter/AtTopBot/Basic.lean",
+      "line": 63,
+      "text": "variable [Nonempty α]"
+     }
+    ]
+   },
+   "status": "proposed",
+   "proposed_by": "model",
+   "reviewed_by": null,
+   "notes": "(∀ᶠ x in atTop, p x) ↔ ∃ a, ∀ b, a ≤ b → p b."
+  },
+  {
+   "name": "Filter.eventually_ge_atTop",
+   "gloss": "the fact that a ≤ x for all sufficiently large x",
+   "statement": {
+    "source": "mathlib4",
+    "path": "Mathlib/Order/Filter/AtTopBot/Defs.lean",
+    "line": 57,
+    "text": "theorem eventually_ge_atTop [Preorder α] (a : α) : ∀ᶠ x in atTop, a ≤ x :=",
+    "context": [
+     {
+      "source": "mathlib4",
+      "path": "Mathlib/Order/Filter/AtTopBot/Defs.lean",
+      "line": 24,
+      "text": "variable {ι α β : Type*}"
+     }
+    ]
+   },
+   "status": "proposed",
+   "proposed_by": "model",
+   "reviewed_by": null,
+   "notes": "Eventually along the filter atTop of a preorder."
+  },
+  {
+   "name": "Filter.mp_mem",
+   "gloss": "modus ponens for sets in a filter",
+   "statement": {
+    "source": "mathlib4",
+    "path": "Mathlib/Order/Filter/Defs.lean",
+    "line": 120,
+    "text": "theorem mp_mem (hs : s ∈ f) (h : { x | x ∈ s → x ∈ t } ∈ f) : t ∈ f :=",
+    "context": [
+     {
+      "source": "mathlib4",
+      "path": "Mathlib/Order/Filter/Defs.lean",
+      "line": 87,
+      "text": "variable {α β : Type*} {f g : Filter α} {s t : Set α}"
+     }
+    ]
+   },
+   "status": "proposed",
+   "proposed_by": "model",
+   "reviewed_by": null,
+   "notes": "From s ∈ f and {x | x ∈ s → x ∈ t} ∈ f, conclude t ∈ f. Frequent in proofs produced by filter_upwards."
+  },
+  {
+   "name": "Filter.univ_mem'",
+   "gloss": "the fact that a set containing every point belongs to every filter",
+   "statement": {
+    "source": "mathlib4",
+    "path": "Mathlib/Order/Filter/Defs.lean",
+    "line": 114,
+    "text": "theorem univ_mem' (h : ∀ a, a ∈ s) : s ∈ f :=",
+    "context": [
+     {
+      "source": "mathlib4",
+      "path": "Mathlib/Order/Filter/Defs.lean",
+      "line": 87,
+      "text": "variable {α β : Type*} {f g : Filter α} {s t : Set α}"
+     }
+    ]
+   },
+   "status": "proposed",
+   "proposed_by": "model",
+   "reviewed_by": null,
+   "notes": "Hypothesis ∀ a, a ∈ s. Frequent in proofs produced by filter_upwards."
+  },
+  {
+   "name": "Fintype.card_congr'",
+   "gloss": "equality of the cardinalities of equal finite types",
+   "statement": {
+    "source": "mathlib4",
+    "path": "Mathlib/Data/Fintype/Card.lean",
+    "line": 71,
+    "text": "theorem card_congr' {α β} [Fintype α] [Fintype β] (h : α = β) : card α = card β :=",
+    "context": [
+     {
+      "source": "mathlib4",
+      "path": "Mathlib/Data/Fintype/Card.lean",
+      "line": 33,
+      "text": "variable {α β : Type*}"
+     }
+    ]
+   },
+   "status": "proposed",
+   "proposed_by": "model",
+   "reviewed_by": null,
+   "notes": ""
+  },
+  {
+   "name": "Function.Injective.comp",
+   "gloss": "injectivity of a composition of injective functions",
+   "statement": {
+    "source": "lean4",
+    "path": "src/Init/Data/Function.lean",
+    "line": 56,
+    "text": "theorem Injective.comp {α β γ} {g : β → γ} {f : α → β} (hg : Injective g) (hf : Injective f) :\n    Injective (g ∘ f) := fun _a₁ _a₂ => fun h => hf (hg h)",
+    "context": []
+   },
+   "status": "proposed",
+   "proposed_by": "model",
+   "reviewed_by": null,
+   "notes": "Lean core, not in the pinned Mathlib tree."
+  },
+  {
+   "name": "Homeomorph.contractibleSpace_iff",
+   "gloss": "invariance of contractibility under a homeomorphism",
+   "statement": {
+    "source": "mathlib4",
+    "path": "Mathlib/Topology/Homotopy/Contractible.lean",
+    "line": 91,
+    "text": "protected theorem Homeomorph.contractibleSpace_iff (e : X ≃ₜ Y) :\n    ContractibleSpace X ↔ ContractibleSpace Y :=",
+    "context": [
+     {
+      "source": "mathlib4",
+      "path": "Mathlib/Topology/Homotopy/Contractible.lean",
+      "line": 77,
+      "text": "variable {X Y : Type*} [TopologicalSpace X] [TopologicalSpace Y]"
+     }
+    ]
+   },
+   "status": "proposed",
+   "proposed_by": "model",
+   "reviewed_by": null,
+   "notes": ""
+  },
+  {
+   "name": "LE.le.trans",
+   "gloss": "transitivity of ≤",
+   "statement": {
+    "source": "mathlib4",
+    "path": "Mathlib/Order/Basic.lean",
+    "line": 126,
+    "text": "@[to_dual trans'] alias LE.le.trans := le_trans",
+    "context": [
+     {
+      "source": "mathlib4",
+      "path": "Mathlib/Order/Defs/PartialOrder.lean",
+      "line": 69,
+      "text": "lemma le_trans : a ≤ b → b ≤ c → a ≤ c := Preorder.le_trans _ _ _"
+     },
+     {
+      "source": "mathlib4",
+      "path": "Mathlib/Order/Basic.lean",
+      "line": 64,
+      "text": "variable {ι α β : Type*} {π : ι → Type*}"
+     },
+     {
+      "source": "mathlib4",
+      "path": "Mathlib/Order/Basic.lean",
+      "line": 110,
+      "text": "variable [Preorder α] {a b c d : α}"
+     },
+     {
+      "source": "mathlib4",
+      "path": "Mathlib/Order/Defs/PartialOrder.lean",
+      "line": 32,
+      "text": "variable {α : Type*}"
+     },
+     {
+      "source": "mathlib4",
+      "path": "Mathlib/Order/Defs/PartialOrder.lean",
+      "line": 60,
+      "text": "variable [Preorder α] {a b c : α}"
+     }
+    ]
+   },
+   "status": "proposed",
+   "proposed_by": "model",
+   "reviewed_by": null,
+   "notes": "Alias of le_trans (quoted as context) for dot notation h₁.trans h₂ in a preorder."
+  },
+  {
+   "name": "LE.le.trans_lt",
+   "gloss": "combining a ≤ b with b < c to get a < c",
+   "statement": {
+    "source": "mathlib4",
+    "path": "Mathlib/Order/Basic.lean",
+    "line": 128,
+    "text": "@[to_dual trans_lt'] alias LE.le.trans_lt := lt_of_le_of_lt",
+    "context": [
+     {
+      "source": "mathlib4",
+      "path": "Mathlib/Order/Defs/PartialOrder.lean",
+      "line": 95,
+      "text": "lemma lt_of_le_of_lt (hab : a ≤ b) (hbc : b < c) : a < c :="
+     },
+     {
+      "source": "mathlib4",
+      "path": "Mathlib/Order/Basic.lean",
+      "line": 64,
+      "text": "variable {ι α β : Type*} {π : ι → Type*}"
+     },
+     {
+      "source": "mathlib4",
+      "path": "Mathlib/Order/Basic.lean",
+      "line": 110,
+      "text": "variable [Preorder α] {a b c d : α}"
+     },
+     {
+      "source": "mathlib4",
+      "path": "Mathlib/Order/Defs/PartialOrder.lean",
+      "line": 32,
+      "text": "variable {α : Type*}"
+     },
+     {
+      "source": "mathlib4",
+      "path": "Mathlib/Order/Defs/PartialOrder.lean",
+      "line": 60,
+      "text": "variable [Preorder α] {a b c : α}"
+     }
+    ]
+   },
+   "status": "proposed",
+   "proposed_by": "model",
+   "reviewed_by": null,
+   "notes": "Alias of lt_of_le_of_lt (quoted as context) in a preorder."
+  },
+  {
+   "name": "LT.lt.le",
+   "gloss": "weakening a < b to a ≤ b",
+   "statement": {
+    "source": "mathlib4",
+    "path": "Mathlib/Order/Basic.lean",
+    "line": 132,
+    "text": "@[to_dual self] alias LT.lt.le := le_of_lt",
+    "context": [
+     {
+      "source": "mathlib4",
+      "path": "Mathlib/Order/Defs/PartialOrder.lean",
+      "line": 81,
+      "text": "@[to_dual self] lemma le_of_lt (hab : a < b) : a ≤ b := (lt_iff_le_not_ge.1 hab).1"
+     },
+     {
+      "source": "mathlib4",
+      "path": "Mathlib/Order/Basic.lean",
+      "line": 64,
+      "text": "variable {ι α β : Type*} {π : ι → Type*}"
+     },
+     {
+      "source": "mathlib4",
+      "path": "Mathlib/Order/Basic.lean",
+      "line": 110,
+      "text": "variable [Preorder α] {a b c d : α}"
+     },
+     {
+      "source": "mathlib4",
+      "path": "Mathlib/Order/Defs/PartialOrder.lean",
+      "line": 32,
+      "text": "variable {α : Type*}"
+     },
+     {
+      "source": "mathlib4",
+      "path": "Mathlib/Order/Defs/PartialOrder.lean",
+      "line": 60,
+      "text": "variable [Preorder α] {a b c : α}"
+     }
+    ]
+   },
+   "status": "proposed",
+   "proposed_by": "model",
+   "reviewed_by": null,
+   "notes": "Alias of le_of_lt (quoted as context) in a preorder."
+  },
+  {
+   "name": "LT.lt.ne",
+   "gloss": "the fact that a < b implies a ≠ b",
+   "statement": {
+    "source": "mathlib4",
+    "path": "Mathlib/Order/Basic.lean",
+    "line": 136,
+    "text": "@[to_dual ne'] alias LT.lt.ne := ne_of_lt",
+    "context": [
+     {
+      "source": "mathlib4",
+      "path": "Mathlib/Order/Defs/PartialOrder.lean",
+      "line": 102,
+      "text": "lemma ne_of_lt (h : a < b) : a ≠ b := fun he => absurd h (he ▸ lt_irrefl a)"
+     },
+     {
+      "source": "mathlib4",
+      "path": "Mathlib/Order/Basic.lean",
+      "line": 64,
+      "text": "variable {ι α β : Type*} {π : ι → Type*}"
+     },
+     {
+      "source": "mathlib4",
+      "path": "Mathlib/Order/Basic.lean",
+      "line": 110,
+      "text": "variable [Preorder α] {a b c d : α}"
+     },
+     {
+      "source": "mathlib4",
+      "path": "Mathlib/Order/Defs/PartialOrder.lean",
+      "line": 32,
+      "text": "variable {α : Type*}"
+     },
+     {
+      "source": "mathlib4",
+      "path": "Mathlib/Order/Defs/PartialOrder.lean",
+      "line": 60,
+      "text": "variable [Preorder α] {a b c : α}"
+     }
+    ]
+   },
+   "status": "proposed",
+   "proposed_by": "model",
+   "reviewed_by": null,
+   "notes": "Alias of ne_of_lt (quoted as context) in a preorder."
+  },
+  {
+   "name": "LT.lt.ne'",
+   "gloss": "the fact that a < b implies b ≠ a",
+   "statement": {
+    "source": "mathlib4",
+    "path": "Mathlib/Order/Basic.lean",
+    "line": 136,
+    "text": "@[to_dual ne'] alias LT.lt.ne := ne_of_lt",
+    "context": [
+     {
+      "source": "mathlib4",
+      "path": "Mathlib/Order/Defs/PartialOrder.lean",
+      "line": 102,
+      "text": "lemma ne_of_lt (h : a < b) : a ≠ b := fun he => absurd h (he ▸ lt_irrefl a)"
+     },
+     {
+      "source": "mathlib4",
+      "path": "Mathlib/Order/Basic.lean",
+      "line": 64,
+      "text": "variable {ι α β : Type*} {π : ι → Type*}"
+     },
+     {
+      "source": "mathlib4",
+      "path": "Mathlib/Order/Basic.lean",
+      "line": 110,
+      "text": "variable [Preorder α] {a b c d : α}"
+     },
+     {
+      "source": "mathlib4",
+      "path": "Mathlib/Order/Defs/PartialOrder.lean",
+      "line": 32,
+      "text": "variable {α : Type*}"
+     },
+     {
+      "source": "mathlib4",
+      "path": "Mathlib/Order/Defs/PartialOrder.lean",
+      "line": 60,
+      "text": "variable [Preorder α] {a b c : α}"
+     }
+    ]
+   },
+   "status": "proposed",
+   "proposed_by": "model",
+   "reviewed_by": null,
+   "notes": "Not written in source: generated by @[to_dual ne'] from LT.lt.ne, an alias of ne_of_lt (quoted). The generated statement is a < b → b ≠ a; corpus instances such as x ≠ ⊥ from ⊥ < x have this form."
+  },
+  {
+   "name": "LT.lt.trans",
+   "gloss": "transitivity of <",
+   "statement": {
+    "source": "mathlib4",
+    "path": "Mathlib/Order/Basic.lean",
+    "line": 127,
+    "text": "@[to_dual trans'] alias LT.lt.trans := lt_trans",
+    "context": [
+     {
+      "source": "mathlib4",
+      "path": "Mathlib/Order/Defs/PartialOrder.lean",
+      "line": 99,
+      "text": "lemma lt_trans : a < b → b < c → a < c := fun h₁ h₂ => lt_of_lt_of_le h₁ (le_of_lt h₂)"
+     },
+     {
+      "source": "mathlib4",
+      "path": "Mathlib/Order/Basic.lean",
+      "line": 64,
+      "text": "variable {ι α β : Type*} {π : ι → Type*}"
+     },
+     {
+      "source": "mathlib4",
+      "path": "Mathlib/Order/Basic.lean",
+      "line": 110,
+      "text": "variable [Preorder α] {a b c d : α}"
+     },
+     {
+      "source": "mathlib4",
+      "path": "Mathlib/Order/Defs/PartialOrder.lean",
+      "line": 32,
+      "text": "variable {α : Type*}"
+     },
+     {
+      "source": "mathlib4",
+      "path": "Mathlib/Order/Defs/PartialOrder.lean",
+      "line": 60,
+      "text": "variable [Preorder α] {a b c : α}"
+     }
+    ]
+   },
+   "status": "proposed",
+   "proposed_by": "model",
+   "reviewed_by": null,
+   "notes": "Alias of lt_trans (quoted as context)."
+  },
+  {
+   "name": "LT.lt.trans_le",
+   "gloss": "combining a < b with b ≤ c to get a < c",
+   "statement": {
+    "source": "mathlib4",
+    "path": "Mathlib/Order/Basic.lean",
+    "line": 129,
+    "text": "@[to_dual trans_le'] alias LT.lt.trans_le := lt_of_lt_of_le",
+    "context": [
+     {
+      "source": "mathlib4",
+      "path": "Mathlib/Order/Defs/PartialOrder.lean",
+      "line": 91,
+      "text": "lemma lt_of_lt_of_le (hab : a < b) (hbc : b ≤ c) : a < c :="
+     },
+     {
+      "source": "mathlib4",
+      "path": "Mathlib/Order/Basic.lean",
+      "line": 64,
+      "text": "variable {ι α β : Type*} {π : ι → Type*}"
+     },
+     {
+      "source": "mathlib4",
+      "path": "Mathlib/Order/Basic.lean",
+      "line": 110,
+      "text": "variable [Preorder α] {a b c d : α}"
+     },
+     {
+      "source": "mathlib4",
+      "path": "Mathlib/Order/Defs/PartialOrder.lean",
+      "line": 32,
+      "text": "variable {α : Type*}"
+     },
+     {
+      "source": "mathlib4",
+      "path": "Mathlib/Order/Defs/PartialOrder.lean",
+      "line": 60,
+      "text": "variable [Preorder α] {a b c : α}"
+     }
+    ]
+   },
+   "status": "proposed",
+   "proposed_by": "model",
+   "reviewed_by": null,
+   "notes": "Alias of lt_of_lt_of_le (quoted as context) in a preorder."
+  },
+  {
+   "name": "Measurable.comp",
+   "gloss": "measurability of a composition of measurable functions",
+   "statement": {
+    "source": "mathlib4",
+    "path": "Mathlib/MeasureTheory/MeasurableSpace/Defs.lean",
+    "line": 523,
+    "text": "protected theorem Measurable.comp {_ : MeasurableSpace α} {_ : MeasurableSpace β}\n    {_ : MeasurableSpace γ} {g : β → γ} {f : α → β} (hg : Measurable g) (hf : Measurable f) :\n    Measurable (g ∘ f) :=",
+    "context": [
+     {
+      "source": "mathlib4",
+      "path": "Mathlib/MeasureTheory/MeasurableSpace/Defs.lean",
+      "line": 46,
+      "text": "variable {α β γ δ : Type*} {ι : Sort*} {s t u : Set α}"
+     }
+    ]
+   },
+   "status": "proposed",
+   "proposed_by": "model",
+   "reviewed_by": null,
+   "notes": ""
+  },
+  {
+   "name": "Measurable.prodMk",
+   "gloss": "measurability of the pairing of two measurable functions",
+   "statement": {
+    "source": "mathlib4",
+    "path": "Mathlib/MeasureTheory/MeasurableSpace/Constructions.lean",
+    "line": 409,
+    "text": "theorem Measurable.prodMk {β γ} {_ : MeasurableSpace β} {_ : MeasurableSpace γ} {f : α → β}\n    {g : α → γ} (hf : Measurable f) (hg : Measurable g) : Measurable fun a : α => (f a, g a) :=",
+    "context": [
+     {
+      "source": "mathlib4",
+      "path": "Mathlib/MeasureTheory/MeasurableSpace/Constructions.lean",
+      "line": 31,
+      "text": "variable {α β γ δ δ' : Type*} {ι : Sort uι} {s : Set α}"
+     },
+     {
+      "source": "mathlib4",
+      "path": "Mathlib/MeasureTheory/MeasurableSpace/Constructions.lean",
+      "line": 387,
+      "text": "variable {m : MeasurableSpace α} {mβ : MeasurableSpace β} {mγ : MeasurableSpace γ}"
+     }
+    ]
+   },
+   "status": "proposed",
+   "proposed_by": "model",
+   "reviewed_by": null,
+   "notes": "The function a ↦ (f a, g a)."
+  },
+  {
+   "name": "MeasureTheory.integral_congr_ae",
+   "gloss": "equality of the integrals of almost everywhere equal functions",
+   "statement": {
+    "source": "mathlib4",
+    "path": "Mathlib/MeasureTheory/Integral/Bochner/Basic.lean",
+    "line": 301,
+    "text": "theorem integral_congr_ae {f g : α → G} (h : f =ᵐ[μ] g) : ∫ a, f a ∂μ = ∫ a, g a ∂μ := by",
+    "context": [
+     {
+      "source": "mathlib4",
+      "path": "Mathlib/MeasureTheory/Integral/Bochner/Basic.lean",
+      "line": 141,
+      "text": "variable {α E F 𝕜 : Type*}"
+     },
+     {
+      "source": "mathlib4",
+      "path": "Mathlib/MeasureTheory/Integral/Bochner/Basic.lean",
+      "line": 152,
+      "text": "variable [NormedAddCommGroup E] [NormedDivisionRing 𝕜]\n  [NormedAddCommGroup F] [NormedSpace ℝ F] [CompleteSpace F]\n  {G : Type*} [NormedAddCommGroup G] [NormedSpace ℝ G]"
+     },
+     {
+      "source": "mathlib4",
+      "path": "Mathlib/MeasureTheory/Integral/Bochner/Basic.lean",
+      "line": 183,
+      "text": "variable [NormedSpace ℝ E]"
+     },
+     {
+      "source": "mathlib4",
+      "path": "Mathlib/MeasureTheory/Integral/Bochner/Basic.lean",
+      "line": 184,
+      "text": "variable {f : α → E} {m : MeasurableSpace α} {μ : Measure α}"
+     },
+     {
+      "source": "mathlib4",
+      "path": "Mathlib/MeasureTheory/Integral/Bochner/Basic.lean",
+      "line": 219,
+      "text": "variable (α G)"
+     },
+     {
+      "source": "mathlib4",
+      "path": "Mathlib/MeasureTheory/Integral/Bochner/Basic.lean",
+      "line": 234,
+      "text": "variable {α G}"
+     }
+    ]
+   },
+   "status": "proposed",
+   "proposed_by": "model",
+   "reviewed_by": null,
+   "notes": "Bochner integral."
+  },
+  {
+   "name": "MeasureTheory.measureReal_le_one",
+   "gloss": "the bound μ.real s ≤ 1 for a probability or zero measure",
+   "statement": {
+    "source": "mathlib4",
+    "path": "Mathlib/MeasureTheory/Measure/Typeclasses/Probability.lean",
+    "line": 44,
+    "text": "lemma measureReal_le_one {μ : Measure α} [IsZeroOrProbabilityMeasure μ] {s : Set α} :\n    μ.real s ≤ 1 :=",
+    "context": [
+     {
+      "source": "mathlib4",
+      "path": "Mathlib/MeasureTheory/Measure/Typeclasses/Probability.lean",
+      "line": 26,
+      "text": "variable {α β : Type*} {m0 : MeasurableSpace α} [MeasurableSpace β] {μ : Measure α} {s : Set α}"
+     }
+    ]
+   },
+   "status": "proposed",
+   "proposed_by": "model",
+   "reviewed_by": null,
+   "notes": ""
+  },
+  {
+   "name": "MeasureTheory.measureReal_mono",
+   "gloss": "monotonicity of μ.real under inclusion when μ s₂ ≠ ∞",
+   "statement": {
+    "source": "mathlib4",
+    "path": "Mathlib/MeasureTheory/Measure/Real.lean",
+    "line": 88,
+    "text": "@[gcongr] theorem measureReal_mono (h : s₁ ⊆ s₂) (h₂ : μ s₂ ≠ ∞ := by finiteness) :\n    μ.real s₁ ≤ μ.real s₂ :=",
+    "context": [
+     {
+      "source": "mathlib4",
+      "path": "Mathlib/MeasureTheory/Measure/Real.lean",
+      "line": 38,
+      "text": "variable {α β ι : Type*} {_ : MeasurableSpace α} {μ : Measure α} {s s₁ s₂ s₃ t t₁ t₂ u : Set α}"
+     }
+    ]
+   },
+   "status": "proposed",
+   "proposed_by": "model",
+   "reviewed_by": null,
+   "notes": "Conclusion μ.real s₁ ≤ μ.real s₂. The finiteness hypothesis has a default proof by finiteness."
+  },
+  {
+   "name": "MeasureTheory.measure_ne_top",
+   "gloss": "finiteness of the measure of every set under a finite measure",
+   "statement": {
+    "source": "mathlib4",
+    "path": "Mathlib/MeasureTheory/Measure/Typeclasses/Finite.lean",
+    "line": 55,
+    "text": "theorem measure_ne_top (μ : Measure α) [IsFiniteMeasure μ] (s : Set α) : μ s ≠ ∞ :=",
+    "context": [
+     {
+      "source": "mathlib4",
+      "path": "Mathlib/MeasureTheory/Measure/Typeclasses/Finite.lean",
+      "line": 24,
+      "text": "variable {α β δ ι : Type*}"
+     },
+     {
+      "source": "mathlib4",
+      "path": "Mathlib/MeasureTheory/Measure/Typeclasses/Finite.lean",
+      "line": 28,
+      "text": "variable {m0 : MeasurableSpace α} [mβ : MeasurableSpace β] {μ ν ν₁ ν₂ : Measure α}\n  {s t : Set α}"
+     }
+    ]
+   },
+   "status": "proposed",
+   "proposed_by": "model",
+   "reviewed_by": null,
+   "notes": ""
+  },
+  {
+   "name": "MeasureTheory.nonempty_of_isProbabilityMeasure",
+   "gloss": "nonemptiness of a space with a probability measure",
+   "statement": {
+    "source": "mathlib4",
+    "path": "Mathlib/MeasureTheory/Measure/Typeclasses/Probability.lean",
+    "line": 78,
+    "text": "theorem nonempty_of_isProbabilityMeasure (μ : Measure α) [IsProbabilityMeasure μ] : Nonempty α := by",
+    "context": [
+     {
+      "source": "mathlib4",
+      "path": "Mathlib/MeasureTheory/Measure/Typeclasses/Probability.lean",
+      "line": 26,
+      "text": "variable {α β : Type*} {m0 : MeasurableSpace α} [MeasurableSpace β] {μ : Measure α} {s : Set α}"
+     }
+    ]
+   },
+   "status": "proposed",
+   "proposed_by": "model",
+   "reviewed_by": null,
+   "notes": ""
+  },
+  {
+   "name": "Nat.cast_le",
+   "gloss": "the equivalence ↑m ≤ ↑n ↔ m ≤ n for the natural-number cast",
+   "statement": {
+    "source": "mathlib4",
+    "path": "Mathlib/Data/Nat/Cast/Order/Basic.lean",
+    "line": 70,
+    "text": "theorem cast_le : (m : α) ≤ n ↔ m ≤ n :=",
+    "context": [
+     {
+      "source": "mathlib4",
+      "path": "Mathlib/Data/Nat/Cast/Order/Basic.lean",
+      "line": 23,
+      "text": "variable {α : Type*}"
+     },
+     {
+      "source": "mathlib4",
+      "path": "Mathlib/Data/Nat/Cast/Order/Basic.lean",
+      "line": 26,
+      "text": "variable [AddMonoidWithOne α] [PartialOrder α]"
+     },
+     {
+      "source": "mathlib4",
+      "path": "Mathlib/Data/Nat/Cast/Order/Basic.lean",
+      "line": 27,
+      "text": "variable [AddLeftMono α] [ZeroLEOneClass α]"
+     },
+     {
+      "source": "mathlib4",
+      "path": "Mathlib/Data/Nat/Cast/Order/Basic.lean",
+      "line": 58,
+      "text": "variable [CharZero α] {m n : ℕ}"
+     }
+    ]
+   },
+   "status": "proposed",
+   "proposed_by": "model",
+   "reviewed_by": null,
+   "notes": "Section variables include an ordered additive monoid with one of characteristic zero."
+  },
+  {
+   "name": "Nat.cast_nonneg",
+   "gloss": "nonnegativity of a natural number cast",
+   "statement": {
+    "source": "mathlib4",
+    "path": "Mathlib/Data/Nat/Cast/Order/Ring.lean",
+    "line": 30,
+    "text": "theorem cast_nonneg {α} [Semiring α] [PartialOrder α] [IsOrderedRing α] (n : ℕ) : 0 ≤ (n : α) :=",
+    "context": [
+     {
+      "source": "mathlib4",
+      "path": "Mathlib/Data/Nat/Cast/Order/Ring.lean",
+      "line": 20,
+      "text": "variable {R α : Type*}"
+     },
+     {
+      "source": "mathlib4",
+      "path": "Mathlib/Data/Nat/Cast/Order/Ring.lean",
+      "line": 25,
+      "text": "variable [AddMonoidWithOne α] [PartialOrder α]"
+     },
+     {
+      "source": "mathlib4",
+      "path": "Mathlib/Data/Nat/Cast/Order/Ring.lean",
+      "line": 26,
+      "text": "variable [AddLeftMono α] [ZeroLEOneClass α]"
+     }
+    ]
+   },
+   "status": "proposed",
+   "proposed_by": "model",
+   "reviewed_by": null,
+   "notes": "Into an ordered semiring (IsOrderedRing). Compare Nat.cast_nonneg'."
+  },
+  {
+   "name": "Nat.cast_nonneg'",
+   "gloss": "nonnegativity of a natural number cast",
+   "statement": {
+    "source": "mathlib4",
+    "path": "Mathlib/Data/Nat/Cast/Order/Basic.lean",
+    "line": 36,
+    "text": "theorem cast_nonneg' (n : ℕ) : 0 ≤ (n : α) :=",
+    "context": [
+     {
+      "source": "mathlib4",
+      "path": "Mathlib/Data/Nat/Cast/Order/Basic.lean",
+      "line": 23,
+      "text": "variable {α : Type*}"
+     },
+     {
+      "source": "mathlib4",
+      "path": "Mathlib/Data/Nat/Cast/Order/Basic.lean",
+      "line": 26,
+      "text": "variable [AddMonoidWithOne α] [PartialOrder α]"
+     },
+     {
+      "source": "mathlib4",
+      "path": "Mathlib/Data/Nat/Cast/Order/Basic.lean",
+      "line": 27,
+      "text": "variable [AddLeftMono α] [ZeroLEOneClass α]"
+     }
+    ]
+   },
+   "status": "proposed",
+   "proposed_by": "model",
+   "reviewed_by": null,
+   "notes": "Into an ordered additive monoid with one (section variables). Compare Nat.cast_nonneg."
+  },
+  {
+   "name": "Nat.cast_one",
+   "gloss": "the identity ↑1 = 1 for the natural-number cast",
+   "statement": {
+    "source": "mathlib4",
+    "path": "Mathlib/Data/Nat/Cast/Defs.lean",
+    "line": 96,
+    "text": "theorem cast_one : ((1 : ℕ) : R) = 1 := by",
+    "context": [
+     {
+      "source": "mathlib4",
+      "path": "Mathlib/Data/Nat/Cast/Defs.lean",
+      "line": 31,
+      "text": "variable {R : Type*}"
+     },
+     {
+      "source": "mathlib4",
+      "path": "Mathlib/Data/Nat/Cast/Defs.lean",
+      "line": 77,
+      "text": "variable [AddMonoidWithOne R]"
+     }
+    ]
+   },
+   "status": "proposed",
+   "proposed_by": "model",
+   "reviewed_by": null,
+   "notes": ""
+  },
+  {
+   "name": "Nat.cast_pos'",
+   "gloss": "the equivalence 0 < ↑n ↔ 0 < n for the natural-number cast",
+   "statement": {
+    "source": "mathlib4",
+    "path": "Mathlib/Data/Nat/Cast/Order/Basic.lean",
+    "line": 54,
+    "text": "theorem cast_pos' {n : ℕ} : (0 : α) < n ↔ 0 < n := by cases n <;> simp [cast_add_one_pos]",
+    "context": [
+     {
+      "source": "mathlib4",
+      "path": "Mathlib/Data/Nat/Cast/Order/Basic.lean",
+      "line": 23,
+      "text": "variable {α : Type*}"
+     },
+     {
+      "source": "mathlib4",
+      "path": "Mathlib/Data/Nat/Cast/Order/Basic.lean",
+      "line": 26,
+      "text": "variable [AddMonoidWithOne α] [PartialOrder α]"
+     },
+     {
+      "source": "mathlib4",
+      "path": "Mathlib/Data/Nat/Cast/Order/Basic.lean",
+      "line": 27,
+      "text": "variable [AddLeftMono α] [ZeroLEOneClass α]"
+     },
+     {
+      "source": "mathlib4",
+      "path": "Mathlib/Data/Nat/Cast/Order/Basic.lean",
+      "line": 45,
+      "text": "variable [NeZero (1 : α)]"
+     }
+    ]
+   },
+   "status": "proposed",
+   "proposed_by": "model",
+   "reviewed_by": null,
+   "notes": "Section variables include a nontrivial ordered additive monoid with one."
+  },
+  {
+   "name": "Nat.exists_eq_add_of_le",
+   "gloss": "writing n = m + k for some natural number k when m ≤ n",
+   "statement": {
+    "source": "lean4",
+    "path": "src/Init/Data/Nat/Lemmas.lean",
+    "line": 377,
+    "text": "protected theorem exists_eq_add_of_le (h : m ≤ n) : ∃ k : Nat, n = m + k :=",
+    "context": []
+   },
+   "status": "proposed",
+   "proposed_by": "model",
+   "reviewed_by": null,
+   "notes": "Lean core, not in the pinned Mathlib tree."
+  },
+  {
+   "name": "Nat.le_ceil",
+   "gloss": "the bound a ≤ ⌈a⌉₊ for the natural-number ceiling",
+   "statement": {
+    "source": "mathlib4",
+    "path": "Mathlib/Algebra/Order/Floor/Semiring.lean",
+    "line": 178,
+    "text": "theorem le_ceil (a : R) : a ≤ ⌈a⌉₊ :=",
+    "context": [
+     {
+      "source": "mathlib4",
+      "path": "Mathlib/Algebra/Order/Floor/Semiring.lean",
+      "line": 31,
+      "text": "variable {R : Type*}"
+     },
+     {
+      "source": "mathlib4",
+      "path": "Mathlib/Algebra/Order/Floor/Semiring.lean",
+      "line": 37,
+      "text": "variable [Semiring R] [LinearOrder R] [FloorSemiring R] {a b : R} {n : ℕ}"
+     }
+    ]
+   },
+   "status": "proposed",
+   "proposed_by": "model",
+   "reviewed_by": null,
+   "notes": ""
+  },
+  {
+   "name": "Nat.mul_le_mul_right",
+   "gloss": "multiplying n ≤ m on the right by a natural number k",
+   "statement": {
+    "source": "lean4",
+    "path": "src/Init/Data/Nat/Basic.lean",
+    "line": 757,
+    "text": "theorem mul_le_mul_right {n m : Nat} (k : Nat) (h : n ≤ m) : n * k ≤ m * k :=",
+    "context": []
+   },
+   "status": "proposed",
+   "proposed_by": "model",
+   "reviewed_by": null,
+   "notes": "Lean core, not in the pinned Mathlib tree. Conclusion n * k ≤ m * k in ℕ."
+  },
+  {
+   "name": "Real.exp_le_exp",
+   "gloss": "the equivalence exp x ≤ exp y ↔ x ≤ y",
+   "statement": {
+    "source": "mathlib4",
+    "path": "Mathlib/Analysis/Complex/Exponential.lean",
+    "line": 316,
+    "text": "theorem exp_le_exp {x y : ℝ} : exp x ≤ exp y ↔ x ≤ y :=",
+    "context": [
+     {
+      "source": "mathlib4",
+      "path": "Mathlib/Analysis/Complex/Exponential.lean",
+      "line": 206,
+      "text": "variable (x y : ℝ)"
+     }
+    ]
+   },
+   "status": "proposed",
+   "proposed_by": "model",
+   "reviewed_by": null,
+   "notes": "Real exponential."
+  },
+  {
+   "name": "Real.log_nonneg",
+   "gloss": "nonnegativity of log x for x ≥ 1",
+   "statement": {
+    "source": "mathlib4",
+    "path": "Mathlib/Analysis/SpecialFunctions/Log/Basic.lean",
+    "line": 213,
+    "text": "theorem log_nonneg (hx : 1 ≤ x) : 0 ≤ log x :=",
+    "context": [
+     {
+      "source": "mathlib4",
+      "path": "Mathlib/Analysis/SpecialFunctions/Log/Basic.lean",
+      "line": 37,
+      "text": "variable {x y : ℝ}"
+     }
+    ]
+   },
+   "status": "proposed",
+   "proposed_by": "model",
+   "reviewed_by": null,
+   "notes": "Hypothesis 1 ≤ x."
+  },
+  {
+   "name": "Real.rpow_le_rpow_of_exponent_le",
+   "gloss": "monotonicity of x ^ y in the exponent when x ≥ 1",
+   "statement": {
+    "source": "mathlib4",
+    "path": "Mathlib/Analysis/SpecialFunctions/Pow/Real.lean",
+    "line": 617,
+    "text": "theorem rpow_le_rpow_of_exponent_le (hx : 1 ≤ x) (hyz : y ≤ z) : x ^ y ≤ x ^ z := by",
+    "context": [
+     {
+      "source": "mathlib4",
+      "path": "Mathlib/Analysis/SpecialFunctions/Pow/Real.lean",
+      "line": 413,
+      "text": "variable {x y z : ℝ} {n : ℕ}"
+     }
+    ]
+   },
+   "status": "proposed",
+   "proposed_by": "model",
+   "reviewed_by": null,
+   "notes": "Hypotheses 1 ≤ x and y ≤ z."
+  },
+  {
+   "name": "Real.rpow_nonneg",
+   "gloss": "nonnegativity of a real power of a nonnegative real",
+   "statement": {
+    "source": "mathlib4",
+    "path": "Mathlib/Analysis/SpecialFunctions/Pow/Real.lean",
+    "line": 164,
+    "text": "theorem rpow_nonneg {x : ℝ} (hx : 0 ≤ x) (y : ℝ) : 0 ≤ x ^ y := by",
+    "context": [
+     {
+      "source": "mathlib4",
+      "path": "Mathlib/Analysis/SpecialFunctions/Pow/Real.lean",
+      "line": 29,
+      "text": "variable {x y z : ℝ}"
+     }
+    ]
+   },
+   "status": "proposed",
+   "proposed_by": "model",
+   "reviewed_by": null,
+   "notes": "Any real exponent y."
+  },
+  {
+   "name": "Real.rpow_pos_of_pos",
+   "gloss": "positivity of a real power of a positive real",
+   "statement": {
+    "source": "mathlib4",
+    "path": "Mathlib/Analysis/SpecialFunctions/Pow/Real.lean",
+    "line": 117,
+    "text": "theorem rpow_pos_of_pos {x : ℝ} (hx : 0 < x) (y : ℝ) : 0 < x ^ y := by",
+    "context": [
+     {
+      "source": "mathlib4",
+      "path": "Mathlib/Analysis/SpecialFunctions/Pow/Real.lean",
+      "line": 29,
+      "text": "variable {x y z : ℝ}"
+     }
+    ]
+   },
+   "status": "proposed",
+   "proposed_by": "model",
+   "reviewed_by": null,
+   "notes": "Any real exponent y."
+  },
+  {
+   "name": "Real.tendsto_log_atTop",
+   "gloss": "the limit log x → ∞ as x → ∞",
+   "statement": {
+    "source": "mathlib4",
+    "path": "Mathlib/Analysis/SpecialFunctions/Log/Basic.lean",
+    "line": 351,
+    "text": "theorem tendsto_log_atTop : Tendsto log atTop atTop :=",
+    "context": [
+     {
+      "source": "mathlib4",
+      "path": "Mathlib/Analysis/SpecialFunctions/Log/Basic.lean",
+      "line": 37,
+      "text": "variable {x y : ℝ}"
+     }
+    ]
+   },
+   "status": "proposed",
+   "proposed_by": "model",
+   "reviewed_by": null,
+   "notes": "Tendsto log atTop atTop for the real logarithm."
+  },
+  {
+   "name": "Right.add_pos_of_nonneg_of_pos",
+   "gloss": "the fact that 0 ≤ a and b < c give b < a + c",
+   "statement": {
+    "source": "mathlib4",
+    "path": "Mathlib/Algebra/Order/Monoid/Unbundled/Basic.lean",
+    "line": 720,
+    "text": "@[to_additive Right.add_pos_of_nonneg_of_pos\n/-- Assumes right covariance.\nThe lemma assuming left covariance is `Left.add_pos_of_nonneg_of_pos`. -/]\nalias Right.one_lt_mul_of_le_of_lt := lt_mul_of_one_le_of_lt",
+    "context": [
+     {
+      "source": "mathlib4",
+      "path": "Mathlib/Algebra/Order/Monoid/Unbundled/Basic.lean",
+      "line": 689,
+      "text": "theorem lt_mul_of_one_le_of_lt [MulRightMono α] (ha : 1 ≤ a) (hbc : b < c) : b < a * c :="
+     },
+     {
+      "source": "mathlib4",
+      "path": "Mathlib/Algebra/Order/Monoid/Unbundled/Basic.lean",
+      "line": 47,
+      "text": "variable {α β : Type*} {a b c d e f : α}"
+     },
+     {
+      "source": "mathlib4",
+      "path": "Mathlib/Algebra/Order/Monoid/Unbundled/Basic.lean",
+      "line": 375,
+      "text": "variable [MulOneClass α]"
+     },
+     {
+      "source": "mathlib4",
+      "path": "Mathlib/Algebra/Order/Monoid/Unbundled/Basic.lean",
+      "line": 498,
+      "text": "variable [Preorder α]"
+     }
+    ]
+   },
+   "status": "proposed",
+   "proposed_by": "model",
+   "reviewed_by": null,
+   "notes": "Not written in source: generated by @[to_additive Right.add_pos_of_nonneg_of_pos] from Right.one_lt_mul_of_le_of_lt, an alias of lt_mul_of_one_le_of_lt (1 ≤ a → b < c → b < a * c). The additive form is 0 ≤ a → b < c → b < a + c; the corpus instances (such as 0 < ↑u + 1) have b = 0."
+  },
+  {
+   "name": "RingEquiv.injective",
+   "gloss": "injectivity of a ring isomorphism",
+   "statement": {
+    "source": "mathlib4",
+    "path": "Mathlib/Algebra/Ring/Equiv.lean",
+    "line": 208,
+    "text": "protected theorem injective (e : R ≃+* S) : Function.Injective e :=",
+    "context": [
+     {
+      "source": "mathlib4",
+      "path": "Mathlib/Algebra/Ring/Equiv.lean",
+      "line": 50,
+      "text": "variable {F α β R S S' : Type*}"
+     },
+     {
+      "source": "mathlib4",
+      "path": "Mathlib/Algebra/Ring/Equiv.lean",
+      "line": 126,
+      "text": "variable [Mul R] [Mul S] [Add R] [Add S] [Mul S'] [Add S']"
+     }
+    ]
+   },
+   "status": "proposed",
+   "proposed_by": "model",
+   "reviewed_by": null,
+   "notes": ""
+  },
+  {
+   "name": "Set.ext",
+   "gloss": "set extensionality",
+   "statement": {
+    "source": "mathlib4",
+    "path": "Mathlib/Data/Set/Defs.lean",
+    "line": 83,
+    "text": "theorem ext {a b : Set α} (h : ∀ (x : α), x ∈ a ↔ x ∈ b) : a = b :=",
+    "context": [
+     {
+      "source": "mathlib4",
+      "path": "Mathlib/Data/Set/Defs.lean",
+      "line": 42,
+      "text": "variable {α : Type u}"
+     }
+    ]
+   },
+   "status": "proposed",
+   "proposed_by": "model",
+   "reviewed_by": null,
+   "notes": ""
+  },
+  {
+   "name": "Subsingleton.elim",
+   "gloss": "equality of any two elements of a subsingleton",
+   "statement": {
+    "source": "lean4",
+    "path": "src/Init/Core.lean",
+    "line": 1272,
+    "text": "protected theorem Subsingleton.elim {α : Sort u} [h : Subsingleton α] : (a b : α) → a = b :=",
+    "context": []
+   },
+   "status": "proposed",
+   "proposed_by": "model",
+   "reviewed_by": null,
+   "notes": "Lean core, not in the pinned Mathlib tree. The statement binds a and b itself; the file-level variable {a b c d : Prop} is not used."
+  },
+  {
+   "name": "Subtype.ext",
+   "gloss": "equality of subtype elements with equal values",
+   "statement": {
+    "source": "lean4",
+    "path": "src/Init/Core.lean",
+    "line": 1380,
+    "text": "protected theorem ext : ∀ {a1 a2 : {x // p x}}, val a1 = val a2 → a1 = a2",
+    "context": [
+     {
+      "source": "lean4",
+      "path": "src/Init/Core.lean",
+      "line": 1378,
+      "text": "variable {α : Sort u} {p : α → Prop}"
+     }
+    ]
+   },
+   "status": "proposed",
+   "proposed_by": "model",
+   "reviewed_by": null,
+   "notes": "Lean core, not in the pinned Mathlib tree. α and p come from the quoted variable line; the file-level variable {a b c d : Prop} is not used."
+  },
+  {
+   "name": "add_le_add",
+   "gloss": "adding the inequalities a ≤ b and c ≤ d",
+   "statement": {
+    "source": "mathlib4",
+    "path": "Mathlib/Algebra/Order/Monoid/Unbundled/Basic.lean",
+    "line": 177,
+    "text": "@[to_additive (attr := gcongr high, to_dual self) add_le_add]\ntheorem mul_le_mul' [MulLeftMono α] [MulRightMono α]\n    (h₁ : a ≤ b) (h₂ : c ≤ d) : a * c ≤ b * d := by",
+    "context": [
+     {
+      "source": "mathlib4",
+      "path": "Mathlib/Algebra/Order/Monoid/Unbundled/Basic.lean",
+      "line": 47,
+      "text": "variable {α β : Type*} {a b c d e f : α}"
+     },
+     {
+      "source": "mathlib4",
+      "path": "Mathlib/Algebra/Order/Monoid/Unbundled/Basic.lean",
+      "line": 51,
+      "text": "variable [Mul α]"
+     },
+     {
+      "source": "mathlib4",
+      "path": "Mathlib/Algebra/Order/Monoid/Unbundled/Basic.lean",
+      "line": 127,
+      "text": "variable [Preorder α]"
+     }
+    ]
+   },
+   "status": "proposed",
+   "proposed_by": "model",
+   "reviewed_by": null,
+   "notes": "Not written in source: generated by @[to_additive … add_le_add] from mul_le_mul' (quoted). The additive statement is a ≤ b → c ≤ d → a + c ≤ b + d."
+  },
+  {
+   "name": "add_pos'",
+   "gloss": "the fact that b < c and 0 < a give b < c + a",
+   "statement": {
+    "source": "mathlib4",
+    "path": "Mathlib/Algebra/Order/Monoid/Unbundled/Basic.lean",
+    "line": 771,
+    "text": "@[to_additive add_pos']\nalias one_lt_mul'' := Left.one_lt_mul'",
+    "context": [
+     {
+      "source": "mathlib4",
+      "path": "Mathlib/Algebra/Order/Monoid/Unbundled/Basic.lean",
+      "line": 620,
+      "text": "@[to_additive Left.add_pos' /-- Assumes left covariance.\nThe lemma assuming right covariance is `Right.add_pos'`. -/]\nalias Left.one_lt_mul' := lt_mul_of_lt_of_one_lt'"
+     },
+     {
+      "source": "mathlib4",
+      "path": "Mathlib/Algebra/Order/Monoid/Unbundled/Basic.lean",
+      "line": 573,
+      "text": "theorem lt_mul_of_lt_of_one_lt' [MulLeftMono α] (hbc : b < c) (ha : 1 < a) : b < c * a :="
+     },
+     {
+      "source": "mathlib4",
+      "path": "Mathlib/Algebra/Order/Monoid/Unbundled/Basic.lean",
+      "line": 47,
+      "text": "variable {α β : Type*} {a b c d e f : α}"
+     },
+     {
+      "source": "mathlib4",
+      "path": "Mathlib/Algebra/Order/Monoid/Unbundled/Basic.lean",
+      "line": 375,
+      "text": "variable [MulOneClass α]"
+     },
+     {
+      "source": "mathlib4",
+      "path": "Mathlib/Algebra/Order/Monoid/Unbundled/Basic.lean",
+      "line": 498,
+      "text": "variable [Preorder α]"
+     }
+    ]
+   },
+   "status": "proposed",
+   "proposed_by": "model",
+   "reviewed_by": null,
+   "notes": "Not written in source: generated by @[to_additive add_pos'] from one_lt_mul'', an alias of Left.one_lt_mul', itself an alias of lt_mul_of_lt_of_one_lt' (b < c → 1 < a → b < c * a). The additive form is b < c → 0 < a → b < c + a; the corpus instances (such as 0 < A + K) have b = 0."
+  },
+  {
+   "name": "add_pos_of_pos_of_nonneg",
+   "gloss": "the fact that b < c and 0 ≤ a give b < c + a",
+   "statement": {
+    "source": "mathlib4",
+    "path": "Mathlib/Algebra/Order/Monoid/Unbundled/Basic.lean",
+    "line": 765,
+    "text": "@[to_additive add_pos_of_pos_of_nonneg]\nalias one_lt_mul_of_lt_of_le' := Left.one_lt_mul_of_lt_of_le",
+    "context": [
+     {
+      "source": "mathlib4",
+      "path": "Mathlib/Algebra/Order/Monoid/Unbundled/Basic.lean",
+      "line": 600,
+      "text": "@[to_additive Left.add_pos_of_pos_of_nonneg\n/-- Assumes left covariance.\nThe lemma assuming right covariance is `Right.add_pos_of_pos_of_nonneg`. -/]\nalias Left.one_lt_mul_of_lt_of_le := lt_mul_of_lt_of_one_le"
+     },
+     {
+      "source": "mathlib4",
+      "path": "Mathlib/Algebra/Order/Monoid/Unbundled/Basic.lean",
+      "line": 565,
+      "text": "theorem lt_mul_of_lt_of_one_le [MulLeftMono α] (hbc : b < c) (ha : 1 ≤ a) : b < c * a :="
+     },
+     {
+      "source": "mathlib4",
+      "path": "Mathlib/Algebra/Order/Monoid/Unbundled/Basic.lean",
+      "line": 47,
+      "text": "variable {α β : Type*} {a b c d e f : α}"
+     },
+     {
+      "source": "mathlib4",
+      "path": "Mathlib/Algebra/Order/Monoid/Unbundled/Basic.lean",
+      "line": 375,
+      "text": "variable [MulOneClass α]"
+     },
+     {
+      "source": "mathlib4",
+      "path": "Mathlib/Algebra/Order/Monoid/Unbundled/Basic.lean",
+      "line": 498,
+      "text": "variable [Preorder α]"
+     }
+    ]
+   },
+   "status": "proposed",
+   "proposed_by": "model",
+   "reviewed_by": null,
+   "notes": "Not written in source: generated by @[to_additive add_pos_of_pos_of_nonneg] from one_lt_mul_of_lt_of_le', an alias of Left.one_lt_mul_of_lt_of_le, itself an alias of lt_mul_of_lt_of_one_le (b < c → 1 ≤ a → b < c * a). The additive form is b < c → 0 ≤ a → b < c + a; the corpus instances (such as 0 < 1 + |x|) have b = 0."
+  },
+  {
+   "name": "div_le_iff₀",
+   "gloss": "clearing a positive denominator in b / c ≤ a",
+   "statement": {
+    "source": "mathlib4",
+    "path": "Mathlib/Algebra/Order/GroupWithZero/Basic.lean",
+    "line": 1133,
+    "text": "lemma div_le_iff₀ (hc : 0 < c) : b / c ≤ a ↔ b ≤ a * c := by",
+    "context": [
+     {
+      "source": "mathlib4",
+      "path": "Mathlib/Algebra/Order/GroupWithZero/Basic.lean",
+      "line": 29,
+      "text": "variable {α M₀ G₀ : Type*}"
+     },
+     {
+      "source": "mathlib4",
+      "path": "Mathlib/Algebra/Order/GroupWithZero/Basic.lean",
+      "line": 765,
+      "text": "variable [GroupWithZero G₀]"
+     },
+     {
+      "source": "mathlib4",
+      "path": "Mathlib/Algebra/Order/GroupWithZero/Basic.lean",
+      "line": 831,
+      "text": "variable [PartialOrder G₀]"
+     },
+     {
+      "source": "mathlib4",
+      "path": "Mathlib/Algebra/Order/GroupWithZero/Basic.lean",
+      "line": 1085,
+      "text": "variable [MulPosReflectLT G₀] {a b c : G₀}"
+     }
+    ]
+   },
+   "status": "proposed",
+   "proposed_by": "model",
+   "reviewed_by": null,
+   "notes": "b / c ≤ a ↔ b ≤ a * c when 0 < c."
+  },
+  {
+   "name": "div_nonneg",
+   "gloss": "nonnegativity of a quotient of two nonnegative elements",
+   "statement": {
+    "source": "mathlib4",
+    "path": "Mathlib/Algebra/Order/GroupWithZero/Basic.lean",
+    "line": 878,
+    "text": "lemma div_nonneg (ha : 0 ≤ a) (hb : 0 ≤ b) : 0 ≤ a / b := by",
+    "context": [
+     {
+      "source": "mathlib4",
+      "path": "Mathlib/Algebra/Order/GroupWithZero/Basic.lean",
+      "line": 29,
+      "text": "variable {α M₀ G₀ : Type*}"
+     },
+     {
+      "source": "mathlib4",
+      "path": "Mathlib/Algebra/Order/GroupWithZero/Basic.lean",
+      "line": 765,
+      "text": "variable [GroupWithZero G₀]"
+     },
+     {
+      "source": "mathlib4",
+      "path": "Mathlib/Algebra/Order/GroupWithZero/Basic.lean",
+      "line": 831,
+      "text": "variable [PartialOrder G₀]"
+     },
+     {
+      "source": "mathlib4",
+      "path": "Mathlib/Algebra/Order/GroupWithZero/Basic.lean",
+      "line": 835,
+      "text": "variable [PosMulReflectLT G₀] {a b c : G₀}"
+     }
+    ]
+   },
+   "status": "proposed",
+   "proposed_by": "model",
+   "reviewed_by": null,
+   "notes": "Same section variables as div_pos."
+  },
+  {
+   "name": "div_pos",
+   "gloss": "positivity of a quotient of two positive elements",
+   "statement": {
+    "source": "mathlib4",
+    "path": "Mathlib/Algebra/Order/GroupWithZero/Basic.lean",
+    "line": 875,
+    "text": "lemma div_pos (ha : 0 < a) (hb : 0 < b) : 0 < a / b := by",
+    "context": [
+     {
+      "source": "mathlib4",
+      "path": "Mathlib/Algebra/Order/GroupWithZero/Basic.lean",
+      "line": 29,
+      "text": "variable {α M₀ G₀ : Type*}"
+     },
+     {
+      "source": "mathlib4",
+      "path": "Mathlib/Algebra/Order/GroupWithZero/Basic.lean",
+      "line": 765,
+      "text": "variable [GroupWithZero G₀]"
+     },
+     {
+      "source": "mathlib4",
+      "path": "Mathlib/Algebra/Order/GroupWithZero/Basic.lean",
+      "line": 831,
+      "text": "variable [PartialOrder G₀]"
+     },
+     {
+      "source": "mathlib4",
+      "path": "Mathlib/Algebra/Order/GroupWithZero/Basic.lean",
+      "line": 835,
+      "text": "variable [PosMulReflectLT G₀] {a b c : G₀}"
+     }
+    ]
+   },
+   "status": "proposed",
+   "proposed_by": "model",
+   "reviewed_by": null,
+   "notes": "In a group with zero with a partial order and PosMulReflectLT (section variables)."
+  },
+  {
+   "name": "funext",
+   "gloss": "function extensionality",
+   "statement": {
+    "source": "lean4",
+    "path": "src/Init/Prelude.lean",
+    "line": 4806,
+    "text": "theorem funext {α : Sort u} {β : α → Sort v} {f g : (x : α) → β x}\n    (h : ∀ x, Eq (f x) (g x)) : Eq f g :=",
+    "context": []
+   },
+   "status": "proposed",
+   "proposed_by": "model",
+   "reviewed_by": null,
+   "notes": "Lean core, not in the pinned Mathlib tree."
+  },
+  {
+   "name": "iSup_le",
+   "gloss": "the least-upper-bound property of an indexed supremum",
+   "statement": {
+    "source": "mathlib4",
+    "path": "Mathlib/Order/CompleteLattice/Basic.lean",
+    "line": 257,
+    "text": "theorem iSup_le (h : ∀ i, f i ≤ a) : iSup f ≤ a :=",
+    "context": [
+     {
+      "source": "mathlib4",
+      "path": "Mathlib/Order/CompleteLattice/Basic.lean",
+      "line": 43,
+      "text": "variable {α β γ : Type*} {ι ι' : Sort*} {κ : ι → Sort*} {κ' : ι' → Sort*}"
+     },
+     {
+      "source": "mathlib4",
+      "path": "Mathlib/Order/CompleteLattice/Basic.lean",
+      "line": 226,
+      "text": "variable [CompleteLattice α] {f g s : ι → α} {a b : α}"
+     }
+    ]
+   },
+   "status": "proposed",
+   "proposed_by": "model",
+   "reviewed_by": null,
+   "notes": "If f i ≤ a for every i, then iSup f ≤ a."
+  },
+  {
+   "name": "inv_pos_of_pos",
+   "gloss": "positivity of the inverse of a positive element",
+   "statement": {
+    "source": "mathlib4",
+    "path": "Mathlib/Algebra/Order/GroupWithZero/Basic.lean",
+    "line": 844,
+    "text": "alias ⟨_, inv_pos_of_pos⟩ := inv_pos",
+    "context": [
+     {
+      "source": "mathlib4",
+      "path": "Mathlib/Algebra/Order/GroupWithZero/Basic.lean",
+      "line": 837,
+      "text": "@[simp] lemma inv_pos : 0 < a⁻¹ ↔ 0 < a := by"
+     },
+     {
+      "source": "mathlib4",
+      "path": "Mathlib/Algebra/Order/GroupWithZero/Basic.lean",
+      "line": 29,
+      "text": "variable {α M₀ G₀ : Type*}"
+     },
+     {
+      "source": "mathlib4",
+      "path": "Mathlib/Algebra/Order/GroupWithZero/Basic.lean",
+      "line": 765,
+      "text": "variable [GroupWithZero G₀]"
+     },
+     {
+      "source": "mathlib4",
+      "path": "Mathlib/Algebra/Order/GroupWithZero/Basic.lean",
+      "line": 831,
+      "text": "variable [PartialOrder G₀]"
+     },
+     {
+      "source": "mathlib4",
+      "path": "Mathlib/Algebra/Order/GroupWithZero/Basic.lean",
+      "line": 835,
+      "text": "variable [PosMulReflectLT G₀] {a b c : G₀}"
+     }
+    ]
+   },
+   "status": "proposed",
+   "proposed_by": "model",
+   "reviewed_by": null,
+   "notes": "Generated by alias ⟨_, inv_pos_of_pos⟩ from the reverse direction of inv_pos (quoted): 0 < a → 0 < a⁻¹."
+  },
+  {
+   "name": "isEmpty_or_nonempty",
+   "gloss": "the dichotomy between empty and nonempty types",
+   "statement": {
+    "source": "mathlib4",
+    "path": "Mathlib/Basic/IsEmpty/Basic.lean",
+    "line": 85,
+    "text": "theorem isEmpty_or_nonempty : IsEmpty α ∨ Nonempty α :=",
+    "context": [
+     {
+      "source": "mathlib4",
+      "path": "Mathlib/Basic/IsEmpty/Basic.lean",
+      "line": 20,
+      "text": "variable {α β γ : Sort*}"
+     },
+     {
+      "source": "mathlib4",
+      "path": "Mathlib/Basic/IsEmpty/Basic.lean",
+      "line": 83,
+      "text": "variable (α)"
+     }
+    ]
+   },
+   "status": "proposed",
+   "proposed_by": "model",
+   "reviewed_by": null,
+   "notes": ""
+  },
+  {
+   "name": "le_antisymm",
+   "gloss": "antisymmetry of ≤",
+   "statement": {
+    "source": "mathlib4",
+    "path": "Mathlib/Order/Defs/PartialOrder.lean",
+    "line": 187,
+    "text": "lemma le_antisymm : a ≤ b → b ≤ a → a = b := PartialOrder.le_antisymm _ _",
+    "context": [
+     {
+      "source": "mathlib4",
+      "path": "Mathlib/Order/Defs/PartialOrder.lean",
+      "line": 32,
+      "text": "variable {α : Type*}"
+     },
+     {
+      "source": "mathlib4",
+      "path": "Mathlib/Order/Defs/PartialOrder.lean",
+      "line": 185,
+      "text": "variable [PartialOrder α] {a b : α}"
+     }
+    ]
+   },
+   "status": "proposed",
+   "proposed_by": "model",
+   "reviewed_by": null,
+   "notes": "In a partial order."
+  },
+  {
+   "name": "le_div_iff₀",
+   "gloss": "clearing a positive denominator in a ≤ b / c",
+   "statement": {
+    "source": "mathlib4",
+    "path": "Mathlib/Algebra/Order/GroupWithZero/Basic.lean",
+    "line": 1129,
+    "text": "lemma le_div_iff₀ (hc : 0 < c) : a ≤ b / c ↔ a * c ≤ b := by",
+    "context": [
+     {
+      "source": "mathlib4",
+      "path": "Mathlib/Algebra/Order/GroupWithZero/Basic.lean",
+      "line": 29,
+      "text": "variable {α M₀ G₀ : Type*}"
+     },
+     {
+      "source": "mathlib4",
+      "path": "Mathlib/Algebra/Order/GroupWithZero/Basic.lean",
+      "line": 765,
+      "text": "variable [GroupWithZero G₀]"
+     },
+     {
+      "source": "mathlib4",
+      "path": "Mathlib/Algebra/Order/GroupWithZero/Basic.lean",
+      "line": 831,
+      "text": "variable [PartialOrder G₀]"
+     },
+     {
+      "source": "mathlib4",
+      "path": "Mathlib/Algebra/Order/GroupWithZero/Basic.lean",
+      "line": 1085,
+      "text": "variable [MulPosReflectLT G₀] {a b c : G₀}"
+     }
+    ]
+   },
+   "status": "proposed",
+   "proposed_by": "model",
+   "reviewed_by": null,
+   "notes": "a ≤ b / c ↔ a * c ≤ b when 0 < c."
+  },
+  {
+   "name": "le_iSup",
+   "gloss": "the upper-bound property of an indexed supremum",
+   "statement": {
+    "source": "mathlib4",
+    "path": "Mathlib/Order/CompleteLattice/Basic.lean",
+    "line": 229,
+    "text": "theorem le_iSup (f : ι → α) (i : ι) : f i ≤ iSup f :=",
+    "context": [
+     {
+      "source": "mathlib4",
+      "path": "Mathlib/Order/CompleteLattice/Basic.lean",
+      "line": 43,
+      "text": "variable {α β γ : Type*} {ι ι' : Sort*} {κ : ι → Sort*} {κ' : ι' → Sort*}"
+     },
+     {
+      "source": "mathlib4",
+      "path": "Mathlib/Order/CompleteLattice/Basic.lean",
+      "line": 226,
+      "text": "variable [CompleteLattice α] {f g s : ι → α} {a b : α}"
+     }
+    ]
+   },
+   "status": "proposed",
+   "proposed_by": "model",
+   "reviewed_by": null,
+   "notes": "f i ≤ iSup f for every i."
+  },
+  {
+   "name": "le_max_left",
+   "gloss": "the bound a ≤ max a b",
+   "statement": {
+    "source": "mathlib4",
+    "path": "Mathlib/Order/Defs/LinearOrder.lean",
+    "line": 162,
+    "text": "@[to_dual le_max_left]\nlemma min_le_left (a b : α) : min a b ≤ a := min_le_iff.mpr (.inl le_rfl)",
+    "context": [
+     {
+      "source": "mathlib4",
+      "path": "Mathlib/Order/Defs/LinearOrder.lean",
+      "line": 28,
+      "text": "variable {α : Type*}"
+     },
+     {
+      "source": "mathlib4",
+      "path": "Mathlib/Order/Defs/LinearOrder.lean",
+      "line": 83,
+      "text": "variable [LinearOrder α] {a b c : α}"
+     }
+    ]
+   },
+   "status": "proposed",
+   "proposed_by": "model",
+   "reviewed_by": null,
+   "notes": "Not written in source: generated by @[to_dual le_max_left] from min_le_left (quoted), in a linear order. The generated statement is a ≤ max a b; corpus instances such as C₀ ≤ max C₀ 1 have this form."
+  },
+  {
+   "name": "le_max_right",
+   "gloss": "the bound b ≤ max a b",
+   "statement": {
+    "source": "mathlib4",
+    "path": "Mathlib/Order/Defs/LinearOrder.lean",
+    "line": 165,
+    "text": "@[to_dual le_max_right]\nlemma min_le_right (a b : α) : min a b ≤ b := min_le_iff.mpr (.inr le_rfl)",
+    "context": [
+     {
+      "source": "mathlib4",
+      "path": "Mathlib/Order/Defs/LinearOrder.lean",
+      "line": 28,
+      "text": "variable {α : Type*}"
+     },
+     {
+      "source": "mathlib4",
+      "path": "Mathlib/Order/Defs/LinearOrder.lean",
+      "line": 83,
+      "text": "variable [LinearOrder α] {a b c : α}"
+     }
+    ]
+   },
+   "status": "proposed",
+   "proposed_by": "model",
+   "reviewed_by": null,
+   "notes": "Not written in source: generated by @[to_dual le_max_right] from min_le_right (quoted), in a linear order. The generated statement is b ≤ max a b; corpus instances such as 1 ≤ max C₀ 1 have this form."
+  },
+  {
+   "name": "le_of_lt",
+   "gloss": "weakening a < b to a ≤ b",
+   "statement": {
+    "source": "mathlib4",
+    "path": "Mathlib/Order/Defs/PartialOrder.lean",
+    "line": 81,
+    "text": "@[to_dual self] lemma le_of_lt (hab : a < b) : a ≤ b := (lt_iff_le_not_ge.1 hab).1",
+    "context": [
+     {
+      "source": "mathlib4",
+      "path": "Mathlib/Order/Defs/PartialOrder.lean",
+      "line": 32,
+      "text": "variable {α : Type*}"
+     },
+     {
+      "source": "mathlib4",
+      "path": "Mathlib/Order/Defs/PartialOrder.lean",
+      "line": 60,
+      "text": "variable [Preorder α] {a b c : α}"
+     }
+    ]
+   },
+   "status": "proposed",
+   "proposed_by": "model",
+   "reviewed_by": null,
+   "notes": "In a preorder."
+  },
+  {
+   "name": "le_of_not_gt",
+   "gloss": "the linear-order fact that ¬(b < a) implies a ≤ b",
+   "statement": {
+    "source": "mathlib4",
+    "path": "Mathlib/Order/Defs/LinearOrder.lean",
+    "line": 107,
+    "text": "lemma le_of_not_gt (h : ¬b < a) : a ≤ b := (le_or_gt a b).resolve_right h",
+    "context": [
+     {
+      "source": "mathlib4",
+      "path": "Mathlib/Order/Defs/LinearOrder.lean",
+      "line": 28,
+      "text": "variable {α : Type*}"
+     },
+     {
+      "source": "mathlib4",
+      "path": "Mathlib/Order/Defs/LinearOrder.lean",
+      "line": 83,
+      "text": "variable [LinearOrder α] {a b c : α}"
+     }
+    ]
+   },
+   "status": "proposed",
+   "proposed_by": "model",
+   "reviewed_by": null,
+   "notes": "In a linear order. Lean prints ¬b < a, meaning ¬(b < a)."
+  },
+  {
+   "name": "le_rfl",
+   "gloss": "reflexivity of ≤",
+   "statement": {
+    "source": "mathlib4",
+    "path": "Mathlib/Order/Defs/PartialOrder.lean",
+    "line": 66,
+    "text": "lemma le_rfl : a ≤ a := le_refl a",
+    "context": [
+     {
+      "source": "mathlib4",
+      "path": "Mathlib/Order/Defs/PartialOrder.lean",
+      "line": 32,
+      "text": "variable {α : Type*}"
+     },
+     {
+      "source": "mathlib4",
+      "path": "Mathlib/Order/Defs/PartialOrder.lean",
+      "line": 60,
+      "text": "variable [Preorder α] {a b c : α}"
+     }
+    ]
+   },
+   "status": "proposed",
+   "proposed_by": "model",
+   "reviewed_by": null,
+   "notes": "In a preorder; the element is implicit."
+  },
+  {
+   "name": "le_trans",
+   "gloss": "transitivity of ≤",
+   "statement": {
+    "source": "mathlib4",
+    "path": "Mathlib/Order/Defs/PartialOrder.lean",
+    "line": 69,
+    "text": "lemma le_trans : a ≤ b → b ≤ c → a ≤ c := Preorder.le_trans _ _ _",
+    "context": [
+     {
+      "source": "mathlib4",
+      "path": "Mathlib/Order/Defs/PartialOrder.lean",
+      "line": 32,
+      "text": "variable {α : Type*}"
+     },
+     {
+      "source": "mathlib4",
+      "path": "Mathlib/Order/Defs/PartialOrder.lean",
+      "line": 60,
+      "text": "variable [Preorder α] {a b c : α}"
+     }
+    ]
+   },
+   "status": "proposed",
+   "proposed_by": "model",
+   "reviewed_by": null,
+   "notes": "In a preorder."
+  },
+  {
+   "name": "lt_div_iff₀",
+   "gloss": "clearing a positive denominator in a < b / c",
+   "statement": {
+    "source": "mathlib4",
+    "path": "Mathlib/Algebra/Order/GroupWithZero/Basic.lean",
+    "line": 1137,
+    "text": "lemma lt_div_iff₀ (hc : 0 < c) : a < b / c ↔ a * c < b := by",
+    "context": [
+     {
+      "source": "mathlib4",
+      "path": "Mathlib/Algebra/Order/GroupWithZero/Basic.lean",
+      "line": 29,
+      "text": "variable {α M₀ G₀ : Type*}"
+     },
+     {
+      "source": "mathlib4",
+      "path": "Mathlib/Algebra/Order/GroupWithZero/Basic.lean",
+      "line": 765,
+      "text": "variable [GroupWithZero G₀]"
+     },
+     {
+      "source": "mathlib4",
+      "path": "Mathlib/Algebra/Order/GroupWithZero/Basic.lean",
+      "line": 831,
+      "text": "variable [PartialOrder G₀]"
+     },
+     {
+      "source": "mathlib4",
+      "path": "Mathlib/Algebra/Order/GroupWithZero/Basic.lean",
+      "line": 1085,
+      "text": "variable [MulPosReflectLT G₀] {a b c : G₀}"
+     }
+    ]
+   },
+   "status": "proposed",
+   "proposed_by": "model",
+   "reviewed_by": null,
+   "notes": "a < b / c ↔ a * c < b when 0 < c."
+  },
+  {
+   "name": "lt_of_le_of_lt",
+   "gloss": "combining a ≤ b with b < c to get a < c",
+   "statement": {
+    "source": "mathlib4",
+    "path": "Mathlib/Order/Defs/PartialOrder.lean",
+    "line": 95,
+    "text": "lemma lt_of_le_of_lt (hab : a ≤ b) (hbc : b < c) : a < c :=",
+    "context": [
+     {
+      "source": "mathlib4",
+      "path": "Mathlib/Order/Defs/PartialOrder.lean",
+      "line": 32,
+      "text": "variable {α : Type*}"
+     },
+     {
+      "source": "mathlib4",
+      "path": "Mathlib/Order/Defs/PartialOrder.lean",
+      "line": 60,
+      "text": "variable [Preorder α] {a b c : α}"
+     }
+    ]
+   },
+   "status": "proposed",
+   "proposed_by": "model",
+   "reviewed_by": null,
+   "notes": "In a preorder."
+  },
+  {
+   "name": "lt_of_lt_of_le",
+   "gloss": "combining a < b with b ≤ c to get a < c",
+   "statement": {
+    "source": "mathlib4",
+    "path": "Mathlib/Order/Defs/PartialOrder.lean",
+    "line": 91,
+    "text": "lemma lt_of_lt_of_le (hab : a < b) (hbc : b ≤ c) : a < c :=",
+    "context": [
+     {
+      "source": "mathlib4",
+      "path": "Mathlib/Order/Defs/PartialOrder.lean",
+      "line": 32,
+      "text": "variable {α : Type*}"
+     },
+     {
+      "source": "mathlib4",
+      "path": "Mathlib/Order/Defs/PartialOrder.lean",
+      "line": 60,
+      "text": "variable [Preorder α] {a b c : α}"
+     }
+    ]
+   },
+   "status": "proposed",
+   "proposed_by": "model",
+   "reviewed_by": null,
+   "notes": "In a preorder."
+  },
+  {
+   "name": "lt_of_not_ge",
+   "gloss": "the linear-order fact that ¬(b ≤ a) implies a < b",
+   "statement": {
+    "source": "mathlib4",
+    "path": "Mathlib/Order/Defs/LinearOrder.lean",
+    "line": 95,
+    "text": "@[to_dual self] lemma lt_of_not_ge (h : ¬b ≤ a) : a < b := lt_of_le_not_ge (le_of_not_ge h) h",
+    "context": [
+     {
+      "source": "mathlib4",
+      "path": "Mathlib/Order/Defs/LinearOrder.lean",
+      "line": 28,
+      "text": "variable {α : Type*}"
+     },
+     {
+      "source": "mathlib4",
+      "path": "Mathlib/Order/Defs/LinearOrder.lean",
+      "line": 83,
+      "text": "variable [LinearOrder α] {a b c : α}"
+     }
+    ]
+   },
+   "status": "proposed",
+   "proposed_by": "model",
+   "reviewed_by": null,
+   "notes": "In a linear order. Lean prints ¬b ≤ a, meaning ¬(b ≤ a)."
+  },
+  {
+   "name": "measurableSet_le",
+   "gloss": "measurability of the set where one measurable function is at most another",
+   "statement": {
+    "source": "mathlib4",
+    "path": "Mathlib/MeasureTheory/Constructions/BorelSpace/Order.lean",
+    "line": 172,
+    "text": "theorem measurableSet_le {f g : δ → α} (hf : Measurable f) (hg : Measurable g) :\n    MeasurableSet { a | f a ≤ g a } :=",
+    "context": [
+     {
+      "source": "mathlib4",
+      "path": "Mathlib/MeasureTheory/Constructions/BorelSpace/Order.lean",
+      "line": 49,
+      "text": "variable {α β γ δ : Type*} {ι : Sort y} {s t u : Set α}"
+     },
+     {
+      "source": "mathlib4",
+      "path": "Mathlib/MeasureTheory/Constructions/BorelSpace/Order.lean",
+      "line": 101,
+      "text": "variable [TopologicalSpace α] {mα : MeasurableSpace α} [OpensMeasurableSpace α]"
+     },
+     {
+      "source": "mathlib4",
+      "path": "Mathlib/MeasureTheory/Constructions/BorelSpace/Order.lean",
+      "line": 102,
+      "text": "variable {mδ : MeasurableSpace δ}"
+     },
+     {
+      "source": "mathlib4",
+      "path": "Mathlib/MeasureTheory/Constructions/BorelSpace/Order.lean",
+      "line": 163,
+      "text": "variable [PartialOrder α] [OrderClosedTopology α] [SecondCountableTopology α] {a : α}"
+     }
+    ]
+   },
+   "status": "proposed",
+   "proposed_by": "model",
+   "reviewed_by": null,
+   "notes": "Under the section hypotheses on the order topology."
+  },
+  {
+   "name": "measurable_const",
+   "gloss": "measurability of a constant function",
+   "statement": {
+    "source": "mathlib4",
+    "path": "Mathlib/MeasureTheory/MeasurableSpace/Defs.lean",
+    "line": 531,
+    "text": "theorem measurable_const {_ : MeasurableSpace α} {_ : MeasurableSpace β} {a : α} :\n    Measurable fun _ : β => a := fun s _ => .const (a ∈ s)",
+    "context": [
+     {
+      "source": "mathlib4",
+      "path": "Mathlib/MeasureTheory/MeasurableSpace/Defs.lean",
+      "line": 46,
+      "text": "variable {α β γ δ : Type*} {ι : Sort*} {s t u : Set α}"
+     }
+    ]
+   },
+   "status": "proposed",
+   "proposed_by": "model",
+   "reviewed_by": null,
+   "notes": ""
+  },
+  {
+   "name": "measurable_fst",
+   "gloss": "measurability of the first projection",
+   "statement": {
+    "source": "mathlib4",
+    "path": "Mathlib/MeasureTheory/MeasurableSpace/Constructions.lean",
+    "line": 379,
+    "text": "theorem measurable_fst {_ : MeasurableSpace α} {_ : MeasurableSpace β} :\n    Measurable (Prod.fst : α × β → α) :=",
+    "context": [
+     {
+      "source": "mathlib4",
+      "path": "Mathlib/MeasureTheory/MeasurableSpace/Constructions.lean",
+      "line": 31,
+      "text": "variable {α β γ δ δ' : Type*} {ι : Sort uι} {s : Set α}"
+     }
+    ]
+   },
+   "status": "proposed",
+   "proposed_by": "model",
+   "reviewed_by": null,
+   "notes": ""
+  },
+  {
+   "name": "mul_le_mul_of_nonneg_left",
+   "gloss": "multiplying b ≤ c on the left by a nonnegative a",
+   "statement": {
+    "source": "mathlib4",
+    "path": "Mathlib/Algebra/Order/GroupWithZero/Defs.lean",
+    "line": 226,
+    "text": "theorem mul_le_mul_of_nonneg_left [PosMulMono α] (hbc : b ≤ c) (ha : 0 ≤ a) : a * b ≤ a * c :=",
+    "context": [
+     {
+      "source": "mathlib4",
+      "path": "Mathlib/Algebra/Order/GroupWithZero/Defs.lean",
+      "line": 82,
+      "text": "variable (α : Type*)"
+     },
+     {
+      "source": "mathlib4",
+      "path": "Mathlib/Algebra/Order/GroupWithZero/Defs.lean",
+      "line": 160,
+      "text": "variable {α}"
+     },
+     {
+      "source": "mathlib4",
+      "path": "Mathlib/Algebra/Order/GroupWithZero/Defs.lean",
+      "line": 161,
+      "text": "variable [Mul α] [Zero α]"
+     },
+     {
+      "source": "mathlib4",
+      "path": "Mathlib/Algebra/Order/GroupWithZero/Defs.lean",
+      "line": 165,
+      "text": "variable [Preorder α] {a b c d : α}"
+     }
+    ]
+   },
+   "status": "proposed",
+   "proposed_by": "model",
+   "reviewed_by": null,
+   "notes": "Conclusion a * b ≤ a * c; assumes PosMulMono."
+  },
+  {
+   "name": "mul_le_mul_of_nonneg_right",
+   "gloss": "multiplying b ≤ c on the right by a nonnegative a",
+   "statement": {
+    "source": "mathlib4",
+    "path": "Mathlib/Algebra/Order/GroupWithZero/Defs.lean",
+    "line": 230,
+    "text": "theorem mul_le_mul_of_nonneg_right [MulPosMono α] (hbc : b ≤ c) (ha : 0 ≤ a) : b * a ≤ c * a :=",
+    "context": [
+     {
+      "source": "mathlib4",
+      "path": "Mathlib/Algebra/Order/GroupWithZero/Defs.lean",
+      "line": 82,
+      "text": "variable (α : Type*)"
+     },
+     {
+      "source": "mathlib4",
+      "path": "Mathlib/Algebra/Order/GroupWithZero/Defs.lean",
+      "line": 160,
+      "text": "variable {α}"
+     },
+     {
+      "source": "mathlib4",
+      "path": "Mathlib/Algebra/Order/GroupWithZero/Defs.lean",
+      "line": 161,
+      "text": "variable [Mul α] [Zero α]"
+     },
+     {
+      "source": "mathlib4",
+      "path": "Mathlib/Algebra/Order/GroupWithZero/Defs.lean",
+      "line": 165,
+      "text": "variable [Preorder α] {a b c d : α}"
+     }
+    ]
+   },
+   "status": "proposed",
+   "proposed_by": "model",
+   "reviewed_by": null,
+   "notes": "Conclusion b * a ≤ c * a; assumes MulPosMono."
+  },
+  {
+   "name": "mul_nonneg",
+   "gloss": "nonnegativity of a product of two nonnegative elements",
+   "statement": {
+    "source": "mathlib4",
+    "path": "Mathlib/Algebra/Order/GroupWithZero/Basic.lean",
+    "line": 67,
+    "text": "alias mul_nonneg := Left.mul_nonneg",
+    "context": [
+     {
+      "source": "mathlib4",
+      "path": "Mathlib/Algebra/Order/GroupWithZero/Basic.lean",
+      "line": 64,
+      "text": "theorem Left.mul_nonneg [PosMulMono α] (ha : 0 ≤ a) (hb : 0 ≤ b) : 0 ≤ a * b := by"
+     },
+     {
+      "source": "mathlib4",
+      "path": "Mathlib/Algebra/Order/GroupWithZero/Basic.lean",
+      "line": 29,
+      "text": "variable {α M₀ G₀ : Type*}"
+     },
+     {
+      "source": "mathlib4",
+      "path": "Mathlib/Algebra/Order/GroupWithZero/Basic.lean",
+      "line": 33,
+      "text": "variable [MulZeroClass α] {a b c d : α}"
+     },
+     {
+      "source": "mathlib4",
+      "path": "Mathlib/Algebra/Order/GroupWithZero/Basic.lean",
+      "line": 37,
+      "text": "variable [Preorder α]"
+     }
+    ]
+   },
+   "status": "proposed",
+   "proposed_by": "model",
+   "reviewed_by": null,
+   "notes": "Alias of Left.mul_nonneg (quoted as context), which assumes PosMulMono."
+  },
+  {
+   "name": "mul_pos",
+   "gloss": "positivity of a product of two positive elements",
+   "statement": {
+    "source": "mathlib4",
+    "path": "Mathlib/Algebra/Order/GroupWithZero/Basic.lean",
+    "line": 43,
+    "text": "alias mul_pos := Left.mul_pos",
+    "context": [
+     {
+      "source": "mathlib4",
+      "path": "Mathlib/Algebra/Order/GroupWithZero/Basic.lean",
+      "line": 40,
+      "text": "theorem Left.mul_pos [PosMulStrictMono α] (ha : 0 < a) (hb : 0 < b) : 0 < a * b := by"
+     },
+     {
+      "source": "mathlib4",
+      "path": "Mathlib/Algebra/Order/GroupWithZero/Basic.lean",
+      "line": 29,
+      "text": "variable {α M₀ G₀ : Type*}"
+     },
+     {
+      "source": "mathlib4",
+      "path": "Mathlib/Algebra/Order/GroupWithZero/Basic.lean",
+      "line": 33,
+      "text": "variable [MulZeroClass α] {a b c d : α}"
+     },
+     {
+      "source": "mathlib4",
+      "path": "Mathlib/Algebra/Order/GroupWithZero/Basic.lean",
+      "line": 37,
+      "text": "variable [Preorder α]"
+     }
+    ]
+   },
+   "status": "proposed",
+   "proposed_by": "model",
+   "reviewed_by": null,
+   "notes": "Alias of Left.mul_pos (quoted as context), which assumes PosMulStrictMono."
+  },
+  {
+   "name": "pow_pos",
+   "gloss": "positivity of every natural-number power of a positive element",
+   "statement": {
+    "source": "mathlib4",
+    "path": "Mathlib/Algebra/Order/GroupWithZero/Basic.lean",
+    "line": 585,
+    "text": "@[simp] lemma pow_pos [ZeroLEOneClass M₀] (ha : 0 < a) : ∀ n, 0 < a ^ n",
+    "context": [
+     {
+      "source": "mathlib4",
+      "path": "Mathlib/Algebra/Order/GroupWithZero/Basic.lean",
+      "line": 29,
+      "text": "variable {α M₀ G₀ : Type*}"
+     },
+     {
+      "source": "mathlib4",
+      "path": "Mathlib/Algebra/Order/GroupWithZero/Basic.lean",
+      "line": 405,
+      "text": "variable [MonoidWithZero M₀]"
+     },
+     {
+      "source": "mathlib4",
+      "path": "Mathlib/Algebra/Order/GroupWithZero/Basic.lean",
+      "line": 548,
+      "text": "variable [PartialOrder M₀] {a b c d : M₀} {m n : ℕ}"
+     },
+     {
+      "source": "mathlib4",
+      "path": "Mathlib/Algebra/Order/GroupWithZero/Basic.lean",
+      "line": 579,
+      "text": "variable [PosMulStrictMono M₀]"
+     }
+    ]
+   },
+   "status": "proposed",
+   "proposed_by": "model",
+   "reviewed_by": null,
+   "notes": "The exponent n is a natural number; ZeroLEOneClass and PosMulStrictMono are assumed."
+  },
+  {
+   "name": "sq_nonneg",
+   "gloss": "nonnegativity of a square",
+   "statement": {
+    "source": "mathlib4",
+    "path": "Mathlib/Algebra/Order/Ring/Unbundled/Basic.lean",
+    "line": 609,
+    "text": "lemma sq_nonneg [ExistsAddOfLE R] [PosMulMono R] [AddLeftMono R]\n    (a : R) : 0 ≤ a ^ 2 := by",
+    "context": [
+     {
+      "source": "mathlib4",
+      "path": "Mathlib/Algebra/Order/Ring/Unbundled/Basic.lean",
+      "line": 42,
+      "text": "variable {R : Type u} {α : Type*}"
+     },
+     {
+      "source": "mathlib4",
+      "path": "Mathlib/Algebra/Order/Ring/Unbundled/Basic.lean",
+      "line": 333,
+      "text": "variable [Semiring R] [LinearOrder R] {a b c : R}"
+     }
+    ]
+   },
+   "status": "proposed",
+   "proposed_by": "model",
+   "reviewed_by": null,
+   "notes": ""
+  },
+  {
+   "name": "tendsto_natCast_atTop_atTop",
+   "gloss": "the limit ↑n → ∞ of the natural-number cast",
+   "statement": {
+    "source": "mathlib4",
+    "path": "Mathlib/Order/Filter/AtTopBot/Archimedean.lean",
+    "line": 44,
+    "text": "theorem tendsto_natCast_atTop_atTop [Semiring R] [PartialOrder R] [IsOrderedRing R]\n    [Archimedean R] :\n    Tendsto ((↑) : ℕ → R) atTop atTop :=",
+    "context": [
+     {
+      "source": "mathlib4",
+      "path": "Mathlib/Order/Filter/AtTopBot/Archimedean.lean",
+      "line": 26,
+      "text": "variable {α R : Type*}"
+     }
+    ]
+   },
+   "status": "proposed",
+   "proposed_by": "model",
+   "reviewed_by": null,
+   "notes": "In an Archimedean ordered semiring."
+  },
+  {
+   "name": "zero_lt_one",
+   "gloss": "the inequality 0 < 1",
+   "statement": {
+    "source": "mathlib4",
+    "path": "Mathlib/Algebra/Order/ZeroLEOne.lean",
+    "line": 49,
+    "text": "@[simp] lemma zero_lt_one : (0 : α) < 1 := zero_le_one.lt_of_ne (NeZero.ne' 1)",
+    "context": [
+     {
+      "source": "mathlib4",
+      "path": "Mathlib/Algebra/Order/ZeroLEOne.lean",
+      "line": 18,
+      "text": "variable {α : Type*}"
+     },
+     {
+      "source": "mathlib4",
+      "path": "Mathlib/Algebra/Order/ZeroLEOne.lean",
+      "line": 46,
+      "text": "variable [Zero α] [One α] [PartialOrder α] [ZeroLEOneClass α] [NeZero (1 : α)]"
+     }
+    ]
+   },
+   "status": "proposed",
+   "proposed_by": "model",
+   "reviewed_by": null,
+   "notes": "Section variables: a partial order with ZeroLEOneClass and NeZero (1 : α)."
+  }
+ ]
+}

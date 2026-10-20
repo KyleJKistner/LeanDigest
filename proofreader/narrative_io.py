@@ -185,10 +185,11 @@ def extract_narrative(theorem: str, output: Path, *, context: str | None = None,
 def write_bundle(record: dict, output: Path, *, source: str = '', file: str = 'Original.lean',
                  receipt: dict | None = None, title: str | None = None,
                  provenance_note: str | None = None,
-                 links: dict | Callable[[Any], dict] | None = None) -> dict:
+                 links: dict | Callable[[Any], dict] | None = None, glossary: str = 'reviewed') -> dict:
     """``links`` (a payload, or a function of the built document) is written to
-    links.json and embedded separately; it never enters the checked reading."""
-    n=Narrative(record)
+    links.json and embedded separately; it never enters the checked reading.
+    ``glossary='preview'`` also shows proposed glosses, marked as unreviewed."""
+    n=Narrative(record,glossary=glossary)
     d=n.document(source=source,file=file,receipt=receipt,title=title,provenance_note=provenance_note)
     check_reading(record,d)
     for i,c in n.certificates.items():verify_polynomial(n.frames[i],c)

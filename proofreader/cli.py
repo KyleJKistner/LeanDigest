@@ -89,6 +89,8 @@ def parser(prog: str = "proofreader") -> argparse.ArgumentParser:
     nr.add_argument("input",type=Path);nr.add_argument("--output","-o",type=Path,required=True)
     nr.add_argument("--source",type=Path);nr.add_argument("--receipt",type=Path)
     nr.add_argument("--title");nr.add_argument("--provenance-note")
+    nr.add_argument("--glossary",choices=["reviewed","preview"],default="reviewed",
+                    help="preview: also show proposed glosses, marked [unreviewed gloss] and kept as gaps")
     nc=commands.add_parser("check-narrative",help="Regenerate displayed mathematics and independently replay supplied certificates")
     nc.add_argument("input",type=Path);nc.add_argument("reading",type=Path);nc.add_argument("--certificates",type=Path)
     ne=commands.add_parser("extract-narrative",help="Opt-in Lean extraction of one source-bound theorem snapshot")
@@ -152,7 +154,7 @@ def main(argv: list[str] | None = None, *, prog: str = "proofreader") -> int:
             result=write_bundle(Snapshot.read(args.input).record,args.output,
                source=args.source.read_text(encoding="utf-8") if args.source else "",file=str(args.source or args.input),
                receipt=strict_json(args.receipt.read_bytes()) if args.receipt else None,
-               title=args.title,provenance_note=args.provenance_note)
+               title=args.title,provenance_note=args.provenance_note,glossary=args.glossary)
             print(json.dumps(result,ensure_ascii=False,indent=2));return 0
         if args.command=="check-narrative":
             from .narrative import Snapshot,check_reading

@@ -20,6 +20,7 @@ from .kernel_io import strict_json, STANDARD_AXIOMS
 from .polynomial import certify, verify as verify_polynomial, certificate_text
 from .formula_surface import (_same_formula, _plain_proposition, _joins_conjunction, _equation_sides, _binary_formula, _negated_operand, _negation_formula, _implication_formula)
 from . import notation
+from . import glossary as _glossary
 
 SCHEMA = 'proofreader.narrative/v1'
 PRINTER_VERSION = 'source-math-en/0.5.0'
@@ -297,8 +298,10 @@ def _citation(head: str) -> tuple[str,str]:
 
 
 class Narrative:
-    def __init__(self, record: dict):
+    def __init__(self, record: dict, glossary: str | _glossary.Selection = _glossary.DEFAULT):
         self.snapshot = Snapshot(record)
+        # Reviewed glosses only, unless a reviewer opts in to the marked preview.
+        self.glosses = _glossary.selection(glossary)
         self.frames = self.snapshot.frames
         self.prefix = self.snapshot.sha256[:16]
         self.owners: dict[int,str] = {}
@@ -860,6 +863,8 @@ class Narrative:
             text='By reflexivity, '+con+'.'
         elif f['head'] in _LEMMAS:
             text=_LEMMAS[f['head']]
+        elif role in {'application','named'} and f['head'] in self.glosses:
+            text,rule=self.glosses.sentence(f['head'],notation.name(f['head']))
         elif role=='rewrite' and f['head'] in _REWRITE_TEXT:
             text=_REWRITE_TEXT[f['head']]
         elif role=='ring':
@@ -872,7 +877,7 @@ class Narrative:
             text,rule=_citation(f['head'])
         else:
             text='Apply '+(f['head'] or 'the recorded term')+' to the supplied arguments.'
-        fallback=role in {'ring','rewrite','unexpanded','cases','choose','identity','combine','chain','witness','induction','congruence'} or (role in {'application','named'} and f['head'] not in _LEMMAS)
+        fallback=role in {'ring','rewrite','unexpanded','cases','choose','identity','combine','chain','witness','induction','congruence'} or (role in {'application','named'} and f['head'] not in _LEMMAS and not self.glosses.explains(f['head']))
         child_steps=self.subproofs(ch)
         s=self.step(i,text,children=child_steps,rule=rule,
                     conclusion=None if con in text or role in {'assume','introduce'} else con,fallback=fallback)
@@ -931,6 +936,8 @@ class Narrative:
                               'axiom_status':{'acceptable':True,'axioms':s.record['axioms']},
                               'printer_version':PRINTER_VERSION,'frame_owners':{str(k):v for k,v in sorted(self.owners.items())},
                               'polynomial_certificates':len(self.certificates)})
+        if self.glosses.axes():  # recorded only for a non-default (preview) mode
+            dec.axes['glossary']=self.glosses.axes()
         doc=Document(title or ('Lean ProofReader · '+s.record['theorem'].split('.')[-1].replace('_',' ')),
                      [{'path':file,'sha256':digest(source),'source':source}], [dec],
                      provenance={'snapshot_sha256':s.sha256,'scope':'one selected theorem',
@@ -952,7 +959,8 @@ def reading_binding(document: Document) -> str:
 def check_reading(record: dict, document: Document) -> None:
     require(len(document.declarations)==1, 'Expected one reading')
     d=document.declarations[0]
-    expected=Narrative(record).document(source=d.source,file=d.file)
+    # Regenerate in the recorded glossary mode; the bound axes then also compare the glossary digest.
+    expected=Narrative(record,glossary=_glossary.recorded_mode(d)).document(source=d.source,file=d.file)
     # Only the label may differ: to a listed earlier label, for a listed snapshot.
     label=d.axes.get('printer_version'); e=expected.declarations[0].axes
     if isinstance(label,str) and e['snapshot_sha256'] in EARLIER_PRINTERS.get(label,()):
