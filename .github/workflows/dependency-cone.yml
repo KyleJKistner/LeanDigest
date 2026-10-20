@@ -60,11 +60,12 @@ jobs:
         with: {name: dependency-cone-plan, path: /tmp/cone/, retention-days: 90, if-no-files-found: error}
   preflight:
     # One cheap job checks the inputs that every shard needs, so a missing input
-    # fails here once instead of in every shard job.
+    # fails here once instead of in every shard job. The timeout covers the
+    # resolution budgets (2,400 s + 900 s) and setup.
     needs: plan
     if: needs.plan.outputs.count != '0'
     runs-on: ubuntu-latest
-    timeout-minutes: 60
+    timeout-minutes: 75
     outputs:
       dependencies: ${{ steps.deps.outputs.cache-hit == 'true' && 'cache' || 'resolve' }}
     steps:
