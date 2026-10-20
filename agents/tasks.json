@@ -48,7 +48,6 @@
         "docs/TRUST.md",
         "docs/KERNEL_IR.md",
         "docs/ACCEPTANCE.md",
-        "proofreader/english.py",
         "proofreader/normalization.py",
         "proofreader/model.py",
         "proofreader/narrative.py",
@@ -74,7 +73,8 @@
         "proofreader/formula_surface.py",
         "proofreader/notation.py",
         "proofreader/narrative_rules.py",
-        "proofreader/glossary.py"
+        "proofreader/glossary.py",
+        "proofreader/narrative_checks.py"
       ],
       "acceptance": [
         "python -m pytest tests/test_kernel.py tests/test_normalization.py tests/test_browser.py tests/test_render_cli.py -q",

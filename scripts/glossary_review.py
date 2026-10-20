@@ -61,8 +61,9 @@ def corpus_instances(corpus: Path, glossary: G.Glossary) -> tuple[dict, str, int
         n = Narrative(record, glossary=selection)
         d = n.document(title=record['theorem']).declarations[0]
         for s in walk_steps(d.steps):
-            f = n.frames[int(s.id.rsplit(':', 1)[1])]
             shown = s.rule == G.REVIEWED_RULE or (s.rule == 'citation' and G.MARKER in s.text)
+            # Step ids are n<prefix>:<frame>, or n<prefix>:<frame>:proof for a subproof container.
+            f = n.frames[int(s.id.split(':')[1])] if shown else None
             if shown and f['head'] in selection:
                 found[f['head']].append({'theorem': record['theorem'], 'snapshot': p.parent.relative_to(corpus).as_posix(),
                                          'frame': f['id'], 'conclusion': f['statement'],

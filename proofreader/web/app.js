@@ -181,7 +181,7 @@
         b.addEventListener("click",()=>inspectStep(step,{focus:true,reveal:true}));links.append(b);
       }root.append(links);
     }
-    if(s.children?.length){const details=text("details","","step-children");if(s.evidence==="source-bound-snapshot" && ["cases","case","verify-conclusions"].includes(s.rule)) details.open=true;details.append(text("summary",`${s.children.length} supporting ${s.children.length===1?"step":"steps"}`));s.children.forEach((c,i)=>details.append(stepNode(c,`${num}.${i+1}`,depth+1)));root.append(details);}
+    if(s.children?.length){const details=text("details","","step-children");if(s.evidence==="source-bound-snapshot" && ["cases","case","verify-conclusions","subproof"].includes(s.rule)) details.open=true;details.append(text("summary",`${s.children.length} supporting ${s.children.length===1?"step":"steps"}`));s.children.forEach((c,i)=>details.append(stepNode(c,`${num}.${i+1}`,depth+1)));root.append(details);}
     return root;
   }
   function stepElement(id) {return [...$("proof-steps").querySelectorAll("[data-step-id]")].find(e=>e.dataset.stepId===id);}

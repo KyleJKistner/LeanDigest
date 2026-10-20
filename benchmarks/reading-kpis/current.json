@@ -108,7 +108,7 @@
   "gap_steps": 5014,
   "instance_frames": 2791,
   "interpretation": "Displayed-reading measurements only; not English fidelity or human comprehension.",
-  "lean_markers_per_1000_characters": 4.29,
+  "lean_markers_per_1000_characters": 4.26,
   "measure_notes": {
     "automation_frames": "Frames owned by one collapsed norm_num, positivity or linarith certificate step.",
     "citation_gap_steps": "Gap steps tagged citation or project-citation: a cited constant whose proof this reading does not expand.",
@@ -133,7 +133,7 @@
   },
   "printer_version": "source-math-en/0.7.0",
   "project_citation_gap_steps": 2068,
-  "qualified_names_per_1000_characters": 7.83,
+  "qualified_names_per_1000_characters": 8.08,
   "readings": 492,
   "readings_over_half_gap_steps": 188,
   "readings_without_gaps": 0,
@@ -195,5 +195,5 @@
     "witness-proof": 12
   },
   "schema": "leanglish.reading-kpis/v1",
-  "words": 321205
+  "words": 321137
 }
