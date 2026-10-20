@@ -3,7 +3,7 @@
   const $ = id => document.getElementById(id);
   let payload = JSON.parse($("proofreader-data").textContent);
   // Citation links are a separate island: navigation aids, never part of the checked reading.
-  const LINKS_SCHEMA = "leanglish.citation-links/v1", SAFE_HREF = /^\.\.\/(?:[a-f0-9]{24}\/reader\.html|\.\.\/sources\/[a-f0-9]{24}\.html#L[1-9][0-9]*)$/;
+  const LINKS_SCHEMA = "leanglish.citation-links/v1", SAFE_HREF = /^\.\.\/(?:[a-f0-9]{24}\/reader\.html|\.\.\/(?:proofs|cone)\/[a-f0-9]{24}\/reader\.html|\.\.\/sources\/[a-f0-9]{24}\.html#L[1-9][0-9]*)$/, CONE_DENOMINATOR = "dependency-cone-level-1";
   const embeddedLinks = (() => {try {const l = JSON.parse($("proofreader-links")?.textContent || "null");return l && l.schema===LINKS_SCHEMA && l.names && typeof l.names==="object" ? l : null;} catch (_) {return null;}})();
   let links = embeddedLinks;
   let doc = payload.document, current = null, filter = "all", tab = "reading", selectedStep = null;
@@ -35,7 +35,8 @@
     "compiler-generated-auxiliary":"The name has the form of a Lean-generated auxiliary (_proof_N or match_N), which has no source declaration of its own."};
   const linkEntry = name => links && Object.prototype.hasOwnProperty.call(links.names,name) ? links.names[name] : null;
   const linkTarget = name => {const v=linkEntry(name);return v && (v.status==="reading" || v.status==="source") && typeof v.href==="string" && SAFE_HREF.test(v.href) ? v : null;};
-  const linkTitle = v => v.status==="reading" ? `Proof reading of this exact Lean name (${v.module}). Navigation only; the citation itself is not checked here.` : `Declaration at line ${v.line} of ${v.module}: exact bundled source, not an English explanation.`;
+  const isCone = v => v?.status==="reading" && v.denominator===CONE_DENOMINATOR;
+  const linkTitle = v => isCone(v) ? `Supporting lemma reading of this exact Lean name (dependency cone, level 1), extracted after importing ${v.module}. A separate denominator from the documented targets. Navigation only; the citation itself is not checked here.` : v.status==="reading" ? `Proof reading of this exact Lean name (${v.module}). Navigation only; the citation itself is not checked here.` : `Declaration at line ${v.line} of ${v.module}: exact bundled source, not an English explanation.`;
   const unresolvedTitle = name => {const v=linkEntry(name);return v ? "Unresolved citation. "+(UNRESOLVED[v.reason] || "No link target is recorded.") : links ? "The attached citation links record nothing for this name." : "No citation link data is attached to this reading.";};
   function citation(name, cls="citation", label=name) {
     const v=linkTarget(name);
@@ -144,11 +145,11 @@
       else $("dependencies").append(citation(name,"dependency"));
     }
     $("dependencies-section").hidden=!(d.dependencies||[]).length;
-    $("dependencies-note").textContent=links?"Exact Lean names recorded for this proof. A name links to a bundled proof reading of the same constant, else to its declaration line in bundled source; otherwise it stays unresolved. A link is navigation, not evidence that the citation is explained or checked.":"Source-mode names are lexical candidates, not a resolved dependency graph. Links appear only for uniquely matched declarations in this document.";
+    $("dependencies-note").textContent=links?"Exact Lean names recorded for this proof. A name links to a bundled proof reading of the same constant (a documented target, else a supporting lemma reading), else to its declaration line in bundled source; otherwise it stays unresolved. A link is navigation, not evidence that the citation is explained or checked.":"Source-mode names are lexical candidates, not a resolved dependency graph. Links appear only for uniquely matched declarations in this document.";
     const cited=[...new Set([...(d.dependencies||[]),...indexSteps(d).steps.flatMap(s=>s.references||[])])];
-    const tally=status=>cited.filter(n=>(linkTarget(n)?.status || "unresolved")===status).length;
+    const kind=n=>{const v=linkTarget(n);return isCone(v)?"cone":(v?.status || "unresolved");}, tally=status=>cited.filter(n=>kind(n)===status).length;
     $("citation-summary").hidden=!links;
-    $("citation-summary").textContent=links?`${cited.length} cited names: ${tally("reading")} linked to proof readings, ${tally("source")} to declaration lines in bundled source, ${tally("unresolved")} unresolved.`:"";
+    $("citation-summary").textContent=links?`${cited.length} cited names: ${tally("reading")} linked to proof readings, ${tally("cone")?`${tally("cone")} to supporting lemma readings, `:""}${tally("source")} to declaration lines in bundled source, ${tally("unresolved")} unresolved.`:"";
     renderAudit(d);setTab(tab,"none");
     if(stepId) {
       const step=indexSteps(d).byId.get(stepId);
@@ -206,7 +207,7 @@
       $("inspector-citations").append(text("h4",s.references.length===1?"Cited constant":"Cited constants"));
       for(const name of s.references) {
         const row=text("p","","citation-row"),v=linkTarget(name);row.append(citation(name));
-        row.append(text("span",v?(v.status==="reading"?" · proof reading":` · source line ${v.line}`):" · unresolved","muted"));
+        row.append(text("span",v?(isCone(v)?" · supporting lemma reading":v.status==="reading"?" · proof reading":` · source line ${v.line}`):" · unresolved","muted"));
         if(v?.source && SAFE_HREF.test(v.source.href)){const a=text("a",`source line ${v.source.line}`,"citation citation-source");a.href=v.source.href;a.title=linkTitle({status:"source",...v.source});row.append(text("span"," · ","muted"),a);}
         if(!v)row.append(text("span"," — "+unresolvedTitle(name),"muted"));
         $("inspector-citations").append(row);

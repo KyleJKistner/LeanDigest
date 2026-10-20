@@ -6,8 +6,10 @@ mathematics. The retained readings show those lemmas only as cited names. This
 page describes the plan, the workflow and the loader that extend reading coverage
 to the lemmas that the retained readings cite.
 
-No dependency-cone extraction has run yet. The numbers below describe the plan,
-not results.
+The [Denominator](#denominator) describes the plan. One workflow run has read the
+pilot scope; [Pilot results](#pilot-results) gives its outcomes, and
+[Entering the catalog](#entering-the-catalog) describes how a catalog includes
+the readings.
 
 ## Level-1 cone
 
@@ -205,8 +207,9 @@ groups, 201 rewrites, 166 restatements, 129 automation summaries and 74 others.
 Library lemmas are the largest gap category in these supporting lemmas, unlike
 the documented targets, where project citations dominate.
 
-These are unsigned retained observations. The readings are not yet in any
-catalog, and they do not count toward the 536 documented targets.
+These are unsigned retained observations, and they do not count toward the 536
+documented targets. The catalog preview includes them as supporting lemma
+readings; see [Entering the catalog](#entering-the-catalog).
 
 ## Running the campaign
 
@@ -360,25 +363,162 @@ retained for accounting, and none of its readings is accepted.
 
 ## Entering the catalog
 
-Cone readings enter the catalog in a later change. The summary's
-`reading_index` maps each read lemma name to its environment module, shard,
-directory and snapshot hash, and `reading_map(summary)` returns that mapping. The
-cross-link mechanism, built in another track, uses a name-to-reading map to
-link a citation in a target reading to the cone reading of the cited lemma.
+A catalog includes cone readings as **supporting lemma readings**, a separate
+denominator. The catalog builder (`leanglish catalog --cone DIR`) and the
+catalog preview (`scripts/rerender_catalog.py --cone-shards DIR`) take a
+campaign directory with the layout that the workflow's `summary` job downloads:
+`dependency-cone-plan/` (`plan.json`, `original-plan.json`, `environment.json`)
+and one directory per shard. `scripts/download_cone_artifacts.py` writes this
+layout from a workflow run. Both commands also take `--cone-scope` (default
+`pilot`) and `--cone-summary FILE`. The code is in `proofreader/cone_catalog.py`.
 
-The catalog must report cone coverage as its own line, with the denominator
-from the plan. A lemma that is excluded, not attempted or not read keeps its
-reason. The catalog renderer regenerates readings from the retained snapshots,
-so a renderer change does not require a new extraction.
+### Acceptance
+
+A campaign directory is used only if all of these hold. Otherwise the build
+stops before any reading is rendered; the catalog builder has then written
+nothing.
+
+- The directory contains no symbolic link, and `dependency-cone-plan/` holds the
+  three files.
+- `validate_plan` and `bind_original` accept the plan with that original plan and
+  environment audit. In a preview, both also equal the catalog's own
+  `original-evidence/plan.json` and `original-evidence/environment.json`.
+- The plan's 492 readings are exactly the catalog's readings: the same
+  identifiers, modules, theorems and snapshot hashes. A plan derived from other
+  readings is rejected.
+- `reconcile` accepts every shard for the scope, with every check in
+  [Loader checks](#loader-checks). With `--cone-summary`, the reconciled summary
+  must equal that campaign summary.
+- No accepted lemma has the name of a target reading, and the catalog's bundled
+  source of each environment module has the hash that the plan records.
+
+### Pages and records
+
+Each accepted reading is rendered from its snapshot by the current renderer and
+written to `cone/<id>/`, where `<id>` is the lemma identifier from the shard
+report. The reading embeds the context that the worker supplied,
+`import <environment module>`, as `Context.lean`, and its provenance note names
+the environment module. Its `snapshot.json`, `receipt.json`, `run.json`,
+`stdout.txt` and `Extract.lean` are the bytes of the shard artifact. A reading
+that fails to render is listed with its error and is not a link target; in a
+preview, any such failure stops the build.
+
+- `coverage.json` has a `dependency_cone` section with the scope, the plan
+  denominator, the outcome counts of every planned lemma, the checked frames and
+  explicit explanation gaps of the bundled readings, the citation-link counts and
+  the flags `counts_toward_documented_target_coverage`,
+  `english_formally_certified` and `observations_authenticated`, all `false`.
+- `coverage.html` has a separate table body that starts with **Supporting lemma
+  readings (dependency cone, level 1)**, for example "151 of 1,722 planned; pilot
+  scope", followed by the plan denominator, each recorded outcome, the shards, the
+  frames and the gaps. The theorem-target rows do not change.
+- `evidence/dependency-cone-summary.json` is the reconciled summary: the outcome
+  of every planned lemma, including lemmas outside the run's scope.
+- A finding page whose target readings cite supporting lemma readings lists them
+  under **Supporting lemma readings**, with the citing targets, checked frames and
+  explicit explanation gaps.
+
+The theorem-target counts, the explanation-gap inventory (`explanations.html`,
+`explanation-gaps.json`) and the reading KPIs cover the target readings only.
+
+### Citation links
+
+A cited name links to a supporting lemma reading when the reading's environment
+module is the citing module or is reachable from it through recorded import
+headers. The citing environment then contains the environment in which the lemma
+was read, and an environment holds one constant per name, so the cited name is
+that constant. Without this evidence the name keeps its source line or its
+recorded reason.
+
+The order of precedence is a visible documented-target reading of the name, then
+a visible supporting lemma reading, then a declaration line in bundled source.
+The plan never plans a name that has a target reading, so the first rule never
+has to choose between the two kinds. A supporting lemma link has the form
+`../../cone/<id>/reader.html`, carries `denominator: dependency-cone-level-1`,
+and keeps the declaration line as `source` when the index has one. Supporting
+lemma readings link to target readings (`../../proofs/<id>/reader.html`), to each
+other and to source lines by the same rule, with the environment module as the
+citing module.
+
+`coverage.json` counts these links apart from links to target readings:
+`citation_links.project_names.linked_to_cone_reading` and
+`citation_links.citations.linked_to_cone_reading` for the target readings, and
+`dependency_cone.from_target_readings` and `dependency_cone.citation_links` for
+the links of the supporting readings themselves.
+
+### Static audit
+
+`proofreader.catalog_audit` covers the supporting lemma pages as follows:
+
+- Every local link and anchor on them, as on every page.
+- Their citation data islands: each equals `links.json` and passes link
+  validation.
+- Every reading link reaches a reader page of the same Lean name, in `proofs/`
+  for a target link and in `cone/` for a supporting lemma link.
+- The `dependency_cone` section reconciles with the outcome record, the reader
+  inventory and the number of supporting lemma links from target readings.
+- Each reading names a lemma in the record's `reading_index`, under the canonical
+  identifier, with the recorded snapshot hash and the `Context.lean` import of its
+  environment module.
+- Each reading is regenerated from its snapshot (`check_reading`), and each reader
+  page is regenerated from its reading and links. The frame and gap totals equal
+  the section.
+
+### Pilot readings in the preview
+
+A local preview of the pinned release `leanglish-original-project-317dc31` with
+renderer `source-math-en/0.6.0` and the artifacts of run 39373979494, downloaded
+with `scripts/download_cone_artifacts.py` (all 10 digests matched the API),
+gave the following.
+
+| Measure | Count |
+| --- | ---: |
+| Supporting lemma readings bundled | 151 of 1,722 planned (pilot scope) |
+| Checked frames | 9,310 |
+| Explicit explanation gaps | 2,649 |
+| Readings without explanation gaps | 0 |
+| Citations in target readings newly linked to a supporting lemma reading | 153 |
+| … distinct cited names | 151 |
+| … target readings with such a link | 12 |
+| … that previously linked only to a source line | 6 |
+| … that were previously unresolved (132 not in the declaration index, 15 Lean auxiliary names) | 147 |
+| Citations between supporting lemma readings | 49 |
+| Finding pages that list supporting lemma readings | 6 |
+| Evidence files byte-identical to the shard artifacts | 755 |
+
+Every one of the 153 citing pairs is in the environment module of the cited
+lemma, so the `same-module` rule decides all of them. No citation in a
+supporting reading links to a target reading, and 6 link only to a source line.
+
+The run used application commit `171ab5e` with a clean tracked tree. The
+reconciled outcomes equal the campaign summary. The static audit passed and
+checked 1,433 pages, including the 151 supporting lemma pages and 202
+supporting lemma links. Real Chromium file navigation passed, including a finding
+page's supporting lemma list, a supporting lemma reader page and a target
+reader's link to it. The target readings' gap steps, frames inside gaps and gap
+counts by rule still equal `benchmarks/reading-kpis/current.json`.
+
+The supporting readings add 1,662 files to the site, which grows from 624.2 MB
+to 731.4 MB; the preview zip grows from 52.1 MB to 60.0 MB. Compared with a
+preview of the same application code without them, every other difference is in
+the 492 target `links.json` files and their reader pages, `coverage.json`,
+`coverage.html`, the pages that carry the preview notice, and the preview
+records. In `links.json` only the 153 newly linked entries change, and the
+per-reading `counts` gain a `cone-reading` key.
+
+These readings are unsigned observations from one CI run. A link to a
+supporting lemma reading does not mean that the citation is explained or
+checked, and no English fidelity is claimed.
 
 ## Limitations
 
 - **Level 1 only.** The plan covers constants that the 492 retained readings
   cite. Lemmas cited by cone readings form level 2. Level 2 is planned from level-1
   readings by the same rules, after level-1 results exist.
-- **No results yet.** No Lean toolchain ran locally. The workflow has not run, and
-  the planner, worker and loader are tested only with synthetic fixtures. The
-  first pilot run is the first native test of this route.
+- **Pilot only.** One workflow run (39373979494) read the 8 pilot shards; 1,571
+  planned lemmas are outside its scope. No Lean toolchain ran locally. Apart from
+  that run's artifacts, the planner, worker, loader and catalog code are tested
+  only with synthetic fixtures.
 - **Name-based exclusions.** The constructor and compiler rules, and the
   instance hint, are conventions. The exporter does not record whether an
   accepted constant is a theorem, a proof-valued definition, an instance or a
@@ -390,7 +530,8 @@ so a renderer change does not require a new extraction.
   2026-11-14. Outside the cache's branch scope, each shard spends a few minutes
   re-creating the dependency tree. Route `resolve` relies on `lake update`
   resolving to the pinned revisions. The preflight checks this once per run, and
-  every shard checks it again with the environment audit, but neither has run yet.
+  every shard checks it again with the environment audit. In the pilot run both
+  checks passed.
 - **Trust.** The trust boundary of [Source-bound mathematical reading](NARRATIVE.md)
   applies unchanged. Shard artifacts are unsigned observations. The checks
   establish consistency, not authenticity, and no English fidelity is claimed.

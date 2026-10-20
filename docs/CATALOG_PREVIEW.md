@@ -3,8 +3,10 @@
 A catalog preview is a published offline catalog whose proof readings were
 re-rendered with the current renderer. It shows renderer changes, display
 notation and citation links on the published readings without a native Lean
-rebuild. A preview is not a release: it adds no reading, runs no Lean, and keeps
-every retained observation byte for byte.
+rebuild. A preview is not a release: it adds no theorem-target reading, runs no
+Lean, and keeps every retained observation byte for byte. It can also add the
+supporting lemma readings of a dependency-cone campaign, a separate denominator
+described in [Dependency-cone readings](DEPENDENCY_CONE.md#entering-the-catalog).
 
 `scripts/rerender_catalog.py` builds a preview. The
 `.github/workflows/catalog-preview.yml` workflow builds one from the pinned
@@ -14,7 +16,16 @@ release and uploads it as a workflow artifact.
 
 ```sh
 python scripts/rerender_catalog.py PUBLISHED OUTPUT [--archive-sha256 DIGEST] [--browser real|document-harness] [--no-archive]
+    [--cone-shards DIR [--cone-scope SCOPE] [--cone-summary FILE] | --cone-unavailable REASON]
 ```
+
+`--cone-shards DIR` adds supporting lemma readings from a dependency-cone
+campaign directory: `dependency-cone-plan/` and the shard directories, as
+`scripts/download_cone_artifacts.py` writes them. `--cone-scope` is the run's
+dispatch scope (default `pilot`). With `--cone-summary FILE`, the reconciled
+outcomes must equal that campaign summary. `--cone-unavailable REASON` builds
+without supporting lemma readings and states the reason in the preview. With
+neither option, the preview states that no dependency-cone shards were supplied.
 
 `PUBLISHED` is an extracted `Leanglish/` site or its release zip. A zip must match
 `--archive-sha256`, which defaults to the digest of
@@ -37,38 +48,59 @@ site records `not_run`. With `--no-archive`, no zip or `SHA256SUMS` is written.
 1. Copy the published site, or extract the zip after rejecting unsafe paths,
    links and oversized archives.
 2. Check every file against the published `SHA256SUMS.json`, including the exact
-   file inventory. Reject a site that is already a preview. Check that
-   `coverage.json` equals the coverage in `release.json`.
-3. Index the bundled solution modules in `originals/` once, as the catalog
+   file inventory. Reject a site that is already a preview, or that already has
+   supporting lemma readings. Check that `coverage.json` equals the coverage in
+   `release.json`.
+3. With `--cone-shards`, validate the campaign directory and bind it to the
+   published readings and to the published `original-evidence/plan.json` and
+   `original-evidence/environment.json`, as described in
+   [Acceptance](DEPENDENCY_CONE.md#acceptance). Any failure stops the preview
+   before a reading is re-rendered.
+4. Index the bundled solution modules in `originals/` once, as the catalog
    builder does, and re-render each reading with `narrative_io.write_bundle`.
    The published title and provenance note are kept. Citation links are built
    with the builder's functions (`declaration_index.citation_links` and
-   `finding_catalog.source_name`).
-4. Restore the published bytes of `snapshot.json`, `receipt.json`, `run.json`,
+   `finding_catalog.source_name`), including links to the supporting lemma
+   readings when a campaign is supplied.
+5. Restore the published bytes of `snapshot.json`, `receipt.json`, `run.json`,
    `stdout.txt` and `Extract.lean` in each reading directory, and check them
    against the published manifest.
-5. Update the counts that depend on the readings: the gap count beside each
+6. With a campaign, write each accepted supporting lemma reading to `cone/<id>/`
+   (`cone_catalog.write_readings`), restore the shard artifact's bytes of the same
+   five evidence files, and write `evidence/dependency-cone-summary.json`. A
+   supporting reading that fails to render stops the preview.
+7. Update the counts that depend on the readings: the gap count beside each
    reading link on the finding pages, `explicit_explanation_gaps` and
    `citation_links` in `coverage.json`, and the matching rows of `coverage.html`.
    Each published count must equal the published readings before it is replaced,
-   and every reading link on a finding page must have the recognized form.
-6. Write `evidence/declaration-index.json` and the explanation-gap inventory
-   (`explanations.html`, `explanation-gaps.json`). Writing the inventory compares
-   every saved reading with deterministic regeneration from its snapshot and
-   every reader page with its reading and links.
-7. Copy the current catalog assets (`assets/catalog.css`, `assets/catalog.js`),
+   and every reading link on a finding page must have the recognized form. With
+   a campaign, also add the `dependency_cone` section to `coverage.json`, the
+   separate table body, interpretation paragraph and outcome-record link to
+   `coverage.html`, and the **Supporting lemma readings** list to each finding
+   page whose target readings cite one.
+8. Write `evidence/declaration-index.json` and the explanation-gap inventory
+   (`explanations.html`, `explanation-gaps.json`) of the target readings. Writing
+   the inventory compares every saved target reading with deterministic
+   regeneration from its snapshot and every target reader page with its reading
+   and links.
+9. Copy the current catalog assets (`assets/catalog.css`, `assets/catalog.js`),
    which the explanation-gap filters need. Add the explanation-gap link to the
    main navigation of the catalog's own pages (top level, `findings/` and
    `sources/`). A page's navigation may only gain links. Bundled originals and
    evidence are never rewritten.
-8. Add a preview notice to every top-level page (catalog, coverage, explanation
+10. Add a preview notice to every top-level page (catalog, coverage, explanation
    gaps, original verification) and every finding page, and write `preview.html`,
    `preview.json`, a preview section at the top of `RELEASE-NOTES.md`, and a
    first line in `START-HERE.txt`. Reader pages carry no notice, because each
-   reader page must equal its regenerated reading.
-9. Run the static catalog audit and stop on any error. Run the requested browser
-   route. Write the audit records, regenerate `SHA256SUMS.json`, check that the
-   file-change table on `preview.html` matches the final site, and write the zip.
+   reader page must equal its regenerated reading. The notice, `preview.html`
+   and the release notes state whether supporting lemma readings are included,
+   with their counts, or why they are not.
+11. Run the static catalog audit and stop on any error; it covers the supporting
+   lemma pages and links ([Static audit](DEPENDENCY_CONE.md#static-audit)). Run
+   the requested browser route. Write the audit records, regenerate
+   `SHA256SUMS.json`, check that the file-change table on `preview.html` matches
+   the final site, check the supporting lemma evidence against the shard artifacts
+   again, and write the zip.
 
 Any reading that fails to re-render stops the preview. A fresh catalog build
 omits such a reading; a preview never drops a published reading.
@@ -92,7 +124,14 @@ untracked files.
 - Explanation gaps before and after: gap steps, checked frames inside gap steps,
   readings without gaps, gap steps by rule, and checked frames inside gap steps
   by the rule of the step.
-- Citation-link summaries before (if any) and after.
+- Citation-link summaries before (if any) and after. With supporting lemma
+  readings, links to them are counted under `linked_to_cone_reading`, never
+  under `linked_to_reading`.
+- `dependency_cone`: either `included: false` with the stated reason, or
+  `included: true` with the scope, the counts, the `dependency_cone` section of
+  `coverage.json` and the download record `cone-artifacts.json` when the
+  campaign directory has one. The download record is provenance; acceptance
+  rests on the loader's checks.
 - Every file group with its added, replaced and unchanged counts.
 - The static audit, the catalog browser audit with the preview-page checks, and
   the original-verification browser audit.
@@ -112,6 +151,9 @@ checks the pages the preview adds or changes:
 - The explanation-gap table lists every reading with gaps, and its filter for
   the most frequent reference shows the inventory's count.
 - A reader page links a cited name to another proof reading.
+- With supporting lemma readings: a finding page lists one and fits a 390-pixel
+  viewport, the link opens the supporting lemma reader page, and a target reader
+  page's labelled link to it navigates there.
 
 The audits use Python assertions, so the script refuses a browser route under
 `python -O`.
@@ -125,18 +167,37 @@ navigation between files.
 
 `catalog-preview.yml` runs on pushes to `claude/keen-archimedes-ihorkq` that
 change `proofreader/**`, the script, the scripts it imports, its tests,
-`benchmarks/reading-kpis/**` or the workflow, and on manual dispatch. It has no
-schedule. It runs the preview tests, downloads the pinned release zip, checks
-its SHA-256, and builds the preview with `--browser real`. It then extracts the
-zip, checks every file against the packaged `SHA256SUMS.json`, runs the static
-audit again, and requires the preview's gap steps and frames inside gaps, in
-total and by rule, to equal `benchmarks/reading-kpis/current.json`.
+`benchmarks/reading-kpis/**`, `benchmarks/dependency-cone/**` or the workflow,
+and on manual dispatch. It has no schedule. It runs the preview tests
+(`tests/test_rerender_catalog.py`, `tests/test_cone_catalog.py`), downloads the
+pinned release zip and checks its SHA-256.
+
+It then runs `scripts/download_cone_artifacts.py` for the dependency-cone pilot
+run 39373979494 (`CONE_RUN`). The script lists the run's artifacts with the
+workflow token, downloads the plan, summary and 8 pilot shard artifacts that
+the committed plan names, and requires each zip's SHA-256 and size to equal the
+values the API records before it extracts the zip. This needs the `actions:
+read` permission. If any artifact is missing, expired or different, the step
+does not fail: it adds a warning annotation, and the preview is built with
+`--cone-unavailable` and the reason, which the preview notes, `preview.html`,
+`preview.json` and the job summary state. The pilot artifacts expire on
+2027-01-18.
+
+With verified artifacts, the preview is built with `--cone-shards` and
+`--cone-summary`. A campaign that downloads correctly but fails the loader's
+checks fails the run; it is never dropped silently. The workflow then extracts
+the zip, checks every file against the packaged `SHA256SUMS.json`, runs the
+static audit again, and requires the preview's 492 re-rendered target readings,
+their gap steps and frames inside gaps, in total and by rule, to equal
+`benchmarks/reading-kpis/current.json`. It writes the supporting lemma line,
+"included" with counts or "not included" with the reason, to the job summary.
 
 Only a successful run uploads the zip, its digest and `summary.json` as the
 `leanglish-catalog-preview` artifact. Every run uploads `summary.json`, audit
-records and screenshots as `catalog-preview-diagnostics`. Both artifacts are kept
-for 30 days. The workflow has read-only repository permission. It never creates
-a release and never pushes.
+records, screenshots, the cone download record and the download log as
+`catalog-preview-diagnostics`. Both artifacts are kept for 30 days. The
+workflow has read-only repository and Actions permissions. It never creates a
+release and never pushes.
 
 ## Pinned release with renderer 0.5.0
 
@@ -197,6 +258,40 @@ The preview site has 8,858 files and 635.5 MB; its zip is 52.2 MB. The
 published site has 8,361 files and 659.3 MB; its zip is 49.1 MB. The run from the
 release zip, including both browser audits and the zip, took about 165 s on
 four CPU cores. Two runs from the same checkout produced byte-identical zips.
+
+## Pinned release with the pilot supporting lemma readings
+
+A local run at application commit `171ab5e` (renderer `source-math-en/0.6.0`)
+used the pinned release zip and the artifacts of dependency-cone run
+39373979494, downloaded with `scripts/download_cone_artifacts.py`. All 10
+artifact digests matched the GitHub API. The table compares it with a run of
+the same application code without `--cone-shards`.
+
+| Measure | Without supporting readings | With them |
+| --- | ---: | ---: |
+| Target readings re-rendered | 492 | 492 |
+| Explicit explanation gaps (target readings) | 4,961 | 4,961 |
+| Supporting lemma readings | — | 151 of 1,722 planned |
+| Cited project names linked to a target reading | 30 | 30 |
+| … linked to a supporting lemma reading | — | 151 |
+| … linked only to a source line | 320 | 314 |
+| … unresolved | 1,412 | 1,267 |
+| Static audit: pages | 1,282 | 1,433 |
+| Static audit: local links | 9,328 | 9,480 |
+| Static audit: citation links | 385 | 593 |
+| Site files | 8,858 | 10,520 |
+| Site size | 624.2 MB | 731.4 MB |
+| Zip size | 52.1 MB | 60.0 MB |
+
+Both static audits passed; the second also checked 151 supporting lemma pages
+and 202 supporting lemma links. Real Chromium file navigation passed for the
+catalog, the original-verification pages, the preview pages and the supporting
+lemma checks. The target readings' gap counts, in total and by rule, equal
+`benchmarks/reading-kpis/current.json` in both runs. The packaged zip was
+extracted, checked against its `SHA256SUMS.json` and audited again. The run with
+supporting readings took 219 s, including both browser audits and the zip.
+[Pilot readings in the preview](DEPENDENCY_CONE.md#pilot-readings-in-the-preview)
+lists the supporting lemma counts.
 
 ## Limitations
 

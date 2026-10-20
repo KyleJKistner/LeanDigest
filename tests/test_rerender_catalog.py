@@ -344,7 +344,8 @@ def test_workflow_rerenders_the_pinned_release_and_never_publishes():
             'scripts/fetch_reading_corpus.py', 'scripts/audit_finding_browser.py', 'scripts/audit_original_browser.py',
             'benchmarks/reading-kpis/**'} <= set(triggers['push']['paths'])
     assert set(triggers) == {'push', 'workflow_dispatch'}
-    assert flow['permissions'] == {'contents': 'read'}
+    # actions: read only lists and downloads the dependency-cone artifacts (tests/test_cone_catalog.py).
+    assert flow['permissions'] == {'contents': 'read', 'actions': 'read'}
     assert flow['env']['RELEASE_URL'] == CORPUS['url'] and flow['env']['RELEASE_SHA256'] == CORPUS['sha256']
     job = flow['jobs']['preview']
     runs = '\n'.join(step.get('run', '') for step in job['steps'])

@@ -5,9 +5,15 @@ A reading records the exact Lean name of each constant it applies, in
 links to one of the following, in order:
 
 1. A bundled proof reading of the same constant: `../<id>/reader.html`.
-2. Its declaration line on a bundled source page: `../../sources/<page>#L<n>`.
+2. When the catalog includes supporting lemma readings (dependency cone), a
+   supporting lemma reading of the same constant: `../../cone/<id>/reader.html`.
+   The link carries `denominator: dependency-cone-level-1`. See
+   [Entering the catalog](DEPENDENCY_CONE.md#entering-the-catalog).
+3. Its declaration line on a bundled source page: `../../sources/<page>#L<n>`.
 
 Otherwise the name stays plain text marked unresolved, with the reason recorded.
+A supporting lemma reader page in `cone/<id>/` links a target reading as
+`../../proofs/<id>/reader.html`; every other form is the same.
 
 The bundled source pages are the solution modules of the comparison
 configurations and the cited dependency modules described below.
@@ -193,8 +199,11 @@ and adds `citation_links` and `cited_dependency_sources` summaries to
 counts keep every reading-and-name pair, with unresolved citations by reason and
 links by basis. `audit-catalog` checks that each embedded island equals
 `links.json`, that it passes the writer's validation, and that every target file
-and line anchor exists. It does not recompute the links from the declaration
-index. The gap inventory regenerates every reader page with its links.
+and line anchor exists. Each reading link must reach a reader page of the same
+Lean name in its own denominator (`proofs/` or `cone/`). It does not recompute
+the links from the declaration index. The gap inventory regenerates every target
+reader page with its links, and the audit regenerates every supporting lemma
+reader page.
 
 ## Limitations
 
