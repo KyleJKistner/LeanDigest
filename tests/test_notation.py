@@ -169,10 +169,19 @@ def test_tendsto_limit_mentioning_the_bound_variable_bails_out(text, expected):
     assert shown(text) == expected
 
 
+def test_tendsto_bails_out_when_the_reading_prints_infinity():
+    # In ENNReal, atTop is the filter at ⊤ and differs from 𝓝 ∞.
+    text = 'Filter.Tendsto (fun n => f n) Filter.atTop Filter.atTop'
+    assert shown(text, 'f 0 < ∞') == 'Tendsto (n ↦ f n) atTop atTop'
+    assert shown(text) == 'f n → ∞ as n → ∞'
+
+
 def test_n_ary_binder_commas_stay_inside_a_lambda_body():
     assert shown('⟨fun x => Σ y, f x y, h⟩') == '⟨(x ↦ Σ y, f x y), h⟩'
     assert shown('⟨fun x => ⨁ i, f i x, h⟩') == '⟨(x ↦ ⨁ i, f i x), h⟩'
     assert shown('⟨fun x => ∫ t in a..b, f t x, h⟩') == '⟨(x ↦ ∫ t in a..b, f t x), h⟩'
+    # The exterior power ⋀[R]^n M takes no comma.
+    assert shown('⟨fun x => ⋀[R]^n M, h⟩') == '⟨(x ↦ ⋀[R]^n M), h⟩'
 
 
 @pytest.mark.parametrize('text,expected', [

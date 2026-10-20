@@ -275,18 +275,26 @@ the text is printed as before, apart from name shortening.
 | Lean | Shown | Conditions | Readings |
 |---|---|---|---:|
 | `fun x => e` | `x ↦ e` | One plain binder; parenthesized unless it fills its bracket group or the whole formula; not used if the reading already contains `↦`. | 125 |
-| `Filter.Tendsto (fun x => e) Filter.atTop (nhds a)` | `e → a as x → ∞` | The lambda rule's binder conditions; the source filter is exactly `Filter.atTop`; the target is `nhds a` with an atomic `a`, `Filter.atTop` (`∞`) or `Filter.atBot` (`−∞`). `a` does not mention `x`, which `as x → ∞` would bind. `e` is parenthesized unless it uses only arithmetic operators; the whole form is parenthesized when it is an operand. Not used if `as` is a name in the reading. | 36 |
+| `Filter.Tendsto (fun x => e) Filter.atTop (nhds a)` | `e → a as x → ∞` | The lambda rule's binder conditions; the source filter is exactly `Filter.atTop`; the target is `nhds a` with an atomic `a`, `Filter.atTop` (`∞`) or `Filter.atBot` (`−∞`). `a` does not mention `x`, which `as x → ∞` would bind. `e` is parenthesized unless it uses only arithmetic operators; the whole form is parenthesized when it is an operand. Not used if `as` is a name in the reading or `∞` occurs in it. | 36 |
 | `nhdsWithin a s` | `𝓝[s] a` | Mathlib's notation; only when `nhds` is shown as `𝓝` in that reading. | 1 |
 | `Finset.card s` | `#s` | Mathlib's notation; not used if `#` already occurs. | 1 |
 | `Real.sqrt x` | `√x` | Mathlib's notation. Lean already prints `√` in the corpus, so this never fires there. | 0 |
 | `Nat.choose n k` | `(n choose k)` | Two atomic arguments; not used if `choose` is a name in the reading. Not parenthesized twice when it fills a parenthesized group, as in `↑(20 choose 10)`. | 1 |
 
-`x → ∞` follows Mathlib's reading of `Filter.atTop`: eventually above every
-bound of the domain's order. For a type such as `Finset ℕ` this is "eventually
-containing every finite set", not a real-valued limit. The legend names the
-exact Lean form.
+`x → ∞` follows Mathlib's reading of `Filter.atTop`: for every `b`, eventually
+`x ≥ b` in the order on the type of `x`. On `ℕ` and `ℝ` this is the usual
+limit. On `Finset ℕ` it means "eventually containing every finite set", which
+is not a real-valued limit. Formula strings do not record the binder's type,
+so the rule cannot check it; the legend entry states the general meaning and
+the exact Lean form. The rule fires on 101 distinct lambdas in 36 corpus
+readings. They were inspected by hand: where the body (for example a cast `↑n`)
+or the original source shows the binder's type, it is `ℕ` or `ℝ`. That
+inspection is not an automated or recorded check.
 
-A limit `nhds a` whose `a` mentions the bound variable is left as printed: in
+The rule is not used when `∞` occurs in the reading. In `ENNReal`, `∞` is the
+top element, so `Filter.atTop` is the principal filter of `{∞}`, while `𝓝 ∞` is
+the neighborhood filter of `∞`; both limits would display as `→ ∞`. A limit `nhds a` whose
+`a` mentions the bound variable is also left as printed: in
 `Filter.Tendsto (fun n => f n) Filter.atTop (nhds n)` the limit's `n` is not
 the lambda's `n`.
 
@@ -359,6 +367,8 @@ legend lines in `prose()` are not part of the measured text.
   other name in the same reading is displayed with the same text.
 - A shortened project name can still coincide with a library root name that
   the reading does not contain and that `RESERVED` does not list.
+- `x → ∞` is shown for `Filter.atTop` on every binder type, because formula
+  strings do not record that type. The legend states the general meaning.
 - The legend includes an entry when a recorded display form, or a shortened
   name as a whole word, occurs in the displayed text. A shortened name that is
   also an ordinary word of the text can add an entry that is not needed. An

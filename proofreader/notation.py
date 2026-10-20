@@ -45,14 +45,14 @@ KEYWORDS = frozenset('fun λ let have show match if then else do by at from in w
 _NO_EXTENT = frozenset('let have show match calc do by λ where deriving'.split())
 _BINDERS = frozenset("∀ ∃ ∑ ∏ ∑' ∏' ∫ ∮ ⋃ ⋂ ⨆ ⨅".split())
 # Lean lexes Σ and Π as tokens, not identifier letters. With the n-ary operator
-# characters (∐, ∫…∳, ⋀…⋃, ⨀…⨜, e.g. ⨍ ⨁ ⨂) they may open a binder whose comma
-# must not be read as the end of an enclosing lambda body.
+# characters (∐, ∫…∳, ⨀…⨜, e.g. ⨍ ⨁ ⨂) they may open a binder whose comma
+# must not be read as the end of an enclosing lambda body. ⋀ is left out: in
+# Mathlib it is the exterior power ⋀[R]^n M, which takes no comma.
 _BINDER_IDS = frozenset("Σ Σ' Π Π'".split())
 
 
 def _nary(x: str) -> bool:
-    return x in _BINDERS or (len(x) == 1 and (x == '∐' or '∫' <= x <= '∳'
-                                              or '⋀' <= x <= '⋃' or '⨀' <= x <= '⨜'))
+    return x in _BINDERS or (len(x) == 1 and (x == '∐' or '∫' <= x <= '∳' or '⨀' <= x <= '⨜'))
 
 
 _PREFIX = frozenset('↑ ⇑ ↥'.split())
@@ -83,7 +83,9 @@ RESERVED = frozenset('''Finite Infinite Countable Nonempty Subsingleton Nontrivi
     LinearMap Equiv Order Lean Mathlib Std Classical Decidable Eq Ne Iff And Or Not Exists True False id'''.split())
 NOTATIONS = {  # legend key -> (shown form, Lean form)
     'lambda': ('x ↦ e', 'fun x => e'),
-    'tendsto': ('e → a as x → ∞', 'Filter.Tendsto (fun x => e) Filter.atTop (nhds a); a limit ∞ or −∞ is Filter.atTop or Filter.atBot'),
+    'tendsto': ('e → a as x → ∞', 'Filter.Tendsto (fun x => e) Filter.atTop (nhds a); x → ∞ is Filter.atTop for the '
+                'order on the type of x (eventually x ≥ b for every b; the usual limit on ℕ and ℝ), and a limit ∞ or −∞ '
+                'is Filter.atTop or Filter.atBot'),
     'nhdsWithin': ('𝓝[s] a', 'nhdsWithin a s'),
     'card': ('#s', 'Finset.card s'),
     'sqrt': ('√x', 'Real.sqrt x'),
@@ -469,7 +471,9 @@ def _rule(items: tuple, i: int, r: Reading, used: set[str], paren: bool = False)
         x, body = found
         used.add('lambda')
         return _wrap(items, i, end, x+' ↦'+sub(body)), end
-    if it.text == 'Filter.Tendsto' and 'as' not in r.words:
+    # Not when the reading prints ∞ itself (ENNReal or EReal ⊤): there atTop and
+    # 𝓝 ∞ are different filters, and both would read as "→ ∞".
+    if it.text == 'Filter.Tendsto' and 'as' not in r.words and '∞' not in r.ops:
         args = _app(items, i, 'Filter.Tendsto', 3)
         if args is None:
             return None
