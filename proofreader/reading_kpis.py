@@ -28,6 +28,7 @@ import sys
 
 from .model import digest, walk_steps
 from .narrative import Narrative, PRINTER_VERSION
+from . import glossary as _glossary
 
 SCHEMA = 'leanglish.reading-kpis/v1'
 # Wording measure: the 0.4 sentence for an unexplained application.
@@ -45,9 +46,9 @@ def snapshot_paths(corpus: Path) -> list[Path]:
     return paths
 
 
-def measure(record: dict) -> dict:
+def measure(record: dict, glossary: str = _glossary.DEFAULT) -> dict:
     """Render one snapshot and measure the displayed reading."""
-    n = Narrative(record)
+    n = Narrative(record, glossary=glossary)
     d = n.document(title=record['theorem']).declarations[0]
     steps = list(walk_steps(d.steps))
     by_id = {s.id: s for s in steps}
@@ -69,7 +70,7 @@ def measure(record: dict) -> dict:
         if s.conclusion:
             shown.append(s.conclusion)
     text = '\n'.join(shown)
-    return {'theorem': record['theorem'], 'snapshot_sha256': n.snapshot.sha256,
+    data = {'theorem': record['theorem'], 'snapshot_sha256': n.snapshot.sha256,
             'frames': len(n.frames), 'display_steps': len(steps),
             'gap_steps': len(gaps), 'gap_frames': gap_frames,
             'citation_gap_steps': sum(s.rule in CITATION_RULES for s in gaps),
@@ -86,6 +87,9 @@ def measure(record: dict) -> dict:
             'gap_rules': dict(sorted(Counter(s.rule for s in gaps).items())),
             'frames_by_rule': dict(sorted(frames_by_rule.items())),
             'gap_frames_by_rule': dict(sorted((k, v) for k, v in gap_frames_by_rule.items() if v))}
+    if glossary != _glossary.DEFAULT:  # default-mode rows are unchanged
+        data['glossary'] = _glossary.measure(n, steps)
+    return data
 
 
 def _ratio(a: int, b: int) -> float:
@@ -137,16 +141,19 @@ def summarize(rows: list[dict], failures: list[dict], corpus_digest: str) -> dic
             'interpretation': 'Displayed-reading measurements only; not English fidelity or human comprehension.'}
 
 
-def measure_corpus(corpus: Path) -> tuple[dict, list[dict]]:
+def measure_corpus(corpus: Path, glossary: str = _glossary.DEFAULT) -> tuple[dict, list[dict]]:
     rows, failures, hashes = [], [], []
     for p in snapshot_paths(corpus):
         data = p.read_bytes()
         hashes.append(digest(data))
         try:
-            rows.append({'path': p.relative_to(corpus).as_posix(), **measure(json.loads(data))})
+            rows.append({'path': p.relative_to(corpus).as_posix(), **measure(json.loads(data), glossary)})
         except (ValueError, KeyError, RecursionError) as exc:
             failures.append({'path': p.relative_to(corpus).as_posix(), 'error': str(exc)})
-    return summarize(rows, failures, digest('\n'.join(sorted(hashes)))), rows
+    summary = summarize(rows, failures, digest('\n'.join(sorted(hashes))))
+    if glossary != _glossary.DEFAULT:
+        summary['glossary'] = _glossary.summarize(rows)
+    return summary, rows
 
 
 HEADLINE = ['readings', 'display_steps', 'gap_steps', 'gap_step_share', 'gap_frames', 'gap_frame_share',
@@ -178,8 +185,10 @@ def main(argv: list[str] | None = None, *, prog: str | None = None) -> int:
     p.add_argument('-o', '--output', type=Path, help='Write the corpus summary JSON here')
     p.add_argument('--per-reading', type=Path, help='Also write one measurement row per reading')
     p.add_argument('--baseline', type=Path, help='Compare against an earlier summary JSON')
+    p.add_argument('--glossary', choices=_glossary.MODES, default=_glossary.DEFAULT,
+                   help='preview: also show proposed glosses, marked and still counted as gaps (docs/GLOSSARY.md)')
     a = p.parse_args(argv)
-    summary, rows = measure_corpus(a.corpus)
+    summary, rows = measure_corpus(a.corpus, a.glossary)
     text = json.dumps(summary, indent=2, ensure_ascii=False, sort_keys=True)+'\n'
     if a.output:
         a.output.write_text(text, encoding='utf-8')
