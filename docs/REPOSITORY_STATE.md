@@ -202,7 +202,7 @@ The **Downloaded by** column was updated on 2026-10-20, when
 
 | Artifact | Run | Expires (UTC) | Downloaded by |
 | --- | --- | --- | --- |
-| `cancellation-env-a` (12202194378) | 39285448721 | 2026-10-20 16:27 | No kept workflow. The optional `--retained-environment` input of `scripts/check_source_cancellation.py`. |
+| `cancellation-env-a` (12202194378) | 39285448721 | 2026-10-20 16:27 (expired) | No kept workflow. The optional `--retained-environment` input of `scripts/check_source_cancellation.py`. On 2026-10-20 at about 17:20 UTC the Actions API returned 404 for the artifact and listed no artifact for the run. |
 | `checkpoint-142c3d0f555a25666bb36dd1-1` (12217614568) | 39315174445 | 2026-11-02 20:14 | `completion-resume.yml` |
 | `complete-openai-lean-source` (12012738377) | 38822475057 | 2026-11-14 23:16 | `all-findings-release.yml`, `atomic-completion-worker.yml`, `breadth-release.yml`, `completion-delivery.yml`, `completion-resume.yml`, `completion-worker.yml`, `dependency-cone.yml` |
 | `finding-statement-retry-*` (12107274354, 12108605282) | 39050823104 | 2026-11-16 16:52 and 17:06 | `all-findings-release.yml`, `breadth-release.yml`, `completion-delivery.yml` |

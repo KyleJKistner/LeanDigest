@@ -82,8 +82,10 @@ before 2026-10-20 02:01 UTC: 39321225048 (pull request, success), 39352981910
 - **`cancellation-env-a` (12202194378, run 39285448721, 193,506,791 bytes,
   expires 2026-10-20 16:27).** Only the optional `--retained-environment` path
   of `scripts/check_source_cancellation.py` reads it, and no kept workflow
-  downloads it. Its digest is recorded in that script. It expires today, so it
-  is not in any set.
+  downloads it. Its digest is recorded in that script. It expired on
+  2026-10-20 at 16:27 UTC, so it is not in any set: at about 17:20 UTC the
+  Actions API returned 404 for artifact 12202194378 and listed no artifact for
+  run 39285448721.
 - **Dependency cache `original-openai-deps-1581d4cb-4341-full-v1`.**
   `completion-worker.yml`, `atomic-completion-worker.yml` and
   `completion-resume.yml` restore it with `fail-on-cache-miss: true`. Caches are

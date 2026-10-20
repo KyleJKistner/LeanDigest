@@ -550,7 +550,9 @@ from 52.6 MB to 60.6 MB (the workflow run's site has 738.3 MB and its zip
 60.6 MB). Every other difference is in the 492 target `links.json` files and
 their reader pages, `coverage.json`, `coverage.html`, the pages that carry the
 preview notice, and the preview records. In `links.json` only the 153 newly
-linked entries change, and the per-reading `counts` gain a `cone-reading` key.
+linked entries change, and the per-reading `counts` gain a `cone-reading` key;
+in the 12 readings with such a link the `unresolved` count falls, and in 3 of
+them the `source` count as well.
 
 These readings are unsigned observations from one CI run. A link to a
 supporting lemma reading does not mean that the citation is explained or

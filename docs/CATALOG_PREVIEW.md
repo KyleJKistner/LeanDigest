@@ -169,9 +169,9 @@ navigation between files.
 ## Workflow
 
 `catalog-preview.yml` runs on pushes to `claude/keen-archimedes-ihorkq` that
-change `proofreader/**`, the script, the scripts it imports, its tests,
-`benchmarks/reading-kpis/**`, `benchmarks/dependency-cone/**` or the workflow,
-and on manual dispatch. `main` does not contain the workflow, and no dispatch of
+change `proofreader/**`, `leanglish/**`, `pyproject.toml`, the script, the
+scripts it imports or runs, its tests, `benchmarks/reading-kpis/**`,
+`benchmarks/dependency-cone/**` or the workflow, and on manual dispatch. `main` does not contain the workflow, and no dispatch of
 it has been tested (see
 [Dispatch](../.github/workflow-archive/README.md#dispatch)). It has no schedule.
 Its recorded runs are push runs 39399318913 (`ab2bfb3`), 39425058262
@@ -265,7 +265,8 @@ bundled original files, 790 original-evidence files, `catalog.json`,
 The static audit passed on 1,282 pages with 9,328 local links, 95,027 anchors and
 385 citation links. The largest retained snapshot (38 MB,
 `proofs/305b16dfae1b96214507073b`) re-rendered within the 64 MB snapshot limit.
-This run had no browser audit; the workflow run described in the next section
+This run had no browser audit; the workflow run described in
+[Pinned release with the pilot supporting lemma readings](#pinned-release-with-the-pilot-supporting-lemma-readings)
 ran both browser audits.
 
 The preview site has 8,858 files and 629.8 MB; its zip is 52.6 MB. The
@@ -276,7 +277,11 @@ in units of 10^6 bytes.
 The first measurement of this kind, with renderer `source-math-en/0.5.0`, gave
 5,098 explicit explanation gaps and 8,171 frames inside them, with the same
 citation-link counts; two runs from the same checkout then produced
-byte-identical zips. That comparison was not repeated for `bbc90ac`.
+byte-identical zips. The comparison was repeated with two runs from a clean
+checkout of commit `9c91c41`, whose 103 application source files have the
+digest `91b7afac…` that the `bbc90ac` runs record: both gave the counts and
+sizes above, their zips (52,608,239 bytes) and `SHA256SUMS` files were
+byte-identical, and they took 140 s and 136 s.
 
 ### Citation links in a preview
 
