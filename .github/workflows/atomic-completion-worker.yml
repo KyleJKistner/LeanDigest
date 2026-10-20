@@ -1,0 +1,107 @@
+name: Uninterrupted original-module recovery
+on:
+  workflow_call:
+    inputs:
+      id: {type: string, required: true}
+permissions: {contents: read, actions: read}
+env:
+  GLIBC_TUNABLES: glibc.malloc.mmap_max=0:glibc.malloc.arena_max=1
+jobs:
+  recover:
+    runs-on: ubuntu-latest
+    timeout-minutes: 270
+    steps:
+      - uses: actions/checkout@v4
+        with: {persist-credentials: false}
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - uses: leanprover/lean-action@v1
+        with: {lake-package-directory: lean, auto-config: false, build: false, test: false, lint: false, use-mathlib-cache: false, use-github-cache: false}
+      - uses: actions/download-artifact@v4
+        with: {name: completion-recovery-plan, path: /tmp/recovery-plan}
+      - name: Check the bounded stopped-worker assignment and acquire unchanged inputs
+        env: {GH_TOKEN: '${{ github.token }}', WORKER_ID: '${{ inputs.id }}'}
+        run: |
+          python - <<'PY'
+          import os
+          from pathlib import Path
+          from proofreader.original_project import read,digest
+          s=read(Path('/tmp/recovery-plan/stopped-selection.json'))
+          assert s['selection_sha256']==digest({k:v for k,v in s.items() if k!='selection_sha256'})
+          assert sum(r['id']==os.environ['WORKER_ID'] for r in s['selected'])==1
+          PY
+          mkdir -p /tmp/inputs/source
+          gh run download 38822475057 -R "$GITHUB_REPOSITORY" -n complete-openai-lean-source -D /tmp/inputs/source
+          python -c "from pathlib import Path;from scripts.assemble_finding_release import unpack_source;unpack_source(Path('/tmp/inputs'),Path('/tmp/original-project'))"
+          gh api repos/$GITHUB_REPOSITORY/actions/artifacts/12152481984/zip > /tmp/tools.zip
+          echo '869b77fe322f2394edc12aa3bf9780809424e512eccce5f45982ffde619c069a  /tmp/tools.zip' | sha256sum -c -
+          python -c "from pathlib import Path;from scripts.collect_original_evidence import unpack;unpack(Path('/tmp/tools.zip'),Path('/tmp/tools'))"
+          chmod +x /tmp/tools/bin/*
+      - uses: actions/cache/restore@v4
+        with:
+          path: /tmp/original-project/lean/.lake/packages
+          key: original-openai-deps-1581d4cb-4341-full-v1
+          fail-on-cache-miss: true
+      - name: Audit every original source and dependency before execution
+        env: {WORKER_ID: '${{ inputs.id }}'}
+        run: |
+          sudo sysctl -w vm.max_map_count=1048576
+          python scripts/run_completion_worker.py initialize --kind module --id "$WORKER_ID" --seed /tmp/recovery-plan --project /tmp/original-project/lean --state /tmp/state --output /tmp/worker --trust-project
+          cp /tmp/recovery-plan/stopped-selection.json /tmp/worker/stopped-selection.json
+      - name: Uninterrupted first-hour compilation
+        id: first
+        env: {WORKER_ID: '${{ inputs.id }}'}
+        run: |
+          (while true; do date -u; ps -C lean,lake -o pid,etimes,pcpu,rss,args || true; free -b; sleep 60; done) > /tmp/worker/build-health-1.log &
+          observer=$!
+          trap 'kill "$observer" 2>/dev/null || true' EXIT
+          python scripts/run_completion_worker.py round --kind module --id "$WORKER_ID" --seed /tmp/recovery-plan --project /tmp/original-project/lean --state /tmp/state --output /tmp/worker --round 1 --seconds 3600 --trust-project
+          python scripts/run_completion_worker.py pack --kind module --id "$WORKER_ID" --seed /tmp/recovery-plan --project /tmp/original-project/lean --state /tmp/state --output /tmp/worker --round 1 --trust-project
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: checkpoint-${{ inputs.id }}-1
+          path: |
+            /tmp/worker/checkpoint-1/
+            /tmp/worker/build-health-1.log
+            /tmp/worker/round-1/
+          compression-level: 0
+          retention-days: 14
+          if-no-files-found: warn
+      - name: Continue from completed outputs only when the first hour timed out
+        if: steps.first.outputs.status == 'timeout'
+        env: {WORKER_ID: '${{ inputs.id }}'}
+        run: |
+          (while true; do date -u; ps -C lean,lake -o pid,etimes,pcpu,rss,args || true; free -b; sleep 60; done) > /tmp/worker/build-health-2.log &
+          observer=$!
+          trap 'kill "$observer" 2>/dev/null || true' EXIT
+          python scripts/run_completion_worker.py round --kind module --id "$WORKER_ID" --seed /tmp/recovery-plan --project /tmp/original-project/lean --state /tmp/state --output /tmp/worker --round 2 --seconds 3600 --trust-project
+          python scripts/run_completion_worker.py pack --kind module --id "$WORKER_ID" --seed /tmp/recovery-plan --project /tmp/original-project/lean --state /tmp/state --output /tmp/worker --round 2 --trust-project
+      - uses: actions/upload-artifact@v4
+        if: always() && steps.first.outputs.status == 'timeout'
+        with:
+          name: checkpoint-${{ inputs.id }}-2
+          path: |
+            /tmp/worker/checkpoint-2/
+            /tmp/worker/build-health-2.log
+            /tmp/worker/round-2/
+          compression-level: 0
+          retention-days: 14
+          if-no-files-found: warn
+      - name: Execute the original independent proof and comparison gates
+        env: {WORKER_ID: '${{ inputs.id }}'}
+        run: python scripts/run_completion_worker.py verify --kind module --id "$WORKER_ID" --seed /tmp/recovery-plan --project /tmp/original-project/lean --state /tmp/state --output /tmp/worker --tools /tmp/tools --trust-project
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: completion-result-${{ inputs.id }}
+          path: |
+            /tmp/worker/identity.json
+            /tmp/worker/stopped-selection.json
+            /tmp/worker/final-status.json
+            /tmp/worker/build-health-*.log
+            /tmp/worker/round-*/
+            /tmp/worker/proofs/
+            /tmp/worker/comparisons/
+          retention-days: 90
+          if-no-files-found: warn
