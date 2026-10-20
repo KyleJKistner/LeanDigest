@@ -1,0 +1,1 @@
+Since g is nonzero and (g * (a * y)) = (g * (d * (z + 1))), cancel g to obtain (a * y) = (d * (z + 1)).

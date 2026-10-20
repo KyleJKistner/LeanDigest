@@ -1,4 +1,135 @@
-# Leanglish breadth checkpoint — 0.4.1
+# Canonical proof-document checkpoint — 2026-10-19
+
+Work is isolated on `work/proof-document-20261019`, based on PR #9 at
+`84fa7ff3691631cc9e7519b65e4fd62bc1c9d9e7`. Do not change the other session's
+`work/full-original-project` branch or merge main without review.
+
+The new `docs/companion/checked-proof.html` displays a complete canonical
+Bézout document, not the old authored explanation with added badges. See
+`docs/PROOF_DOCUMENT.md`. The native certificate covers the fixed statement,
+definitions, both scoped branches, the existing fourteen passages, and the
+conclusion. `text_implies_statement` derives the original existential from the
+document meaning. The original proof's `hxz`, `hbez`, `hrel`, and applied
+identity-lambda aliases are restored as definitions before closing the branches.
+They do not remain additional assumptions of the complete document certificate.
+
+The first full local native gate passed all 31 commands, including sixteen
+expected source mutations. Eleven universal contracts and thirty executable
+guards are checked. The 99 new static tests passed. Local real-file browser
+navigation was administrator-blocked; the in-memory preview is not acceptance.
+Check the final commit's GitHub workflow and retained artifacts for remote results.
+
+Canonical text SHA-256:
+`d3daeabb618085d61e1ba8c9babb44a429062f4548aa60ba68514b59d7d31cf8`.
+Positive record SHA-256:
+`a616f24f83f634bedd4ae329623141eae02d4176f77d87ef5339ad834d634a5d`.
+Native evidence is `artifacts/source-document`; the gate uses a fresh workspace.
+
+The scope is one defined document grammar. The separately authored companion,
+arbitrary English, general Lean import, full original-project replay, and browser
+semantics are not newly certified. No independent agents ran for this extension.
+Do not paraphrase the native proof text after certification. Future notation or
+wording changes need their own grammar/semantic contract. The next product work
+is to improve the mathematical notation within that checked boundary and extend
+source-bound document schemas beyond the fixed Bézout case split.
+
+---
+
+# Equation and witness checkpoint — 2026-10-19
+
+The isolated branch `work/source-bound-equations-20261019` extends
+`0742966549cb4cc641d9799df365828baadc4cb4` on the cancellation branch. It does
+not change the concurrent Pro session's `work/full-original-project` branch.
+
+Read `docs/SOURCE_BOUND_EQUATIONS.md`. Six new Lean modules add equation-chain
+and witness-tuple languages, exact original-path importers, and adversarial
+controls. The final local native observation is `artifacts/source-equations/`:
+43 compiler invocations, 18 required universal contracts, 47 executable guards,
+28 rejected source mutations, ten equation chains containing 19 adjacent proofs,
+and both actual witness tuples. Both source runs repeat byte for byte.
+
+The companion now embeds 14 source-bound passages (12 new plus 2 cancellations).
+The authored proof bodies, formula inventory, and original source remain unchanged.
+Whole-proof English certification remains false: statement/introduction, gcd
+case-split structure, dependency exposition, and document assembly need their own
+checked rendering contract. Do not replace this with a statement that the entire
+proof or its English is certified. Do not substitute an unrelated proof with the
+same conclusion for original occurrence identity.
+
+Local file navigation is blocked by browser administrator policy. The memory
+preview is not offline acceptance. Inspect the final PR's native and real-browser
+CI and retained artifacts before reporting remote success. Existing native
+modules and the full-project workflows were not modified. The new workflow is
+`.github/workflows/source-bound-equations.yml`.
+
+---
+
+# Source-bound cancellation checkpoint — 2026-10-19
+
+The two cancellation sentences in the Bézout companion now have checked literal
+String/UTF-8 meanings in the original proof contexts, using the source's actual
+nonzero and equality proof arguments. Read `docs/SOURCE_BOUND_CANCELLATION.md`.
+The surrounding six-step prose is still not a fully certified English proof.
+Do not promote either whole proof section based on its one checked sentence.
+
+The implementation is isolated on `work/source-bound-cancellation-20261019`,
+based on editorial branch commit `8bcf42025179c05b9eb29f5088d4316a09061797`.
+No existing exporter/full-project code or original CI workflow was changed.
+The concurrent Pro session retains `work/full-original-project`.
+
+The final retained local native run passed nine required arithmetic contracts,
+32 executable parser guards, both original-source sentence checks, exact repeat,
+and 12 hostile native controls. It used the unchanged theorem body with explicitly
+adapted imports, Lean 4.34.1, and the pinned Mathlib environment. The observation
+is unsigned. Check the final-commit GitHub jobs separately before claiming CI.
+
+`proofreader/source_text.py` pins the native positive record and checks code,
+file, and command identities before the companion includes the two sentences.
+The generated page and native modules must not drift from the retained evidence.
+The next mathematical coverage gaps are the zero-gcd branch, gcd/Bézout facts,
+witness construction, and the remaining arithmetic calculations. Existing corpus
+and release counts are unchanged. No independent AI agents ran in this extension.
+
+---
+
+# Current isolated reader and architecture checkpoint — 2026-10-18
+
+The immediate user goal is one presentation-quality proof for Sebastian Bubeck
+and an architecture for correct-by-construction, deterministic mathematical
+English. The reviewed [Bézout companion](docs/companion/index.html) is the first
+concrete example. It is curated prose for one supporting theorem; its complete
+English semantics are not yet formally certified.
+
+Read [the architecture](docs/CORRECT_BY_CONSTRUCTION.md),
+[the proved logical fragment](docs/CONTROLLED_ENGLISH_PROTOTYPE.md), and
+[the independent audit](docs/SWARM_READER_AUDIT.md). The core Lean module proves
+typed derivation soundness, controlled formula/sentence token roundtrips, rule
+meaning, and local node alignment. Arithmetic, full proof-tree prose, string/HTML
+serialization, and import of original proof occurrences still need integration.
+Do not promote the companion or corpus from that component proof alone.
+
+Fresh native evidence in `artifacts/companion/native` uses Lean 4.34.1 and the
+exact Mathlib revision pinned by OpenAI. The theorem body is unchanged under two
+explicitly substituted imports. All 86 selected judgements, exact repeat, and
+wrong-path/false-claim controls passed. The failed historical snapshot byte
+comparison remains recorded separately; its older exporter leaked macro-scoped
+display names. No full original-project or Comparator pass is claimed here.
+
+Four actual independent agents contributed implementation or review during this
+session, in isolated worktrees. This branch is
+`work/swarm-reader-completion-20261018`. The concurrent Pro session owns
+`work/full-original-project`; its exporter, runtime, campaign and existing CI
+files were left untouched. A separate `checked-companion.yml` gates this work.
+
+The published v0.4.1 archive stays frozen at 216 readings, 9,272 selected frames,
+and 3,005 gaps. The current printer version `source-math-en/0.4.2` reproduces
+those same snapshots with 3,001 gaps: 91 logical passages newly explained and 87
+previously unmarked projections correctly exposed. The following sections are
+historical checkpoints, including their environment and agent-provider limits.
+
+---
+
+# Historical Leanglish breadth checkpoint — 0.4.1
 
 ## Resume here, not from old toy examples
 

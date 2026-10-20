@@ -302,11 +302,14 @@ class English:
                               "fully_quantified_statement": self.formula.render(a.typ)},
                         warnings=["Named lemmas without an exposition template remain explicitly unexpanded.",
                                   "Kernel judgement checks do not constitute a formal proof of this English printer."])
-        return Document(a.name, [{"path": file, "source": source, "sha256": digest(source)}] if source else [], [d],
+        document = Document(a.name, [{"path": file, "source": source, "sha256": digest(source)}] if source else [], [d],
                         provenance={"mode": "path-bound-typed-proof", "argument_sha256": a.sha256,
                                     "printer": PRINTER_VERSION, "pipeline_model_calls": 0,
                                     "lean_version": a.record["lean_version"], **a.coverage()},
                         generator="lean-proofreader/0.2.0")
+        from .layout import check_layout
+        check_layout(a.record, document)
+        return document
 
 
 def reading_binding(document: Document) -> dict:
@@ -320,6 +323,8 @@ def reading_binding(document: Document) -> dict:
 
 
 def check_reading(record: dict, document: Document) -> None:
+    from .layout import check_layout
+    check_layout(record, document)
     expected = English(record).document()
     require(reading_binding(expected) == reading_binding(document),
             "Reading text or proof structure differs from deterministic regeneration")

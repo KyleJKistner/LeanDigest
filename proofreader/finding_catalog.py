@@ -92,7 +92,7 @@ def shell(title: str, body: str, *, root: str = '', page: str = '') -> str:
         '<meta http-equiv="Content-Security-Policy" content="default-src \'none\'; script-src \'self\'; style-src \'self\' \'unsafe-inline\'; img-src \'self\' data:; base-uri \'none\'; form-action \'none\'">'
         '<title>'+html.escape(title)+' · Leanglish</title><link rel="stylesheet" href="'+root+'assets/catalog.css">'
         '<script defer src="'+root+'assets/katex.min.js"></script><script defer src="'+root+'assets/catalog.js"></script></head>'
-        '<body data-page="'+page+'"><a class="skip" href="#content">Skip to content</a><header><a class="brand" href="'+root+'index.html">Leanglish<span>.</span></a><nav aria-label="Main"><a href="'+root+'index.html">Findings</a><a href="'+root+'coverage.html">Coverage &amp; evidence</a><a href="https://github.com/KyleJKistner/LeanDigest">GitHub ↗</a></nav></header>'
+        '<body data-page="'+page+'"><a class="skip" href="#content">Skip to content</a><header><a class="brand" href="'+root+'index.html">Leanglish<span>.</span></a><nav aria-label="Main"><a href="'+root+'index.html">Findings</a><a href="'+root+'explanations.html">Explanation gaps</a><a href="'+root+'coverage.html">Coverage &amp; evidence</a><a href="https://github.com/KyleJKistner/LeanDigest">GitHub ↗</a></nav></header>'
         '<main id="content">'+body+'</main><footer>OpenAI mathematics collection · pinned '+PIN[:12]+' · Deterministic reading, not certified English.</footer></body></html>')
 
 
@@ -223,6 +223,8 @@ def build(upstream: Path, lean: Path, statement_roots: list[Path], proof_roots: 
     (output/'coverage.html').write_text(shell('Coverage and evidence',body),encoding='utf-8')
     write_json(output/'coverage.json',summary);write_json(output/'catalog.json',ledger)
     write_json(output/'evidence/attempts.json',{'statements':statement_attempts,'proofs':proof_attempts})
+    from .explanation_gaps import write_report
+    write_report(output)
     (output/'START-HERE.txt').write_text('Open index.html in a browser. No installation, network connection, API key, or Lean runtime is needed to read the included material. External paper and upstream links require a connection. See coverage.html before interpreting verification labels.\n')
     return summary
 

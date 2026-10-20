@@ -1,0 +1,1229 @@
+{
+  "axioms": [
+    "propext",
+    "Classical.choice",
+    "Quot.sound"
+  ],
+  "formula_backend": "Lean pretty-printer",
+  "frames": [
+    {
+      "budget_cut": false,
+      "children": [
+        1,
+        14
+      ],
+      "context": [],
+      "head": "And.intro",
+      "id": 0,
+      "objects": [
+        "∀ (k : ℕ) (f : OAI.DiamondDistortion.Diamond.Vertex k → OAI.DiamondDistortion.ForestDual) (D s : ℝ),\n  0 < s →\n    (∀ (u v : OAI.DiamondDistortion.Diamond.Vertex k),\n        s * OAI.DiamondDistortion.Diamond.distance k u v ≤ ‖f u - f v‖ ∧\n          ‖f u - f v‖ ≤ D * s * OAI.DiamondDistortion.Diamond.distance k u v) →\n      1 + ↑k / 4 ≤ D ^ 2",
+        "∀ (k : ℕ) (f : OAI.DiamondDistortion.Diamond.Vertex k → ↥OAI.DiamondDistortion.InfinitePredual) (D s : ℝ),\n  0 < s →\n    (∀ (u v : OAI.DiamondDistortion.Diamond.Vertex k),\n        s * OAI.DiamondDistortion.Diamond.distance k u v ≤ ‖f u - f v‖ ∧\n          ‖f u - f v‖ ≤ D * s * OAI.DiamondDistortion.Diamond.distance k u v) →\n      1 + ↑k / 4 ≤ D ^ 2"
+      ],
+      "path": [],
+      "premises": [
+        {
+          "argument": 2,
+          "frame": 1,
+          "statement": "∀ (k : ℕ) (f : OAI.DiamondDistortion.Diamond.Vertex k → OAI.DiamondDistortion.ForestDual) (D s : ℝ),\n  0 < s →\n    (∀ (u v : OAI.DiamondDistortion.Diamond.Vertex k),\n        s * OAI.DiamondDistortion.Diamond.distance k u v ≤ ‖f u - f v‖ ∧\n          ‖f u - f v‖ ≤ D * s * OAI.DiamondDistortion.Diamond.distance k u v) →\n      1 + ↑k / 4 ≤ D ^ 2"
+        },
+        {
+          "argument": 3,
+          "frame": 14,
+          "statement": "∀ (k : ℕ) (f : OAI.DiamondDistortion.Diamond.Vertex k → ↥OAI.DiamondDistortion.InfinitePredual) (D s : ℝ),\n  0 < s →\n    (∀ (u v : OAI.DiamondDistortion.Diamond.Vertex k),\n        s * OAI.DiamondDistortion.Diamond.distance k u v ≤ ‖f u - f v‖ ∧\n          ‖f u - f v‖ ≤ D * s * OAI.DiamondDistortion.Diamond.distance k u v) →\n      1 + ↑k / 4 ≤ D ^ 2"
+        }
+      ],
+      "role": "combine",
+      "statement": "(∀ (k : ℕ) (f : OAI.DiamondDistortion.Diamond.Vertex k → OAI.DiamondDistortion.ForestDual) (D s : ℝ),\n    0 < s →\n      (∀ (u v : OAI.DiamondDistortion.Diamond.Vertex k),\n          s * OAI.DiamondDistortion.Diamond.distance k u v ≤ ‖f u - f v‖ ∧\n            ‖f u - f v‖ ≤ D * s * OAI.DiamondDistortion.Diamond.distance k u v) →\n        1 + ↑k / 4 ≤ D ^ 2) ∧\n  ∀ (k : ℕ) (f : OAI.DiamondDistortion.Diamond.Vertex k → ↥OAI.DiamondDistortion.InfinitePredual) (D s : ℝ),\n    0 < s →\n      (∀ (u v : OAI.DiamondDistortion.Diamond.Vertex k),\n          s * OAI.DiamondDistortion.Diamond.distance k u v ≤ ‖f u - f v‖ ∧\n            ‖f u - f v‖ ≤ D * s * OAI.DiamondDistortion.Diamond.distance k u v) →\n        1 + ↑k / 4 ≤ D ^ 2"
+    },
+    {
+      "binder": "k",
+      "budget_cut": false,
+      "children": [
+        2
+      ],
+      "context": [],
+      "domain": "ℕ",
+      "head": "",
+      "id": 1,
+      "objects": [],
+      "path": [
+        0,
+        1
+      ],
+      "premises": [],
+      "role": "introduce",
+      "statement": "∀ (k : ℕ) (f : OAI.DiamondDistortion.Diamond.Vertex k → OAI.DiamondDistortion.ForestDual) (D s : ℝ),\n  0 < s →\n    (∀ (u v : OAI.DiamondDistortion.Diamond.Vertex k),\n        s * OAI.DiamondDistortion.Diamond.distance k u v ≤ ‖f u - f v‖ ∧\n          ‖f u - f v‖ ≤ D * s * OAI.DiamondDistortion.Diamond.distance k u v) →\n      1 + ↑k / 4 ≤ D ^ 2"
+    },
+    {
+      "binder": "f",
+      "budget_cut": false,
+      "children": [
+        3
+      ],
+      "context": [
+        {
+          "name": "k",
+          "type": "ℕ"
+        }
+      ],
+      "domain": "OAI.DiamondDistortion.Diamond.Vertex k → OAI.DiamondDistortion.ForestDual",
+      "head": "",
+      "id": 2,
+      "objects": [],
+      "path": [
+        0,
+        1,
+        1
+      ],
+      "premises": [],
+      "role": "introduce",
+      "statement": "∀ (f : OAI.DiamondDistortion.Diamond.Vertex k → OAI.DiamondDistortion.ForestDual) (D s : ℝ),\n  0 < s →\n    (∀ (u v : OAI.DiamondDistortion.Diamond.Vertex k),\n        s * OAI.DiamondDistortion.Diamond.distance k u v ≤ ‖f u - f v‖ ∧\n          ‖f u - f v‖ ≤ D * s * OAI.DiamondDistortion.Diamond.distance k u v) →\n      1 + ↑k / 4 ≤ D ^ 2"
+    },
+    {
+      "binder": "D",
+      "budget_cut": false,
+      "children": [
+        4
+      ],
+      "context": [
+        {
+          "name": "k",
+          "type": "ℕ"
+        },
+        {
+          "name": "f",
+          "type": "OAI.DiamondDistortion.Diamond.Vertex k → OAI.DiamondDistortion.ForestDual"
+        }
+      ],
+      "domain": "ℝ",
+      "head": "",
+      "id": 3,
+      "objects": [],
+      "path": [
+        0,
+        1,
+        1,
+        1
+      ],
+      "premises": [],
+      "role": "introduce",
+      "statement": "∀ (D s : ℝ),\n  0 < s →\n    (∀ (u v : OAI.DiamondDistortion.Diamond.Vertex k),\n        s * OAI.DiamondDistortion.Diamond.distance k u v ≤ ‖f u - f v‖ ∧\n          ‖f u - f v‖ ≤ D * s * OAI.DiamondDistortion.Diamond.distance k u v) →\n      1 + ↑k / 4 ≤ D ^ 2"
+    },
+    {
+      "binder": "s",
+      "budget_cut": false,
+      "children": [
+        5
+      ],
+      "context": [
+        {
+          "name": "k",
+          "type": "ℕ"
+        },
+        {
+          "name": "f",
+          "type": "OAI.DiamondDistortion.Diamond.Vertex k → OAI.DiamondDistortion.ForestDual"
+        },
+        {
+          "name": "D",
+          "type": "ℝ"
+        }
+      ],
+      "domain": "ℝ",
+      "head": "",
+      "id": 4,
+      "objects": [],
+      "path": [
+        0,
+        1,
+        1,
+        1,
+        1
+      ],
+      "premises": [],
+      "role": "introduce",
+      "statement": "∀ (s : ℝ),\n  0 < s →\n    (∀ (u v : OAI.DiamondDistortion.Diamond.Vertex k),\n        s * OAI.DiamondDistortion.Diamond.distance k u v ≤ ‖f u - f v‖ ∧\n          ‖f u - f v‖ ≤ D * s * OAI.DiamondDistortion.Diamond.distance k u v) →\n      1 + ↑k / 4 ≤ D ^ 2"
+    },
+    {
+      "binder": "hs",
+      "budget_cut": false,
+      "children": [
+        6
+      ],
+      "context": [
+        {
+          "name": "k",
+          "type": "ℕ"
+        },
+        {
+          "name": "f",
+          "type": "OAI.DiamondDistortion.Diamond.Vertex k → OAI.DiamondDistortion.ForestDual"
+        },
+        {
+          "name": "D",
+          "type": "ℝ"
+        },
+        {
+          "name": "s",
+          "type": "ℝ"
+        }
+      ],
+      "domain": "0 < s",
+      "head": "",
+      "id": 5,
+      "objects": [],
+      "path": [
+        0,
+        1,
+        1,
+        1,
+        1,
+        1
+      ],
+      "premises": [],
+      "role": "assume",
+      "statement": "0 < s →\n  (∀ (u v : OAI.DiamondDistortion.Diamond.Vertex k),\n      s * OAI.DiamondDistortion.Diamond.distance k u v ≤ ‖f u - f v‖ ∧\n        ‖f u - f v‖ ≤ D * s * OAI.DiamondDistortion.Diamond.distance k u v) →\n    1 + ↑k / 4 ≤ D ^ 2"
+    },
+    {
+      "binder": "h",
+      "budget_cut": false,
+      "children": [
+        7
+      ],
+      "context": [
+        {
+          "name": "k",
+          "type": "ℕ"
+        },
+        {
+          "name": "f",
+          "type": "OAI.DiamondDistortion.Diamond.Vertex k → OAI.DiamondDistortion.ForestDual"
+        },
+        {
+          "name": "D",
+          "type": "ℝ"
+        },
+        {
+          "name": "s",
+          "type": "ℝ"
+        },
+        {
+          "name": "hs",
+          "type": "0 < s"
+        }
+      ],
+      "domain": "∀ (u v : OAI.DiamondDistortion.Diamond.Vertex k),\n  s * OAI.DiamondDistortion.Diamond.distance k u v ≤ ‖f u - f v‖ ∧\n    ‖f u - f v‖ ≤ D * s * OAI.DiamondDistortion.Diamond.distance k u v",
+      "head": "",
+      "id": 6,
+      "objects": [],
+      "path": [
+        0,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1
+      ],
+      "premises": [],
+      "role": "assume",
+      "statement": "(∀ (u v : OAI.DiamondDistortion.Diamond.Vertex k),\n    s * OAI.DiamondDistortion.Diamond.distance k u v ≤ ‖f u - f v‖ ∧\n      ‖f u - f v‖ ≤ D * s * OAI.DiamondDistortion.Diamond.distance k u v) →\n  1 + ↑k / 4 ≤ D ^ 2"
+    },
+    {
+      "budget_cut": false,
+      "children": [
+        8,
+        9
+      ],
+      "context": [
+        {
+          "name": "k",
+          "type": "ℕ"
+        },
+        {
+          "name": "f",
+          "type": "OAI.DiamondDistortion.Diamond.Vertex k → OAI.DiamondDistortion.ForestDual"
+        },
+        {
+          "name": "D",
+          "type": "ℝ"
+        },
+        {
+          "name": "s",
+          "type": "ℝ"
+        },
+        {
+          "name": "hs",
+          "type": "0 < s"
+        },
+        {
+          "name": "h",
+          "type": "∀ (u v : OAI.DiamondDistortion.Diamond.Vertex k),\n  s * OAI.DiamondDistortion.Diamond.distance k u v ≤ ‖f u - f v‖ ∧\n    ‖f u - f v‖ ≤ D * s * OAI.DiamondDistortion.Diamond.distance k u v"
+        }
+      ],
+      "head": "And.left",
+      "id": 7,
+      "objects": [
+        "∀ (k : ℕ) (f : OAI.DiamondDistortion.Diamond.Vertex k → OAI.DiamondDistortion.ForestDual) (D s : ℝ),\n  OAI.DiamondDistortion.Diamond.HasDistortion k f D s → 1 + ↑k / 4 ≤ D ^ 2",
+        "∀ (k : ℕ) (f : OAI.DiamondDistortion.Diamond.Vertex k → ↥OAI.DiamondDistortion.InfinitePredual) (D s : ℝ),\n  OAI.DiamondDistortion.Diamond.HasDistortion k f D s → 1 + ↑k / 4 ≤ D ^ 2",
+        "k",
+        "f",
+        "D",
+        "s"
+      ],
+      "path": [
+        0,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1
+      ],
+      "premises": [
+        {
+          "argument": 2,
+          "frame": 8,
+          "statement": "OAI.DiamondDistortion.Headline"
+        },
+        {
+          "argument": 7,
+          "frame": 9,
+          "statement": "OAI.DiamondDistortion.Diamond.HasDistortion k f D s"
+        }
+      ],
+      "role": "application",
+      "statement": "1 + ↑k / 4 ≤ D ^ 2"
+    },
+    {
+      "budget_cut": false,
+      "children": [],
+      "context": [
+        {
+          "name": "k",
+          "type": "ℕ"
+        },
+        {
+          "name": "f",
+          "type": "OAI.DiamondDistortion.Diamond.Vertex k → OAI.DiamondDistortion.ForestDual"
+        },
+        {
+          "name": "D",
+          "type": "ℝ"
+        },
+        {
+          "name": "s",
+          "type": "ℝ"
+        },
+        {
+          "name": "hs",
+          "type": "0 < s"
+        },
+        {
+          "name": "h",
+          "type": "∀ (u v : OAI.DiamondDistortion.Diamond.Vertex k),\n  s * OAI.DiamondDistortion.Diamond.distance k u v ≤ ‖f u - f v‖ ∧\n    ‖f u - f v‖ ≤ D * s * OAI.DiamondDistortion.Diamond.distance k u v"
+        }
+      ],
+      "head": "OAI.DiamondDistortion.headline",
+      "id": 8,
+      "objects": [],
+      "path": [
+        0,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        0,
+        0,
+        0,
+        0,
+        0,
+        1
+      ],
+      "premises": [],
+      "role": "named",
+      "statement": "OAI.DiamondDistortion.Headline"
+    },
+    {
+      "budget_cut": false,
+      "children": [
+        10,
+        11
+      ],
+      "context": [
+        {
+          "name": "k",
+          "type": "ℕ"
+        },
+        {
+          "name": "f",
+          "type": "OAI.DiamondDistortion.Diamond.Vertex k → OAI.DiamondDistortion.ForestDual"
+        },
+        {
+          "name": "D",
+          "type": "ℝ"
+        },
+        {
+          "name": "s",
+          "type": "ℝ"
+        },
+        {
+          "name": "hs",
+          "type": "0 < s"
+        },
+        {
+          "name": "h",
+          "type": "∀ (u v : OAI.DiamondDistortion.Diamond.Vertex k),\n  s * OAI.DiamondDistortion.Diamond.distance k u v ≤ ‖f u - f v‖ ∧\n    ‖f u - f v‖ ≤ D * s * OAI.DiamondDistortion.Diamond.distance k u v"
+        }
+      ],
+      "head": "Iff.mpr",
+      "id": 9,
+      "objects": [
+        "OAI.DiamondDistortion.Diamond.HasDistortion k f D s",
+        "0 < s ∧\n  ∀ (u v : OAI.DiamondDistortion.Diamond.Vertex k),\n    s * OAI.DiamondDistortion.Diamond.distance k u v ≤ ‖f u - f v‖ ∧\n      ‖f u - f v‖ ≤ D * s * OAI.DiamondDistortion.Diamond.distance k u v"
+      ],
+      "path": [
+        0,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1
+      ],
+      "premises": [
+        {
+          "argument": 2,
+          "frame": 10,
+          "statement": "OAI.DiamondDistortion.Diamond.HasDistortion k f D s ↔\n  0 < s ∧\n    ∀ (u v : OAI.DiamondDistortion.Diamond.Vertex k),\n      s * OAI.DiamondDistortion.Diamond.distance k u v ≤ ‖f u - f v‖ ∧\n        ‖f u - f v‖ ≤ D * s * OAI.DiamondDistortion.Diamond.distance k u v"
+        },
+        {
+          "argument": 3,
+          "frame": 11,
+          "statement": "0 < s ∧\n  ∀ (u v : OAI.DiamondDistortion.Diamond.Vertex k),\n    s * OAI.DiamondDistortion.Diamond.distance k u v ≤ ‖f u - f v‖ ∧\n      ‖f u - f v‖ ≤ D * s * OAI.DiamondDistortion.Diamond.distance k u v"
+        }
+      ],
+      "role": "application",
+      "statement": "OAI.DiamondDistortion.Diamond.HasDistortion k f D s"
+    },
+    {
+      "budget_cut": false,
+      "children": [],
+      "context": [
+        {
+          "name": "k",
+          "type": "ℕ"
+        },
+        {
+          "name": "f",
+          "type": "OAI.DiamondDistortion.Diamond.Vertex k → OAI.DiamondDistortion.ForestDual"
+        },
+        {
+          "name": "D",
+          "type": "ℝ"
+        },
+        {
+          "name": "s",
+          "type": "ℝ"
+        },
+        {
+          "name": "hs",
+          "type": "0 < s"
+        },
+        {
+          "name": "h",
+          "type": "∀ (u v : OAI.DiamondDistortion.Diamond.Vertex k),\n  s * OAI.DiamondDistortion.Diamond.distance k u v ≤ ‖f u - f v‖ ∧\n    ‖f u - f v‖ ≤ D * s * OAI.DiamondDistortion.Diamond.distance k u v"
+        }
+      ],
+      "head": "OAI.DiamondDistortion.Diamond.hasDistortion_iff_all_pairs",
+      "id": 10,
+      "objects": [
+        "OAI.DiamondDistortion.ForestDual",
+        "ContinuousLinearMap.toNormedAddCommGroup",
+        "k",
+        "f",
+        "D",
+        "s"
+      ],
+      "path": [
+        0,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        0,
+        1
+      ],
+      "premises": [],
+      "role": "application",
+      "statement": "OAI.DiamondDistortion.Diamond.HasDistortion k f D s ↔\n  0 < s ∧\n    ∀ (u v : OAI.DiamondDistortion.Diamond.Vertex k),\n      s * OAI.DiamondDistortion.Diamond.distance k u v ≤ ‖f u - f v‖ ∧\n        ‖f u - f v‖ ≤ D * s * OAI.DiamondDistortion.Diamond.distance k u v"
+    },
+    {
+      "budget_cut": false,
+      "children": [
+        12,
+        13
+      ],
+      "context": [
+        {
+          "name": "k",
+          "type": "ℕ"
+        },
+        {
+          "name": "f",
+          "type": "OAI.DiamondDistortion.Diamond.Vertex k → OAI.DiamondDistortion.ForestDual"
+        },
+        {
+          "name": "D",
+          "type": "ℝ"
+        },
+        {
+          "name": "s",
+          "type": "ℝ"
+        },
+        {
+          "name": "hs",
+          "type": "0 < s"
+        },
+        {
+          "name": "h",
+          "type": "∀ (u v : OAI.DiamondDistortion.Diamond.Vertex k),\n  s * OAI.DiamondDistortion.Diamond.distance k u v ≤ ‖f u - f v‖ ∧\n    ‖f u - f v‖ ≤ D * s * OAI.DiamondDistortion.Diamond.distance k u v"
+        }
+      ],
+      "head": "And.intro",
+      "id": 11,
+      "objects": [
+        "0 < s",
+        "∀ (u v : OAI.DiamondDistortion.Diamond.Vertex k),\n  s * OAI.DiamondDistortion.Diamond.distance k u v ≤ ‖f u - f v‖ ∧\n    ‖f u - f v‖ ≤ D * s * OAI.DiamondDistortion.Diamond.distance k u v"
+      ],
+      "path": [
+        0,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1
+      ],
+      "premises": [
+        {
+          "argument": 2,
+          "frame": 12,
+          "statement": "0 < s"
+        },
+        {
+          "argument": 3,
+          "frame": 13,
+          "statement": "∀ (u v : OAI.DiamondDistortion.Diamond.Vertex k),\n  s * OAI.DiamondDistortion.Diamond.distance k u v ≤ ‖f u - f v‖ ∧\n    ‖f u - f v‖ ≤ D * s * OAI.DiamondDistortion.Diamond.distance k u v"
+        }
+      ],
+      "role": "combine",
+      "statement": "0 < s ∧\n  ∀ (u v : OAI.DiamondDistortion.Diamond.Vertex k),\n    s * OAI.DiamondDistortion.Diamond.distance k u v ≤ ‖f u - f v‖ ∧\n      ‖f u - f v‖ ≤ D * s * OAI.DiamondDistortion.Diamond.distance k u v"
+    },
+    {
+      "binder": "hs",
+      "budget_cut": false,
+      "children": [],
+      "context": [
+        {
+          "name": "k",
+          "type": "ℕ"
+        },
+        {
+          "name": "f",
+          "type": "OAI.DiamondDistortion.Diamond.Vertex k → OAI.DiamondDistortion.ForestDual"
+        },
+        {
+          "name": "D",
+          "type": "ℝ"
+        },
+        {
+          "name": "s",
+          "type": "ℝ"
+        },
+        {
+          "name": "hs",
+          "type": "0 < s"
+        },
+        {
+          "name": "h",
+          "type": "∀ (u v : OAI.DiamondDistortion.Diamond.Vertex k),\n  s * OAI.DiamondDistortion.Diamond.distance k u v ≤ ‖f u - f v‖ ∧\n    ‖f u - f v‖ ≤ D * s * OAI.DiamondDistortion.Diamond.distance k u v"
+        }
+      ],
+      "head": "",
+      "id": 12,
+      "objects": [],
+      "path": [
+        0,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        0,
+        1
+      ],
+      "premises": [],
+      "role": "given",
+      "statement": "0 < s"
+    },
+    {
+      "binder": "h",
+      "budget_cut": false,
+      "children": [],
+      "context": [
+        {
+          "name": "k",
+          "type": "ℕ"
+        },
+        {
+          "name": "f",
+          "type": "OAI.DiamondDistortion.Diamond.Vertex k → OAI.DiamondDistortion.ForestDual"
+        },
+        {
+          "name": "D",
+          "type": "ℝ"
+        },
+        {
+          "name": "s",
+          "type": "ℝ"
+        },
+        {
+          "name": "hs",
+          "type": "0 < s"
+        },
+        {
+          "name": "h",
+          "type": "∀ (u v : OAI.DiamondDistortion.Diamond.Vertex k),\n  s * OAI.DiamondDistortion.Diamond.distance k u v ≤ ‖f u - f v‖ ∧\n    ‖f u - f v‖ ≤ D * s * OAI.DiamondDistortion.Diamond.distance k u v"
+        }
+      ],
+      "head": "",
+      "id": 13,
+      "objects": [],
+      "path": [
+        0,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1
+      ],
+      "premises": [],
+      "role": "given",
+      "statement": "∀ (u v : OAI.DiamondDistortion.Diamond.Vertex k),\n  s * OAI.DiamondDistortion.Diamond.distance k u v ≤ ‖f u - f v‖ ∧\n    ‖f u - f v‖ ≤ D * s * OAI.DiamondDistortion.Diamond.distance k u v"
+    },
+    {
+      "binder": "k",
+      "budget_cut": false,
+      "children": [
+        15
+      ],
+      "context": [],
+      "domain": "ℕ",
+      "head": "",
+      "id": 14,
+      "objects": [],
+      "path": [
+        1
+      ],
+      "premises": [],
+      "role": "introduce",
+      "statement": "∀ (k : ℕ) (f : OAI.DiamondDistortion.Diamond.Vertex k → ↥OAI.DiamondDistortion.InfinitePredual) (D s : ℝ),\n  0 < s →\n    (∀ (u v : OAI.DiamondDistortion.Diamond.Vertex k),\n        s * OAI.DiamondDistortion.Diamond.distance k u v ≤ ‖f u - f v‖ ∧\n          ‖f u - f v‖ ≤ D * s * OAI.DiamondDistortion.Diamond.distance k u v) →\n      1 + ↑k / 4 ≤ D ^ 2"
+    },
+    {
+      "binder": "f",
+      "budget_cut": false,
+      "children": [
+        16
+      ],
+      "context": [
+        {
+          "name": "k",
+          "type": "ℕ"
+        }
+      ],
+      "domain": "OAI.DiamondDistortion.Diamond.Vertex k → ↥OAI.DiamondDistortion.InfinitePredual",
+      "head": "",
+      "id": 15,
+      "objects": [],
+      "path": [
+        1,
+        1
+      ],
+      "premises": [],
+      "role": "introduce",
+      "statement": "∀ (f : OAI.DiamondDistortion.Diamond.Vertex k → ↥OAI.DiamondDistortion.InfinitePredual) (D s : ℝ),\n  0 < s →\n    (∀ (u v : OAI.DiamondDistortion.Diamond.Vertex k),\n        s * OAI.DiamondDistortion.Diamond.distance k u v ≤ ‖f u - f v‖ ∧\n          ‖f u - f v‖ ≤ D * s * OAI.DiamondDistortion.Diamond.distance k u v) →\n      1 + ↑k / 4 ≤ D ^ 2"
+    },
+    {
+      "binder": "D",
+      "budget_cut": false,
+      "children": [
+        17
+      ],
+      "context": [
+        {
+          "name": "k",
+          "type": "ℕ"
+        },
+        {
+          "name": "f",
+          "type": "OAI.DiamondDistortion.Diamond.Vertex k → ↥OAI.DiamondDistortion.InfinitePredual"
+        }
+      ],
+      "domain": "ℝ",
+      "head": "",
+      "id": 16,
+      "objects": [],
+      "path": [
+        1,
+        1,
+        1
+      ],
+      "premises": [],
+      "role": "introduce",
+      "statement": "∀ (D s : ℝ),\n  0 < s →\n    (∀ (u v : OAI.DiamondDistortion.Diamond.Vertex k),\n        s * OAI.DiamondDistortion.Diamond.distance k u v ≤ ‖f u - f v‖ ∧\n          ‖f u - f v‖ ≤ D * s * OAI.DiamondDistortion.Diamond.distance k u v) →\n      1 + ↑k / 4 ≤ D ^ 2"
+    },
+    {
+      "binder": "s",
+      "budget_cut": false,
+      "children": [
+        18
+      ],
+      "context": [
+        {
+          "name": "k",
+          "type": "ℕ"
+        },
+        {
+          "name": "f",
+          "type": "OAI.DiamondDistortion.Diamond.Vertex k → ↥OAI.DiamondDistortion.InfinitePredual"
+        },
+        {
+          "name": "D",
+          "type": "ℝ"
+        }
+      ],
+      "domain": "ℝ",
+      "head": "",
+      "id": 17,
+      "objects": [],
+      "path": [
+        1,
+        1,
+        1,
+        1
+      ],
+      "premises": [],
+      "role": "introduce",
+      "statement": "∀ (s : ℝ),\n  0 < s →\n    (∀ (u v : OAI.DiamondDistortion.Diamond.Vertex k),\n        s * OAI.DiamondDistortion.Diamond.distance k u v ≤ ‖f u - f v‖ ∧\n          ‖f u - f v‖ ≤ D * s * OAI.DiamondDistortion.Diamond.distance k u v) →\n      1 + ↑k / 4 ≤ D ^ 2"
+    },
+    {
+      "binder": "hs",
+      "budget_cut": false,
+      "children": [
+        19
+      ],
+      "context": [
+        {
+          "name": "k",
+          "type": "ℕ"
+        },
+        {
+          "name": "f",
+          "type": "OAI.DiamondDistortion.Diamond.Vertex k → ↥OAI.DiamondDistortion.InfinitePredual"
+        },
+        {
+          "name": "D",
+          "type": "ℝ"
+        },
+        {
+          "name": "s",
+          "type": "ℝ"
+        }
+      ],
+      "domain": "0 < s",
+      "head": "",
+      "id": 18,
+      "objects": [],
+      "path": [
+        1,
+        1,
+        1,
+        1,
+        1
+      ],
+      "premises": [],
+      "role": "assume",
+      "statement": "0 < s →\n  (∀ (u v : OAI.DiamondDistortion.Diamond.Vertex k),\n      s * OAI.DiamondDistortion.Diamond.distance k u v ≤ ‖f u - f v‖ ∧\n        ‖f u - f v‖ ≤ D * s * OAI.DiamondDistortion.Diamond.distance k u v) →\n    1 + ↑k / 4 ≤ D ^ 2"
+    },
+    {
+      "binder": "h",
+      "budget_cut": false,
+      "children": [
+        20
+      ],
+      "context": [
+        {
+          "name": "k",
+          "type": "ℕ"
+        },
+        {
+          "name": "f",
+          "type": "OAI.DiamondDistortion.Diamond.Vertex k → ↥OAI.DiamondDistortion.InfinitePredual"
+        },
+        {
+          "name": "D",
+          "type": "ℝ"
+        },
+        {
+          "name": "s",
+          "type": "ℝ"
+        },
+        {
+          "name": "hs",
+          "type": "0 < s"
+        }
+      ],
+      "domain": "∀ (u v : OAI.DiamondDistortion.Diamond.Vertex k),\n  s * OAI.DiamondDistortion.Diamond.distance k u v ≤ ‖f u - f v‖ ∧\n    ‖f u - f v‖ ≤ D * s * OAI.DiamondDistortion.Diamond.distance k u v",
+      "head": "",
+      "id": 19,
+      "objects": [],
+      "path": [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1
+      ],
+      "premises": [],
+      "role": "assume",
+      "statement": "(∀ (u v : OAI.DiamondDistortion.Diamond.Vertex k),\n    s * OAI.DiamondDistortion.Diamond.distance k u v ≤ ‖f u - f v‖ ∧\n      ‖f u - f v‖ ≤ D * s * OAI.DiamondDistortion.Diamond.distance k u v) →\n  1 + ↑k / 4 ≤ D ^ 2"
+    },
+    {
+      "budget_cut": false,
+      "children": [
+        21,
+        22
+      ],
+      "context": [
+        {
+          "name": "k",
+          "type": "ℕ"
+        },
+        {
+          "name": "f",
+          "type": "OAI.DiamondDistortion.Diamond.Vertex k → ↥OAI.DiamondDistortion.InfinitePredual"
+        },
+        {
+          "name": "D",
+          "type": "ℝ"
+        },
+        {
+          "name": "s",
+          "type": "ℝ"
+        },
+        {
+          "name": "hs",
+          "type": "0 < s"
+        },
+        {
+          "name": "h",
+          "type": "∀ (u v : OAI.DiamondDistortion.Diamond.Vertex k),\n  s * OAI.DiamondDistortion.Diamond.distance k u v ≤ ‖f u - f v‖ ∧\n    ‖f u - f v‖ ≤ D * s * OAI.DiamondDistortion.Diamond.distance k u v"
+        }
+      ],
+      "head": "And.right",
+      "id": 20,
+      "objects": [
+        "∀ (k : ℕ) (f : OAI.DiamondDistortion.Diamond.Vertex k → OAI.DiamondDistortion.ForestDual) (D s : ℝ),\n  OAI.DiamondDistortion.Diamond.HasDistortion k f D s → 1 + ↑k / 4 ≤ D ^ 2",
+        "∀ (k : ℕ) (f : OAI.DiamondDistortion.Diamond.Vertex k → ↥OAI.DiamondDistortion.InfinitePredual) (D s : ℝ),\n  OAI.DiamondDistortion.Diamond.HasDistortion k f D s → 1 + ↑k / 4 ≤ D ^ 2",
+        "k",
+        "f",
+        "D",
+        "s"
+      ],
+      "path": [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1
+      ],
+      "premises": [
+        {
+          "argument": 2,
+          "frame": 21,
+          "statement": "OAI.DiamondDistortion.Headline"
+        },
+        {
+          "argument": 7,
+          "frame": 22,
+          "statement": "OAI.DiamondDistortion.Diamond.HasDistortion k f D s"
+        }
+      ],
+      "role": "application",
+      "statement": "1 + ↑k / 4 ≤ D ^ 2"
+    },
+    {
+      "budget_cut": false,
+      "children": [],
+      "context": [
+        {
+          "name": "k",
+          "type": "ℕ"
+        },
+        {
+          "name": "f",
+          "type": "OAI.DiamondDistortion.Diamond.Vertex k → ↥OAI.DiamondDistortion.InfinitePredual"
+        },
+        {
+          "name": "D",
+          "type": "ℝ"
+        },
+        {
+          "name": "s",
+          "type": "ℝ"
+        },
+        {
+          "name": "hs",
+          "type": "0 < s"
+        },
+        {
+          "name": "h",
+          "type": "∀ (u v : OAI.DiamondDistortion.Diamond.Vertex k),\n  s * OAI.DiamondDistortion.Diamond.distance k u v ≤ ‖f u - f v‖ ∧\n    ‖f u - f v‖ ≤ D * s * OAI.DiamondDistortion.Diamond.distance k u v"
+        }
+      ],
+      "head": "OAI.DiamondDistortion.headline",
+      "id": 21,
+      "objects": [],
+      "path": [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        0,
+        0,
+        0,
+        0,
+        0,
+        1
+      ],
+      "premises": [],
+      "role": "named",
+      "statement": "OAI.DiamondDistortion.Headline"
+    },
+    {
+      "budget_cut": false,
+      "children": [
+        23,
+        24
+      ],
+      "context": [
+        {
+          "name": "k",
+          "type": "ℕ"
+        },
+        {
+          "name": "f",
+          "type": "OAI.DiamondDistortion.Diamond.Vertex k → ↥OAI.DiamondDistortion.InfinitePredual"
+        },
+        {
+          "name": "D",
+          "type": "ℝ"
+        },
+        {
+          "name": "s",
+          "type": "ℝ"
+        },
+        {
+          "name": "hs",
+          "type": "0 < s"
+        },
+        {
+          "name": "h",
+          "type": "∀ (u v : OAI.DiamondDistortion.Diamond.Vertex k),\n  s * OAI.DiamondDistortion.Diamond.distance k u v ≤ ‖f u - f v‖ ∧\n    ‖f u - f v‖ ≤ D * s * OAI.DiamondDistortion.Diamond.distance k u v"
+        }
+      ],
+      "head": "Iff.mpr",
+      "id": 22,
+      "objects": [
+        "OAI.DiamondDistortion.Diamond.HasDistortion k f D s",
+        "0 < s ∧\n  ∀ (u v : OAI.DiamondDistortion.Diamond.Vertex k),\n    s * OAI.DiamondDistortion.Diamond.distance k u v ≤ ‖f u - f v‖ ∧\n      ‖f u - f v‖ ≤ D * s * OAI.DiamondDistortion.Diamond.distance k u v"
+      ],
+      "path": [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1
+      ],
+      "premises": [
+        {
+          "argument": 2,
+          "frame": 23,
+          "statement": "OAI.DiamondDistortion.Diamond.HasDistortion k f D s ↔\n  0 < s ∧\n    ∀ (u v : OAI.DiamondDistortion.Diamond.Vertex k),\n      s * OAI.DiamondDistortion.Diamond.distance k u v ≤ ‖f u - f v‖ ∧\n        ‖f u - f v‖ ≤ D * s * OAI.DiamondDistortion.Diamond.distance k u v"
+        },
+        {
+          "argument": 3,
+          "frame": 24,
+          "statement": "0 < s ∧\n  ∀ (u v : OAI.DiamondDistortion.Diamond.Vertex k),\n    s * OAI.DiamondDistortion.Diamond.distance k u v ≤ ‖f u - f v‖ ∧\n      ‖f u - f v‖ ≤ D * s * OAI.DiamondDistortion.Diamond.distance k u v"
+        }
+      ],
+      "role": "application",
+      "statement": "OAI.DiamondDistortion.Diamond.HasDistortion k f D s"
+    },
+    {
+      "budget_cut": false,
+      "children": [],
+      "context": [
+        {
+          "name": "k",
+          "type": "ℕ"
+        },
+        {
+          "name": "f",
+          "type": "OAI.DiamondDistortion.Diamond.Vertex k → ↥OAI.DiamondDistortion.InfinitePredual"
+        },
+        {
+          "name": "D",
+          "type": "ℝ"
+        },
+        {
+          "name": "s",
+          "type": "ℝ"
+        },
+        {
+          "name": "hs",
+          "type": "0 < s"
+        },
+        {
+          "name": "h",
+          "type": "∀ (u v : OAI.DiamondDistortion.Diamond.Vertex k),\n  s * OAI.DiamondDistortion.Diamond.distance k u v ≤ ‖f u - f v‖ ∧\n    ‖f u - f v‖ ≤ D * s * OAI.DiamondDistortion.Diamond.distance k u v"
+        }
+      ],
+      "head": "OAI.DiamondDistortion.Diamond.hasDistortion_iff_all_pairs",
+      "id": 23,
+      "objects": [
+        "↥OAI.DiamondDistortion.InfinitePredual",
+        "OAI.DiamondDistortion.InfinitePredual.normedAddCommGroup",
+        "k",
+        "f",
+        "D",
+        "s"
+      ],
+      "path": [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        0,
+        1
+      ],
+      "premises": [],
+      "role": "application",
+      "statement": "OAI.DiamondDistortion.Diamond.HasDistortion k f D s ↔\n  0 < s ∧\n    ∀ (u v : OAI.DiamondDistortion.Diamond.Vertex k),\n      s * OAI.DiamondDistortion.Diamond.distance k u v ≤ ‖f u - f v‖ ∧\n        ‖f u - f v‖ ≤ D * s * OAI.DiamondDistortion.Diamond.distance k u v"
+    },
+    {
+      "budget_cut": false,
+      "children": [
+        25,
+        26
+      ],
+      "context": [
+        {
+          "name": "k",
+          "type": "ℕ"
+        },
+        {
+          "name": "f",
+          "type": "OAI.DiamondDistortion.Diamond.Vertex k → ↥OAI.DiamondDistortion.InfinitePredual"
+        },
+        {
+          "name": "D",
+          "type": "ℝ"
+        },
+        {
+          "name": "s",
+          "type": "ℝ"
+        },
+        {
+          "name": "hs",
+          "type": "0 < s"
+        },
+        {
+          "name": "h",
+          "type": "∀ (u v : OAI.DiamondDistortion.Diamond.Vertex k),\n  s * OAI.DiamondDistortion.Diamond.distance k u v ≤ ‖f u - f v‖ ∧\n    ‖f u - f v‖ ≤ D * s * OAI.DiamondDistortion.Diamond.distance k u v"
+        }
+      ],
+      "head": "And.intro",
+      "id": 24,
+      "objects": [
+        "0 < s",
+        "∀ (u v : OAI.DiamondDistortion.Diamond.Vertex k),\n  s * OAI.DiamondDistortion.Diamond.distance k u v ≤ ‖f u - f v‖ ∧\n    ‖f u - f v‖ ≤ D * s * OAI.DiamondDistortion.Diamond.distance k u v"
+      ],
+      "path": [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1
+      ],
+      "premises": [
+        {
+          "argument": 2,
+          "frame": 25,
+          "statement": "0 < s"
+        },
+        {
+          "argument": 3,
+          "frame": 26,
+          "statement": "∀ (u v : OAI.DiamondDistortion.Diamond.Vertex k),\n  s * OAI.DiamondDistortion.Diamond.distance k u v ≤ ‖f u - f v‖ ∧\n    ‖f u - f v‖ ≤ D * s * OAI.DiamondDistortion.Diamond.distance k u v"
+        }
+      ],
+      "role": "combine",
+      "statement": "0 < s ∧\n  ∀ (u v : OAI.DiamondDistortion.Diamond.Vertex k),\n    s * OAI.DiamondDistortion.Diamond.distance k u v ≤ ‖f u - f v‖ ∧\n      ‖f u - f v‖ ≤ D * s * OAI.DiamondDistortion.Diamond.distance k u v"
+    },
+    {
+      "binder": "hs",
+      "budget_cut": false,
+      "children": [],
+      "context": [
+        {
+          "name": "k",
+          "type": "ℕ"
+        },
+        {
+          "name": "f",
+          "type": "OAI.DiamondDistortion.Diamond.Vertex k → ↥OAI.DiamondDistortion.InfinitePredual"
+        },
+        {
+          "name": "D",
+          "type": "ℝ"
+        },
+        {
+          "name": "s",
+          "type": "ℝ"
+        },
+        {
+          "name": "hs",
+          "type": "0 < s"
+        },
+        {
+          "name": "h",
+          "type": "∀ (u v : OAI.DiamondDistortion.Diamond.Vertex k),\n  s * OAI.DiamondDistortion.Diamond.distance k u v ≤ ‖f u - f v‖ ∧\n    ‖f u - f v‖ ≤ D * s * OAI.DiamondDistortion.Diamond.distance k u v"
+        }
+      ],
+      "head": "",
+      "id": 25,
+      "objects": [],
+      "path": [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        0,
+        1
+      ],
+      "premises": [],
+      "role": "given",
+      "statement": "0 < s"
+    },
+    {
+      "binder": "h",
+      "budget_cut": false,
+      "children": [],
+      "context": [
+        {
+          "name": "k",
+          "type": "ℕ"
+        },
+        {
+          "name": "f",
+          "type": "OAI.DiamondDistortion.Diamond.Vertex k → ↥OAI.DiamondDistortion.InfinitePredual"
+        },
+        {
+          "name": "D",
+          "type": "ℝ"
+        },
+        {
+          "name": "s",
+          "type": "ℝ"
+        },
+        {
+          "name": "hs",
+          "type": "0 < s"
+        },
+        {
+          "name": "h",
+          "type": "∀ (u v : OAI.DiamondDistortion.Diamond.Vertex k),\n  s * OAI.DiamondDistortion.Diamond.distance k u v ≤ ‖f u - f v‖ ∧\n    ‖f u - f v‖ ≤ D * s * OAI.DiamondDistortion.Diamond.distance k u v"
+        }
+      ],
+      "head": "",
+      "id": 26,
+      "objects": [],
+      "path": [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1
+      ],
+      "premises": [],
+      "role": "given",
+      "statement": "∀ (u v : OAI.DiamondDistortion.Diamond.Vertex k),\n  s * OAI.DiamondDistortion.Diamond.distance k u v ≤ ‖f u - f v‖ ∧\n    ‖f u - f v‖ ≤ D * s * OAI.DiamondDistortion.Diamond.distance k u v"
+    }
+  ],
+  "judgements_checked": 27,
+  "lean_version": "4.34.1",
+  "schema": "proofreader.narrative/v1",
+  "statement": "(∀ (k : ℕ) (f : OAI.DiamondDistortion.Diamond.Vertex k → OAI.DiamondDistortion.ForestDual) (D s : ℝ),\n    0 < s →\n      (∀ (u v : OAI.DiamondDistortion.Diamond.Vertex k),\n          s * OAI.DiamondDistortion.Diamond.distance k u v ≤ ‖f u - f v‖ ∧\n            ‖f u - f v‖ ≤ D * s * OAI.DiamondDistortion.Diamond.distance k u v) →\n        1 + ↑k / 4 ≤ D ^ 2) ∧\n  ∀ (k : ℕ) (f : OAI.DiamondDistortion.Diamond.Vertex k → ↥OAI.DiamondDistortion.InfinitePredual) (D s : ℝ),\n    0 < s →\n      (∀ (u v : OAI.DiamondDistortion.Diamond.Vertex k),\n          s * OAI.DiamondDistortion.Diamond.distance k u v ≤ ‖f u - f v‖ ∧\n            ‖f u - f v‖ ≤ D * s * OAI.DiamondDistortion.Diamond.distance k u v) →\n        1 + ↑k / 4 ≤ D ^ 2",
+  "theorem": "OAI.DiamondDistortion.headline_all_pairs"
+}

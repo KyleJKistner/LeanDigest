@@ -1,0 +1,10 @@
+witnesses-kernel-flag-bypass.lean:55:0: error: (kernel) declaration type mismatch, 'OAI.ComplexCancellation.BezoutFrame.exists_frame.witnessText.0.products' has type
+  ∀ {R : Type u_1} [inst : EuclideanDomain R] (x y z : R),
+    x * y = z * (z + 1) →
+      let g := EuclideanDomain.gcd x z;
+      g = 0 → x = 0 ∧ z = 0 → 1 * 0 = x ∧ y * 1 = y ∧ y * 0 = z ∧ 1 * 1 - y * 0 = 1
+but it is expected to have type
+  ∀ {R : Type u_1} [inst : EuclideanDomain R] (x y z : R),
+    x * y = z * (z + 1) →
+      let g := EuclideanDomain.gcd x z;
+      g = 0 → x = 0 ∧ z = 0 → False

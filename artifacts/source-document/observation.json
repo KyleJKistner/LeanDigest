@@ -1,0 +1,865 @@
+{
+  "canonical_document_count": 1,
+  "certified_surface": "bezout-scoped-document/v1",
+  "commands": [
+    {
+      "arguments": [
+        "--version"
+      ],
+      "expected_outcome_observed": true,
+      "label": "version",
+      "returncode": 0,
+      "stdout_sha256": "355a9a028f81641782d75d6e6b58dec70f29d2f61238a9e271690259d9bf5680"
+    },
+    {
+      "arguments": [
+        "-o",
+        "ControlledEnglish.olean",
+        "ControlledEnglish.lean"
+      ],
+      "expected_outcome_observed": true,
+      "label": "ControlledEnglish",
+      "returncode": 0,
+      "stdout_sha256": "505e0572532a23c9f209aa7a53df7c8a031630e9db6f3db542bd779cf4ca48c8"
+    },
+    {
+      "arguments": [
+        "-o",
+        "ControlledEnglishText.olean",
+        "ControlledEnglishText.lean"
+      ],
+      "expected_outcome_observed": true,
+      "label": "ControlledEnglishText",
+      "returncode": 0,
+      "stdout_sha256": "3dbb290188f78453c3d01ed6a57c1332fe48bfe5e7564d3c5014047da18bd1ab"
+    },
+    {
+      "arguments": [
+        "-o",
+        "ArithmeticEnglish.olean",
+        "ArithmeticEnglish.lean"
+      ],
+      "expected_outcome_observed": true,
+      "label": "ArithmeticEnglish",
+      "returncode": 0,
+      "stdout_sha256": "428eee16760662009363c826518f0c3b55f7cc71d7b31c535189719919367ddd"
+    },
+    {
+      "arguments": [
+        "-o",
+        "SourceCancellation.olean",
+        "SourceCancellation.lean"
+      ],
+      "expected_outcome_observed": true,
+      "label": "SourceCancellation",
+      "returncode": 0,
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "arguments": [
+        "-o",
+        "EquationEnglish.olean",
+        "EquationEnglish.lean"
+      ],
+      "expected_outcome_observed": true,
+      "label": "EquationEnglish",
+      "returncode": 0,
+      "stdout_sha256": "eb2ac01418ecf643196f1fa1b338a5285e909a58d20fe25819a919fb1fa246fc"
+    },
+    {
+      "arguments": [
+        "-o",
+        "SourceEquations.olean",
+        "SourceEquations.lean"
+      ],
+      "expected_outcome_observed": true,
+      "label": "SourceEquations",
+      "returncode": 0,
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "arguments": [
+        "-o",
+        "WitnessEnglish.olean",
+        "WitnessEnglish.lean"
+      ],
+      "expected_outcome_observed": true,
+      "label": "WitnessEnglish",
+      "returncode": 0,
+      "stdout_sha256": "1df1ff6b16f2c4c8acec24be44882ff507241be3b809c9d5d0d118ac0c15ae52"
+    },
+    {
+      "arguments": [
+        "-o",
+        "SourceWitnesses.olean",
+        "SourceWitnesses.lean"
+      ],
+      "expected_outcome_observed": true,
+      "label": "SourceWitnesses",
+      "returncode": 0,
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "arguments": [
+        "-o",
+        "ProofDocumentSyntax.olean",
+        "ProofDocumentSyntax.lean"
+      ],
+      "expected_outcome_observed": true,
+      "label": "ProofDocumentSyntax",
+      "returncode": 0,
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "arguments": [
+        "-o",
+        "ProofDocument.olean",
+        "ProofDocument.lean"
+      ],
+      "expected_outcome_observed": true,
+      "label": "ProofDocument",
+      "returncode": 0,
+      "stdout_sha256": "560ff14210ed312f6f0b1fd12710c64427fac0bfaa1b04fd742380363f5d1472"
+    },
+    {
+      "arguments": [
+        "-o",
+        "SourceProofDocument.olean",
+        "SourceProofDocument.lean"
+      ],
+      "expected_outcome_observed": true,
+      "label": "SourceProofDocument",
+      "returncode": 0,
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "arguments": [
+        "ProofDocumentAudit.lean"
+      ],
+      "expected_outcome_observed": true,
+      "label": "ProofDocumentAudit",
+      "returncode": 0,
+      "stdout_sha256": "b1a6ec15815e67d3d724c6c855b4ecc9e625861f0758b0a0875f8ac3bb8dafb4"
+    },
+    {
+      "arguments": [
+        "positive.lean"
+      ],
+      "expected_outcome_observed": true,
+      "label": "positive",
+      "returncode": 0,
+      "stdout_sha256": "3efac541b28a05188ec4fba9920febf5d9742b4a8b211a5ab936c406221296dd"
+    },
+    {
+      "arguments": [
+        "repeat.lean"
+      ],
+      "expected_outcome_observed": true,
+      "label": "repeat",
+      "returncode": 0,
+      "stdout_sha256": "3efac541b28a05188ec4fba9920febf5d9742b4a8b211a5ab936c406221296dd"
+    },
+    {
+      "arguments": [
+        "wrong-case.lean"
+      ],
+      "expected_outcome_observed": true,
+      "label": "wrong-case",
+      "returncode": 1,
+      "stdout_sha256": "677f7a65f1046c568ff3d0ad1da067d7ef2343fa85ba64b2bd8c553c0eac53ec"
+    },
+    {
+      "arguments": [
+        "scope-name.lean"
+      ],
+      "expected_outcome_observed": true,
+      "label": "scope-name",
+      "returncode": 1,
+      "stdout_sha256": "c311deb89a26ef82dd70d01ccf215cf60d080c486ffae28bf691e9cfa83858a2"
+    },
+    {
+      "arguments": [
+        "wrong-input.lean"
+      ],
+      "expected_outcome_observed": true,
+      "label": "wrong-input",
+      "returncode": 1,
+      "stdout_sha256": "4b7b127332a5e23fb533929d5706bd06cf6fc82910eaa78ca84725c129e0d601"
+    },
+    {
+      "arguments": [
+        "unproved-let.lean"
+      ],
+      "expected_outcome_observed": true,
+      "label": "unproved-let",
+      "returncode": 1,
+      "stdout_sha256": "685919dcb09c1aba866470476f21e4e4bea230cb842435df6a5403189c0e918d"
+    },
+    {
+      "arguments": [
+        "unproved-alias.lean"
+      ],
+      "expected_outcome_observed": true,
+      "label": "unproved-alias",
+      "returncode": 1,
+      "stdout_sha256": "6cd58eeb4a460f1962bb0ca456525e24d9a92920da24392c8cf409f528f69105"
+    },
+    {
+      "arguments": [
+        "text-tamper.lean"
+      ],
+      "expected_outcome_observed": true,
+      "label": "text-tamper",
+      "returncode": 1,
+      "stdout_sha256": "45fe19f2b99837ee8ac8b35469dbac7f48c98ba98027a0f8966126231fae5cdd"
+    },
+    {
+      "arguments": [
+        "wrong-branch.lean"
+      ],
+      "expected_outcome_observed": true,
+      "label": "wrong-branch",
+      "returncode": 1,
+      "stdout_sha256": "3edad2645f6a0ea15451f0a3ad287533df7af0118bb6166c668a6ca81262e7c3"
+    },
+    {
+      "arguments": [
+        "kernel-claim.lean"
+      ],
+      "expected_outcome_observed": true,
+      "label": "kernel-claim",
+      "returncode": 1,
+      "stdout_sha256": "af1fed0aae31583f750683f32a3e2bd7168f4554c54899a527bffa4396e0df51"
+    },
+    {
+      "arguments": [
+        "kernel-bypass.lean"
+      ],
+      "expected_outcome_observed": true,
+      "label": "kernel-bypass",
+      "returncode": 1,
+      "stdout_sha256": "2cdafef7f88d682709c0e6ce788360b17183613a82039c4afd62f8b14932c6b2"
+    },
+    {
+      "arguments": [
+        "missing-equation.lean"
+      ],
+      "expected_outcome_observed": true,
+      "label": "missing-equation",
+      "returncode": 1,
+      "stdout_sha256": "9da7a463fccf1de48cf3734aa42900e8cda9018aa12319e54f51ca9cc659c9aa"
+    },
+    {
+      "arguments": [
+        "duplicate-equation.lean"
+      ],
+      "expected_outcome_observed": true,
+      "label": "duplicate-equation",
+      "returncode": 1,
+      "stdout_sha256": "2d72bb0f5a9ae264809553c78a0cd6ccce6f8a04714953efaa5a5692fc96d3ec"
+    },
+    {
+      "arguments": [
+        "reordered-equations.lean"
+      ],
+      "expected_outcome_observed": true,
+      "label": "reordered-equations",
+      "returncode": 1,
+      "stdout_sha256": "8f22a30179f57f1377b4ff9c3870f8e9430b2bc63b083c32dace939cb1334210"
+    },
+    {
+      "arguments": [
+        "missing-branch.lean"
+      ],
+      "expected_outcome_observed": true,
+      "label": "missing-branch",
+      "returncode": 1,
+      "stdout_sha256": "28dfd48324c9887b63dd78551c7a139c5d02b20718bbc3f6737a0a05c5f89a51"
+    },
+    {
+      "arguments": [
+        "swapped-branches.lean"
+      ],
+      "expected_outcome_observed": true,
+      "label": "swapped-branches",
+      "returncode": 1,
+      "stdout_sha256": "02d819ad7b6fe56e2d794437b074b4318e48a0cb1c5d3afcae91108489f3b35e"
+    },
+    {
+      "arguments": [
+        "wrong-prerequisite.lean"
+      ],
+      "expected_outcome_observed": true,
+      "label": "wrong-prerequisite",
+      "returncode": 1,
+      "stdout_sha256": "ed7f270846c9c8b73b760b70b8d72e209cd152d7800ab8aea9829a799ac541e7"
+    },
+    {
+      "arguments": [
+        "unknown-variant.lean"
+      ],
+      "expected_outcome_observed": true,
+      "label": "unknown-variant",
+      "returncode": 1,
+      "stdout_sha256": "546b7488b705ff8f46b6f7513bacd6d8ed48e4bcff05a0646e556a9b0b43aca7"
+    }
+  ],
+  "complete_canonical_document_certified": true,
+  "configuration": {
+    "cancellations": [
+      [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        2,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        0,
+        1,
+        1,
+        0,
+        1,
+        1,
+        2,
+        2,
+        1
+      ],
+      [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        2,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        0,
+        1,
+        1,
+        0,
+        1,
+        1,
+        2,
+        2,
+        2,
+        1
+      ]
+    ],
+    "equations": [
+      [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        2,
+        0,
+        1,
+        1,
+        2,
+        1,
+        1,
+        1,
+        1,
+        0,
+        1
+      ],
+      [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        2,
+        0,
+        1,
+        1,
+        2,
+        1,
+        1,
+        1,
+        1,
+        1,
+        0,
+        1
+      ],
+      [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        2,
+        0,
+        1,
+        1,
+        2,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        0,
+        1
+      ],
+      [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        2,
+        0,
+        1,
+        1,
+        2,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1
+      ],
+      [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        2,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        0,
+        1,
+        1,
+        0,
+        1,
+        1,
+        2,
+        2,
+        1,
+        1
+      ],
+      [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        2,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        0,
+        1,
+        1,
+        0,
+        1,
+        1,
+        2,
+        2,
+        2,
+        1,
+        1
+      ],
+      [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        2,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        0,
+        1,
+        1,
+        0,
+        1,
+        1,
+        2,
+        2,
+        2,
+        2,
+        1,
+        1,
+        1,
+        1,
+        0,
+        1
+      ],
+      [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        2,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        0,
+        1,
+        1,
+        0,
+        1,
+        1,
+        2,
+        2,
+        2,
+        2,
+        1,
+        1,
+        1,
+        1,
+        1,
+        0,
+        1
+      ],
+      [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        2,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        0,
+        1,
+        1,
+        0,
+        1,
+        1,
+        2,
+        2,
+        2,
+        2,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        0,
+        1
+      ],
+      [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        2,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        0,
+        1,
+        1,
+        0,
+        1,
+        1,
+        2,
+        2,
+        2,
+        2,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1
+      ]
+    ],
+    "witnesses": [
+      [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        2,
+        0,
+        1,
+        1,
+        2
+      ],
+      [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        2,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        0,
+        1,
+        1,
+        0,
+        1,
+        1,
+        2,
+        2,
+        2,
+        2
+      ]
+    ]
+  },
+  "contract_axioms": {
+    "Document.render_injective": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "Document.sound": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "bytes_imply_statement": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "certify": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "certifyBytes": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "parseFragments_chars": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "readBytes_render": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "read_render": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "rendered_bytes_meaning": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "rendered_meaning": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "text_implies_statement": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ]
+  },
+  "curated_explanation_certified": false,
+  "environment": {
+    "archive_sha256": "b5d80a41ea2961052c55a09cfffc26c399d08efe9c3599a9bf27501d63c2f779",
+    "artifact_id": 12202194378,
+    "files_checked": 13818,
+    "kind": "retained-actions-archive",
+    "mathlib_commit": "d13f23b723b8a846827a245b89c10fc7d3f11612",
+    "run_id": 39285448721
+  },
+  "equation_link_count": 19,
+  "executable_sha256": "e8baaa71855a616dc351028f3ad2200051b0671f423a1696a100e809302d5550",
+  "files_sha256": {
+    "ArithmeticEnglish.log": "428eee16760662009363c826518f0c3b55f7cc71d7b31c535189719919367ddd",
+    "ControlledEnglish.log": "505e0572532a23c9f209aa7a53df7c8a031630e9db6f3db542bd779cf4ca48c8",
+    "ControlledEnglishText.log": "3dbb290188f78453c3d01ed6a57c1332fe48bfe5e7564d3c5014047da18bd1ab",
+    "EquationEnglish.log": "eb2ac01418ecf643196f1fa1b338a5285e909a58d20fe25819a919fb1fa246fc",
+    "ProofDocument.log": "560ff14210ed312f6f0b1fd12710c64427fac0bfaa1b04fd742380363f5d1472",
+    "ProofDocumentAudit.log": "b1a6ec15815e67d3d724c6c855b4ecc9e625861f0758b0a0875f8ac3bb8dafb4",
+    "ProofDocumentSyntax.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "SourceCancellation.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "SourceEquations.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "SourceProofDocument.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "SourceWitnesses.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "WitnessEnglish.log": "1df1ff6b16f2c4c8acec24be44882ff507241be3b809c9d5d0d118ac0c15ae52",
+    "duplicate-equation-config.json": "26f6526c1b6ef29b4c327056da8738c73d583cb38cce9f3061770d4e7c5eb0c4",
+    "duplicate-equation.lean": "6e49a0f928e67b9c8b934447e3f090c5686ae06ba30e036267bd0c318105cb40",
+    "duplicate-equation.log": "2d72bb0f5a9ae264809553c78a0cd6ccce6f8a04714953efaa5a5692fc96d3ec",
+    "kernel-bypass-config.json": "80ca7abd97bf20846f454163d1d3decd2d9503e8c2782a03731550b4406ab0d8",
+    "kernel-bypass.lean": "0dea84902b5b52431979daad9105ab0e8a165d04098d0bc003c69a2236fcd9cf",
+    "kernel-bypass.log": "2cdafef7f88d682709c0e6ce788360b17183613a82039c4afd62f8b14932c6b2",
+    "kernel-claim-config.json": "80ca7abd97bf20846f454163d1d3decd2d9503e8c2782a03731550b4406ab0d8",
+    "kernel-claim.lean": "24d938051b582fde362bfca02ca2b2a6c60ecc7bbc39888405682fa9009f1b19",
+    "kernel-claim.log": "af1fed0aae31583f750683f32a3e2bd7168f4554c54899a527bffa4396e0df51",
+    "missing-branch-config.json": "c26bb674a5a7f492449a918858eaaac09039a0f975f1f410be9cda71f9b93614",
+    "missing-branch.lean": "9f3a84c75c96a230bd2b9077d68b5e2240a55c8e100fee488f9045dfba6486b5",
+    "missing-branch.log": "28dfd48324c9887b63dd78551c7a139c5d02b20718bbc3f6737a0a05c5f89a51",
+    "missing-equation-config.json": "d6adee9ea0b89e49da2da8a1c150dd76f1f3b5d887077261c9111e5b3623c8a6",
+    "missing-equation.lean": "37cc955018ef0ae4bd61c840e49d81e547e2ee989928d826d24592f7634f99c1",
+    "missing-equation.log": "9da7a463fccf1de48cf3734aa42900e8cda9018aa12319e54f51ca9cc659c9aa",
+    "positive-config.json": "80ca7abd97bf20846f454163d1d3decd2d9503e8c2782a03731550b4406ab0d8",
+    "positive.json": "a616f24f83f634bedd4ae329623141eae02d4176f77d87ef5339ad834d634a5d",
+    "positive.lean": "d7e7a53e11ac89541554b9546603e727c40d68462c1aef34f1d1d7481553a532",
+    "positive.log": "3efac541b28a05188ec4fba9920febf5d9742b4a8b211a5ab936c406221296dd",
+    "proof.txt": "d3daeabb618085d61e1ba8c9babb44a429062f4548aa60ba68514b59d7d31cf8",
+    "reordered-equations-config.json": "c59a84e131a4f654b1046c7c80f7077415c868edb28716366aef47cba4e18569",
+    "reordered-equations.lean": "e87724721237e3ae04c604d48470e0e974b77fb55605bb6e2559ecb6913b37f0",
+    "reordered-equations.log": "8f22a30179f57f1377b4ff9c3870f8e9430b2bc63b083c32dace939cb1334210",
+    "repeat-config.json": "80ca7abd97bf20846f454163d1d3decd2d9503e8c2782a03731550b4406ab0d8",
+    "repeat.json": "a616f24f83f634bedd4ae329623141eae02d4176f77d87ef5339ad834d634a5d",
+    "repeat.lean": "3353fc7f6e65ea0831af31249c855c9344cedff3c24c0f553783bd75678d73f2",
+    "repeat.log": "3efac541b28a05188ec4fba9920febf5d9742b4a8b211a5ab936c406221296dd",
+    "scope-name-config.json": "80ca7abd97bf20846f454163d1d3decd2d9503e8c2782a03731550b4406ab0d8",
+    "scope-name.lean": "082b87a00c9118e8a91a488ca589f41685461e90573e81de486d687db00bf914",
+    "scope-name.log": "c311deb89a26ef82dd70d01ccf215cf60d080c486ffae28bf691e9cfa83858a2",
+    "swapped-branches-config.json": "9573614001034603f7d2d2cb42f40e62adb074184c1f30312c15ade50263f095",
+    "swapped-branches.lean": "c540c714fad2ced4fba97c139ba4a3265b35d3174ba7de21b8c697cfec9cc081",
+    "swapped-branches.log": "02d819ad7b6fe56e2d794437b074b4318e48a0cb1c5d3afcae91108489f3b35e",
+    "text-tamper-config.json": "80ca7abd97bf20846f454163d1d3decd2d9503e8c2782a03731550b4406ab0d8",
+    "text-tamper.lean": "7edf60231873e12683047761b0525ef043465280741b5c5d957f0fbd83ae5770",
+    "text-tamper.log": "45fe19f2b99837ee8ac8b35469dbac7f48c98ba98027a0f8966126231fae5cdd",
+    "unknown-variant-config.json": "80ca7abd97bf20846f454163d1d3decd2d9503e8c2782a03731550b4406ab0d8",
+    "unknown-variant.lean": "c85591aff28e942aec61d53df3dbbb66cf4e18b93b142feedcf5efe10619cf22",
+    "unknown-variant.log": "546b7488b705ff8f46b6f7513bacd6d8ed48e4bcff05a0646e556a9b0b43aca7",
+    "unproved-alias-config.json": "80ca7abd97bf20846f454163d1d3decd2d9503e8c2782a03731550b4406ab0d8",
+    "unproved-alias.lean": "6865c0133f588c2955e3b39a62e4e9b30d1a17cbba330940c3a3334d31bdf6f6",
+    "unproved-alias.log": "6cd58eeb4a460f1962bb0ca456525e24d9a92920da24392c8cf409f528f69105",
+    "unproved-let-config.json": "80ca7abd97bf20846f454163d1d3decd2d9503e8c2782a03731550b4406ab0d8",
+    "unproved-let.lean": "42d8fa9becb4f082083ff91fc273d50c7dee5d1011604f4b20e416e217ace7ad",
+    "unproved-let.log": "685919dcb09c1aba866470476f21e4e4bea230cb842435df6a5403189c0e918d",
+    "version.log": "355a9a028f81641782d75d6e6b58dec70f29d2f61238a9e271690259d9bf5680",
+    "wrong-branch-config.json": "80ca7abd97bf20846f454163d1d3decd2d9503e8c2782a03731550b4406ab0d8",
+    "wrong-branch.lean": "f0f78ffdd07f3efd987b6667a02867de38807b14d1b0fc68c880f52332aae559",
+    "wrong-branch.log": "3edad2645f6a0ea15451f0a3ad287533df7af0118bb6166c668a6ca81262e7c3",
+    "wrong-case-config.json": "80ca7abd97bf20846f454163d1d3decd2d9503e8c2782a03731550b4406ab0d8",
+    "wrong-case.lean": "310c0037f371c004009c9afc90e2218ac04d59eb6b710930fbac850fd0f6a894",
+    "wrong-case.log": "677f7a65f1046c568ff3d0ad1da067d7ef2343fa85ba64b2bd8c553c0eac53ec",
+    "wrong-input-config.json": "80ca7abd97bf20846f454163d1d3decd2d9503e8c2782a03731550b4406ab0d8",
+    "wrong-input.lean": "ab73a71bbcfad32d7cd8b00dafc49df4ceedd9c8b08adf1ce88c481dc89bef37",
+    "wrong-input.log": "4b7b127332a5e23fb533929d5706bd06cf6fc82910eaa78ca84725c129e0d601",
+    "wrong-prerequisite-config.json": "2009781801726b68903e0d7fe843d5b11481a4ab4b2c3b7d46d1bdece1d1cced",
+    "wrong-prerequisite.lean": "152837dee6dbef06bf80de6c1e85d1f212dad46aa755001dca49c28f7669b2e9",
+    "wrong-prerequisite.log": "ed7f270846c9c8b73b760b70b8d72e209cd152d7800ab8aea9829a799ac541e7"
+  },
+  "gate_sha256": "5669f3488b59df2f434e22f3ded44b408db34c66338ccd0b78566c8d829e6e02",
+  "helper_sha256": {
+    "check_source_cancellation.py": "c32d7d935b45a9ae8aabac25fb4126ab00f7b25145d677c3e2caea9078a2e291",
+    "check_source_equations.py": "a83d7fcca5f816fbcd7a0e2dfd65fe5c651a4ac1e2cfddce7409dff245a4e90b"
+  },
+  "html_semantics_proved": false,
+  "human_readability_evaluated": false,
+  "import_adaptation": {
+    "added": [
+      "Mathlib.Algebra.EuclideanDomain.Basic",
+      "Mathlib.Tactic.Ring",
+      "SourceProofDocument"
+    ],
+    "body_sha256": "b1fcac7efe81e1d3a6b1462bea38d0235c8b25fb812b6638e1976e4e67796a93",
+    "removed": [
+      "OAI.Algebra.AffineCancellation.Model"
+    ],
+    "theorem_body_unchanged": true
+  },
+  "lean_version": "Lean (version 4.34.1, x86_64-unknown-linux-gnu, commit 5045d0056413266e57c625dcd7c365b10e377c52, Release)",
+  "module_sha256": {
+    "ArithmeticEnglish.lean": "70b5d7ce95a8e8b586381b37254915d51df2c46d91a8ce385ceaf18690ea5b7e",
+    "ControlledEnglish.lean": "1fd897784400c9e0362ab12b8e4006651d090e098f2dd3c24fa7a979386b4c41",
+    "ControlledEnglishText.lean": "bf0a44b35aa1d96b49c43c133125e09373a07aef24b235c42424b3d27a27a81f",
+    "EquationEnglish.lean": "493f0a664708766ddcada3bfddfd36e7050e7830bb4d0455b657e4eefabffe8b",
+    "ProofDocument.lean": "343860e3b1ce62034ab4dfddb227117c93dadbdceb57dd3bf1480165a068cfaf",
+    "ProofDocumentAudit.lean": "2775e52ccdfe1bbc383b770f1f82a72929bf6c7923f402c5292ea2d646cff9a8",
+    "ProofDocumentSyntax.lean": "db5108efd6a774a3383f1c787e55d63c780515fef9a5c7afebf90a532d843a4f",
+    "SourceCancellation.lean": "05c09630a4e9ca50dc36e7798c005bfab3246f89a98a1fc2fb689f5b321c17d2",
+    "SourceEquations.lean": "94ed0f6cf164493bf1b48924c8e389d0e6fb4adf556d520ea5691e8dc0020077",
+    "SourceProofDocument.lean": "2d1eabe35a8197d5a02a90cb2ae07761f6034e98725efea8a41b8e177dd59f7a",
+    "SourceWitnesses.lean": "97243609fd0f44bf96c4ad3905d2d8baf01581f06b9d2cca5f9a6f6c3fa2242c",
+    "WitnessEnglish.lean": "d6593d5f6e6ba481c5695b0a525f219861665f1888655e74b527436b0b6a0308"
+  },
+  "original_project_replayed": false,
+  "parser_guards": 30,
+  "receipt_authenticated": false,
+  "repeat_byte_identical": true,
+  "schema": "leanglish.source-document/v1",
+  "source_negative_cases": 16,
+  "source_passage_count": 14,
+  "source_sha256": "d108afa98f200bfce183b8afc0af586b70734f7ad2cce1bc5e49853a2f555c6f",
+  "status": "passed",
+  "theorem": "OAI.ComplexCancellation.BezoutFrame.exists_frame",
+  "upstream_commit": "1581d4cbdd69a0faf34b2089614fe2a814316a6a"
+}

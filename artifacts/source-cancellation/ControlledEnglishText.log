@@ -1,0 +1,18 @@
+'ProofReader.ControlledEnglish.Text.decodeUTF8_encode' depends on axioms: [propext, Classical.choice, Quot.sound]
+'ProofReader.ControlledEnglish.Text.lexBytes_renderBytes' depends on axioms: [propext, Classical.choice, Quot.sound]
+'ProofReader.ControlledEnglish.Text.renderBytes_injective' depends on axioms: [propext, Classical.choice, Quot.sound]
+'ProofReader.ControlledEnglish.Text.readSentenceBytes_render' depends on axioms: [propext, Classical.choice, Quot.sound]
+'ProofReader.ControlledEnglish.Text.rendered_bytes_meaning' depends on axioms: [propext, Classical.choice, Quot.sound]
+'ProofReader.ControlledEnglish.Text.rendered_rule_bytes_sound' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'ProofReader.ControlledEnglish.Text.lex_render' depends on axioms: [propext, Classical.choice, Quot.sound]
+'ProofReader.ControlledEnglish.Text.render_injective' depends on axioms: [propext, Classical.choice, Quot.sound]
+'ProofReader.ControlledEnglish.Text.readFormula_render' depends on axioms: [propext, Classical.choice, Quot.sound]
+'ProofReader.ControlledEnglish.Text.readSentence_render' depends on axioms: [propext, Classical.choice, Quot.sound]
+'ProofReader.ControlledEnglish.Text.rendered_formula_meaning' depends on axioms: [propext, Classical.choice, Quot.sound]
+'ProofReader.ControlledEnglish.Text.rendered_sentence_meaning' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'ProofReader.ControlledEnglish.Text.accepted_rule_sound' depends on axioms: [propext, Classical.choice, Quot.sound]
+'ProofReader.ControlledEnglish.Text.accepted_root_aligned' depends on axioms: [propext, Classical.choice, Quot.sound]

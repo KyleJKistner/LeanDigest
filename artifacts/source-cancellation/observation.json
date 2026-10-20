@@ -1,0 +1,326 @@
+{
+  "certified_sentence_count": 2,
+  "commands": [
+    {
+      "arguments": [
+        "--version"
+      ],
+      "expected_outcome_observed": true,
+      "label": "version",
+      "returncode": 0,
+      "stdout_sha256": "355a9a028f81641782d75d6e6b58dec70f29d2f61238a9e271690259d9bf5680"
+    },
+    {
+      "arguments": [
+        "-o",
+        "ControlledEnglish.olean",
+        "ControlledEnglish.lean"
+      ],
+      "expected_outcome_observed": true,
+      "label": "ControlledEnglish",
+      "returncode": 0,
+      "stdout_sha256": "505e0572532a23c9f209aa7a53df7c8a031630e9db6f3db542bd779cf4ca48c8"
+    },
+    {
+      "arguments": [
+        "-o",
+        "ControlledEnglishText.olean",
+        "ControlledEnglishText.lean"
+      ],
+      "expected_outcome_observed": true,
+      "label": "ControlledEnglishText",
+      "returncode": 0,
+      "stdout_sha256": "3dbb290188f78453c3d01ed6a57c1332fe48bfe5e7564d3c5014047da18bd1ab"
+    },
+    {
+      "arguments": [
+        "-o",
+        "ArithmeticEnglish.olean",
+        "ArithmeticEnglish.lean"
+      ],
+      "expected_outcome_observed": true,
+      "label": "ArithmeticEnglish",
+      "returncode": 0,
+      "stdout_sha256": "428eee16760662009363c826518f0c3b55f7cc71d7b31c535189719919367ddd"
+    },
+    {
+      "arguments": [
+        "-o",
+        "SourceCancellation.olean",
+        "SourceCancellation.lean"
+      ],
+      "expected_outcome_observed": true,
+      "label": "SourceCancellation",
+      "returncode": 0,
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "arguments": [
+        "ArithmeticEnglishAudit.lean"
+      ],
+      "expected_outcome_observed": true,
+      "label": "ArithmeticEnglishAudit",
+      "returncode": 0,
+      "stdout_sha256": "a6e22de2c4e584145ec412f0ab4975ead728e9e90f3053ea5ff5e02249332c06"
+    },
+    {
+      "arguments": [
+        "positive.lean"
+      ],
+      "expected_outcome_observed": true,
+      "label": "positive",
+      "returncode": 0,
+      "stdout_sha256": "7747793bdb5e378ebe5dfbbd0816342b7f24f85a482388436237ec6f959bf00f"
+    },
+    {
+      "arguments": [
+        "repeat.lean"
+      ],
+      "expected_outcome_observed": true,
+      "label": "repeat",
+      "returncode": 0,
+      "stdout_sha256": "7747793bdb5e378ebe5dfbbd0816342b7f24f85a482388436237ec6f959bf00f"
+    },
+    {
+      "arguments": [
+        "wrong-nonzero.lean"
+      ],
+      "expected_outcome_observed": true,
+      "label": "wrong-nonzero",
+      "returncode": 1,
+      "stdout_sha256": "37b2e69be57673cd6935a80f8a43ae61e5e22d295bb2f2063b7feca9ff6e2d0f"
+    },
+    {
+      "arguments": [
+        "wrong-premise.lean"
+      ],
+      "expected_outcome_observed": true,
+      "label": "wrong-premise",
+      "returncode": 1,
+      "stdout_sha256": "a0b23ef0457baa5d76c27e8ef25b5dff1a06930f0d3043d3b96115435489bad4"
+    },
+    {
+      "arguments": [
+        "wrong-conclusion.lean"
+      ],
+      "expected_outcome_observed": true,
+      "label": "wrong-conclusion",
+      "returncode": 1,
+      "stdout_sha256": "aa91aba07dafa73351fb548c10a6f3da7595ab593c2ce1730b58e100e56af656"
+    },
+    {
+      "arguments": [
+        "text-tamper.lean"
+      ],
+      "expected_outcome_observed": true,
+      "label": "text-tamper",
+      "returncode": 1,
+      "stdout_sha256": "0580858eed7a81ab0a303375a1bcde50ce99780678de65cc964edc311f7cea7d"
+    },
+    {
+      "arguments": [
+        "wrong-label-map.lean"
+      ],
+      "expected_outcome_observed": true,
+      "label": "wrong-label-map",
+      "returncode": 1,
+      "stdout_sha256": "953db797d4659651546c774330d65aad066457058a64c987888054bd93ecdcfd"
+    },
+    {
+      "arguments": [
+        "wrong-operation.lean"
+      ],
+      "expected_outcome_observed": true,
+      "label": "wrong-operation",
+      "returncode": 1,
+      "stdout_sha256": "43e2a2fba6ac781ccf51e7433b007bc8840ce893e7cd2ce5c8abb5b3228734df"
+    },
+    {
+      "arguments": [
+        "proof-replacement.lean"
+      ],
+      "expected_outcome_observed": true,
+      "label": "proof-replacement",
+      "returncode": 1,
+      "stdout_sha256": "526df072a09acf03d1f3f3f20d786333f56f7cb2648c2ce049165274ed53a9a0"
+    },
+    {
+      "arguments": [
+        "unknown-mode.lean"
+      ],
+      "expected_outcome_observed": true,
+      "label": "unknown-mode",
+      "returncode": 1,
+      "stdout_sha256": "0de7499a53e161b9283b56cab138b33aa99e69d410584d0daee088bdc53589be"
+    },
+    {
+      "arguments": [
+        "kernel-claim-tamper.lean"
+      ],
+      "expected_outcome_observed": true,
+      "label": "kernel-claim-tamper",
+      "returncode": 1,
+      "stdout_sha256": "d81eaacf8aba286a80d8448b6b7d650dabddd221b400aa885cce51dca0f0e585"
+    },
+    {
+      "arguments": [
+        "kernel-flag-bypass.lean"
+      ],
+      "expected_outcome_observed": true,
+      "label": "kernel-flag-bypass",
+      "returncode": 1,
+      "stdout_sha256": "21d71eb77dd70f72163f478601768c3c5948aa8caf34b900846f91c616d78248"
+    },
+    {
+      "arguments": [
+        "wrong-path.lean"
+      ],
+      "expected_outcome_observed": true,
+      "label": "wrong-path",
+      "returncode": 1,
+      "stdout_sha256": "0b4a5f7951f54d4dfad68fb2aa15d80cd367d74fcb84a56e50a6376415875117"
+    },
+    {
+      "arguments": [
+        "duplicate-path.lean"
+      ],
+      "expected_outcome_observed": true,
+      "label": "duplicate-path",
+      "returncode": 1,
+      "stdout_sha256": "8a6e97326675725850a587dff5f49b0a6e95efcabc0cde0baa78ecd4cb1ab399"
+    }
+  ],
+  "complete_english_proof_certified": false,
+  "contract_axioms": {
+    "Cancellation.render_injective": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "certify": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "certifyBytes": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "parseCancellation_chars": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "parseTerm_chars": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "readBytes_render": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "readCancellation_render": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "rendered_bytes_meaning": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "rendered_meaning": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ]
+  },
+  "environment": {
+    "archive_sha256": "b5d80a41ea2961052c55a09cfffc26c399d08efe9c3599a9bf27501d63c2f779",
+    "artifact_id": 12202194378,
+    "files_checked": 13818,
+    "kind": "retained-actions-archive",
+    "mathlib_commit": "d13f23b723b8a846827a245b89c10fc7d3f11612",
+    "run_id": 39285448721
+  },
+  "executable_sha256": "e8baaa71855a616dc351028f3ad2200051b0671f423a1696a100e809302d5550",
+  "files_sha256": {
+    "ArithmeticEnglish.log": "428eee16760662009363c826518f0c3b55f7cc71d7b31c535189719919367ddd",
+    "ArithmeticEnglishAudit.log": "a6e22de2c4e584145ec412f0ab4975ead728e9e90f3053ea5ff5e02249332c06",
+    "ControlledEnglish.log": "505e0572532a23c9f209aa7a53df7c8a031630e9db6f3db542bd779cf4ca48c8",
+    "ControlledEnglishText.log": "3dbb290188f78453c3d01ed6a57c1332fe48bfe5e7564d3c5014047da18bd1ab",
+    "SourceCancellation.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "cancellation-0.txt": "9fe686ccfcb0470268fa21187a91b7205fe03a84cc731cd32ddc442c7b41c399",
+    "cancellation-1.txt": "9cabe8f890c00e483729c8dae55d4867e0d6bec1d53dbcc79325baa54763f966",
+    "duplicate-path.lean": "2b114f790493f562c208527f6fda60d0761c87016d44257d9e8653d034f86f53",
+    "duplicate-path.log": "8a6e97326675725850a587dff5f49b0a6e95efcabc0cde0baa78ecd4cb1ab399",
+    "kernel-claim-tamper.lean": "31b3e276e173bdd641b224c66b31d2ec558916046c975b3ececc3a08d31ca2d6",
+    "kernel-claim-tamper.log": "d81eaacf8aba286a80d8448b6b7d650dabddd221b400aa885cce51dca0f0e585",
+    "kernel-flag-bypass.lean": "631196d37c00e86642d2df85a916f834cac5c6babb08b1f1a531a5aebcd00aeb",
+    "kernel-flag-bypass.log": "21d71eb77dd70f72163f478601768c3c5948aa8caf34b900846f91c616d78248",
+    "positive.json": "f8eea70b40b08772d17bd222e41548d6afa097e721216b64cd9e5cf5cf227751",
+    "positive.lean": "a1d6810321fb99be5df80c2f539a4eb555956237164588f391cf79d75a8b9675",
+    "positive.log": "7747793bdb5e378ebe5dfbbd0816342b7f24f85a482388436237ec6f959bf00f",
+    "proof-replacement.lean": "5e2ab51233dd8927f442dfce84c6114a5037181b6784128b6268a6834114dbba",
+    "proof-replacement.log": "526df072a09acf03d1f3f3f20d786333f56f7cb2648c2ce049165274ed53a9a0",
+    "repeat.json": "f8eea70b40b08772d17bd222e41548d6afa097e721216b64cd9e5cf5cf227751",
+    "repeat.lean": "c97434aec62cf4f5b26f58495649f84cdd80b4715b087db022b5e57559cc4391",
+    "repeat.log": "7747793bdb5e378ebe5dfbbd0816342b7f24f85a482388436237ec6f959bf00f",
+    "text-tamper.lean": "46e10d2626dbd700e0babd1a019f42b8a252bdd44d6546bac3a2f2b1191e9a36",
+    "text-tamper.log": "0580858eed7a81ab0a303375a1bcde50ce99780678de65cc964edc311f7cea7d",
+    "unknown-mode.lean": "566a2397fecf7927bcb5cca7547890214d2f7039db3def9500b44e39da51fcdd",
+    "unknown-mode.log": "0de7499a53e161b9283b56cab138b33aa99e69d410584d0daee088bdc53589be",
+    "version.log": "355a9a028f81641782d75d6e6b58dec70f29d2f61238a9e271690259d9bf5680",
+    "wrong-conclusion.lean": "a8380ac55ebc47a224dfc0a9b4010cff06c84e5bf2177b2e591e70c3f9f42b4b",
+    "wrong-conclusion.log": "aa91aba07dafa73351fb548c10a6f3da7595ab593c2ce1730b58e100e56af656",
+    "wrong-label-map.lean": "8797beb4973c0348cab9f926f1337c65a33f8dd305a6e654d188410f2a73edad",
+    "wrong-label-map.log": "953db797d4659651546c774330d65aad066457058a64c987888054bd93ecdcfd",
+    "wrong-nonzero.lean": "b6a3a8f5400a062bb1f180cd6bb2897b6ff1e492a8369ae8c9500eba7912b621",
+    "wrong-nonzero.log": "37b2e69be57673cd6935a80f8a43ae61e5e22d295bb2f2063b7feca9ff6e2d0f",
+    "wrong-operation.lean": "4ee064e54b9107d63488f599c15078ae78e96a8a50c348059c0bf299f43e593e",
+    "wrong-operation.log": "43e2a2fba6ac781ccf51e7433b007bc8840ce893e7cd2ce5c8abb5b3228734df",
+    "wrong-path.lean": "faf30d30c4d0a50b467404a01b27f5f5f7680832833dbb8a34e03a47b1f10425",
+    "wrong-path.log": "0b4a5f7951f54d4dfad68fb2aa15d80cd367d74fcb84a56e50a6376415875117",
+    "wrong-premise.lean": "6698dfc01399e9b9c1489cf113bdd7979253782ac8817b0ddd0a4aad8bac7be0",
+    "wrong-premise.log": "a0b23ef0457baa5d76c27e8ef25b5dff1a06930f0d3043d3b96115435489bad4"
+  },
+  "gate_sha256": "c32d7d935b45a9ae8aabac25fb4126ab00f7b25145d677c3e2caea9078a2e291",
+  "html_semantics_proved": false,
+  "import_adaptation": {
+    "added": [
+      "import Mathlib.Algebra.EuclideanDomain.Basic",
+      "import Mathlib.Tactic.Ring",
+      "import SourceCancellation"
+    ],
+    "body_sha256": "b1fcac7efe81e1d3a6b1462bea38d0235c8b25fb812b6638e1976e4e67796a93",
+    "removed": [
+      "OAI.Algebra.AffineCancellation.Model"
+    ],
+    "theorem_body_unchanged": true
+  },
+  "lean_version": "Lean (version 4.34.1, x86_64-unknown-linux-gnu, commit 5045d0056413266e57c625dcd7c365b10e377c52, Release)",
+  "module_sha256": {
+    "ArithmeticEnglish.lean": "70b5d7ce95a8e8b586381b37254915d51df2c46d91a8ce385ceaf18690ea5b7e",
+    "ArithmeticEnglishAudit.lean": "4dd83447d31c60bab6625754973541ecf95ebbe1e93243e041595831c0f7c25a",
+    "ControlledEnglish.lean": "1fd897784400c9e0362ab12b8e4006651d090e098f2dd3c24fa7a979386b4c41",
+    "ControlledEnglishText.lean": "bf0a44b35aa1d96b49c43c133125e09373a07aef24b235c42424b3d27a27a81f",
+    "SourceCancellation.lean": "05c09630a4e9ca50dc36e7798c005bfab3246f89a98a1fc2fb689f5b321c17d2"
+  },
+  "native_negative_cases": 12,
+  "native_parser_guards": 32,
+  "original_project_replayed": false,
+  "receipt_authenticated": false,
+  "repeat_byte_identical": true,
+  "schema": "leanglish.source-cancellation/v1",
+  "source_frames": [
+    40,
+    53
+  ],
+  "source_sha256": "d108afa98f200bfce183b8afc0af586b70734f7ad2cce1bc5e49853a2f555c6f",
+  "status": "passed",
+  "theorem": "OAI.ComplexCancellation.BezoutFrame.exists_frame",
+  "upstream_commit": "1581d4cbdd69a0faf34b2089614fe2a814316a6a"
+}

@@ -1,0 +1,68 @@
+name: Checked explanation core and Bezout companion
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - 'lean/ControlledEnglish.lean'
+      - 'lean/ControlledEnglishAudit.lean'
+      - 'docs/companion/**'
+      - 'scripts/check_bezout_companion.py'
+      - 'proofreader/narrative.py'
+      - 'proofreader/data/Narrative.lean'
+      - 'artifacts/companion/**'
+      - '.github/workflows/checked-companion.yml'
+permissions:
+  contents: read
+jobs:
+  explanation-core:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: leanprover/lean-action@v1
+        with:
+          lake-package-directory: lean
+          auto-config: false
+          build: false
+          test: false
+          lint: false
+          use-mathlib-cache: false
+          use-github-cache: false
+      - name: Kernel-check the controlled language and independent countermodels
+        working-directory: lean
+        run: |
+          lake env lean -o ControlledEnglish.olean ControlledEnglish.lean
+          LEAN_PATH=. lake env lean ControlledEnglishAudit.lean
+  bezout-native:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python -m pip install .
+      - uses: actions/checkout@v4
+        with:
+          repository: leanprover-community/mathlib4
+          ref: d13f23b723b8a846827a245b89c10fc7d3f11612
+          path: companion-mathlib
+      - uses: leanprover/lean-action@v1
+        with:
+          lake-package-directory: companion-mathlib
+          auto-config: false
+          build: false
+          test: false
+          lint: false
+          use-mathlib-cache: false
+          use-github-cache: false
+      - name: Retrieve only the pinned imports and their dependencies
+        working-directory: companion-mathlib
+        run: lake exe cache get Mathlib/Algebra/EuclideanDomain/Basic.lean Mathlib/Tactic/Ring.lean
+      - name: Recheck unchanged theorem body, exact repeat, and hostile mutations
+        run: python scripts/check_bezout_companion.py --project companion-mathlib --output artifacts/ci-bezout --trust-project
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: bezout-native-evidence
+          path: artifacts/ci-bezout/

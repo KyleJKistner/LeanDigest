@@ -1,13 +1,31 @@
 # Leanglish
 
-**Lean proofs, in mathematical English.**
+The [canonical Bézout proof](docs/companion/checked-proof.html) includes a
+source-bound certificate for its complete fixed-language document. See
+[the document contract and reproduction](docs/PROOF_DOCUMENT.md) for its scope.
+The separately authored companion is not covered by that certificate.
 
 Leanglish connects the OpenAI mathematics findings to their formalization scope,
 explicit statements, original Lean source, and the structured proof readings
 available so far. The renderer is deterministic and makes no language-model API
 calls. Reading does not execute Lean or send source to a service.
 
-## All documented findings: version 0.4.0
+## Bézout frame companion
+
+The [Bézout companion](docs/companion/index.html) presents a compact supporting
+theorem from the OpenAI source: an explicit determinant-one construction over
+a Euclidean domain. It includes the full statement, both cases, all four witness
+equations, source/frame links, and the precise scope of its checking evidence.
+Its mathematical prose is curated and independently reviewed; it is not yet a
+formally certified English translation.
+
+The architecture for that stronger claim is a typed explanation language with
+Lean-proved inference rules and a deterministic controlled renderer. See
+[Correct by construction](docs/CORRECT_BY_CONSTRUCTION.md) for the contracts,
+trust boundary, and implementation sequence. A proof of a restricted logical
+fragment does not certify the complete companion or the corpus.
+
+## Finding catalog
 
 The all-findings catalog indexes **all 242 findings with Lean scope documentation**
 in the pinned release. It retains the broader 372-finding table of contents,
@@ -15,10 +33,15 @@ all 416 comparison configurations, and all **602 statement entries**. Those
 entries correspond to 601 distinct formal targets: 536 theorems and 65 definition
 references. It also includes the 413 directly referenced solution modules.
 
-**109 of the 536 theorem targets have structured proof readings** in this frozen
-release. Their retained native observations check 4,090 selected proof frames;
-the generated readings contain 1,357 explicitly unexpanded passages. All remaining
+**216 of the 536 theorem targets have structured proof readings** in this frozen
+release. Their retained native observations check 9,272 selected proof frames;
+the published readings contain 3,005 explicitly unexpanded passages. All remaining
 targets stay visible, with recorded attempt status and original source access.
+
+The reader changes on this branch produce 3,001 explicit gaps for the same frozen
+216 snapshots: 91 logical passages gain guarded explanations, while 87 previously
+unmarked conjunction applications are now exposed as gaps. This is a separately
+validated development result; it does not change the published archive.
 
 This is complete **finding and statement access**, not complete English-proof
 coverage. Comparison specifications intentionally contain placeholders; an

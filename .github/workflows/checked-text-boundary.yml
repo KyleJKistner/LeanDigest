@@ -1,0 +1,59 @@
+name: Checked text boundary
+on:
+  workflow_dispatch:
+  push:
+    branches: ['work/checked-text-boundary-20261019']
+  pull_request:
+    paths:
+      - 'lean/ControlledEnglish*.lean'
+      - 'scripts/check_controlled_text.py'
+      - 'tests/test_controlled_text_gate.py'
+      - 'docs/CHECKED_TEXT_BOUNDARY.md'
+      - 'docs/CONTROLLED_ENGLISH_PROTOTYPE.md'
+      - '.github/workflows/checked-text-boundary.yml'
+permissions:
+  contents: read
+jobs:
+  checked-text:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Retain the exact checked source
+        run: |
+          mkdir -p boundary-source
+          git rev-parse HEAD > boundary-source/commit.txt
+          git archive --format=zip HEAD -o boundary-source/source.zip
+          sha256sum boundary-source/source.zip > boundary-source/SHA256SUMS
+      - name: Install hash-pinned Lean without the release redirect service
+        run: |
+          curl --fail --location --retry 4 --retry-all-errors --connect-timeout 30 --max-time 300 \
+            https://github.com/leanprover/lean4/releases/download/v4.34.1/lean-4.34.1-linux.tar.zst -o "$RUNNER_TEMP/lean.tar.zst"
+          echo "47bf4bbd78f70c2e9670598ab7124d92b6efb7330ff33e5fbb4030f6fd72e4e4  $RUNNER_TEMP/lean.tar.zst" | sha256sum --check
+          tar --zstd -xf "$RUNNER_TEMP/lean.tar.zst" -C "$RUNNER_TEMP"
+          echo "$RUNNER_TEMP/lean-4.34.1-linux/bin" >> "$GITHUB_PATH"
+      - name: Prove the String and UTF-8 contracts and run adversarial controls
+        run: python scripts/check_controlled_text.py --output artifacts/ci-checked-text --trust-project
+      - name: Test fail-closed evidence accounting
+        run: |
+          python -m pip install '.[dev]'
+          python -m pytest tests/test_controlled_text_gate.py -q --junitxml=artifacts/ci-checked-text/gate-tests.xml
+      - name: Require the committed source to remain unchanged
+        run: git diff --exit-code
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: checked-text-evidence
+          path: artifacts/ci-checked-text/
+          retention-days: 30
+          if-no-files-found: error
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: checked-text-source
+          path: boundary-source/
+          retention-days: 30
+          if-no-files-found: error

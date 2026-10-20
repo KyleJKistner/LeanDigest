@@ -1,5 +1,7 @@
 Bézout-frame construction
 
+Source-bound reading; the English is not formally verified. Reading this text does not authenticate the Lean snapshot.
+
 Let R be a Euclidean domain.
 Let x, y, z be elements of R.
 Assume x · y = z · (z + 1).

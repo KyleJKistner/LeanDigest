@@ -1,0 +1,28 @@
+{
+  "source_release": "https://github.com/KyleJKistner/LeanDigest/releases/tag/leanglish-all-findings-v0.4.1",
+  "upstream_commit": "1581d4cbdd69a0faf34b2089614fe2a814316a6a",
+  "boundary": "Unmodified retained observations. Local tests do not execute Lean or authenticate these snapshots.",
+  "fixtures": [
+    {
+      "file": "diamond_distortion.snapshot.json",
+      "sha256": "8335e17a818eb289b1a30f587d7d8abc7dc396999fb8a1ede803d5ef7f644a50",
+      "theorem": "OAI.DiamondDistortion.headline_all_pairs",
+      "archive_path": "Leanglish/proofs/90b159c98f2abbb6da27b959/snapshot.json",
+      "audited_frames": [
+        7,
+        20
+      ],
+      "frames": 27
+    },
+    {
+      "file": "infinite_matroid.snapshot.json",
+      "sha256": "8a975d483f330ad2ab31d6a9f66d8d481fa5d9bedecc7f277c8ab648f1896da5",
+      "theorem": "OAI.InfiniteMatroidCounterexample.partitional_intersection_counterexample",
+      "archive_path": "Leanglish/proofs/8b1e1f94be8814a970b044de/snapshot.json",
+      "audited_frames": [
+        41
+      ],
+      "frames": 138
+    }
+  ]
+}
