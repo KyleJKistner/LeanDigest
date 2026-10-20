@@ -45,7 +45,7 @@ CITATIONS = {
     (ALPHA, 'OAI.Alpha.second'): ['OAI.Alpha.lemma1', 'OAI.Alpha.main._proof_1', 'OAI.Alpha.lemma1'],
     (BETA, 'OAI.Beta.main'): ['OAI.Shared.lemma', 'OAI.Beta.size', 'OAI.Beta.T.mk', 'OAI.Beta.helper', 'Nat.succ'],
 }
-PLANNED = {ALPHA: ['OAI.Alpha.lemma1', 'OAI.Alpha.lemma2', 'OAI.Alpha.main._proof_1', 'OAI.Shared.lemma'],
+PLANNED = {ALPHA: ['OAI.Alpha.instFoo', 'OAI.Alpha.lemma1', 'OAI.Alpha.lemma2', 'OAI.Alpha.main._proof_1', 'OAI.Shared.lemma'],
            BETA: ['OAI.Beta.helper']}
 
 
@@ -84,19 +84,21 @@ def world(tmp_path):
 def test_denominator_is_explicit_and_separate(world):
     plan = world['plan']
     d = plan['denominator']
-    assert d['cited_constants'] == 11 and d['already_read'] == 1 and d['excluded'] == 5 and d['planned_lemmas'] == 5
+    assert d['cited_constants'] == 11 and d['already_read'] == 1 and d['excluded'] == 4 and d['planned_lemmas'] == 6
     assert d['excluded_by_reason'] == {'constructor-by-name': 1, 'documented-definition': 1, 'documented-theorem-target': 1,
-                                       'instance-by-name': 1, 'not-addressable-by-exporter': 1}
+                                       'not-addressable-by-exporter': 1}
     assert {s['module']: [l['name'] for l in s['lemmas']] for s in plan['shards']} == PLANNED
     assert all(l['kind'] == 'unknown-kind' for s in plan['shards'] for l in s['lemmas'])
-    lemma1 = plan['shards'][0]['lemmas'][0]
+    lemma1 = plan['shards'][0]['lemmas'][1]
     assert lemma1['citations'] == 3 and len(lemma1['cited_by']) == 2
-    assert plan['shards'][0]['lemmas'][2]['hint'] == 'compiler-abstracted-proof'
+    # A cited instance heads a proof frame, so it is proof-valued and planned with a name hint.
+    assert [l['hint'] for l in plan['shards'][0]['lemmas']] == ['instance-by-name', None, None, 'compiler-abstracted-proof', None]
     assert plan['already_read'][0]['name'] == 'OAI.Beta.main' and d['planned_compiler_abstracted_proofs'] == 1
+    assert d['planned_instances_by_name'] == 1
     assert plan['counts_toward_documented_target_coverage'] is False and plan['denominator_name'] == 'dependency-cone-level-1'
     # Shared.lemma is cited from both modules; its home is the module citing more planned lemmas.
     assert 'OAI.Shared.lemma' in PLANNED[ALPHA]
-    assert plan['pilot']['shards'] == [cone.module_id(ALPHA)] and plan['pilot']['lemmas'] == 4
+    assert plan['pilot']['shards'] == [cone.module_id(ALPHA)] and plan['pilot']['lemmas'] == 5
 
 
 def test_plan_is_deterministic_and_bound(world):
@@ -109,13 +111,14 @@ def test_plan_is_deterministic_and_bound(world):
     lambda p: p['shards'][0]['lemmas'].pop(),
     lambda p: p['shards'][0]['lemmas'][0].update(citations=0),
     lambda p: p['shards'][0]['lemmas'][0].update(kind='theorem'),
+    lambda p: p['shards'][0]['lemmas'][0].update(hint=None),
     lambda p: p['shards'][1].update(module=ALPHA),
-    lambda p: p['excluded'][0].update(reason='constructor-by-name'),
+    lambda p: p['excluded'][0].update(reason='compiler-matcher-or-recursor'),
     lambda p: p['excluded'][0].update(reason='no-such-reason'),
     lambda p: p['pilot']['shards'].append(cone.module_id(BETA)),
     lambda p: p['execution'].update(extract_timeout=1),
     lambda p: p.update(counts_toward_documented_target_coverage=True),
-    lambda p: p['shards'][0]['lemmas'].append({'name': 'OAI.Alpha.instBar', 'citations': 1, 'kind': 'unknown-kind',
+    lambda p: p['shards'][0]['lemmas'].append({'name': 'OAI.Alpha.T.mk', 'citations': 1, 'kind': 'unknown-kind',
                                                'cited_by': p['shards'][0]['lemmas'][0]['cited_by'][:1], 'hint': None}),
 ])
 def test_plan_tampering_rejected(world, edit):
@@ -139,10 +142,11 @@ def test_documented_reasons_are_checked_against_the_original_plan(world):
 
 def test_moving_a_lemma_to_another_citing_module_is_rejected(world):
     plan = deepcopy(world['plan'])
-    shared = plan['shards'][0]['lemmas'].pop(3)
+    shared = plan['shards'][0]['lemmas'].pop(4)
+    assert shared['name'] == 'OAI.Shared.lemma'
     plan['shards'][1]['lemmas'] = sorted(plan['shards'][1]['lemmas']+[shared], key=lambda l: l['name'])
     plan['denominator'] = cone.denominator(plan)
-    plan['pilot']['lemmas'] = 3
+    plan['pilot']['lemmas'] = 4
     plan['plan_sha256'] = cone.digest({k: v for k, v in plan.items() if k != 'plan_sha256'})
     with pytest.raises(ValueError, match='planned environment module'):
         cone.validate_plan(plan)
@@ -186,14 +190,18 @@ def test_dispatch_scopes(world):
 
 
 # Synthetic Lean process. Lemma behaviour is chosen by name; nothing is compiled.
-BEHAVIOUR = {'OAI.Alpha.lemma1': 'ok', 'OAI.Alpha.lemma2': 'declined', 'OAI.Alpha.main._proof_1': 'ok',
-             'OAI.Shared.lemma': 'timeout', 'OAI.Beta.helper': 'ok'}
+BEHAVIOUR = {'OAI.Alpha.instFoo': 'ok', 'OAI.Alpha.lemma1': 'ok', 'OAI.Alpha.lemma2': 'declined',
+             'OAI.Alpha.main._proof_1': 'ok', 'OAI.Shared.lemma': 'timeout', 'OAI.Beta.helper': 'ok'}
 
 
-def fake_lean(build='passed'):
+def fake_lean(build='passed', resolve='passed'):
     def run(command, cwd, timeout=120, max_output=128_000_000):
         if command == ['lake', 'env', 'lean', '--version']:
             return RunResult('passed', command, 0, 'Lean (version 4.34.1, synthetic)\n', '', 0.1)
+        if command in (['lake', 'update'], ['lake', 'exe', 'cache', 'get']):
+            # Synthetic: the fixture dependency tree is already in place and is left unchanged.
+            return (RunResult('passed', command, 0, 'synthetic resolution', '', 0.1) if resolve == 'passed' else
+                    RunResult('failed', command, 1, '', 'error: synthetic resolution failure', 0.1))
         if command[:2] == ['lake', 'build']:
             return (RunResult('passed', command, 0, 'synthetic build', '', 0.2) if build == 'passed' else
                     RunResult('failed', command, None, '', '', 0.2, 'timeout') if build == 'timeout' else
@@ -208,9 +216,9 @@ def fake_lean(build='passed'):
     return run
 
 
-def shard_output(world, monkeypatch, tmp_path, module=ALPHA, build='passed', **kw):
-    monkeypatch.setattr('proofreader.dependency_cone.run_bounded', fake_lean(build))
-    monkeypatch.setattr('proofreader.narrative_io.run_bounded', fake_lean(build))
+def shard_output(world, monkeypatch, tmp_path, module=ALPHA, build='passed', resolve='passed', **kw):
+    monkeypatch.setattr('proofreader.dependency_cone.run_bounded', fake_lean(build, resolve))
+    monkeypatch.setattr('proofreader.narrative_io.run_bounded', fake_lean(build, resolve))
     out = tmp_path/('shard-'+module)
     report = cone.run_shard(world['project'], world['original'], world['environment'], world['plan'],
                             cone.module_id(module), out, trust_project=True, **kw)
@@ -219,16 +227,19 @@ def shard_output(world, monkeypatch, tmp_path, module=ALPHA, build='passed', **k
 
 def test_worker_records_every_outcome(world, monkeypatch, tmp_path):
     out, report = shard_output(world, monkeypatch, tmp_path)
-    assert report['status'] == 'partial' and report['readings_generated'] == 2 and not report['complete']
+    assert report['status'] == 'partial' and report['readings_generated'] == 3 and not report['complete']
     assert {r['name']: r['status'] for r in report['lemmas']} == {
-        'OAI.Alpha.lemma1': 'reading-generated', 'OAI.Alpha.lemma2': 'not-proof-valued',
-        'OAI.Alpha.main._proof_1': 'reading-generated', 'OAI.Shared.lemma': 'extraction-timeout'}
+        'OAI.Alpha.instFoo': 'reading-generated', 'OAI.Alpha.lemma1': 'reading-generated',
+        'OAI.Alpha.lemma2': 'not-proof-valued', 'OAI.Alpha.main._proof_1': 'reading-generated',
+        'OAI.Shared.lemma': 'extraction-timeout'}
+    assert report['dependencies'] == {'route': 'cache', 'cache_key': cone.CACHE_KEY, 'steps': {}}
     report_, rows, accepted = cone.load_shard(out, world['plan'], world['environment'])
-    assert sorted(accepted) == ['OAI.Alpha.lemma1', 'OAI.Alpha.main._proof_1']
+    assert sorted(accepted) == ['OAI.Alpha.instFoo', 'OAI.Alpha.lemma1', 'OAI.Alpha.main._proof_1']
     summary, _ = cone.reconcile(world['plan'], world['environment'], [out], 'full-1')
-    assert summary['statuses'] == {'extraction-timeout': 1, 'not-proof-valued': 1, 'reading-generated': 2,
+    assert summary['statuses'] == {'extraction-timeout': 1, 'not-proof-valued': 1, 'reading-generated': 3,
                                    'shard-artifact-missing': 1}
-    assert summary['missing_shards'] == [cone.module_id(BETA)] and summary['planned_lemmas'] == 5
+    assert summary['missing_shards'] == [cone.module_id(BETA)] and summary['planned_lemmas'] == 6
+    assert summary['dependency_routes'] == {'cache': 1}
     assert cone.reading_map(summary)['OAI.Alpha.lemma1']['module'] == ALPHA
     assert summary['counts_toward_documented_target_coverage'] is False
     pilot, _ = cone.reconcile(world['plan'], world['environment'], [out], 'pilot')
@@ -243,14 +254,74 @@ def test_complete_shard_and_failed_build(world, monkeypatch, tmp_path):
     out3, report3 = shard_output(world, monkeypatch, tmp_path/'c', module=ALPHA, build='timeout')
     assert set(report3['statuses']) == {'build-timeout'}
     summary, accepted = cone.reconcile(world['plan'], world['environment'], [out, out2], 'full-1')
-    assert summary['statuses'] == {'build-failed': 4, 'reading-generated': 1} and list(accepted) == ['OAI.Beta.helper']
+    assert summary['statuses'] == {'build-failed': 5, 'reading-generated': 1} and list(accepted) == ['OAI.Beta.helper']
 
 
 def test_missing_dependency_cache_is_a_retained_failure(world, monkeypatch, tmp_path):
-    out, report = shard_output(world, monkeypatch, tmp_path, dependency_cache=False)
-    assert report['status'] == 'failed' and 'cache' in report['error'] and report['statuses'] == {'not-attempted': 4}
+    packages = world['project']/'.lake/packages'
+    packages.rename(tmp_path/'packages-away')
+    out, report = shard_output(world, monkeypatch, tmp_path, dependencies='cache')
+    assert report['status'] == 'failed' and 'cache' in report['error'] and report['statuses'] == {'not-attempted': 5}
     summary, accepted = cone.reconcile(world['plan'], world['environment'], [out], 'pilot')
-    assert summary['statuses'] == {'shard-failed': 4, 'not-in-run-scope': 1} and not accepted
+    assert summary['statuses'] == {'shard-failed': 5, 'not-in-run-scope': 1} and not accepted
+    with pytest.raises(ValueError, match='route'):
+        shard_output(world, monkeypatch, tmp_path/'x', dependencies='assumed')
+
+
+def test_resolved_dependencies_are_recorded_and_checked(world, monkeypatch, tmp_path):
+    out, report = shard_output(world, monkeypatch, tmp_path, dependencies='resolve')
+    steps = report['dependencies']['steps']
+    assert report['status'] == 'partial' and report['readings_generated'] == 3
+    assert [steps[k]['command'] for k in ('resolve', 'cache')] == [['lake', 'update'], ['lake', 'exe', 'cache', 'get']]
+    _, _, accepted = cone.load_shard(out, world['plan'], world['environment'])
+    assert len(accepted) == 3
+    summary, _ = cone.reconcile(world['plan'], world['environment'], [out], 'pilot')
+    assert summary['dependency_routes'] == {'resolve': 1}
+    log = out/'dependencies-cache.json'
+    write(log, {**read(log), 'exit_code': 1})
+    with pytest.raises(ValueError, match='dependency log'):
+        cone.load_shard(out, world['plan'], world['environment'])
+    write(log, {**read(log), 'exit_code': 0})
+    tamper_report(out, lambda r: r['dependencies'].update(route='cache'))
+    with pytest.raises(ValueError, match='route'):
+        cone.load_shard(out, world['plan'], world['environment'])
+
+
+def test_failed_resolution_is_a_retained_failure(world, monkeypatch, tmp_path):
+    out, report = shard_output(world, monkeypatch, tmp_path, dependencies='resolve', resolve='failed')
+    assert report['status'] == 'failed' and 'resolve' in report['error'] and report['statuses'] == {'not-attempted': 5}
+    assert set(report['dependencies']['steps']) == {'resolve'} and (out/'dependencies-resolve.json').is_file()
+    summary, accepted = cone.reconcile(world['plan'], world['environment'], [out], 'pilot')
+    assert summary['statuses']['shard-failed'] == 5 and not accepted
+
+
+def test_dependency_preflight(world, monkeypatch, tmp_path):
+    monkeypatch.setattr('proofreader.dependency_cone.run_bounded', fake_lean())
+    args = (world['project'], world['original'], world['environment'])
+    with pytest.raises(PermissionError):
+        cone.preflight_dependencies(*args, tmp_path/'a')
+    report = cone.preflight_dependencies(*args, tmp_path/'b', trust_project=True)
+    assert report['matches_pinned_environment'] and report['error'] is None and set(report['steps']) == {'resolve', 'cache'}
+    assert read(tmp_path/'b/dependency-preflight.json') == report
+    other = deepcopy(world['environment']); other['dependencies']['example']['tree'] = '0'*40
+    other['environment_sha256'] = cone.digest(other['dependencies'])
+    report = cone.preflight_dependencies(world['project'], world['original'], other, tmp_path/'c', trust_project=True)
+    assert not report['matches_pinned_environment'] and 'pinned original environment' in report['error']
+    monkeypatch.setattr('proofreader.dependency_cone.run_bounded', fake_lean(resolve='failed'))
+    report = cone.preflight_dependencies(*args, tmp_path/'d', trust_project=True)
+    assert not report['matches_pinned_environment'] and report['environment'] is None and 'resolve' in report['error']
+
+
+def test_source_artifact_metadata():
+    meta = {'id': 12012738377, 'name': 'complete-openai-lean-source', 'expired': False,
+            'expires_at': '2026-11-14T23:16:31Z', 'workflow_run': {'id': 38822475057},
+            'digest': 'sha256:4192507caa2d48023ec3d3cd8ff16d4d3b66ab8f62bc32ee358208961bdf1076'}
+    assert cone.check_source_artifact(meta)['expires_at'] == '2026-11-14T23:16:31Z'
+    with pytest.raises(ValueError, match='expired'):
+        cone.check_source_artifact({**meta, 'expired': True})
+    for edit in [{'digest': 'sha256:'+'0'*64}, {'name': 'other'}, {'workflow_run': {'id': 1}}, {'id': 1}]:
+        with pytest.raises(ValueError, match='pinned artifact'):
+            cone.check_source_artifact({**meta, **edit})
 
 
 def test_environment_drift_invalidates_successes(world, monkeypatch, tmp_path):
@@ -263,7 +334,7 @@ def test_environment_drift_invalidates_successes(world, monkeypatch, tmp_path):
     monkeypatch.setattr('proofreader.dependency_cone.audit_environment', drifting)
     out, report = shard_output(world, monkeypatch, tmp_path)
     assert report['status'] == 'failed' and report['readings_generated'] == 0
-    assert 'reading-generated' not in report['statuses'] and report['statuses']['environment-invalidated'] == 2
+    assert 'reading-generated' not in report['statuses'] and report['statuses']['environment-invalidated'] == 3
     _, _, accepted = cone.load_shard(out, world['plan'], world['environment'])
     assert accepted == {}
 
@@ -299,7 +370,7 @@ def first(report, status):
     lambda r: r.update(cone_plan_sha256='0'*64),
     lambda r: r.update(module=BETA),
     lambda r: r.update(counts_toward_documented_target_coverage=True),
-    lambda r: r.update(readings_generated=3),
+    lambda r: r.update(readings_generated=4),
     lambda r: r.update(status='complete', complete=True),
     lambda r: r.update(environment_after=None),
     lambda r: first(r, 'not-proof-valued').update(status='no-proof-body'),
@@ -366,7 +437,7 @@ def test_interrupted_shard_is_never_accepted(world, monkeypatch, tmp_path):
     out, report = shard_output(world, monkeypatch, tmp_path)
     tamper_report(out, lambda r: r.update(status='running', complete=False, readings_generated=0))
     summary, accepted = cone.reconcile(world['plan'], world['environment'], [out], 'full-1')
-    assert not accepted and summary['statuses']['shard-running'] == 4
+    assert not accepted and summary['statuses']['shard-running'] == 5
 
 
 def test_classification_markers(tmp_path):
@@ -387,12 +458,17 @@ def test_classification_markers(tmp_path):
 @pytest.mark.parametrize('name,reason', [
     ('_private.OAI.X.Main.0.OAI.X.y', 'not-addressable-by-exporter'), ('OAI.X.«weird name»', 'not-addressable-by-exporter'),
     ('OAI.X.f.match_1', 'compiler-matcher-or-recursor'), ('OAI.X.f.match_1_1', 'compiler-matcher-or-recursor'),
-    ('OAI.X.T.casesOn', 'compiler-matcher-or-recursor'), ('OAI.X.instNeZeroNatM', 'instance-by-name'),
+    ('OAI.X.T.casesOn', 'compiler-matcher-or-recursor'), ('OAI.X.instNeZeroNatM', None),
     ('OAI.X.T.mk', 'constructor-by-name'), ('OAI.X.instance_exists', None), ('OAI.X.below_threshold', None),
     ('OAI.X.rec_main', None), ('OAI.X.main._proof_1_2', None),
 ])
 def test_name_rules(name, reason):
     assert cone.exclusion(name) == reason
+
+
+def test_name_hints():
+    assert cone.hint('OAI.X.instNeZeroNatM') == 'instance-by-name' and cone.hint('OAI.X.instance_exists') is None
+    assert cone.hint('OAI.X.main._proof_1_2') == 'compiler-abstracted-proof' and cone.hint('OAI.X.lemma') is None
 
 
 # Committed plan: real retained data, validated without executing anything.
@@ -402,8 +478,10 @@ COMMITTED = ROOT/'benchmarks/dependency-cone/plan.json'
 def test_committed_plan_is_valid_and_honest():
     plan = cone.validate_plan(json.loads(COMMITTED.read_text(encoding='utf-8')))
     d = plan['denominator']
-    assert (d['cited_constants'], d['already_read'], d['planned_lemmas'], d['environment_modules']) == (1764, 31, 1708, 379)
+    assert (d['cited_constants'], d['already_read'], d['planned_lemmas'], d['environment_modules']) == (1764, 31, 1722, 379)
     assert d['already_read']+d['excluded']+d['planned_lemmas'] == d['cited_constants']
+    assert d['excluded_by_reason'] == {'compiler-matcher-or-recursor': 5, 'constructor-by-name': 4, 'not-addressable-by-exporter': 2}
+    assert d['planned_instances_by_name'] == 14 and d['planned_compiler_abstracted_proofs'] == 106
     assert d['full_dispatch_parts'] == 2 and len(cone.scope_shards(plan, 'full-1')) == 256
     assert len(plan['pilot']['shards']) == 8 and plan['pilot']['lemmas'] == 151
     kpis = json.loads((ROOT/'benchmarks/reading-kpis/current.json').read_text())
@@ -456,3 +534,13 @@ def test_workflow_is_bounded_and_never_publishes():
     uploads = [s for s in extract['steps'] if s.get('uses', '').startswith('actions/upload-artifact')]
     assert len(uploads) == 1 and uploads[0]['if'] == 'always()' and '${{ matrix.id }}' in uploads[0]['with']['name']
     assert 'git push' not in text and 'gh release' not in text and 'contents: write' not in text
+    # Inputs are checked once before any shard; no job saves a cache (which could evict the pinned one).
+    assert extract['needs'] == ['plan', 'preflight'] and 'preflight' in flow['jobs']['summary']['needs']
+    preflight = flow['jobs']['preflight']
+    lookup = next(s for s in preflight['steps'] if s.get('id') == 'deps')
+    assert lookup['with']['lookup-only'] is True and lookup['with']['key'] == '${{ env.DEPS_KEY }}'
+    assert 'actions/cache/save' not in text and 'actions/cache@' not in text
+    assert flow['env']['DEPS_KEY'] == cone.CACHE_KEY and flow['env']['SOURCE_ARTIFACT'] == str(cone.SOURCE_ARTIFACT['id'])
+    assert flow['env']['SOURCE_RUN'] == str(cone.SOURCE_ARTIFACT['run_id'])
+    run = next(s for s in extract['steps'] if 'plan_dependency_cone.py run' in s.get('run', ''))
+    assert '--dependencies "$DEPENDENCIES"' in run['run'] and "'cache' || 'resolve'" in run['env']['DEPENDENCIES']

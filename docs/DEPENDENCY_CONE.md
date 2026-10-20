@@ -36,9 +36,10 @@ readings of the pinned release `leanglish-original-project-317dc31`.
 | Citing frames | 2,068 |
 | Cited project constants (the cone) | 1,764 |
 | Already read (the constant is itself a documented target with a reading) | 31 |
-| Excluded, with a recorded reason | 25 |
-| Planned lemmas | 1,708 |
+| Excluded, with a recorded reason | 11 |
+| Planned lemmas | 1,722 |
 | Planned lemmas that are compiler-abstracted proofs (`…._proof_N`) | 106 |
+| Planned lemmas with a generated instance name (`…inst…`) | 14 |
 | Environment modules (one shard each) | 379 |
 
 The count of 1,764 includes 2 mangled private names (`_private.OAI.…`), so 1,762
@@ -60,18 +61,19 @@ excluded name with its reason.
 | `documented-definition` | The constant is a documented definition reference, not a proof obligation. | 0 |
 | `not-addressable-by-exporter` | A mangled private name, or a name with numeric or escaped components. The exporter resolves names with `String.toName`, which cannot form these components. | 2 |
 | `compiler-matcher-or-recursor` | A name ending in `match_N`, `casesOn`, `rec`, `recOn`, `brecOn`, `below` or a similar compiler-generated suffix. | 5 |
-| `instance-by-name` | A last component of the form `inst` followed by an uppercase letter, which is Lean's generated instance name. | 14 |
 | `constructor-by-name` | A last component `mk`, which is a structure constructor name. | 4 |
 
-The last four reasons are name conventions, not Lean facts. A user-named
-instance, a structure projection or a proof-valued definition is not detected by
-name. Those constants stay in the plan as `unknown-kind`, and the exporter
-decides at extraction time.
+The last three reasons are name conventions, not Lean facts. A structure
+projection or a proof-valued definition is not detected by name. Those constants
+stay in the plan as `unknown-kind`, and the exporter decides at extraction time.
 
-Some excluded instances carry mathematics. For example,
-`OAI.ThreeManifold.GluedConstruction.instCompactSpaceCarrierManifold` proves
-compactness of a constructed space. A later plan can include instances by
-changing the rule; the exclusion is a scope decision for level 1.
+Instances are not excluded. Every cited constant heads a frame of a checked
+proof, so a cited instance is proof-valued: its type is a proposition, and the
+exporter reads its body like any other lemma. For example,
+`OAI.ThreeManifold.GluedConstruction.instCompactSpaceCarrierManifold` proves that
+a constructed space is compact. The 14 cited constants whose last component is
+Lean's generated instance name (`inst` followed by an uppercase letter) are
+planned with the hint `instance-by-name`.
 
 ### Planned lemmas
 
@@ -168,32 +170,75 @@ are never acceptance evidence.
 
 ## Running the campaign
 
-The workflow `.github/workflows/dependency-cone.yml` runs on `workflow_dispatch`
-and on pushes to `claude/keen-archimedes-ihorkq` that change the workflow or
-`benchmarks/dependency-cone/`. Choose the scope on dispatch:
+The workflow `.github/workflows/dependency-cone.yml` runs on pushes to
+`claude/keen-archimedes-ihorkq` that change the workflow or
+`benchmarks/dependency-cone/`, and on `workflow_dispatch`. A push runs the pilot.
+The Actions page offers a dispatch button only for workflows on the default
+branch; from this branch, dispatch with
+`gh workflow run dependency-cone.yml --ref claude/keen-archimedes-ihorkq -f scope=full-1`.
+The scopes are:
 
 - `pilot` (default): the 8 pilot shards.
 - `full-1`, then `full-2`: all 379 shards in two dispatches.
 
-Each run has three jobs:
+Each run has four jobs:
 
 1. `plan` runs the synthetic tests, re-derives the committed plan from the pinned
    archive, extracts the original plan and environment audit, and emits the matrix.
-2. `extract` runs one job per shard with `max-parallel: 8` and a 225-minute
+2. `preflight` checks the external inputs once, before any shard starts. It
+   fails with an error message, and no shard runs, if the source artifact is
+   missing, expired or not the pinned artifact, or if the dependency route does
+   not reproduce the pinned environment audit. See [External inputs](#external-inputs).
+3. `extract` runs one job per shard with `max-parallel: 8` and a 225-minute
    timeout, the same per-job limits as the original-environment theorem campaign.
    It reuses that campaign's machinery: the `complete-openai-lean-source` artifact,
-   `unpack_source`, the `original-openai-deps-1581d4cb-4341-full-v1` dependency
-   cache, `audit_environment` before and after, `lake build <module>`, and
-   `extract_narrative` with the campaign budgets (3,600 s build, 900 s per
-   extraction, 2,000,000 heartbeats, 12,000 s wall clock).
-3. `summary` reconciles every planned lemma and uploads
+   `unpack_source`, the pinned dependency tree, `audit_environment` before and
+   after, `lake build <module>`, and `extract_narrative` with the campaign budgets
+   (3,600 s build, 900 s per extraction, 2,000,000 heartbeats, 12,000 s wall
+   clock).
+4. `summary` reconciles every planned lemma and uploads
    `dependency-cone-summary.json`.
 
-Every shard uploads `dependency-cone-<shard id>` with its report, build log and
-the retained output of each attempted lemma, including failures. The extraction
-step also runs after an earlier step fails, so a missing source archive or
-dependency cache is recorded in the shard report. The workflow has read-only
-permissions and never publishes, releases or pushes.
+Every shard uploads `dependency-cone-<shard id>` with its report, build log,
+dependency logs and the retained output of each attempted lemma, including
+failures. The extraction step also runs after an earlier step fails, so a
+missing source archive or dependency tree is recorded in the shard report. The
+workflow has read-only permissions. It never publishes, releases or pushes, and
+it never saves a cache.
+
+### External inputs
+
+Each shard needs two inputs that are not in this repository.
+
+- **Original source.** The artifact `complete-openai-lean-source` (artifact
+  12012738377) of run 38822475057. An artifact is downloadable by run ID from any
+  branch. GitHub deletes it on 2026-11-14 (its recorded `expires_at`). After that
+  date the preflight fails until a new source bundle is pinned.
+- **Dependency tree.** The 42 pinned dependencies, with Mathlib's build cache and
+  the compatibility patches applied. The theorem campaign restored them from the
+  Actions cache `original-openai-deps-1581d4cb-4341-full-v1`. That cache was
+  saved by `full-original-project.yml` on `work/full-original-project`. GitHub
+  restores a cache only from the run's own branch, the default branch (`main`)
+  or, for a pull request, its base branch. The recovery campaign ran as a pull
+  request into `work/full-original-project`. Its one run on a push to another
+  branch (run 39352981910) stopped at the cache step. A run on
+  `claude/keen-archimedes-ihorkq` cannot restore that cache.
+
+The preflight looks up the cache in the run's own scope without downloading it.
+On a hit, every shard restores the cache (route `cache`). On a miss, the shards
+re-create the tree with the commands of the seed job that built the cache:
+`lake update` (2,400 s budget), then `lake exe cache get` (900 s budget). This is
+route `resolve`. The preflight first runs this route once and requires the
+resulting environment audit to equal the pinned audit, so a moved upstream
+reference fails once instead of in every shard. In run 39141760623 the seed
+job's two commands took under four minutes together. No job
+saves a cache, because a second copy of a multi-gigabyte cache could evict the
+pinned one that other campaigns restore.
+
+The route does not change what is accepted. On either route a shard must pass
+`audit_environment` before and after extraction with a result equal to the
+pinned audit. The shard report records the route, and on route `resolve` it
+keeps both command logs.
 
 The same steps run locally, with `--trust-project`, on an isolated machine:
 
@@ -202,10 +247,13 @@ python scripts/plan_dependency_cone.py inputs --archive /tmp/release.zip --outpu
 python scripts/plan_dependency_cone.py matrix --scope pilot
 python scripts/plan_dependency_cone.py run --project /tmp/original-project/lean \
   --original-plan /tmp/cone/original-plan.json --environment /tmp/cone/environment.json \
-  --shard 55b304b716a214a3517ae6a5 --output /tmp/shards/one --trust-project
+  --shard 55b304b716a214a3517ae6a5 --dependencies resolve --output /tmp/shards/one --trust-project
 python scripts/plan_dependency_cone.py reconcile --environment /tmp/cone/environment.json \
   --scope pilot --shards /tmp/shards --output /tmp/cone-summary.json
 ```
+
+Pass `--dependencies cache` instead when `.lake/packages` already holds the
+pinned tree. The `dependencies` mode runs the preflight's resolution check alone.
 
 Native elaboration executes the project's code and is not a sandbox.
 
@@ -229,8 +277,9 @@ plan order.
 | `build-failed`, `build-timeout` | The environment module did not build; no lemma of the shard was attempted. |
 | `toolchain-unavailable`, `source-missing`, `source-changed` | The toolchain or the pinned module source did not match. |
 | `deadline-not-attempted` | The shard's wall-clock budget ran out before this lemma. |
-| `environment-invalidated` | The environment audit failed after extraction; earlier successes are withdrawn. |
-| `not-attempted` | The shard stopped before any work, for example without the dependency cache. |
+| `environment-invalidated` | The lemma was read, but the shard then failed, for example because the closing environment audit differed. The success is withdrawn. |
+| `not-attempted` | The shard stopped before this lemma, for example because the dependency tree was missing. |
+| `extracting` | The shard failed while this lemma was being extracted. It was never read. |
 
 The summary (`leanglish.dependency-cone-summary/v1`) also uses
 `shard-artifact-missing` for an in-scope shard without an artifact,
@@ -253,6 +302,8 @@ if all of these hold. The checks extend `catalog_inputs.load_proofs`.
   that no row references are rejected.
 - The shard finished, and its before and after environment audits equal the
   plan's original environment.
+- The report records a dependency route. On route `resolve`, both seed-command
+  logs exist, match their recorded hashes and record exit code 0.
 - The build log exists, matches its recorded hash, and records
   `lake build <module>` with exit code 0.
 - The toolchain reported Lean 4.34.1, and the module source hash equals the hash
@@ -288,16 +339,18 @@ so a renderer change does not require a new extraction.
 - **No results yet.** No Lean toolchain ran locally. The workflow has not run, and
   the planner, worker and loader are tested only with synthetic fixtures. The
   first pilot run is the first native test of this route.
-- **Name-based exclusions.** The instance, constructor and compiler rules are
-  conventions. The exporter does not record whether an accepted constant is a
-  theorem, a proof-valued definition, an instance or a projection; a reading
-  states only that the declaration is proof-valued and kernel checked.
+- **Name-based exclusions.** The constructor and compiler rules, and the
+  instance hint, are conventions. The exporter does not record whether an
+  accepted constant is a theorem, a proof-valued definition, an instance or a
+  projection; a reading states only that the declaration is proof-valued and
+  kernel checked.
 - **Private names.** The two private lemmas cannot be addressed by the current
   exporter.
-- **External inputs.** The workflow depends on the source artifact from run
-  38822475057, which can expire, and on the dependency cache. GitHub restores a
-  cache only from the current branch or the default branch. A shard without them
-  records a failed outcome; it does not read anything.
+- **External inputs.** The source artifact of run 38822475057 expires on
+  2026-11-14. Outside the cache's branch scope, each shard spends a few minutes
+  re-creating the dependency tree. Route `resolve` relies on `lake update`
+  resolving to the pinned revisions. The preflight checks this once per run, and
+  every shard checks it again with the environment audit, but neither has run yet.
 - **Trust.** The trust boundary of [Source-bound mathematical reading](NARRATIVE.md)
   applies unchanged. Shard artifacts are unsigned observations. The checks
   establish consistency, not authenticity, and no English fidelity is claimed.

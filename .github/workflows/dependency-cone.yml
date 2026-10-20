@@ -3,9 +3,10 @@ name: Dependency-cone readings (level 1) in the original environment
 # Extracts source-bound readings of the project lemmas that retained readings
 # cite, each in the unchanged original environment of a citing module. A pilot
 # of 8 planned shards runs by default; full-1/full-2 dispatch every shard in two
-# blocks of at most 256 (a matrix limit). Every shard uploads its outcomes,
-# including failures. Cone readings are a separate denominator from the 536
-# documented targets. This workflow never publishes, releases or pushes.
+# blocks of at most 256 (a matrix limit). A preflight job checks every external
+# input before any shard starts. Every shard uploads its outcomes, including
+# failures. Cone readings are a separate denominator from the 536 documented
+# targets. This workflow never publishes, releases, pushes or saves a cache.
 on:
   workflow_dispatch:
     inputs:
@@ -26,6 +27,10 @@ concurrency:
 env:
   GLIBC_TUNABLES: glibc.malloc.mmap_max=0:glibc.malloc.arena_max=1
   SCOPE: ${{ inputs.scope || 'pilot' }}
+  # Pinned in proofreader/dependency_cone.py (SOURCE_ARTIFACT, CACHE_KEY).
+  SOURCE_RUN: '38822475057'
+  SOURCE_ARTIFACT: '12012738377'
+  DEPS_KEY: original-openai-deps-1581d4cb-4341-full-v1
 jobs:
   plan:
     runs-on: ubuntu-latest
@@ -53,9 +58,70 @@ jobs:
         run: python scripts/plan_dependency_cone.py matrix --cone-plan /tmp/cone/plan.json --scope "$SCOPE" --github-output "$GITHUB_OUTPUT"
       - uses: actions/upload-artifact@v4
         with: {name: dependency-cone-plan, path: /tmp/cone/, retention-days: 90, if-no-files-found: error}
-  extract:
+  preflight:
+    # One cheap job checks the inputs that every shard needs, so a missing input
+    # fails here once instead of in every shard job.
     needs: plan
     if: needs.plan.outputs.count != '0'
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    outputs:
+      dependencies: ${{ steps.deps.outputs.cache-hit == 'true' && 'cache' || 'resolve' }}
+    steps:
+      - uses: actions/checkout@v4
+        with: {persist-credentials: false}
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - uses: actions/download-artifact@v4
+        with: {name: dependency-cone-plan, path: /tmp/cone}
+      - name: Require the retained unchanged original source artifact
+        env: {GH_TOKEN: '${{ github.token }}'}
+        run: |
+          if ! gh api "repos/$GITHUB_REPOSITORY/actions/artifacts/$SOURCE_ARTIFACT" > /tmp/source-artifact.json; then
+            echo "::error::Source artifact $SOURCE_ARTIFACT (complete-openai-lean-source, run $SOURCE_RUN) is not available. Re-run lean-source-bundle.yml and pin the new artifact."
+            exit 1
+          fi
+          if ! python scripts/plan_dependency_cone.py source-artifact --metadata /tmp/source-artifact.json; then
+            echo "::error::Source artifact $SOURCE_ARTIFACT is expired or is not the pinned artifact. No shard can restore the unchanged source."
+            exit 1
+          fi
+      - name: Look up the pinned dependency cache in this run's cache scope
+        uses: actions/cache/restore@v4
+        id: deps
+        with:
+          path: /tmp/original-project/lean/.lake/packages
+          key: ${{ env.DEPS_KEY }}
+          lookup-only: true
+      - name: Report the dependency route
+        env: {HIT: '${{ steps.deps.outputs.cache-hit }}'}
+        run: |
+          if [ "$HIT" = true ]; then
+            echo "Dependency cache $DEPS_KEY is restorable from $GITHUB_REF; shards restore it."
+          else
+            echo "::notice::Dependency cache $DEPS_KEY is not restorable from $GITHUB_REF (it was saved on another branch). Shards re-create it with the seed commands; checking that route once here."
+          fi
+      - uses: leanprover/lean-action@v1
+        if: steps.deps.outputs.cache-hit != 'true'
+        with: {lake-package-directory: lean, auto-config: false, build: false, test: false, lint: false, use-mathlib-cache: false, use-github-cache: false}
+      - name: Re-create the dependencies once and require the pinned environment audit
+        if: steps.deps.outputs.cache-hit != 'true'
+        env: {GH_TOKEN: '${{ github.token }}'}
+        run: |
+          mkdir -p /tmp/inputs/source
+          gh run download "$SOURCE_RUN" -R "$GITHUB_REPOSITORY" -n complete-openai-lean-source -D /tmp/inputs/source
+          python -c "from pathlib import Path; from scripts.assemble_finding_release import unpack_source; unpack_source(Path('/tmp/inputs'),Path('/tmp/original-project'))"
+          sudo sysctl -w vm.max_map_count=1048576
+          if ! python scripts/plan_dependency_cone.py dependencies --project /tmp/original-project/lean \
+               --original-plan /tmp/cone/original-plan.json --environment /tmp/cone/environment.json \
+               --output /tmp/cone-preflight --trust-project; then
+            echo "::error::The re-created dependencies do not reproduce the pinned original environment. No shard was started."
+            exit 1
+          fi
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with: {name: cone-preflight, path: /tmp/cone-preflight/, retention-days: 90, if-no-files-found: ignore}
+  extract:
+    needs: [plan, preflight]
     name: extract (${{ matrix.module }})
     strategy:
       fail-fast: false
@@ -76,21 +142,24 @@ jobs:
         env: {GH_TOKEN: '${{ github.token }}'}
         run: |
           mkdir -p /tmp/inputs/source
-          gh run download 38822475057 -R "$GITHUB_REPOSITORY" -n complete-openai-lean-source -D /tmp/inputs/source
+          gh run download "$SOURCE_RUN" -R "$GITHUB_REPOSITORY" -n complete-openai-lean-source -D /tmp/inputs/source
           python -c "from pathlib import Path; from scripts.assemble_finding_release import unpack_source; unpack_source(Path('/tmp/inputs'),Path('/tmp/original-project'))"
       - uses: actions/cache/restore@v4
         id: deps
+        if: needs.preflight.outputs.dependencies == 'cache'
         with:
           path: /tmp/original-project/lean/.lake/packages
-          key: original-openai-deps-1581d4cb-4341-full-v1
+          key: ${{ env.DEPS_KEY }}
       - name: Build this environment module once and extract every planned lemma
         # Runs after an earlier failure too, so the shard still records why nothing was read.
+        # Without a restored cache the worker re-creates the dependencies and records both logs.
         if: ${{ !cancelled() }}
+        env: {DEPENDENCIES: "${{ steps.deps.outputs.cache-hit == 'true' && 'cache' || 'resolve' }}"}
         run: |
           sudo sysctl -w vm.max_map_count=1048576
           python scripts/plan_dependency_cone.py run --project /tmp/original-project/lean --cone-plan /tmp/cone/plan.json \
             --original-plan /tmp/cone/original-plan.json --environment /tmp/cone/environment.json \
-            --shard '${{ matrix.id }}' --dependency-cache '${{ steps.deps.outputs.cache-hit }}' \
+            --shard '${{ matrix.id }}' --dependencies "$DEPENDENCIES" \
             --output /tmp/cone-output --trust-project
       - uses: actions/upload-artifact@v4
         if: always()
@@ -99,9 +168,10 @@ jobs:
           path: /tmp/cone-output/
           retention-days: 90
           if-no-files-found: warn
+          overwrite: true
   summary:
-    if: ${{ !cancelled() && needs.plan.result == 'success' }}
-    needs: [plan, extract]
+    if: ${{ !cancelled() && needs.plan.result == 'success' && needs.preflight.result == 'success' }}
+    needs: [plan, preflight, extract]
     runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:

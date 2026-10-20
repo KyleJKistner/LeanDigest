@@ -1,8 +1,9 @@
 """Level-1 dependency-cone campaign: plan, dispatch matrix, one shard, reconciliation.
 
 `plan` reads only the pinned release archive (digest-checked) and executes nothing.
-`run` executes the unchanged original source and requires --trust-project; it is
-not a sandbox. Cone readings are a separate denominator from the 536 targets.
+`source-artifact` checks saved GitHub artifact metadata. `dependencies` and `run`
+execute the unchanged original source and require --trust-project; they are not
+a sandbox. Cone readings are a separate denominator from the 536 targets.
 """
 from hashlib import sha256
 from pathlib import Path
@@ -10,7 +11,7 @@ import argparse,json,sys,urllib.request
 sys.path.insert(0,str(Path(__file__).resolve().parents[1]))
 from scripts.fetch_reading_corpus import CORPUS
 from proofreader.dependency_cone import (make_plan,read_archive,validate_plan,scope_shards,run_shard,
-                                         reconcile,REPORT)
+                                         reconcile,check_source_artifact,preflight_dependencies,REPORT)
 from proofreader.kernel_io import strict_json
 from proofreader.original_project import write
 
@@ -40,7 +41,7 @@ def load(path: Path):
 
 def main(argv=None) -> int:
     p=argparse.ArgumentParser(description=__doc__.split('\n\n')[0])
-    p.add_argument('mode',choices=['fetch','plan','inputs','matrix','run','reconcile'])
+    p.add_argument('mode',choices=['fetch','plan','inputs','matrix','source-artifact','dependencies','run','reconcile'])
     p.add_argument('--archive',type=Path,help='Pinned release archive (default: download the pinned URL)')
     p.add_argument('--cone-plan',type=Path,default=COMMITTED)
     p.add_argument('--check',action='store_true',help='plan: require byte equality with --cone-plan')
@@ -51,8 +52,9 @@ def main(argv=None) -> int:
     p.add_argument('--project',type=Path)
     p.add_argument('--shard')
     p.add_argument('--shards',type=Path,help='reconcile: directory searched for '+REPORT)
-    p.add_argument('--dependency-cache',choices=['true','false',''],default='true',
-                   help='run: whether the pinned dependency cache was restored (GitHub cache-hit output)')
+    p.add_argument('--dependencies',choices=['cache','resolve'],default='cache',
+                   help='run: the pinned cache was restored, or re-create it with the seed commands')
+    p.add_argument('--metadata',type=Path,help='source-artifact: saved GitHub artifact metadata (JSON)')
     p.add_argument('--output',type=Path)
     p.add_argument('--trust-project',action='store_true')
     a=p.parse_args(argv)
@@ -77,6 +79,12 @@ def main(argv=None) -> int:
         print(json.dumps({'plan_sha256':plan['plan_sha256'],'denominator':plan['denominator'],
                           'pilot':{k:plan['pilot'][k] for k in ('shards','lemmas','eligible_shards')}},indent=2))
         return 0
+    if a.mode=='source-artifact':
+        if a.metadata is None:p.error('source-artifact requires --metadata')
+        try:print(json.dumps(check_source_artifact(load(a.metadata)),indent=2))
+        except ValueError as exc:
+            print(exc,file=sys.stderr);return 1
+        return 0
     plan=validate_plan(load(a.cone_plan))
     if a.mode=='matrix':
         shards=scope_shards(plan,a.scope)
@@ -87,10 +95,17 @@ def main(argv=None) -> int:
         print(json.dumps({'scope':a.scope,'shards':len(shards),'lemmas':sum(x['lemmas'] for x in matrix['include'])}))
         return 0
     if a.environment is None or a.output is None:p.error(a.mode+' requires --environment and --output')
+    if a.mode=='dependencies':
+        if not (a.project and a.original_plan):p.error('dependencies requires --project and --original-plan')
+        report=preflight_dependencies(a.project.resolve(),load(a.original_plan),load(a.environment),a.output.resolve(),
+                                      trust_project=a.trust_project)
+        print(json.dumps({k:report[k] for k in ('matches_pinned_environment','error','steps')},indent=2))
+        if report['error']:print(report['error'],file=sys.stderr)
+        return 0 if report['matches_pinned_environment'] and not report['error'] else 2
     if a.mode=='run':
         if not (a.project and a.original_plan and a.shard):p.error('run requires --project, --original-plan and --shard')
         report=run_shard(a.project.resolve(),load(a.original_plan),load(a.environment),plan,a.shard,a.output.resolve(),
-                         trust_project=a.trust_project,dependency_cache=a.dependency_cache=='true')
+                         trust_project=a.trust_project,dependencies=a.dependencies)
         print(json.dumps({k:report[k] for k in ('shard_id','module','status','error','statuses','readings_generated')},indent=2))
         return 0 if report['status'] in {'complete','partial'} else 2
     if a.shards is None:p.error('reconcile requires --shards')
