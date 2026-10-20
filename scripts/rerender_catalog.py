@@ -269,6 +269,14 @@ def changes(base: dict, current: dict, declared: dict | None = None) -> dict:
     return {k:dict(sorted(v.items())) for k,v in sorted(table.items())}
 
 
+def per_reading(rows: dict) -> dict:
+    """How many readings have fewer, the same or more gap steps and gap frames than published."""
+    def compare(key):
+        c=Counter('fewer' if r['after'][key]<r['before'][key] else 'more' if r['after'][key]>r['before'][key] else 'same' for r in rows.values())
+        return {k:c[k] for k in ('fewer','same','more')}
+    return {'gap_steps':compare('gaps'),'frames_in_gaps':compare('gap_frames')}
+
+
 def profile(rows: dict, side: str) -> dict:
     rules=Counter()
     for r in rows.values():rules.update(r[side]['rules'])
@@ -302,7 +310,12 @@ def preview_page(record: dict) -> str:
     body+='<section><h2>Changes</h2><table><thead><tr><th>Measure</th><th>Published</th><th>Preview</th></tr></thead><tbody>'
     body+=''.join('<tr><td>'+label+'</td><td>'+str(x)+'</td><td>'+str(y)+'</td></tr>' for label,x,y in cells)+'</tbody></table>'
     body+=('<p>Several checked frames can be grouped into one displayed step. Such grouping lowers the gap count without explaining '
-           'those frames; the frame count above shows it.</p><h3>Explanation gaps by rule</h3><table><thead><tr><th>Rule</th><th>Published</th><th>Preview</th></tr></thead><tbody>')
+           'those frames; the frame count above shows it.</p><h3>Change per reading</h3><table><thead><tr><th>Readings with</th>'
+           '<th>Fewer</th><th>The same</th><th>More</th></tr></thead><tbody>')
+    for label,key in [('Gap steps','gap_steps'),('Checked frames inside gaps','frames_in_gaps')]:
+        c=record['explanation_gaps']['per_reading'][key]
+        body+='<tr><td>'+label+'</td><td>'+str(c['fewer'])+'</td><td>'+str(c['same'])+'</td><td>'+str(c['more'])+'</td></tr>'
+    body+=('</tbody></table><h3>Explanation gaps by rule</h3><table><thead><tr><th>Rule</th><th>Published</th><th>Preview</th></tr></thead><tbody>')
     rules=sorted(set(b['gaps_by_rule'])|set(a['gaps_by_rule']),key=lambda r:(-a['gaps_by_rule'].get(r,0),-b['gaps_by_rule'].get(r,0),r))
     body+=''.join('<tr><td><code>'+esc(r)+'</code></td><td>'+str(b['gaps_by_rule'].get(r,0))+'</td><td>'+str(a['gaps_by_rule'].get(r,0))+'</td></tr>' for r in rules)
     body+=('</tbody></table><p class="small">Rule tags come from each renderer version. A later version can split one earlier tag '
@@ -329,6 +342,7 @@ def release_notes(record: dict, published: str) -> str:
     state=lambda r:'passed, route `'+r['navigation_backend']+'`' if r.get('passed') else 'not run' if r.get('not_run') else 'failed'
     browser=state(w)+('' if w.get('not_run') else '; original-verification pages '+state(record['original_browser_audit']))
     assets=[k for k,v in record['files'].items() if k.startswith('assets/') and v.get('replaced')]
+    pr=record['explanation_gaps']['per_reading']
     lines=['# Catalog preview','',
         'This catalog is '+(f"the published release `{p['release']}`" if p['release'] else f"a published catalog with manifest SHA-256 `{p['manifest_sha256']}`")
         +f" with its {record['readings']['re_rendered']} proof readings "
@@ -339,6 +353,8 @@ def release_notes(record: dict, published: str) -> str:
         f"Checked frames inside gaps: {b['frames_in_explanation_gaps']} published, {a['frames_in_explanation_gaps']} here."
         +(' One displayed gap step can group several checked frames, so the step count fell while more frames sit inside gaps.'
           if a['explicit_explanation_gaps']<b['explicit_explanation_gaps'] and a['frames_in_explanation_gaps']>b['frames_in_explanation_gaps'] else ''),
+        f"- Per reading: {pr['gap_steps']['fewer']} fewer, {pr['gap_steps']['same']} the same and {pr['gap_steps']['more']} more gap steps; "
+        f"{pr['frames_in_gaps']['fewer']} fewer, {pr['frames_in_gaps']['same']} the same and {pr['frames_in_gaps']['more']} more checked frames inside gaps.",
         f"- Citation links: of {cl['cited']} cited project names, {cl['linked_to_reading']} link to a proof reading, "
         f"{cl['linked_to_source']} only to a bundled source line, and {cl['unresolved']} stay unresolved.",
         '- Added `explanations.html` and `explanation-gaps.json`, the inventory of every explanation gap.',
@@ -478,7 +494,7 @@ def build_preview(published: Path, output: Path, *, archive_sha256: str = CORPUS
         'selected_checked_frames':frames,
         'evidence':{'files':len(evidence),'names':list(EVIDENCE),'byte_identical_to_published_manifest':True},
         'explanation_gaps':{'published':profile(rows,'before'),'preview':profile(rows,'after'),
-                            'readings_with_gaps':gaps['readings_with_gaps']},
+                            'readings_with_gaps':gaps['readings_with_gaps'],'per_reading':per_reading(rows)},
         'citation_links':{'published':before.get('citation_links'),'preview':after['citation_links']},
         'pages':{'finding_reading_links_updated':linked,'navigation_updated':navigation,'preview_notices':noticed}}
     require(record['explanation_gaps']['preview']['explicit_explanation_gaps']==gaps['explicit_explanation_gaps'],'Gap inventory differs')

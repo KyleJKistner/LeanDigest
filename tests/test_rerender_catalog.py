@@ -165,6 +165,8 @@ def test_preview_rerenders_readings_and_updates_every_count(published, tmp_path)
     gaps = s['explanation_gaps']
     assert gaps['published']['explicit_explanation_gaps'] == gaps['preview']['explicit_explanation_gaps'] + 1 == 5
     assert gaps['published']['frames_in_explanation_gaps'] == 5 and gaps['preview']['frames_in_explanation_gaps'] == 4
+    assert gaps['per_reading'] == {'gap_steps': {'fewer': 1, 'same': 1, 'more': 0},
+                                   'frames_in_gaps': {'fewer': 1, 'same': 1, 'more': 0}}
     assert s['published']['printer_versions'] == {'source-math-en/0.4.1': 2} and s['published']['release'] is None
     coverage = json.loads((site / 'coverage.json').read_text())
     assert coverage['explicit_explanation_gaps'] == 4 and coverage['citation_links']['names']['linked_to_reading'] == 1
