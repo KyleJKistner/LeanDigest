@@ -1,0 +1,155 @@
+[
+  {
+    "id": "bezout_original",
+    "target": "OAI.ComplexCancellation.BezoutFrame.exists_frame",
+    "source": "candidates/bezout_original.lean",
+    "intent": "Copied original proof body",
+    "kind": "candidate"
+  },
+  {
+    "id": "bezout_compact",
+    "target": "OAI.ComplexCancellation.BezoutFrame.exists_frame",
+    "source": "candidates/bezout_compact.lean",
+    "intent": "Try automation alone",
+    "kind": "candidate"
+  },
+  {
+    "id": "bezout_explanatory",
+    "target": "OAI.ComplexCancellation.BezoutFrame.exists_frame",
+    "source": "candidates/bezout_explanatory.lean",
+    "intent": "Separate the compatibility lemma; derive rather than guess the witness",
+    "kind": "candidate"
+  },
+  {
+    "id": "reverse_original",
+    "target": "List.reverse_reverse",
+    "source": "candidates/reverse_original.lean",
+    "intent": "Copied library proof body with qualified names",
+    "kind": "candidate"
+  },
+  {
+    "id": "reverse_compact",
+    "target": "List.reverse_reverse",
+    "source": "candidates/reverse_compact.lean",
+    "intent": "Try the one-line simplifier; test target leakage",
+    "kind": "candidate"
+  },
+  {
+    "id": "reverse_explanatory",
+    "target": "List.reverse_reverse",
+    "source": "candidates/reverse_explanatory.lean",
+    "intent": "Prove how reversal acts on a last element, then use induction",
+    "kind": "candidate"
+  },
+  {
+    "id": "cantor_original",
+    "target": "Function.cantor_surjective",
+    "source": "candidates/cantor_original.lean",
+    "intent": "Copied Mathlib diagonal proof",
+    "kind": "candidate"
+  },
+  {
+    "id": "cantor_compact",
+    "target": "Function.cantor_surjective",
+    "source": "candidates/cantor_compact.lean",
+    "intent": "Try automation without proposing the diagonal set",
+    "kind": "candidate"
+  },
+  {
+    "id": "cantor_explanatory",
+    "target": "Function.cantor_surjective",
+    "source": "candidates/cantor_explanatory.lean",
+    "intent": "Establish the explicit omitted set first; use surjectivity only at the end",
+    "kind": "candidate"
+  },
+  {
+    "id": "reverse_explanatory_v2",
+    "target": "List.reverse_reverse",
+    "source": "candidates/reverse_explanatory_v2.lean",
+    "intent": "Remove an extra tactic after simp only had already closed the helper",
+    "kind": "candidate"
+  },
+  {
+    "id": "reverse_compact_v2",
+    "target": "List.reverse_reverse",
+    "source": "candidates/reverse_compact_v2.lean",
+    "intent": "Use the existing accumulator lemma by definitional reduction",
+    "kind": "candidate"
+  },
+  {
+    "id": "cantor_fixpoint",
+    "target": "Function.cantor_surjective",
+    "source": "candidates/cantor_fixpoint.lean",
+    "intent": "Use the general fixed-point form of diagonalization without the target theorem",
+    "kind": "candidate"
+  },
+  {
+    "id": "bezout_compact_v2",
+    "target": "OAI.ComplexCancellation.BezoutFrame.exists_frame",
+    "source": "candidates/bezout_compact_v2.lean",
+    "intent": "Keep the witness and its two identities; automate only the concluding algebra",
+    "kind": "candidate"
+  },
+  {
+    "id": "bezout_explanatory_v3",
+    "target": "OAI.ComplexCancellation.BezoutFrame.exists_frame",
+    "source": "candidates/bezout_explanatory_v3.lean",
+    "intent": "Also check why the original product condition is necessary",
+    "kind": "candidate"
+  },
+  {
+    "id": "control_direct_target",
+    "target": "List.reverse_reverse",
+    "source": "candidates/control_direct_target.lean",
+    "kind": "control",
+    "intent": "Reject invalid acceptance shortcut",
+    "expected_error": "Circular shortcut"
+  },
+  {
+    "id": "control_hidden_target",
+    "target": "List.reverse_reverse",
+    "source": "candidates/control_hidden_target.lean",
+    "kind": "control",
+    "intent": "Reject invalid acceptance shortcut",
+    "expected_error": "Circular shortcut"
+  },
+  {
+    "id": "control_wrong_statement",
+    "target": "List.reverse_reverse",
+    "source": "candidates/control_wrong_statement.lean",
+    "kind": "control",
+    "intent": "Reject invalid acceptance shortcut",
+    "expected_error": "declaration type mismatch"
+  },
+  {
+    "id": "control_admission",
+    "target": "List.reverse_reverse",
+    "source": "candidates/control_admission.lean",
+    "kind": "control",
+    "intent": "Reject invalid acceptance shortcut",
+    "expected_error": "Disallowed axiom"
+  },
+  {
+    "id": "control_extra_hypothesis",
+    "target": "List.reverse_reverse",
+    "source": "candidates/control_extra_hypothesis.lean",
+    "kind": "control",
+    "intent": "Reject invalid acceptance shortcut",
+    "expected_error": "declaration type mismatch"
+  },
+  {
+    "id": "control_witness_sign",
+    "target": "OAI.ComplexCancellation.BezoutFrame.exists_frame",
+    "source": "candidates/control_witness_sign.lean",
+    "kind": "control",
+    "intent": "Wrong sign in the proposed witness",
+    "expected_error": "error:"
+  },
+  {
+    "id": "reverse_indexed",
+    "target": "List.reverse_reverse",
+    "source": "candidates/reverse_indexed.lean",
+    "intent": "Explain reversal as the involution i \u21a6 n\u22121\u2212i, not as accumulator code",
+    "kind": "candidate"
+  }
+]
