@@ -69,6 +69,25 @@ jobs:
           PROOFREADER_REQUIRE_LEAN: '1'
           LEANGLISH_BATCH_ARTIFACTS: artifacts/ci-narrative-batch
         run: python -m pytest tests/test_lean_integration.py tests/test_kernel_integration.py tests/test_narrative_integration.py tests/test_narrative_batch_integration.py tests/test_narrative_context_integration.py -q --junitxml=artifacts/ci-lean.xml
+      - name: Check source expressions and lemma extraction
+        run: |
+          lean_binary="$(cd lean && elan which lean)"
+          python scripts/check_source_expressions.py --lean "$lean_binary" --output artifacts/ci-source-expressions-core --trust-project
+          git diff --exit-code
+      - name: Retain the source-expression checking inputs
+        if: always()
+        run: |
+          mkdir -p artifacts/ci-source-expressions-core
+          git rev-parse HEAD > artifacts/ci-source-expressions-core/commit.txt
+          git rev-parse HEAD^{tree} > artifacts/ci-source-expressions-core/tree.txt
+          git archive --format=zip HEAD -o artifacts/ci-source-expressions-core/source.zip
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: source-expressions-core
+          path: artifacts/ci-source-expressions-core/
+          retention-days: 30
+          if-no-files-found: error
       - uses: actions/upload-artifact@v4
         if: always()
         with:

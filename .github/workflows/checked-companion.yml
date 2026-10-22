@@ -3,6 +3,18 @@ on:
   workflow_dispatch:
   pull_request:
     paths:
+      - 'lean/SourceExpressions*.lean'
+      - 'lean/KernelExport.lean'
+      - 'lean/JsonReplay.lean'
+      - 'lean/Narrative.lean'
+      - 'proofreader/source_expressions.py'
+      - 'proofreader/kernel.py'
+      - 'proofreader/argument_index.py'
+      - 'scripts/check_source_expressions.py'
+      - 'scripts/check_source_cancellation.py'
+      - 'tests/test_source_expression*.py'
+      - 'tests/fixtures/source-expressions/**'
+      - 'docs/SOURCE_EXPRESSIONS.md'
       - 'lean/ControlledEnglish.lean'
       - 'lean/ControlledEnglishAudit.lean'
       - 'docs/companion/**'
@@ -69,3 +81,15 @@ jobs:
         with:
           name: bezout-native-evidence
           path: artifacts/ci-bezout/
+      - name: Check generic source expressions against the retained theorem
+        run: |
+          lean_binary="$(cd companion-mathlib && elan which lean)"
+          python scripts/check_source_expressions.py --lean "$lean_binary" --project companion-mathlib --output artifacts/ci-source-expressions-mathlib --trust-project
+          git diff --exit-code
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: source-expressions-mathlib
+          path: artifacts/ci-source-expressions-mathlib/
+          retention-days: 30
+          if-no-files-found: error
