@@ -81,3 +81,12 @@ def test_notes_do_not_claim_certification():
  b=json.loads((HERE/'book.json').read_text());assert b['english_certified'] is False
  assert len({a['id'] for a in b['articles']})==3
  assert {a['chosen'] for a in b['articles']}=={'bezout_explanatory_v3','reverse_indexed','cantor_explanatory'}
+
+
+def test_mathml_tokens_cannot_contain_other_tokens():
+ with pytest.raises(ValueError,match='nested MathML token'):
+  BUILD.validate_mathml('<math><mo><mo>+</mo><mo>+</mo></mo></math>')
+
+
+def test_single_token_concatenation_notation_is_allowed():
+ BUILD.validate_mathml('<math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>X</mi><mo>∥</mo><mi>Y</mi></mrow></math>')

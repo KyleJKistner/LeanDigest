@@ -39,10 +39,13 @@ def check(html: Path, output: Path, mode: str) -> dict:
                     assert source==expected
                 q.locator(f'#{id} .comparison').evaluate('(x)=>x.open=false')
                 q.screenshot(path=str(output/(id+'-desktop.png')),full_page=True)
+                q.locator(f'#{id} details.note').evaluate_all('(xs)=>xs.forEach(x=>x.open=true)')
+                q.screenshot(path=str(output/(id+'-expanded-desktop.png')),full_page=True)
                 q.set_viewport_size({'width':390,'height':844})
                 assert q.evaluate('document.documentElement.scrollWidth<=innerWidth')
                 q.screenshot(path=str(output/(id+'-mobile.png')),full_page=True)
                 q.set_viewport_size({'width':1280,'height':1000})
+                q.locator(f'#{id} details.note').evaluate_all('(xs)=>xs.forEach(x=>x.open=false)')
             report['articles_checked']=3
             # Verify examples independently with Python integer multiplication.
             triples=[(x,y,z) for x in range(-8,9) for y in range(-8,9) for z in range(-8,9) if x*y==z*(z+1)]

@@ -13,10 +13,23 @@ import json
 from pathlib import Path
 import re
 import subprocess
+import xml.etree.ElementTree as ET
 
 HERE=Path(__file__).resolve().parent
 
 def digest(data: bytes) -> str:return hashlib.sha256(data).hexdigest()
+
+
+def validate_mathml(markup: str) -> None:
+    """Reject nested MathML tokens that browsers can place on separate baselines.
+
+    This is a layout/structure guard, not a theorem about notation semantics.
+    """
+    root=ET.fromstring(markup)
+    for node in root.iter():
+        tag=node.tag.rsplit('}',1)[-1]
+        if tag in {'mi','mn','mo','ms','mtext'} and len(node):
+            raise ValueError('Unsupported nested MathML token: '+tag)
 
 
 def build(evidence: Path, destination: Path) -> dict:
@@ -82,6 +95,7 @@ def build(evidence: Path, destination: Path) -> dict:
     markup='''<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; connect-src 'none'; base-uri 'none'"><title>Proofs | Leanglish</title><style>'''+(HERE/'style.css').read_text()+'''</style></head><body><header><span class="brand">Leanglish</span><span class="label">Proofs</span></header><nav role="tablist" aria-label="Proof selection">'''+nav+'</nav><main>'+''.join(articles)+'</main><footer>Three-proof pilot · One OpenAI supporting theorem and two library controls.</footer><script type="application/json" id="reader-data">'+payload+'</script><script>'+(HERE/'reader.js').read_text()+'</script></body></html>'
     result=subprocess.run(['node',str(HERE/'render_math.js')],input=json.dumps(math),text=True,capture_output=True,check=True)
     rendered=json.loads(result.stdout)
+    for formula in rendered:validate_mathml(formula)
     markup=re.sub(r'<!--MATH:(\d+)-->',lambda m:rendered[int(m[1])],markup)
     destination.parent.mkdir(parents=True,exist_ok=True);destination.write_text(markup,encoding='utf-8')
     summary={'schema':'leanglish.exposition-page/v1','html_sha256':digest(markup.encode()),'book_sha256':digest((HERE/'book.json').read_bytes()),'renderer_sha256':digest(Path(__file__).read_bytes()),'math_blocks':len(math),'articles':len(articles),'english_certified':False,'human_evaluation':False,'sources':{id:outcomes[id]['source_sha256'] for id in sources},'native_records':{id:outcomes[id]['record_sha256'] for id in records}}

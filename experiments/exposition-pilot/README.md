@@ -123,7 +123,10 @@ the queue; completion means the checks ran, not that every proposal was accepted
 The page build requires the selected accepted alternatives and rejects missing
 or inconsistent records.
 
-The local 17-test suite passed. The in-memory Chromium audit checked all three
+The local 19-test suite passed. A print review caught a nested MathML operator
+that split the concatenation symbol across baselines. The notation now uses one
+operator token; a structural guard rejects nested token elements. This does not
+certify the meaning of the typeset notation. The in-memory Chromium audit checked all three
 articles, exact source downloads, mobile width, 138 integer examples, 18 list
 positions, all 16 four-entry diagonal patterns, and 12 off-diagonal edits. It
 observed no page errors or remote requests. Local `file://` navigation was blocked

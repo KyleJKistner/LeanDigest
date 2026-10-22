@@ -217,15 +217,15 @@
               "blocks": [
                 {
                   "kind": "paragraph",
-                  "text": "Write \\(a::X\\) for prepending an entry and \\(X\\mathbin{+\\!+}Y\\) for concatenation. Reversal sends a first entry to the end and a last entry to the front:"
+                  "text": "Write \\(a::X\\) for prepending an entry and \\(X\\mathbin{\\Vert}Y\\) for concatenation. Reversal sends a first entry to the end and a last entry to the front:"
                 },
                 {
                   "kind": "math",
-                  "tex": "\\operatorname{rev}(a::X)=\\operatorname{rev}(X)\\mathbin{+\\!+}[a],"
+                  "tex": "\\operatorname{rev}(a::X)=\\operatorname{rev}(X)\\mathbin{\\Vert}[a],"
                 },
                 {
                   "kind": "math",
-                  "tex": "\\operatorname{rev}(X\\mathbin{+\\!+}[a])=a::\\operatorname{rev}(X)."
+                  "tex": "\\operatorname{rev}(X\\mathbin{\\Vert}[a])=a::\\operatorname{rev}(X)."
                 },
                 {
                   "kind": "paragraph",
@@ -233,7 +233,7 @@
                 },
                 {
                   "kind": "math",
-                  "tex": "\\begin{aligned}\\operatorname{rev}(\\operatorname{rev}(a::X))&=\\operatorname{rev}(\\operatorname{rev}(X)\\mathbin{+\\!+}[a])\\\\&=a::\\operatorname{rev}(\\operatorname{rev}(X))\\\\&=a::X.\\end{aligned}"
+                  "tex": "\\begin{aligned}\\operatorname{rev}(\\operatorname{rev}(a::X))&=\\operatorname{rev}(\\operatorname{rev}(X)\\mathbin{\\Vert}[a])\\\\&=a::\\operatorname{rev}(\\operatorname{rev}(X))\\\\&=a::X.\\end{aligned}"
                 }
               ],
               "refs": [
@@ -318,7 +318,7 @@
               "blocks": [
                 {
                   "kind": "paragraph",
-                  "text": "No. The construction uses \\(f\\) itself to specify membership in \\(D\\). It does not enumerate \\(A\\) or make one choice for each element. The finite table below is an illustration, not a restriction of the theorem."
+                  "text": "No. The construction uses \\(f\\) itself to specify membership in \\(D\\). It does not enumerate \\(A\\) or make one choice for each element. The finite illustration is not a restriction of the theorem."
                 }
               ],
               "refs": [
