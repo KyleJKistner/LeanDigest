@@ -1,0 +1,152 @@
+{
+  "schema": "leanglish.argument-cohort/v1",
+  "seed": "leanglish-argument-explorer-20261021-v1",
+  "selection": "Smallest SHA-256(seed + NUL + canonical snapshot digest), ascending; ties by snapshot digest.",
+  "corpus_count": 492,
+  "corpus_file_digests_sha256": "9b34751d9a1e97f31993ba290ae26b82710a6ac956e3d81f2643dffdfcfa55ae",
+  "base_commit": "d31d9939b5a16e855cf71a359df968e113ad089f",
+  "source_artifact_id": 12285517963,
+  "source_artifact_sha256": "7e33a285419a89fbbcdeb935075eb7c231de6f5b49fcd089c7feecca606b00da",
+  "selected": [
+    {
+      "id": "82d0c7b188507f4397b38918",
+      "theorem": "OAI.SharpTerminalLeave.sharp_terminal_leave",
+      "snapshot_sha256": "c904f040fdefac877bdb84acb870f0f9827cef8284d251035fdbb87119a8d61b",
+      "file_sha256": "4a43b1f8f202c09267e6511c38cb10594f3078e97ba3dc8f9dff91680d566f75",
+      "selection_key": "023a4ad1f22a208e221def2348cfc9211949e9f41d4ef0583107f7fd3e7a10b3"
+    },
+    {
+      "id": "2239a1b0c44a028c3a0db7f2",
+      "theorem": "OAI.WLIdentification.main",
+      "snapshot_sha256": "518eab99c736141032ff32118f863c14e9d83bd236473ed970a410be15022891",
+      "file_sha256": "5488a2567752e3db19f11d58d22cfe5343f2f9754258c2d3219499f6759929d8",
+      "selection_key": "023c3f65743f9d5e023993ee245514ead1c9f11b99624f5498cb7637f11e3cfc"
+    },
+    {
+      "id": "e98d2e3b91328c7a65664665",
+      "theorem": "OAI.Zarankiewicz.mainTarget_proof",
+      "snapshot_sha256": "582036d04d82ce0b6646bbd87717c31a69e3c065057958fe1dc99cfeb8f23947",
+      "file_sha256": "1b237844862f785684f4cdddc81258608f1bfc760a8efbc6476207f41f52b299",
+      "selection_key": "023ff000b779f4f283cd24cc56da267afeebc6bf12285226d97f6c12fa484793"
+    },
+    {
+      "id": "20cab8cff7679da2c196a254",
+      "theorem": "OAI.CurrentProjection.actualRowMain",
+      "snapshot_sha256": "a0d7b078d837cb03dc1334976709b9ed2cb347ed41fea85cb3373dcaa6bd4089",
+      "file_sha256": "c872ec21ccdd955eeb6d0ecd3584244fb4b2813cdebe3b1f8f024b36f6853676",
+      "selection_key": "029da3168da9cca5e04b1734cbd208a054fed1d43a83980df72923fc965b8cde"
+    },
+    {
+      "id": "2960712980d0d63a80586fb8",
+      "theorem": "OAI.ExactModuli.exact_main",
+      "snapshot_sha256": "b3f227168ebecf1e870c36dc44166c10276ba7456d919ca970039e39ccacfc48",
+      "file_sha256": "fed3762055689942b47652345ac6a3298df5bcd829bb815b4a09cfee4f50ec1b",
+      "selection_key": "033241e8ab216d9f2cd1ff68d0a0337b03598fea4572265ea0514c7d479792f3"
+    },
+    {
+      "id": "6d8e821628f097e52be5c16e",
+      "theorem": "OAI.MatroidProphet.Assigned.hidden_vector",
+      "snapshot_sha256": "c53dd2ec1ccb9cf889860dcfc6daee73f6e89e7c186c6830616e1d91c079d98d",
+      "file_sha256": "76c820cf9b72512eb198e0f760c02d0562eb626d448c22b0781d388e313bd7d9",
+      "selection_key": "0342e7ed8f2b8226fe0c531029fafc9d5c7d981cc373385ae3cf17cd2c730f2a"
+    },
+    {
+      "id": "dbfe2501f0a220f44b87ca51",
+      "theorem": "OAI.LaughlinFock.thm_fock",
+      "snapshot_sha256": "5031279fbd1cce0021cd05505a52811caa5cd118a99e2066d51786323b8d49db",
+      "file_sha256": "daf9c4bacc2f2ca06177420775779ae57519d5b550123037e36deed498e3d7ca",
+      "selection_key": "03e427e2ed7d2144ac5710ff55ef8b2cf2c3d0ec627aefacd7e9956f902d8b5d"
+    },
+    {
+      "id": "50ee6a3f932f165a0ed0e9f9",
+      "theorem": "OAI.CirculantHadamard.Barker.even_length_eq_two_or_four",
+      "snapshot_sha256": "c7f6d15161d1fa99ae3835e5e6a4cc28dd73218b30cc77773baed39904b0acca",
+      "file_sha256": "2de339109468c2024473888b7f784839b9ad2a6f7f863a120a6fdc8de920e0dd",
+      "selection_key": "04e0ed9a3af51c2dfc52fe6d64836548a9e7c9e2b162f7befb77efe51621b6cd"
+    },
+    {
+      "id": "f001fbc29abb7ff7f0f193ad",
+      "theorem": "OAI.StandardMapEntropy.main_entropy_complete",
+      "snapshot_sha256": "d389b2935c2da79ef20e6ab61cc29af604c728add6ae2bfa47486186662c48ba",
+      "file_sha256": "42c54ff3e5c6c1368f991dfe4b5ce79e3a4cd2a7cafdf703183c8da5e7388656",
+      "selection_key": "0552dea630f265abb64cf79b7e174f4a1bc0196fbc4c7659eeef4a99d71c6ea6"
+    },
+    {
+      "id": "03a261dab1f9c5b0b39f25d8",
+      "theorem": "OAI.Kervaire.coefficient_injective",
+      "snapshot_sha256": "928cdba51a0970dd43384e177d461ca110e47d6733764d5f87501a8665eb800f",
+      "file_sha256": "8b3fb8f9d49284020003f5ac2c227be2fa3059bec1d77be360c3615a5e56db43",
+      "selection_key": "06dba60f4af0f971c63efb092510a3448f3d3a07cb80cf4c12666154468000ea"
+    },
+    {
+      "id": "981e6ad74ad85482b47979c4",
+      "theorem": "OAI.GeneralizedStarHeight.main",
+      "snapshot_sha256": "8d9fc9508934e7a0b7845462382406bbbed09e15d4bde07ea334ef59ba658f39",
+      "file_sha256": "2397d031e4dc4e697ab6933bf58b23cebecadf972366defb598747d5f6e76c56",
+      "selection_key": "08f09a946afdcfc67758fc17f02822906e491c29a3eab7a19a1a07c69aff3843"
+    },
+    {
+      "id": "61f923fa6b54e8223ac006d2",
+      "theorem": "OAI.AtomicTriangular.sharp_gaussian_minorants_atomic",
+      "snapshot_sha256": "0a8f2c5ecb6adffc9b24d00b54b24b8dc02232aeb9a7a36eb0fbad93aea408e1",
+      "file_sha256": "89c91878a38991750e2b521fb4d6092b2e5cd052a05d6799c4a09acf7129a897",
+      "selection_key": "08fd6c068f533990704a3826842c92835f5bb28a0e792f44d6efadaa19a395e5"
+    },
+    {
+      "id": "008a9f35be9a8725f8752541",
+      "theorem": "OAI.StrongThinTree.strongThinTree",
+      "snapshot_sha256": "b44c946fc00022c773c715fa1bce9016043dede70fbe89cf899956a4b13bfe98",
+      "file_sha256": "e6eec4bfc37d9c9379a96ebd2d029bfbb1da6556130da597a0a093da7842908a",
+      "selection_key": "0946dae61fa09db3756683ff18e0490f42f30ed9c15badab095cfb0223f1859f"
+    },
+    {
+      "id": "b06f6e3aa7675c54c403f460",
+      "theorem": "OAI.RandomKSAT.sharpness",
+      "snapshot_sha256": "d7c892da43fcf36ef20f42cadc67e9a8f40e6c1d5f0b43a7c8a3c1e636ae9ab9",
+      "file_sha256": "9b1195f23aef8fc14108b7bf8ebd940a5f6e49765980fccc8217ede2a77f6e7e",
+      "selection_key": "0a05d4f6065259e3b179663616bf812d687a78187de862bd84e66f867f98ef4b"
+    },
+    {
+      "id": "26cb68b996e05d803f3ece1f",
+      "theorem": "OAI.RationalHitting.main",
+      "snapshot_sha256": "07667de6a5a338c6825deb98e52031cdee9b84c957175b2e853b6ae3f46adc52",
+      "file_sha256": "f43c8e6aff0725542f9036ca7c36e04ec245cdff3490fd9bf2ed79f920902ce8",
+      "selection_key": "0a23ee27f8cca2ef6f7008676ac17db05ee9e9b8a3c7f6e6442cdbb6543aee28"
+    },
+    {
+      "id": "86e2a60b559cca241c81a63e",
+      "theorem": "OAI.FiniteCongruence.graph_criterion",
+      "snapshot_sha256": "f8d7309449eea9a7577da0d59db106d0993cd79d318d84d5225d4f09b16fd4e4",
+      "file_sha256": "f31f1c9778aa3a566d628616eb99f99b017cc4a0395c883754f35be2eae67ba7",
+      "selection_key": "0a5c3daed1f0cb14dac54dd7824608a0f408d6eecaa91cee2c4d6ca1dff4ca7d"
+    },
+    {
+      "id": "fd6ee4b580182e751044e5a3",
+      "theorem": "OAI.ClassicalON.main",
+      "snapshot_sha256": "7be15ce2ab22858f225dd5bba0e60e8974593907ee6282fb591877ae113589d6",
+      "file_sha256": "8513e7d47b3c3bb7994a54d3bb0b3f4d11b40cffb2e40ff3a55e76324fe7e016",
+      "selection_key": "0a8950250ff7ee14158108574450163a414e638c5dd95a549fbf654745f424fc"
+    },
+    {
+      "id": "ac3890ad73ba346d2127763b",
+      "theorem": "OAI.BoltzmannNonuniqueness.nonuniqueness",
+      "snapshot_sha256": "ccd0e591d95e012401e5fb8ebf8727605bd11e882e38f2aba3cb78e6005d4aa0",
+      "file_sha256": "ba0a6b0100b43c684325b001a090c77f9911b283959989d5ba6d222b99f09b87",
+      "selection_key": "0ad9fc66a2c0cbd292e1cbe232e71d6c2e83e347add59f68253efdfaf8bbaf47"
+    },
+    {
+      "id": "a34fa9ec232ec58581d2b99b",
+      "theorem": "OAI.RelativeGeneration.main_theorem",
+      "snapshot_sha256": "23cd7a6e3412f75bec9382897a50f567556349c6286c82e4877257be94691a9b",
+      "file_sha256": "56ee2337aa56e2b5db29df3fe3f7cd28150f9e3d94a1d8863422d865b8b56470",
+      "selection_key": "0b7319c699184ec97fc9738391ce51182ee01411d29c413c34826307b0091886"
+    },
+    {
+      "id": "1060eb9b95810adf20ec05f7",
+      "theorem": "OAI.TraceConeClassification.ExtendedTrace.add_mem_finiteSquareSet",
+      "snapshot_sha256": "4c0e455546b66e1384a7cdf1ff667cff0471743e7685d749b8cf7db89f926be1",
+      "file_sha256": "3daa94669dc9085966b8ff9394eedbb1adc2bc7d82fd16ac6dafec1756b813a3",
+      "selection_key": "10320858d305535d9f5ae91323bdec0e8f133101f49d9ca00f04d9d994f05742"
+    }
+  ]
+}

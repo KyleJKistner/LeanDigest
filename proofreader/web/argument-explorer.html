@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src data:; connect-src 'none'; base-uri 'none'; form-action 'none'">
+<title>Argument | Leanglish</title>
+<style>@STYLE@</style>
+</head>
+<body>
+<a class="skip" href="#goal">Skip to goal</a>
+<header><a class="brand" href="#">Leanglish</a><span>Argument</span><span id="proof-count"></span></header>
+<div class="layout">
+<aside aria-label="Proof selection">
+<label for="search">Find a proof</label><input id="search" type="search" placeholder="Theorem name" autocomplete="off">
+<div id="proof-list"></div>
+</aside>
+<main>
+<div id="empty" hidden>No matching proofs.</div>
+<div id="reader">
+<h1 id="theorem-name"></h1>
+<p class="note">Explore the recorded proof inputs and local facts. The text comes from the Lean snapshot.</p>
+<div class="toolbar"><button id="statement-button">Statement</button><button id="parent-button">Enclosing step</button><button id="pin-button">Add to reading order</button></div>
+<nav id="breadcrumb" aria-label="Source path"></nav>
+<section aria-labelledby="goal-heading"><div class="section-heading"><h2 id="goal-heading">Goal</h2><span id="frame-label"></span></div><pre id="goal" tabindex="-1"></pre><p id="operation"></p><div id="reference"></div></section>
+<section id="inputs-section" aria-labelledby="inputs-heading"><h2 id="inputs-heading">Proof inputs</h2><div id="inputs"></div><p id="input-note" class="note"></p></section>
+<section aria-labelledby="context-heading"><h2 id="context-heading">Local context</h2><div id="context"></div></section>
+<details id="facts-box"><summary>Local facts and definitions</summary><div id="facts"></div></details>
+<details id="plan-box"><summary>Reading order <span id="plan-count"></span></summary><p class="note">This changes navigation, not the proof. Each step keeps its own assumptions.</p><ol id="plan"></ol><button id="download-plan">Download reading order</button><button id="import-plan">Open reading order</button><input id="plan-file" type="file" accept=".json,application/json" hidden><p id="plan-message" class="note" role="status"></p><button id="clear-plan">Clear</button></details>
+<details><summary>Source record</summary><p id="source-path" class="note"></p><button id="download-snapshot">Download snapshot</button><pre id="source-frame"></pre></details>
+<details id="lean-box"><summary>Lean source</summary><p id="lean-path"></p><pre id="lean-source"></pre></details>
+<details><summary>Build record</summary><dl><dt>Snapshot</dt><dd><code id="snapshot-hash"></code></dd><dt>Navigation check</dt><dd>Matched to the snapshot.</dd><dt>New Lean run</dt><dd>Not performed by this reader.</dd></dl><p class="note">Local references may omit uses inside expressions or unexpanded proofs. Absence from this view does not show that a hypothesis is unnecessary.</p></details>
+</div>
+</main>
+</div>
+<dialog id="binding-dialog" aria-labelledby="binding-title"><div class="section-heading"><h2 id="binding-title"></h2><button id="close-dialog">Close</button></div><pre id="binding-type"></pre><p id="binding-kind"></p><div id="binding-origin"></div><h3>Recorded references</h3><div id="binding-uses"></div><p class="note">Other uses may not be recorded. This is not a test of whether the hypothesis is necessary.</p></dialog>
+<p id="status" class="sr-only" aria-live="polite"></p>
+<script id="argument-data" type="application/json">@DATA@</script>
+<script>@SCRIPT@</script>
+</body>
+</html>
