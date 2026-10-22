@@ -1,0 +1,43 @@
+{
+  "agent_roles": {
+    "coordination_audit": "Independent adversarial tests, mathematical/source audit, and architectural critique",
+    "logical_explanations": "Logical-rule implementation, mathematical draft, and proved controlled-language core",
+    "presentation_review": "Fresh independent mathematics, architecture and artifact review",
+    "reader_navigation": "Offline reader navigation and complete companion UI"
+  },
+  "bezout_native_observation": "native/observation.json",
+  "branch": "work/swarm-reader-completion-20261018",
+  "controlled_audit_compile_exit_code": 0,
+  "controlled_language_compile_exit_code": 0,
+  "controlled_language_scope": "Typed logical derivations and supported local inference token sentences; no String/HTML, full proof text, snapshot importer or arithmetic certification.",
+  "date_utc": "2026-10-18",
+  "english_companion_formally_verified": false,
+  "existing_native_integration": {
+    "errors": "0",
+    "failures": "0",
+    "skipped": "0",
+    "tests": "8",
+    "time": "95.887"
+  },
+  "files": {
+    "docs/companion/index.html": "71c87a7b4856d76136a9e405e032e8424efa89dd1ef019935389a40af6530522",
+    "lean/ControlledEnglish.lean": "1fd897784400c9e0362ab12b8e4006651d090e098f2dd3c24fa7a979386b4c41",
+    "lean/ControlledEnglishAudit.lean": "9b96fbcda845716f5a1479581713a6b9c402fcda735066bea578d557788f54d3",
+    "proofreader/narrative.py": "b4bbfc000c948802d0448574901b31725f9a9b81863332d6b97d1e2fb5511dc8",
+    "scripts/check_bezout_companion.py": "9487f4eaec553ce0a9c1ab958bb4765806340f9e321687602efbaf3b035bae98"
+  },
+  "full_original_project_replayed_here": false,
+  "human_comprehension_study_performed": false,
+  "mathematical_review": "Independent AI reviews found no mathematical or source correspondence defect in the curated supporting-theorem companion.",
+  "observations_authenticated": false,
+  "other_session_head_observed": "3da3bc40aa2124983eec3da18d24b6f9fb87d685",
+  "python_and_browser": {
+    "errors": "0",
+    "failures": "0",
+    "skipped": "0",
+    "tests": "795",
+    "time": "33.652"
+  },
+  "python_and_browser_command": "PROOFREADER_REQUIRE_BROWSER=1 python -m pytest -q --ignore=tests/test_lean_integration.py --ignore=tests/test_kernel_integration.py --ignore=tests/test_narrative_integration.py --ignore=tests/test_narrative_batch_integration.py",
+  "schema": "leanglish.swarm-validation/v1"
+}

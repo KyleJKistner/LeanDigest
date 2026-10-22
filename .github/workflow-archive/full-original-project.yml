@@ -1,0 +1,192 @@
+name: Complete original OpenAI project
+on:
+  workflow_dispatch:
+  push:
+    branches: [work/full-original-project]
+    paths: ['.github/workflows/full-original-project.yml']
+permissions:
+  contents: read
+  actions: read
+concurrency:
+  group: full-original-project
+  cancel-in-progress: false
+
+env:
+  GLIBC_TUNABLES: glibc.malloc.mmap_max=0:glibc.malloc.arena_max=1
+jobs:
+  seed:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    outputs:
+      cache_key: ${{ steps.key.outputs.value }}
+    steps:
+      - uses: actions/checkout@v4
+        with: {persist-credentials: false}
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - uses: leanprover/lean-action@v1
+        with: {lake-package-directory: lean, auto-config: false, build: false, test: false, lint: false, use-mathlib-cache: false, use-github-cache: false}
+      - name: Acquire and plan original source before any compilation
+        env: {GH_TOKEN: '${{ github.token }}'}
+        run: |
+          mkdir -p /tmp/inputs/source /tmp/seed-evidence
+          gh run download 38822475057 -R "$GITHUB_REPOSITORY" -n complete-openai-lean-source -D /tmp/inputs/source
+          python - <<'PY'
+          from pathlib import Path
+          from scripts.assemble_finding_release import unpack_source
+          from proofreader.original_project import make_plan,read,write
+          p=unpack_source(Path('/tmp/inputs'),Path('/tmp/original-project'))
+          plan=make_plan(p,read(Path('/tmp/inputs/source/source-inventory.json')))
+          assert len(plan['tasks'])==441 and len(plan['dependencies'])==42
+          write(Path('/tmp/seed-evidence/plan.json'),plan)
+          PY
+      - id: key
+        run: echo 'value=original-openai-deps-1581d4cb-4341-full-v1' >> "$GITHUB_OUTPUT"
+      - uses: actions/cache/restore@v4
+        id: deps
+        with:
+          path: /tmp/original-project/lean/.lake/packages
+          key: ${{ steps.key.outputs.value }}
+      - name: Resolve full project, cache and exact compatibility-patch trees
+        run: |
+          sudo sysctl -w vm.max_map_count=1048576
+          python - <<'PY'
+          from pathlib import Path
+          from dataclasses import asdict
+          from proofreader.original_project import audit_environment,read,write
+          from proofreader.lean import run_bounded
+          p=Path('/tmp/original-project/lean');out=Path('/tmp/seed-evidence')
+          for label,command,timeout in [('resolve',['lake','update'],2400),('cache',['lake','exe','cache','get'],900)]:
+              r=run_bounded(command,p,timeout,32000000);write(out/(label+'.json'),asdict(r))
+              print(label,r.status,r.stderr[-3000:],flush=True)
+              if r.status!='passed':raise SystemExit(2)
+          write(out/'environment.json',audit_environment(p,read(out/'plan.json')))
+          PY
+      - uses: actions/cache/save@v4
+        if: steps.deps.outputs.cache-hit != 'true'
+        with:
+          path: /tmp/original-project/lean/.lake/packages
+          key: ${{ steps.key.outputs.value }}
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with: {name: original-project-seed, path: /tmp/seed-evidence/, retention-days: 90, if-no-files-found: error}
+  tools:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with: {persist-credentials: false}
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - uses: actions/setup-go@v5
+        with: {go-version: '1.27.2', cache: false}
+      - uses: leanprover/lean-action@v1
+        with: {lake-package-directory: lean, auto-config: false, build: false, test: false, lint: false, use-mathlib-cache: false, use-github-cache: false}
+      - name: Build pinned verification tools on the target kernel version
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/verified-tools/bin /tmp/verified-tools/evidence
+          go install github.com/zouuup/landrun/cmd/landrun@5ed4a3db3a4ad930d577215c6b9abaa19df7f99f
+          git clone https://github.com/leanprover/comparator.git /tmp/comparator
+          cd /tmp/comparator
+          git checkout --detach d03acab154d269c06e60e4de7e4cc85deebff94b
+          cp lean-toolchain /tmp/verified-tools/evidence/original-toolchain
+          printf 'leanprover/lean4:v4.34.1\n' > lean-toolchain
+          lake build comparator lean4export 2>&1 | tee /tmp/verified-tools/evidence/build.log
+          test "$(git -C .lake/packages/lean4export rev-parse HEAD)" = 076e8e57707e813375e8f9da8bf989799ace9680
+          cp .lake/build/bin/comparator .lake/packages/lean4export/.lake/build/bin/lean4export /tmp/verified-tools/bin/
+          cp "$(go env GOPATH)/bin/landrun" /tmp/verified-tools/bin/
+          git diff > /tmp/verified-tools/evidence/explicit-toolchain-override.patch
+          cp lake-manifest.json /tmp/verified-tools/evidence/lake-manifest.json
+      - name: Positive, negative and real sandbox controls
+        run: python scripts/comparator_smoke.py --bin /tmp/verified-tools/bin --output /tmp/verified-tools/controls
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with: {name: validated-comparator-toolchain, path: /tmp/verified-tools/, retention-days: 90, if-no-files-found: error}
+  libraries:
+    needs: seed
+    strategy:
+      fail-fast: false
+      max-parallel: 4
+      matrix:
+        shard: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24]
+    runs-on: ubuntu-latest
+    timeout-minutes: 340
+    steps:
+      - uses: actions/checkout@v4
+        with: {persist-credentials: false}
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - uses: leanprover/lean-action@v1
+        with: {lake-package-directory: lean, auto-config: false, build: false, test: false, lint: false, use-mathlib-cache: false, use-github-cache: false}
+      - uses: actions/download-artifact@v4
+        with: {name: original-project-seed, path: /tmp/seed-evidence}
+      - name: Acquire unchanged original source
+        env: {GH_TOKEN: '${{ github.token }}'}
+        run: |
+          mkdir -p /tmp/inputs/source
+          gh run download 38822475057 -R "$GITHUB_REPOSITORY" -n complete-openai-lean-source -D /tmp/inputs/source
+          python -c "from pathlib import Path; from scripts.assemble_finding_release import unpack_source; unpack_source(Path('/tmp/inputs'),Path('/tmp/original-project'))"
+      - uses: actions/cache/restore@v4
+        with: {path: /tmp/original-project/lean/.lake/packages, key: '${{ needs.seed.outputs.cache_key }}', fail-on-cache-miss: true}
+      - name: Build every module in the selected original library
+        run: |
+          sudo sysctl -w vm.max_map_count=1048576
+          python scripts/original_project.py run --project /tmp/original-project/lean --plan /tmp/seed-evidence/plan.json --output /tmp/library-result --kind library --shard ${{ matrix.shard }} --shards 25 --timeout 19200 --wall-seconds 19800 --trust-project
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with: {name: 'original-library-${{ matrix.shard }}', path: /tmp/library-result/, retention-days: 90, if-no-files-found: warn}
+  comparisons:
+    needs: [seed, tools]
+    strategy:
+      fail-fast: false
+      max-parallel: 8
+      matrix:
+        shard: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63]
+    runs-on: ubuntu-latest
+    timeout-minutes: 175
+    steps:
+      - uses: actions/checkout@v4
+        with: {persist-credentials: false}
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - uses: leanprover/lean-action@v1
+        with: {lake-package-directory: lean, auto-config: false, build: false, test: false, lint: false, use-mathlib-cache: false, use-github-cache: false}
+      - uses: actions/download-artifact@v4
+        with: {name: original-project-seed, path: /tmp/seed-evidence}
+      - uses: actions/download-artifact@v4
+        with: {name: validated-comparator-toolchain, path: /tmp/verified-tools}
+      - name: Acquire unchanged source before any solution is compiled
+        env: {GH_TOKEN: '${{ github.token }}'}
+        run: |
+          mkdir -p /tmp/inputs/source
+          gh run download 38822475057 -R "$GITHUB_REPOSITORY" -n complete-openai-lean-source -D /tmp/inputs/source
+          python -c "from pathlib import Path; from scripts.assemble_finding_release import unpack_source; unpack_source(Path('/tmp/inputs'),Path('/tmp/original-project'))"
+      - uses: actions/cache/restore@v4
+        with: {path: /tmp/original-project/lean/.lake/packages, key: '${{ needs.seed.outputs.cache_key }}', fail-on-cache-miss: true}
+      - name: Compare original statements and definitions and replay solutions
+        run: |
+          sudo sysctl -w vm.max_map_count=1048576
+          chmod +x /tmp/verified-tools/bin/*
+          python scripts/original_project.py run --project /tmp/original-project/lean --plan /tmp/seed-evidence/plan.json --output /tmp/comparison-result --kind comparator --shard ${{ matrix.shard }} --shards 64 --timeout 2400 --wall-seconds 9600 --comparator /tmp/verified-tools/bin/comparator --tool-receipt /tmp/verified-tools/controls/toolchain.json --trust-project
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with: {name: 'original-comparison-${{ matrix.shard }}', path: /tmp/comparison-result/, retention-days: 90, if-no-files-found: warn}
+  reconcile:
+    if: always()
+    needs: [seed, tools, libraries, comparisons]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with: {persist-credentials: false}
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - uses: actions/download-artifact@v4
+        with: {pattern: 'original-*', path: /tmp/observations}
+      - name: Reconcile every declared build and comparison target
+        run: |
+          python scripts/original_project.py reconcile --plan /tmp/observations/original-project-seed/plan.json --inputs /tmp/observations --output /tmp/observations/full-project-summary.json
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with: {name: original-project-summary, path: /tmp/observations/full-project-summary.json, retention-days: 90, if-no-files-found: warn}

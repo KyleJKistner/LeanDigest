@@ -1,0 +1,162 @@
+name: Original OpenAI project preflight
+on:
+  workflow_dispatch:
+  push:
+    branches: [work/full-original-project]
+    paths: ['.github/workflows/original-project-preflight.yml']
+permissions:
+  contents: read
+  actions: read
+concurrency:
+  group: original-project-preflight
+  cancel-in-progress: false
+jobs:
+  environment:
+    runs-on: ubuntu-latest
+    timeout-minutes: 50
+    env:
+      GLIBC_TUNABLES: glibc.malloc.mmap_max=0:glibc.malloc.arena_max=1
+    steps:
+      - uses: actions/checkout@v4
+        with: {persist-credentials: false}
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - uses: leanprover/lean-action@v1
+        with:
+          lake-package-directory: lean
+          auto-config: false
+          build: false
+          test: false
+          lint: false
+          use-mathlib-cache: false
+          use-github-cache: false
+      - name: Acquire all original project inputs
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mkdir -p /tmp/original-inputs/source /tmp/original-evidence
+          gh run download 38822475057 -R "$GITHUB_REPOSITORY" -n complete-openai-lean-source -D /tmp/original-inputs/source
+          python - <<'PY'
+          from pathlib import Path
+          from scripts.assemble_finding_release import unpack_source
+          import json,hashlib
+          project=unpack_source(Path('/tmp/original-inputs'),Path('/tmp/original-project'))
+          record={'upstream_commit':'1581d4cbdd69a0faf34b2089614fe2a814316a6a','source_inventory_verified':True,'original_lakefile_preserved':True,'original_manifest_sha256':hashlib.sha256((project/'lake-manifest.json').read_bytes()).hexdigest(),'original_package_count':len(json.loads((project/'lake-manifest.json').read_text())['packages'])}
+          Path('/tmp/original-evidence/source.json').write_text(json.dumps(record,indent=2)+'\n')
+          for name in ['lakefile.lean','lean-toolchain','lake-manifest.json']:
+              Path('/tmp/original-evidence/original-'+name).write_bytes((project/name).read_bytes())
+          PY
+      - name: Configure Linux mappings without altering Lean source
+        run: |
+          sudo sysctl -w vm.max_map_count=1048576
+          sysctl vm.max_map_count > /tmp/original-evidence/memory-settings.txt
+          df -h >> /tmp/original-evidence/memory-settings.txt
+      - name: Resolve and patch the full original Lake project
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          from dataclasses import asdict
+          from proofreader.lean import run_bounded
+          import json,hashlib
+          p=Path('/tmp/original-project/lean'); out=Path('/tmp/original-evidence')
+          r=run_bounded(['lake','update'],p,timeout=2100,max_output=16000000)
+          (out/'lake-update.json').write_text(json.dumps(asdict(r),indent=2)+'\n')
+          (out/'resolved-lake-manifest.json').write_bytes((p/'lake-manifest.json').read_bytes())
+          print(json.dumps({'status':r.status,'elapsed':r.elapsed_seconds,'reason':r.reason,'stdout_tail':r.stdout[-6000:],'stderr_tail':r.stderr[-6000:]},indent=2))
+          if r.status!='passed': raise SystemExit(2)
+          old=json.loads((out/'original-lake-manifest.json').read_text());new=json.loads((p/'lake-manifest.json').read_text())
+          key=lambda x:x['name'].strip('«»')
+          expected={key(x):(x['url'],x['rev']) for x in old['packages']};actual={key(x):(x['url'],x['rev']) for x in new['packages']}
+          assert expected==actual, 'Original dependency pins drifted'
+          assert (p/'lakefile.lean').read_bytes()==(out/'original-lakefile.lean').read_bytes()
+          (out/'pins.json').write_text(json.dumps({'exact_original_pins':True,'packages':actual},indent=2)+'\n')
+          PY
+      - name: Acquire original Mathlib cache
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          from dataclasses import asdict
+          from proofreader.lean import run_bounded
+          import json
+          r=run_bounded(['lake','exe','cache','get'],Path('/tmp/original-project/lean'),timeout=600,max_output=16000000)
+          Path('/tmp/original-evidence/cache.json').write_text(json.dumps(asdict(r),indent=2)+'\n')
+          print(json.dumps({'status':r.status,'reason':r.reason,'tail':r.stderr[-4000:]},indent=2))
+          if r.status!='passed':raise SystemExit(2)
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with: {name: original-project-environment, path: /tmp/original-evidence/, retention-days: 90, if-no-files-found: error}
+  tools:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with: {persist-credentials: false}
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - uses: actions/setup-go@v5
+        with: {go-version: 'stable', cache: false}
+      - uses: leanprover/lean-action@v1
+        with:
+          lake-package-directory: lean
+          auto-config: false
+          build: false
+          test: false
+          lint: false
+          use-mathlib-cache: false
+          use-github-cache: false
+      - name: Build real Landrun and pinned Comparator
+        run: |
+          mkdir -p /tmp/comparator-evidence /tmp/comparator-tools
+          go install github.com/zouuup/landrun/cmd/landrun@5ed4a3db3a4ad930d577215c6b9abaa19df7f99f
+          git clone https://github.com/leanprover/comparator.git /tmp/comparator-tools/comparator
+          cd /tmp/comparator-tools/comparator
+          git checkout --detach 865edc14486c3388e9225daa971da8e157488c3e
+          lake build comparator lean4export 2>&1 | tee /tmp/comparator-evidence/build.log
+          cp lake-manifest.json /tmp/comparator-evidence/comparator-manifest.json
+          cp lean-toolchain /tmp/comparator-evidence/comparator-toolchain
+      - name: Locate and build the upstream exporter for Lean 4.34.1
+        run: |
+          git clone https://github.com/leanprover/lean4export.git /tmp/comparator-tools/exporter
+          python - <<'PY'
+          import subprocess,json
+          from pathlib import Path
+          p=Path('/tmp/comparator-tools/exporter')
+          git=lambda *a:subprocess.check_output(['git','-C',str(p),*a],text=True).strip()
+          ceiling='5a9a355dc6c5fd82b69058d433e2ae2e8dfbf8fe'
+          candidates=git('rev-list',ceiling,'--','lean-toolchain').splitlines()
+          matches=[sha for sha in candidates if git('show',sha+':lean-toolchain')=='leanprover/lean4:v4.34.1']
+          if not matches:raise SystemExit('No exact upstream Lean 4.34.1 exporter toolchain revision found; do not silently substitute')
+          commit=matches[0];subprocess.run(['git','-C',str(p),'checkout','--detach',commit],check=True)
+          Path('/tmp/comparator-evidence/exporter-selection.json').write_text(json.dumps({'history_ceiling':ceiling,'commit':commit,'toolchain':'leanprover/lean4:v4.34.1'},indent=2)+'\n')
+          PY
+          cd /tmp/comparator-tools/exporter
+          lake build lean4export 2>&1 | tee /tmp/comparator-evidence/exporter-build.log
+          mkdir -p /tmp/comparator-evidence/bin
+          cp .lake/build/bin/lean4export /tmp/comparator-evidence/bin/
+          cp /tmp/comparator-tools/comparator/.lake/build/bin/comparator /tmp/comparator-evidence/bin/
+          cp "$(go env GOPATH)/bin/landrun" /tmp/comparator-evidence/bin/
+          sha256sum /tmp/comparator-evidence/bin/* > /tmp/comparator-evidence/SHA256SUMS
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with: {name: original-project-comparator-tools, path: /tmp/comparator-evidence/, retention-days: 90, if-no-files-found: error}
+  collect:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with: {persist-credentials: false}
+      - name: Retain all completed prior breadth outputs and targeted retries
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mkdir -p /tmp/reconciled/native-metadata
+          gh run download 39067324637 -R "$GITHUB_REPOSITORY" -p 'finding-proof-remaining-*' -D /tmp/reconciled/remaining
+          gh run download 39078995651 -R "$GITHUB_REPOSITORY" -p 'finding-proof-budget-*' -D /tmp/reconciled/budget
+          gh api --paginate "repos/$GITHUB_REPOSITORY/actions/runs/39067324637/jobs?per_page=100" > /tmp/reconciled/native-metadata/jobs-pages.json
+          gh api --paginate "repos/$GITHUB_REPOSITORY/actions/runs/39067324637/artifacts?per_page=100" > /tmp/reconciled/native-metadata/artifact-pages.json
+          gh api "repos/$GITHUB_REPOSITORY/actions/runs/39067324637" > /tmp/reconciled/native-metadata/run.json
+          git rev-parse HEAD > /tmp/reconciled/application-commit.txt
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with: {name: all-prior-proof-observations, path: /tmp/reconciled/, retention-days: 90, if-no-files-found: error}

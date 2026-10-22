@@ -54,7 +54,7 @@
     "Source discovery is heuristic; custom command-generated declarations need the Lean exporter."
   ],
   "snapshot_sha256": "dad8ef23a231904f37b73979f8284ea3662ffe8f8cd30c79066856f2095b4dd7",
-  "reading_binding": "14012256778ba7e69251bce7675b50a115952d6dd48f0e39abf56a2e8977c06a",
+  "reading_binding": "8cd2942c826cc79f3dda1ef7b34d38884258527a4fb67acedb1e8fa7138a3aab",
   "polynomial_certificates_replayed": 16,
   "exported_frames_accounted_for": 86,
   "whole_corpus_coverage": false,

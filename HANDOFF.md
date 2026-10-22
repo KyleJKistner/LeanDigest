@@ -1,4 +1,245 @@
-# Leanglish breadth checkpoint — 0.4.1
+# Consolidation and reading-quality checkpoint — 2026-10-20
+
+Resume from this section. The sections below it are earlier checkpoints, kept
+for their run identifiers; do not read their coverage numbers as current.
+
+## Branch state
+
+`claude/keen-archimedes-ihorkq` merges `main` (01dfd1e), the PR #8 recovery line
+(`work/completion-evidence-retries`, merged at 423e4e4 and again at efc679d), and
+the reader/certification stack (PRs #5, #6, #7, #9 and #10, via
+`work/proof-document-20261019`). Neither merge had conflicts. PR #8 is still
+being extended by another session; merge its new commits again before opening a
+pull request from this branch. No pull request exists for this branch yet, and
+nothing was merged into `main`. See docs/REPOSITORY_STATE.md for every branch.
+
+No independent agents in the AGENTS.md sense ran. Work was split across
+parallel subagents in this session. Each track had a separate adversarial
+self-check, and the integrated branch had a five-lens audit (fidelity, notation,
+links, documentation claims, workflows) whose 55 findings were each re-checked
+by an independent skeptic: 54 were confirmed (1 blocker, 24 major, 29 minor) and
+then fixed, with an independent check of each fix.
+
+## What changed
+
+- Measurement first: `leanglish reading-kpis` re-renders all 492 retained
+  snapshots of release `leanglish-original-project-317dc31` (fetched and
+  digest-checked by `scripts/fetch_reading_corpus.py`). CI fails when
+  `benchmarks/reading-kpis/current.json` is stale. The 0.4.1 baseline reproduces
+  the release's 7,587 gaps. The merged 0.4.2 reader stack measured 7,635.
+- Renderer `source-math-en/0.7.0` (narrative.py, narrative_rules.py,
+  narrative_checks.py, formula_surface.py): instance side conditions grouped,
+  norm_num/positivity/linarith certificates summarised, rewrite frontiers worded
+  by head, citations phrased as "By the project lemma X:", hypotheses grouped,
+  several logical shapes explained, and unchecked definitional unfoldings marked
+  as gaps. Corpus: gap steps 7,587 → 5,014, words 390,871 → 321,137, gap frames
+  7,587 → 8,175. See docs/READING_QUALITY.md for the per-change table.
+- Binder scope (audit blocker EF-1, present since the published 0.4.1 renderer):
+  a premise, conjunct, case or motive proof that introduces a variable or
+  assumption is now nested in its own "Prove …" block. Before the fix, 126
+  corpus and 38 cone readings displayed later steps as if under an earlier
+  branch's assumptions. `document()` now refuses any reading that violates the
+  scope invariant.
+- Display notation (notation.py): collision-checked namespace shortening, a
+  legend per reading (shown in the reader's default view), and a bail-out parser
+  for `x ↦ e`, 𝓝, #s, √, binomials and Real functions. The Tendsto limit form
+  now requires evidence of the binder type and fires on no retained snapshot.
+  See docs/NOTATION.md.
+- Citation links and cited-source bundling (declaration_index.py,
+  finding_catalog.py, app.js): links stay outside the checked reading. A local
+  full build links 1,557 of the 1,762 cited project names; the catalog preview
+  links 495 (30 to readings, 151 to supporting-lemma readings, 314 to source
+  lines). See docs/CITATION_LINKS.md.
+- Dependency cone (dependency_cone.py, cone_catalog.py, dependency-cone.yml):
+  level-1 plan of 1,722 cited lemmas in 379 environment modules. Pilot run
+  39373979494 produced readings for all 151 pilot lemmas; the catalog preview
+  includes them as a separate denominator. See docs/DEPENDENCY_CONE.md.
+- Reviewed-gloss mechanism (glossary.py): 85 proposals, none reviewed, so default
+  output is unchanged. All-reviewed projection at 0.7.0: 4,117 gap steps. See
+  docs/GLOSSARY.md and docs/glossary-review/.
+- Catalog preview (scripts/rerender_catalog.py, catalog-preview.yml) and input
+  preservation (scripts/preserve_inputs.py, preserve-inputs.yml, dispatch only).
+- Housekeeping: one-shot workflows moved to .github/workflow-archive/, the two
+  frozen-release rebuild workflows can no longer mislabel a current-renderer
+  rebuild as 0.4.0 or 0.4.1, CI compares the whole tracked tree after the demo
+  builds, an artifact size budget is enforced by tests, docs/RESEARCH_TRACKS.md
+  covers the certified-English line, and the README is written for readers of
+  the mathematics.
+
+## Owner actions
+
+1. Start the rest of the cone campaign. This session's GitHub token cannot
+   dispatch workflows (HTTP 403), and no dispatch of dependency-cone.yml from a
+   non-default branch has been tested; the documented route is to put the
+   workflow on `main` and dispatch scopes `full-1`, then `full-2`. The pilot took
+   33 minutes for 8 shards.
+2. Preserve expiring inputs before 2026-11-02 (checkpoint artifact) and
+   2026-11-14 (source artifact): put preserve-inputs.yml on `main` and dispatch
+   it, or decide to attach the inputs to a release. See docs/INPUT_PRESERVATION.md.
+3. Review glossary proposals with `scripts/glossary_review.py`; only a named
+   human reviewer may mark an entry reviewed.
+4. Decide on the certified-English line using the exit criteria in
+   docs/RESEARCH_TRACKS.md. Its five native gates have not run on the
+   consolidated tree; a pull request that contains this branch runs them.
+5. Delete merged branches listed in docs/REPOSITORY_STATE.md if you agree.
+
+## Next work
+
+- Run the full cone campaign, publish a catalog with the cone readings as their
+  own denominator, then plan level 2 from the level-1 readings.
+- Flatten nested existential unpacking: `obtain ⟨r, δ, s, …⟩` currently restates
+  the remaining existential at every layer (see
+  `OAI.Yau.Target.yau_nodal_set_upper_bound_counterexample`).
+- Library citations are the largest gap category in cone readings (1,334 of
+  2,754 gap steps in the pilot at 0.7.0); reviewed glosses address them directly.
+- Record binder types in the exporter so display notation can show limits
+  without guessing.
+- Run the human comprehension study described in docs/ACCEPTANCE.md (A5).
+
+## Validation at this checkpoint
+
+Local, at the commit that integrated the audit fixes (bbc90ac): the CI sequence
+(demo builds, then the test suite without the Lean integration files) gave 2,146
+passed and 5 skipped, and left the tracked tree unchanged.
+`benchmarks/reading-kpis/current.json` regenerates byte-identically. Native
+tests run only in GitHub Actions; check the latest runs on this branch before
+claiming CI results.
+
+---
+
+
+# Canonical proof-document checkpoint — 2026-10-19
+
+Work is isolated on `work/proof-document-20261019`, based on PR #9 at
+`84fa7ff3691631cc9e7519b65e4fd62bc1c9d9e7`. Do not change the other session's
+`work/full-original-project` branch or merge main without review.
+
+The new `docs/companion/checked-proof.html` displays a complete canonical
+Bézout document, not the old authored explanation with added badges. See
+`docs/PROOF_DOCUMENT.md`. The native certificate covers the fixed statement,
+definitions, both scoped branches, the existing fourteen passages, and the
+conclusion. `text_implies_statement` derives the original existential from the
+document meaning. The original proof's `hxz`, `hbez`, `hrel`, and applied
+identity-lambda aliases are restored as definitions before closing the branches.
+They do not remain additional assumptions of the complete document certificate.
+
+The first full local native gate passed all 31 commands, including sixteen
+expected source mutations. Eleven universal contracts and thirty executable
+guards are checked. The 99 new static tests passed. Local real-file browser
+navigation was administrator-blocked; the in-memory preview is not acceptance.
+Check the final commit's GitHub workflow and retained artifacts for remote results.
+
+Canonical text SHA-256:
+`d3daeabb618085d61e1ba8c9babb44a429062f4548aa60ba68514b59d7d31cf8`.
+Positive record SHA-256:
+`a616f24f83f634bedd4ae329623141eae02d4176f77d87ef5339ad834d634a5d`.
+Native evidence is `artifacts/source-document`; the gate uses a fresh workspace.
+
+The scope is one defined document grammar. The separately authored companion,
+arbitrary English, general Lean import, full original-project replay, and browser
+semantics are not newly certified. No independent agents ran for this extension.
+Do not paraphrase the native proof text after certification. Future notation or
+wording changes need their own grammar/semantic contract. The next product work
+is to improve the mathematical notation within that checked boundary and extend
+source-bound document schemas beyond the fixed Bézout case split.
+
+---
+
+# Equation and witness checkpoint — 2026-10-19
+
+The isolated branch `work/source-bound-equations-20261019` extends
+`0742966549cb4cc641d9799df365828baadc4cb4` on the cancellation branch. It does
+not change the concurrent Pro session's `work/full-original-project` branch.
+
+Read `docs/SOURCE_BOUND_EQUATIONS.md`. Six new Lean modules add equation-chain
+and witness-tuple languages, exact original-path importers, and adversarial
+controls. The final local native observation is `artifacts/source-equations/`:
+43 compiler invocations, 18 required universal contracts, 47 executable guards,
+28 rejected source mutations, ten equation chains containing 19 adjacent proofs,
+and both actual witness tuples. Both source runs repeat byte for byte.
+
+The companion now embeds 14 source-bound passages (12 new plus 2 cancellations).
+The authored proof bodies, formula inventory, and original source remain unchanged.
+Whole-proof English certification remains false: statement/introduction, gcd
+case-split structure, dependency exposition, and document assembly need their own
+checked rendering contract. Do not replace this with a statement that the entire
+proof or its English is certified. Do not substitute an unrelated proof with the
+same conclusion for original occurrence identity.
+
+Local file navigation is blocked by browser administrator policy. The memory
+preview is not offline acceptance. Inspect the final PR's native and real-browser
+CI and retained artifacts before reporting remote success. Existing native
+modules and the full-project workflows were not modified. The new workflow is
+`.github/workflows/source-bound-equations.yml`.
+
+---
+
+# Source-bound cancellation checkpoint — 2026-10-19
+
+The two cancellation sentences in the Bézout companion now have checked literal
+String/UTF-8 meanings in the original proof contexts, using the source's actual
+nonzero and equality proof arguments. Read `docs/SOURCE_BOUND_CANCELLATION.md`.
+The surrounding six-step prose is still not a fully certified English proof.
+Do not promote either whole proof section based on its one checked sentence.
+
+The implementation is isolated on `work/source-bound-cancellation-20261019`,
+based on editorial branch commit `8bcf42025179c05b9eb29f5088d4316a09061797`.
+No existing exporter/full-project code or original CI workflow was changed.
+The concurrent Pro session retains `work/full-original-project`.
+
+The final retained local native run passed nine required arithmetic contracts,
+32 executable parser guards, both original-source sentence checks, exact repeat,
+and 12 hostile native controls. It used the unchanged theorem body with explicitly
+adapted imports, Lean 4.34.1, and the pinned Mathlib environment. The observation
+is unsigned. Check the final-commit GitHub jobs separately before claiming CI.
+
+`proofreader/source_text.py` pins the native positive record and checks code,
+file, and command identities before the companion includes the two sentences.
+The generated page and native modules must not drift from the retained evidence.
+The next mathematical coverage gaps are the zero-gcd branch, gcd/Bézout facts,
+witness construction, and the remaining arithmetic calculations. Existing corpus
+and release counts are unchanged. No independent AI agents ran in this extension.
+
+---
+
+# Current isolated reader and architecture checkpoint — 2026-10-18
+
+The immediate user goal is one presentation-quality proof for Sebastian Bubeck
+and an architecture for correct-by-construction, deterministic mathematical
+English. The reviewed [Bézout companion](docs/companion/index.html) is the first
+concrete example. It is curated prose for one supporting theorem; its complete
+English semantics are not yet formally certified.
+
+Read [the architecture](docs/CORRECT_BY_CONSTRUCTION.md),
+[the proved logical fragment](docs/CONTROLLED_ENGLISH_PROTOTYPE.md), and
+[the independent audit](docs/SWARM_READER_AUDIT.md). The core Lean module proves
+typed derivation soundness, controlled formula/sentence token roundtrips, rule
+meaning, and local node alignment. Arithmetic, full proof-tree prose, string/HTML
+serialization, and import of original proof occurrences still need integration.
+Do not promote the companion or corpus from that component proof alone.
+
+Fresh native evidence in `artifacts/companion/native` uses Lean 4.34.1 and the
+exact Mathlib revision pinned by OpenAI. The theorem body is unchanged under two
+explicitly substituted imports. All 86 selected judgements, exact repeat, and
+wrong-path/false-claim controls passed. The failed historical snapshot byte
+comparison remains recorded separately; its older exporter leaked macro-scoped
+display names. No full original-project or Comparator pass is claimed here.
+
+Four actual independent agents contributed implementation or review during this
+session, in isolated worktrees. This branch is
+`work/swarm-reader-completion-20261018`. The concurrent Pro session owns
+`work/full-original-project`; its exporter, runtime, campaign and existing CI
+files were left untouched. A separate `checked-companion.yml` gates this work.
+
+The published v0.4.1 archive stays frozen at 216 readings, 9,272 selected frames,
+and 3,005 gaps. The current printer version `source-math-en/0.4.2` reproduces
+those same snapshots with 3,001 gaps: 91 logical passages newly explained and 87
+previously unmarked projections correctly exposed. The following sections are
+historical checkpoints, including their environment and agent-provider limits.
+
+---
+
+# Historical Leanglish breadth checkpoint — 0.4.1
 
 ## Resume here, not from old toy examples
 
@@ -29,7 +270,7 @@ failures. These counts do not establish that missing jobs ultimately failed.
   independent shape/arity guards but no measured reduction in this snapshot.
 - Extraction has bounded max_heartbeats, preserved exact-driver mode, and saved
   compiler stdout on failure. This is not an invented success for a slow proof.
-- .github/workflows/proof-budget-recovery.yml attempts the two known extraction
+- .github/workflow-archive/proof-budget-recovery.yml attempts the two known extraction
   failures (RotationWeights and TreewidthL1), with 2M heartbeats and 900s. Check
   real native results before including either in any released count.
 
@@ -130,7 +371,7 @@ per shard. All failed, timed-out and unattempted targets remain in its output.
 Inspect actual job/artifact results before reporting progress. This run does not
 increase the frozen 109-reading release until its records are reconciled.
 
-The workflow is .github/workflows/finding-proofs-remaining.yml and artifacts are
+The workflow is .github/workflow-archive/finding-proofs-remaining.yml and artifacts are
 finding-proof-remaining-0 through -63. Some jobs may need larger build budgets or
 unavailable original-project dependencies; do not omit them or claim completion.
 

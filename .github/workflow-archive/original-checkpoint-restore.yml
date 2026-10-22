@@ -1,0 +1,65 @@
+name: Verify real original-project checkpoint restoration
+on:
+  workflow_dispatch:
+permissions: {contents: read, actions: read}
+env:
+  GLIBC_TUNABLES: glibc.malloc.mmap_max=0:glibc.malloc.arena_max=1
+jobs:
+  cold-restore:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with: {persist-credentials: false}
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - uses: leanprover/lean-action@v1
+        with: {lake-package-directory: lean, auto-config: false, build: false, test: false, lint: false, use-mathlib-cache: false, use-github-cache: false}
+      - name: Retrieve the selected digest-bound checkpoint and recovery plan
+        env: {GH_TOKEN: '${{ github.token }}'}
+        run: |
+          mkdir -p /tmp/acquired /tmp/inputs/source
+          python - <<'PY'
+          from scripts.collect_original_evidence import api
+          from proofreader.original_project import write
+          from pathlib import Path
+          a=api('KyleJKistner/LeanDigest','actions/artifacts/12217614568')
+          assert a['workflow_run']['id']==39315174445
+          assert a['workflow_run']['head_sha']=='4f9c1e823dd65023cfa7d8b9afe5e08390b8d2ad'
+          assert a['digest']=='sha256:f0cb3658f6edbffc2e62cd8f538ea9a7529a0e4cbe4e27286241030441003523'
+          assert a['name']=='checkpoint-142c3d0f555a25666bb36dd1-1' and not a['expired']
+          write(Path('/tmp/acquired/checkpoint-acquisition.json'),{
+              'artifact_id':a['id'],'run_id':a['workflow_run']['id'],
+              'source_commit':a['workflow_run']['head_sha'],'archive_sha256':a['digest'].removeprefix('sha256:')})
+          PY
+          gh api repos/$GITHUB_REPOSITORY/actions/artifacts/12217614568/zip > /tmp/acquired/checkpoint.zip
+          echo 'f0cb3658f6edbffc2e62cd8f538ea9a7529a0e4cbe4e27286241030441003523  /tmp/acquired/checkpoint.zip' | sha256sum -c -
+          gh api repos/$GITHUB_REPOSITORY/actions/artifacts/12197582957/zip > /tmp/acquired/plan.zip
+          echo '8164869bdd4972b89c7481be210ab559493017cdf9c563e834f65362f36b4d6a  /tmp/acquired/plan.zip' | sha256sum -c -
+          python - <<'PY'
+          from pathlib import Path
+          from scripts.collect_original_evidence import unpack
+          unpack(Path('/tmp/acquired/checkpoint.zip'),Path('/tmp/acquired/checkpoint'))
+          unpack(Path('/tmp/acquired/plan.zip'),Path('/tmp/seed'))
+          PY
+          gh run download 38822475057 -R "$GITHUB_REPOSITORY" -n complete-openai-lean-source -D /tmp/inputs/source
+          python -c "from pathlib import Path;from scripts.assemble_finding_release import unpack_source;unpack_source(Path('/tmp/inputs'),Path('/tmp/original-project'))"
+      - uses: actions/cache/restore@v4
+        with:
+          path: /tmp/original-project/lean/.lake/packages
+          key: original-openai-deps-1581d4cb-4341-full-v1
+          fail-on-cache-miss: true
+      - name: Restore and independently hash-check the complete resulting build inventory
+        run: |
+          python scripts/check_original_checkpoint.py --project /tmp/original-project/lean --seed /tmp/seed --checkpoint /tmp/acquired/checkpoint --output /tmp/checkpoint-check --trust-project
+          git rev-parse HEAD > /tmp/checkpoint-check/application-commit.txt
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: original-checkpoint-cold-restore
+          path: |
+            /tmp/checkpoint-check/result.json
+            /tmp/checkpoint-check/application-commit.txt
+            /tmp/acquired/checkpoint-acquisition.json
+          retention-days: 90
+          if-no-files-found: error

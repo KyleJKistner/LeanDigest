@@ -1,0 +1,47 @@
+Statement
+Let R be a Euclidean domain. Let x, y, z be elements of R with x*y = z*(z+1).
+There exist a, d, b, c in R with a*b = x, d*c = y, d*b = z, and a*c - d*b = 1.
+A tuple (a, d, b, c) with these four properties is called a frame for (x, y, z).
+
+Proof
+Set g = gcd(x, z).
+
+Zero case
+Suppose g = 0. Then x = 0 and z = 0.
+
+We have (1 * 0) = x.
+
+We have (y * 1) = y.
+
+We have (y * 0) = z.
+
+We have ((1 * 1) - (y * 0)) = 1.
+
+The tuple (1, y, 0, 1) is a frame for (x, y, z).
+
+Nonzero case
+Suppose g is nonzero. The element g divides x and z.
+Choose a with x = g*a, and d with z = g*d.
+Set r = gcdA(x, z) and s = gcdB(x, z), the Euclidean-domain Bezout coefficient functions.
+
+We have (g * ((a * r) + (d * s))) = ((x * r) + (z * s)) = g = (g * 1).
+
+Since g is nonzero and (g * ((a * r) + (d * s))) = (g * 1), cancel g to obtain ((a * r) + (d * s)) = 1.
+
+We have (g * (a * y)) = (x * y) = (z * (z + 1)) = (g * (d * (z + 1))).
+
+Since g is nonzero and (g * (a * y)) = (g * (d * (z + 1))), cancel g to obtain (a * y) = (d * (z + 1)).
+
+We have (a * g) = x.
+
+We have (d * ((r * (z + 1)) + (s * y))) = ((r * (d * (z + 1))) + ((d * s) * y)) = ((r * (a * y)) + ((d * s) * y)) = (((a * r) + (d * s)) * y) = y.
+
+We have (d * g) = z.
+
+We have ((a * ((r * (z + 1)) + (s * y))) - (d * g)) = ((((a * r) * (z + 1)) + (s * (a * y))) - z) = ((((a * r) + (d * s)) * (z + 1)) - z) = 1.
+
+The tuple (a, d, g, ((r * (z + 1)) + (s * y))) is a frame for (x, y, z).
+
+Conclusion
+Each case provides a frame for (x, y, z), so the statement follows.
+

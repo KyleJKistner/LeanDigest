@@ -1,0 +1,93 @@
+name: Canonical proof document
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - 'lean/ProofDocument*.lean'
+      - 'lean/SourceProofDocument.lean'
+      - 'lean/ArithmeticEnglish.lean'
+      - 'lean/EquationEnglish.lean'
+      - 'lean/WitnessEnglish.lean'
+      - 'lean/SourceCancellation.lean'
+      - 'lean/SourceEquations.lean'
+      - 'lean/SourceWitnesses.lean'
+      - 'scripts/check_source_document.py'
+      - 'scripts/check_source_cancellation.py'
+      - 'scripts/check_source_equations.py'
+      - 'proofreader/document_text.py'
+      - 'docs/companion/**'
+      - 'docs/PROOF_DOCUMENT.md'
+      - 'artifacts/source-document/**'
+      - 'tests/test_proof_document.py'
+      - 'tests/reader/test_checked_proof.py'
+      - '.github/workflows/proof-document.yml'
+permissions:
+  contents: read
+jobs:
+  document-native:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+        with: {persist-credentials: false}
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python -m pip install '.[dev,webtest]'
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+          repository: leanprover-community/mathlib4
+          ref: d13f23b723b8a846827a245b89c10fc7d3f11612
+          path: document-mathlib
+      - uses: leanprover/lean-action@v1
+        with:
+          lake-package-directory: document-mathlib
+          auto-config: false
+          build: false
+          test: false
+          lint: false
+          use-mathlib-cache: false
+          use-github-cache: false
+      - name: Retrieve the pinned imports and dependencies
+        working-directory: document-mathlib
+        run: lake exe cache get Mathlib/Algebra/EuclideanDomain/Basic.lean Mathlib/Tactic/Ring.lean
+      - name: Check document composition, literal text, and negative controls
+        run: |
+          lean_binary="$(cd document-mathlib && elan which lean)"
+          test -x "$lean_binary"
+          python scripts/check_source_document.py --lean "$lean_binary" --project document-mathlib --output artifacts/ci-proof-document --trust-project
+      - name: Compare the native document with the frozen reader input
+        run: |
+          cmp artifacts/source-document/positive.json artifacts/ci-proof-document/positive.json
+          cmp artifacts/source-document/proof.txt artifacts/ci-proof-document/proof.txt
+          git rev-parse HEAD > artifacts/ci-proof-document/application-commit.txt
+      - name: Check exact DOM text, source inspection, and downloads in an offline browser
+        env:
+          PROOFREADER_REQUIRE_BROWSER: '1'
+        run: |
+          python -m playwright install --with-deps chromium
+          python -m pytest tests/test_proof_document.py tests/reader/test_checked_proof.py -q --junitxml=artifacts/ci-proof-document/reader-tests.xml
+          python docs/companion/build_checked_proof.py
+          git diff --exit-code
+      - name: Retain the checked source
+        if: always()
+        run: |
+          mkdir -p proof-document-source
+          git rev-parse HEAD > proof-document-source/commit.txt
+          git archive --format=zip HEAD -o proof-document-source/source.zip
+          sha256sum proof-document-source/source.zip > proof-document-source/SHA256SUMS
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: proof-document-evidence
+          path: artifacts/ci-proof-document/
+          retention-days: 30
+          if-no-files-found: error
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: proof-document-source
+          path: proof-document-source/
+          retention-days: 30
+          if-no-files-found: error

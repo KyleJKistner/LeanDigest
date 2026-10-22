@@ -1,0 +1,47 @@
+name: Publish original-project reading checkpoint
+on:
+  workflow_dispatch:
+  push:
+    branches: [work/completion-evidence-retries]
+    paths: ['.github/workflows/publish-completion.yml']
+permissions: {contents: write, actions: read}
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with: {persist-credentials: false}
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: python -m pip install '.[dev]'
+      - name: Test publication identity and archive-manifest controls
+        run: python -m pytest -q tests/test_completion_publication.py tests/test_completion_diagnostics.py
+      - name: Require the explicit branch for the exact validated application
+        env: {GH_TOKEN: '${{ github.token }}'}
+        run: |
+          python - <<'PY'
+          from scripts.collect_original_evidence import api
+          ref=api('KyleJKistner/LeanDigest','git/ref/heads/release/validated-2149131')
+          assert ref['ref']=='refs/heads/release/validated-2149131'
+          assert ref['object']['sha']=='2149131183ae1ecc5c2c7adf649493e4840c6aa2'
+          PY
+      - name: Verify the exact successful delivery and publish a new prerelease
+        env: {GH_TOKEN: '${{ github.token }}'}
+        run: |
+          python scripts/publish_completion_release.py \
+            --run-id 39353736010 --artifact-id 12234627856 \
+            --artifact-sha256 4da280da1b7bd8c93ddaeed397e8730b70ce874c9232cf7c98fe82bd378eb4e2 \
+            --application 2149131183ae1ecc5c2c7adf649493e4840c6aa2 \
+            --tag leanglish-original-project-2149131 \
+            --output /tmp/publication --allow-publish
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: original-project-publication
+          path: |
+            /tmp/publication/notes.md
+            /tmp/publication/published.json
+            /tmp/publication/assets/summary.json
+          retention-days: 90
+          if-no-files-found: warn

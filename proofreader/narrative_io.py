@@ -8,7 +8,7 @@ from __future__ import annotations
 from dataclasses import asdict
 from pathlib import Path
 import re
-from typing import Any
+from typing import Any, Callable
 
 from .core import lean_string
 from .kernel import InvalidExport, require
@@ -18,9 +18,12 @@ from .model import digest, report
 from .narrative import Snapshot, Narrative, reading_binding, prose, check_reading
 from .polynomial import verify as verify_polynomial
 from .render import write_html
+from .declaration_index import validate_links
 
 PREFIX = 'PR_NARRATIVE:'
 MAX_BYTES = 16_000_000
+# Output may repeat long local contexts. Keep source and output budgets separate.
+MAX_OUTPUT_BYTES = 64_000_000
 VERSION = re.compile(r'4\.\d+\.\d+')
 
 
@@ -59,13 +62,25 @@ def extraction_source(theorem: str, *, version: str, context: str | None = None,
     return prefix+gate+('' if driver is not None else budget+'#narrative '+lean_string(theorem)+'\n')
 
 
+def _share_strings(value: Any, pool: dict[str, str] | None = None) -> Any:
+    # Lossless, local deduplication only: do not share mutable frame/context objects
+    # or retain attacker-controlled strings in the interpreter's global intern pool.
+    if pool is None:pool = {}
+    if isinstance(value,str):return pool.setdefault(value,value)
+    if isinstance(value,list):
+        return [_share_strings(x,pool) for x in value]
+    if isinstance(value,dict):
+        return {k:_share_strings(v,pool) for k,v in value.items()}
+    return value
+
+
 def parse_stream(stdout: str, *, theorem: str, version: str) -> Snapshot:
-    require(isinstance(stdout,str) and len(stdout.encode('utf-8')) <= MAX_BYTES, 'Exporter output budget')
+    require(isinstance(stdout,str) and len(stdout.encode('utf-8')) <= MAX_OUTPUT_BYTES, 'Exporter output budget')
     records = []
     for line in stdout.splitlines():
         m = re.fullmatch(r'(?:[^\n]*?\binfo: )?'+PREFIX+r'(.*)', line)
         if m:
-            records.append(Snapshot(strict_json(m[1])))
+            records.append(Snapshot(_share_strings(strict_json(m[1]))))
     require(len(records) == 1, 'Expected exactly one complete narrative record')
     s = records[0]
     require(s.record['theorem'] == theorem, 'Unexpected exported theorem')
@@ -118,7 +133,7 @@ def extract_narrative(theorem: str, output: Path, *, context: str | None = None,
     if context is not None:
         (output/'Context.lean').write_text(context,encoding='utf-8')
     # Never leave last run's successful record at the canonical output path.
-    for name in ('snapshot.json','actual-snapshot.json','receipt.json','reading.json','reader.html','coverage.json','proof.txt','polynomial-certificates.json'):
+    for name in ('snapshot.json','actual-snapshot.json','receipt.json','reading.json','reader.html','coverage.json','proof.txt','polynomial-certificates.json','links.json'):
         path=output/name
         if path.is_file():path.unlink()
     receipt={'schema':'proofreader.narrative-receipt/v1','status':'failed',
@@ -160,7 +175,7 @@ def extract_narrative(theorem: str, output: Path, *, context: str | None = None,
         receipt['all_selected_judgements_kernel_checked']=False
         receipt['path_linkage_checked_in_lean']=False
         receipt['errors']=[str(exc)[:4000]]
-        for name in ('snapshot.json','reading.json','reader.html','coverage.json','proof.txt','polynomial-certificates.json'):
+        for name in ('snapshot.json','reading.json','reader.html','coverage.json','proof.txt','polynomial-certificates.json','links.json'):
             stale=output/name
             if stale.is_file():stale.unlink()
     _write_json(output/'receipt.json',receipt)
@@ -169,17 +184,25 @@ def extract_narrative(theorem: str, output: Path, *, context: str | None = None,
 
 def write_bundle(record: dict, output: Path, *, source: str = '', file: str = 'Original.lean',
                  receipt: dict | None = None, title: str | None = None,
-                 provenance_note: str | None = None) -> dict:
-    n=Narrative(record)
+                 provenance_note: str | None = None,
+                 links: dict | Callable[[Any], dict] | None = None, glossary: str = 'reviewed') -> dict:
+    """``links`` (a payload, or a function of the built document) is written to
+    links.json and embedded separately; it never enters the checked reading.
+    ``glossary='preview'`` also shows proposed glosses, marked as unreviewed."""
+    n=Narrative(record,glossary=glossary)
     d=n.document(source=source,file=file,receipt=receipt,title=title,provenance_note=provenance_note)
     check_reading(record,d)
     for i,c in n.certificates.items():verify_polynomial(n.frames[i],c)
+    links=links(d) if callable(links) else links
+    if links is not None:validate_links(links)
     output=Path(output);output.mkdir(parents=True,exist_ok=True)
     _write_json(output/'snapshot.json',record)
     _write_json(output/'polynomial-certificates.json',list(n.certificates.values()))
     (output/'reading.json').write_text(d.to_json(),encoding='utf-8')
     (output/'proof.txt').write_text(prose(d),encoding='utf-8')
-    write_html(d,output/'reader.html')
+    write_html(d,output/'reader.html',links=links)
+    if links is not None:_write_json(output/'links.json',links)
+    elif (output/'links.json').is_file():(output/'links.json').unlink()
     if receipt is not None:_write_json(output/'receipt.json',receipt)
     result={**n.snapshot.coverage(),**report(d),'snapshot_sha256':n.snapshot.sha256,
             'reading_binding':reading_binding(d),'polynomial_certificates_replayed':len(n.certificates),

@@ -1,0 +1,98 @@
+name: Preserve expiring workflow inputs
+
+# Copies pinned artifacts of earlier runs, which kept workflows download by run
+# or artifact ID, into new artifacts of this run with 90-day retention, the
+# maximum for this public repository. Each original is checked against the
+# digests the repository records, each copy is downloaded again and compared
+# with the original, and the old and new identities go into a preservation
+# record. Dispatch only. This workflow never publishes a release, pushes, saves
+# a cache or edits a consumer: repinning is a separate reviewed commit
+# (scripts/preserve_inputs.py repin; docs/INPUT_PRESERVATION.md).
+on:
+  workflow_dispatch:
+    inputs:
+      set:
+        description: 'Artifact set to copy (SETS in scripts/preserve_inputs.py)'
+        type: choice
+        options: [expiring-2026-11, checkpoint, source, statement-retries, expiring-2027-01]
+        default: expiring-2026-11
+permissions:
+  contents: read
+  actions: read
+concurrency:
+  group: preserve-inputs
+  cancel-in-progress: false
+env:
+  SET: ${{ inputs.set }}
+jobs:
+  plan:
+    if: github.repository == 'KyleJKistner/LeanDigest'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    outputs:
+      matrix: ${{ steps.matrix.outputs.matrix }}
+    steps:
+      - uses: actions/checkout@v4
+        with: {persist-credentials: false}
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: python -m pip install '.[dev]'
+      # Tests that read consumer files are left to CI: copying does not depend on
+      # them, and the dispatched ref may predate some consumers.
+      - name: Copy, record and repin tests (synthetic fixtures)
+        run: python -m pytest -q tests/test_preserve_inputs.py -k 'not checkout'
+      - id: matrix
+        run: python scripts/preserve_inputs.py matrix --set "$SET" --github-output "$GITHUB_OUTPUT"
+  copy:
+    needs: plan
+    name: copy (${{ matrix.key }})
+    strategy:
+      fail-fast: false
+      max-parallel: 4
+      matrix: ${{ fromJSON(needs.plan.outputs.matrix) }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+        with: {persist-credentials: false}
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - name: Download the pinned artifact and check its recorded digests
+        env: {GH_TOKEN: '${{ github.token }}', KEY: '${{ matrix.key }}'}
+        run: python scripts/preserve_inputs.py fetch --key "$KEY" --work /tmp/preserve --allow-download
+      - uses: actions/upload-artifact@v4
+        id: upload
+        with:
+          name: ${{ matrix.name }}
+          path: /tmp/preserve/payload/
+          retention-days: 90
+          compression-level: ${{ matrix.level }}
+          include-hidden-files: true
+          if-no-files-found: error
+      - name: Download the new copy and compare it with the staged contents
+        env: {GH_TOKEN: '${{ github.token }}', KEY: '${{ matrix.key }}', COPY_ID: '${{ steps.upload.outputs.artifact-id }}'}
+        run: |
+          python scripts/preserve_inputs.py verify --key "$KEY" --work /tmp/preserve --artifact-id "$COPY_ID" \
+            --run-id "$GITHUB_RUN_ID" --head "$GITHUB_SHA" --allow-download
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with: {name: 'preservation-record-${{ matrix.key }}', path: /tmp/preserve/record/, retention-days: 90, if-no-files-found: warn}
+  record:
+    needs: [plan, copy]
+    if: ${{ !cancelled() && needs.plan.result == 'success' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with: {persist-credentials: false}
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - uses: actions/download-artifact@v4
+        with: {pattern: 'preservation-record-*', path: /tmp/records, merge-multiple: true}
+      - name: Write the preservation record; a missing or failed copy fails this job
+        run: |
+          python scripts/preserve_inputs.py merge --set "$SET" --records /tmp/records \
+            --run-id "$GITHUB_RUN_ID" --head "$GITHUB_SHA" --output /tmp/preservation/preservation-record.json
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with: {name: preservation-record, path: /tmp/preservation/, retention-days: 90, if-no-files-found: warn}

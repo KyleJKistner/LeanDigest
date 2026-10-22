@@ -35,7 +35,9 @@ def presentationName (suggested : Name) (xs : Array Expr) : MetaM Name := do
 
 partial def visit (e : Expr) (xs : Array Expr) (path : Array Nat)
     (base : Name) (levels : List Name) (depth : Nat)
-    (expectedType : Option Expr := none) : M Nat := do
+    (expectedType : Option Expr := none) (frozenContext : Array Json := #[]) : M Nat := do
+  unless frozenContext.size == xs.size do
+    throwError "Presentation context does not match the formal local context"
   let e := e.consumeMData
   let i := (← get).frames.size
   if i ≥ 1000 then throwError "Narrative frame budget exceeded; no complete record"
@@ -51,10 +53,11 @@ partial def visit (e : Expr) (xs : Array Expr) (path : Array Nat)
   withOptions (fun o => o.setBool `debug.skipKernelTC false) do
     addDecl <| .thmDecl {name := .num base i, levelParams := levels, type := ct, value := cv}
   let goal ← liftM <| pp typ
-  let mut context : Array Json := #[]
-  for x in xs do
-    let d ← liftM <| x.fvarId!.getDecl
-    context := context.push <| obj [("name", toJson d.userName.toString), ("type", toJson (← liftM <| pp d.type))]
+  -- A later free variable can also rename BOUND variables inside an older
+  -- hypothesis when Lean pretty-prints it again (e.g. fun x x_1 => 0).
+  -- Print each local type once, in its declaration scope. Its formal Expr is
+  -- unchanged and still kernel-checked; descendants inherit that exact text.
+  let context := frozenContext
   let head := nameOf e
   let arithmetic := head.startsWith "Mathlib.Tactic.Ring."
   let rewrite := #["Eq.mpr", "Eq.mp", "of_eq_true", "congr", "congrFun", "congrFun'"].contains head
@@ -70,22 +73,26 @@ partial def visit (e : Expr) (xs : Array Expr) (path : Array Nat)
       let dp ← liftM <| isProp d
       role := if dp then "assume" else "introduce"
       let displayName ← liftM <| presentationName n xs
-      fields := [("binder", toJson displayName.toString), ("domain", toJson (← liftM <| pp d))]
+      let domain ← liftM <| pp d
+      fields := [("binder", toJson displayName.toString), ("domain", toJson domain)]
+      let childContext := context.push <| obj [("name", toJson displayName.toString), ("type", toJson domain)]
       let st ← get
       let (ch, st) ← liftM <| withLocalDecl displayName bi d fun x =>
-        (visit (b.instantiate1 x) (xs.push x) (path.push 1) base levels (depth-1)).run st
+        (visit (b.instantiate1 x) (xs.push x) (path.push 1) base levels (depth-1) (frozenContext := childContext)).run st
       set st
       children := #[ch]
     | .letE n t v b nd =>
       let vp ← liftM <| isProp t
       role := if vp then "have" else "define"
       let displayName ← liftM <| presentationName n xs
-      fields := [("binder", toJson displayName.toString), ("domain", toJson (← liftM <| pp t))]
-      if vp then children := children.push (← visit v xs (path.push 1) base levels (depth-1))
+      let domain ← liftM <| pp t
+      fields := [("binder", toJson displayName.toString), ("domain", toJson domain)]
+      let childContext := context.push <| obj [("name", toJson displayName.toString), ("type", toJson domain)]
+      if vp then children := children.push (← visit v xs (path.push 1) base levels (depth-1) (frozenContext := context))
       else fields := fields ++ [("value", toJson (← liftM <| pp v))]
       let st ← get
       let (ch, st) ← liftM <| withLetDecl displayName t v (nondep := nd) fun x =>
-        (visit (b.instantiate1 x) (xs.push x) (path.push 2) base levels (depth-1)).run st
+        (visit (b.instantiate1 x) (xs.push x) (path.push 2) base levels (depth-1) (frozenContext := childContext)).run st
       set st
       children := children.push ch
     | .app .. =>
@@ -101,14 +108,14 @@ partial def visit (e : Expr) (xs : Array Expr) (path : Array Nat)
         if ← liftM <| isProp prefixType then
           role := "specialize"
           let prefixPath := path ++ Array.replicate (args.size-arity) 0
-          let ch ← visit headProof xs prefixPath base levels (depth-1)
+          let ch ← visit headProof xs prefixPath base levels (depth-1) (frozenContext := context)
           children := children.push ch
           for k in [arity:args.size] do
             let a := args[k]!
             let atp ← liftM <| inferType a
             if ← liftM <| isProp atp then
               let p := (path ++ Array.replicate (args.size-k-1) 0).push 1
-              let ch ← visit a xs p base levels (depth-1)
+              let ch ← visit a xs p base levels (depth-1) (frozenContext := context)
               premises := premises.push <| obj [("argument", toJson k), ("statement", toJson (← liftM <| pp atp)), ("frame", toJson ch)]
               children := children.push ch
             else objects := objects.push (← liftM <| pp a)
@@ -119,7 +126,7 @@ partial def visit (e : Expr) (xs : Array Expr) (path : Array Nat)
          let proof ← liftM <| isProp atp
          if proof then
            let p := (path ++ Array.replicate (args.size-k-1) 0).push 1
-           let ch ← visit a xs p base levels (depth-1)
+           let ch ← visit a xs p base levels (depth-1) (frozenContext := context)
            premises := premises.push <| obj [("argument", toJson k), ("statement", toJson (← liftM <| pp atp)), ("frame", toJson ch)]
            children := children.push ch
          else objects := objects.push (← liftM <| pp a)
@@ -129,9 +136,12 @@ partial def visit (e : Expr) (xs : Array Expr) (path : Array Nat)
          for k in [:xs.size] do
            if xs[k]! == .fvar fid then localIndex := some k
          let some k := localIndex | throwError "Local application head is outside the exported context"
+         let domain ← match context[k]!.getObjVal? "type" >>= Json.getStr? with
+           | .ok text => pure text
+           | .error message => throwError "Invalid frozen hypothesis type: {message}"
          role := "local-application"
          fields := [("binder", toJson declaration.userName.toString),
-           ("domain", toJson (← liftM <| pp declaration.type)), ("local_index", toJson k)]
+           ("domain", toJson domain), ("local_index", toJson k)]
        if head == "congrArg" then role := "congruence"
        if #["Nat.rec", "Nat.recOn", "Nat.recAux", "List.rec", "List.recOn"].contains head then role := "induction"
        if head == "Exists.intro" then role := "witness"

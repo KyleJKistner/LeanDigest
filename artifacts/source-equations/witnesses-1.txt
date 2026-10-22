@@ -1,0 +1,1 @@
+The tuple (a, d, g, ((r * (z + 1)) + (s * y))) is a frame for (x, y, z).

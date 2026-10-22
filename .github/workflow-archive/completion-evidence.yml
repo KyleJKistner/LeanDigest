@@ -1,0 +1,92 @@
+name: Freeze original-project completion evidence
+on:
+  workflow_dispatch:
+  push:
+    branches: [work/completion-evidence-retries]
+    paths: ['.github/workflows/completion-evidence.yml']
+permissions:
+  contents: read
+  actions: read
+jobs:
+  collect:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+        with: {persist-credentials: false}
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - name: Collect existing original-project workers at a fresh fixed cutoff
+        env: {GH_TOKEN: '${{ github.token }}'}
+        run: |
+          python scripts/collect_original_evidence.py --output /tmp/collected --allow-download
+          git rev-parse HEAD > /tmp/collected/collector-commit.txt
+      - name: Retain the successful external-kernel retry separately
+        env: {GH_TOKEN: '${{ github.token }}'}
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          from scripts.collect_original_evidence import api,retain
+          from proofreader.original_project import write
+          repo='KyleJKistner/LeanDigest';run=api(repo,'actions/runs/39170206904')
+          artifact=api(repo,'actions/artifacts/12153381990')
+          root=Path('/tmp/collected/retries');root.mkdir()
+          outcome=retain(repo,run,artifact,root)
+          write(root/'collection.json',{'schema':'leanglish.original-retry-collection/v1','repository':repo,'run':run,'artifacts':[artifact],'outcomes':[outcome]})
+          PY
+      - name: Recover unchanged original source and the bound baseline
+        env: {GH_TOKEN: '${{ github.token }}'}
+        run: |
+          mkdir -p /tmp/inputs/source
+          gh run download 38822475057 -R "$GITHUB_REPOSITORY" -n complete-openai-lean-source -D /tmp/inputs/source
+          gh run download 39049596449 -R "$GITHUB_REPOSITORY" -n leanglish-all-finding-observations -D /tmp/inputs/observations
+          gh run download 39065371645 -R "$GITHUB_REPOSITORY" -p 'finding-proof-retry-*' -D /tmp/inputs/repaired
+          gh run download 39140071998 -R "$GITHUB_REPOSITORY" -n all-prior-proof-observations -D /tmp/inputs/prior
+          python - <<'PY'
+          from pathlib import Path
+          import shutil
+          from scripts.assemble_finding_release import unpack_source
+          root=Path('/tmp/collected');inputs=Path('/tmp/inputs')
+          unpack_source(inputs,Path('/tmp/original-project'))
+          baseline=[inputs/'observations/inputs/proofs',inputs/'repaired',inputs/'prior/remaining',inputs/'prior/budget']
+          for i,p in enumerate(baseline):shutil.copytree(p,root/'baseline'/str(i))
+          shutil.copy2(inputs/'source/source-inventory.json',root/'source-inventory.json')
+          PY
+      - name: Validate complete plan and every retained reading
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          from proofreader.original_project import read,write,reconcile
+          from proofreader.original_status import build_status
+          root=Path('/tmp/collected')
+          status,roots=build_status(Path('/tmp/original-project/lean'),root,recovery_output=Path('/tmp/recovered'))
+          write(root/'current-status.json',status)
+          plan=read(root/'original-proofs/original-proof-campaign-plan/plan.json')
+          retry=reconcile(plan,[root/'retries/original-nanoda-retry'])
+          write(root/'retry-summary.json',retry)
+          diagnostics=[]
+          for p in sorted((root/'original-build').rglob('worker.json')):
+            for row in read(p)['targets']:
+              if row['status']=='passed':continue
+              d={'task':row['id'],'status':row['status'],'worker':p.parent.name}
+              if row.get('log'):
+                log=read(p.parent/row['log']);d.update(exit_code=log.get('exit_code'),reason=log.get('reason'),stdout_tail=log.get('stdout','')[-4000:],stderr_tail=log.get('stderr','')[-4000:])
+              diagnostics.append(d)
+          write(root/'diagnostics.json',diagnostics)
+          print('COMPLETION_BASE_BUILD', {k:v for k,v in status['build_summary'].items() if k!='missing_tasks'},flush=True)
+          print('COMPLETION_BASE_PROOFS', {k:v for k,v in status['proof_summary'].items() if k not in {'targets','missing_workers'}},flush=True)
+          print('COMPLETION_NANODA_RETRY', {k:v for k,v in retry.items() if k!='missing_tasks'},flush=True)
+          print('COMPLETION_DIAGNOSES',status['diagnoses'],flush=True)
+          PY
+      - name: Archive the exact collector source
+        if: always()
+        run: |
+          mkdir -p /tmp/collected
+          git archive --format=zip --prefix=Leanglish/ -o /tmp/collected/application.zip HEAD
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: original-completion-evidence
+          path: /tmp/collected/
+          retention-days: 90
+          if-no-files-found: error

@@ -1,0 +1,38 @@
+witnesses-wrong-operation.lean:54:0: error: (kernel) declaration type mismatch, 'OAI.ComplexCancellation.BezoutFrame.exists_frame.witnessText.1.value.3' has type
+  ∀ {R : Type u_1} [inst : EuclideanDomain R] (x y z : R),
+    x * y = z * (z + 1) →
+      let g := EuclideanDomain.gcd x z;
+      ¬g = 0 →
+        ∀ (a : R),
+          x = EuclideanDomain.gcd x z * a →
+            ∀ (d : R),
+              z = EuclideanDomain.gcd x z * d →
+                x = g * a →
+                  z = g * d →
+                    let r := EuclideanDomain.gcdA x z;
+                    let s := EuclideanDomain.gcdB x z;
+                    a * r + d * s = 1 → a * y = d * (z + 1) → r * (z + 1) + s * y = r * (z + 1) + s * y
+but it is expected to have type
+  ∀ {R : Type u_1} [inst : EuclideanDomain R] (x y z : R),
+    x * y = z * (z + 1) →
+      let g := EuclideanDomain.gcd x z;
+      ¬g = 0 →
+        ∀ (a : R),
+          x = EuclideanDomain.gcd x z * a →
+            ∀ (d : R),
+              z = EuclideanDomain.gcd x z * d →
+                x = g * a →
+                  z = g * d →
+                    let r := EuclideanDomain.gcdA x z;
+                    let s := EuclideanDomain.gcdB x z;
+                    a * r + d * s = 1 →
+                      a * y = d * (z + 1) →
+                        ProofReader.ArithmeticEnglish.Term.eval
+                            { values := ProofReader.ArithmeticEnglish.assignment x y z g a d r s, zero := 0, one := 1,
+                              add := fun u v => u * v, mul := fun u v => u * v, sub := fun u v => u - v }
+                            (((ProofReader.ArithmeticEnglish.Term.var ProofReader.ArithmeticEnglish.Variable.r).mul
+                                  ((ProofReader.ArithmeticEnglish.Term.var ProofReader.ArithmeticEnglish.Variable.z).add
+                                    ProofReader.ArithmeticEnglish.Term.one)).add
+                              ((ProofReader.ArithmeticEnglish.Term.var ProofReader.ArithmeticEnglish.Variable.s).mul
+                                (ProofReader.ArithmeticEnglish.Term.var ProofReader.ArithmeticEnglish.Variable.y))) =
+                          r * (z + 1) + s * y

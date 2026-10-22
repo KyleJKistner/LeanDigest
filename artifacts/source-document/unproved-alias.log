@@ -1,0 +1,535 @@
+unproved-alias.lean:56:0: error: Application type mismatch: The argument
+  OAI.ComplexCancellation.BezoutFrame.exists_frame.documentNonzero
+has type
+  ∀ (x y z : R) (h : x * y = z * (z + 1)),
+    let g := EuclideanDomain.gcd x z;
+    ∀ (hg : ¬g = 0) (a : R),
+      x = EuclideanDomain.gcd x z * a →
+        ∀ (d : R),
+          z = EuclideanDomain.gcd x z * d →
+            ∀ (ha : x = g * a) (hd : z = g * d),
+              let r := EuclideanDomain.gcdA x z;
+              let s := EuclideanDomain.gcdB x z;
+              let hbez := ⋯;
+              let hrel := ⋯;
+              {
+                    zeroAB :=
+                      ProofReader.EquationEnglish.Chain.pair
+                        (ProofReader.ArithmeticEnglish.Term.one.mul ProofReader.ArithmeticEnglish.Term.zero)
+                        (ProofReader.ArithmeticEnglish.Term.var ProofReader.ArithmeticEnglish.Variable.x),
+                    zeroDC :=
+                      ProofReader.EquationEnglish.Chain.pair
+                        ((ProofReader.ArithmeticEnglish.Term.var ProofReader.ArithmeticEnglish.Variable.y).mul
+                          ProofReader.ArithmeticEnglish.Term.one)
+                        (ProofReader.ArithmeticEnglish.Term.var ProofReader.ArithmeticEnglish.Variable.y),
+                    zeroDB :=
+                      ProofReader.EquationEnglish.Chain.pair
+                        ((ProofReader.ArithmeticEnglish.Term.var ProofReader.ArithmeticEnglish.Variable.y).mul
+                          ProofReader.ArithmeticEnglish.Term.zero)
+                        (ProofReader.ArithmeticEnglish.Term.var ProofReader.ArithmeticEnglish.Variable.z),
+                    zeroDet :=
+                      ProofReader.EquationEnglish.Chain.pair
+                        ((ProofReader.ArithmeticEnglish.Term.one.mul ProofReader.ArithmeticEnglish.Term.one).sub
+                          ((ProofReader.ArithmeticEnglish.Term.var ProofReader.ArithmeticEnglish.Variable.y).mul
+                            ProofReader.ArithmeticEnglish.Term.zero))
+                        ProofReader.ArithmeticEnglish.Term.one,
+                    zeroFrame :=
+                      { x := ProofReader.ArithmeticEnglish.Term.var ProofReader.ArithmeticEnglish.Variable.x,
+                        y := ProofReader.ArithmeticEnglish.Term.var ProofReader.ArithmeticEnglish.Variable.y,
+                        z := ProofReader.ArithmeticEnglish.Term.var ProofReader.ArithmeticEnglish.Variable.z,
+                        a := ProofReader.ArithmeticEnglish.Term.one,
+                        d := ProofReader.ArithmeticEnglish.Term.var ProofReader.ArithmeticEnglish.Variable.y,
+                        b := ProofReader.ArithmeticEnglish.Term.zero, c := ProofReader.ArithmeticEnglish.Term.one },
+                    bezoutEq :=
+                      ProofReader.EquationEnglish.Chain.cons
+                        ((ProofReader.ArithmeticEnglish.Term.var ProofReader.ArithmeticEnglish.Variable.g).mul
+                          (((ProofReader.ArithmeticEnglish.Term.var ProofReader.ArithmeticEnglish.Variable.a).mul
+                                (ProofReader.ArithmeticEnglish.Term.var ProofReader.ArithmeticEnglish.Variable.r)).add
+                            ((ProofReader.ArithmeticEnglish.Term.var ProofReader.ArithmeticEnglish.Variable.d).mul
+                              (ProofReader.ArithmeticEnglish.Term.var ProofReader.ArithmeticEnglish.Variable.s))))
+                        (ProofReader.EquationEnglish.Chain.cons
+                          (((ProofReader.ArithmeticEnglish.Term.var ProofReader.ArithmeticEnglish.Variable.x).mul
+                                (ProofReader.ArithmeticEnglish.Term.var ProofReader.ArithmeticEnglish.Variable.r)).add
+                            ((ProofReader.ArithmeticEnglish.Term.var ProofReader.ArithmeticEnglish.Variable.z).mul
+                              (ProofReader.ArithmeticEnglish.Term.var ProofReader.ArithmeticEnglish.Variable.s)))
+                          (ProofReader.EquationEnglish.Chain.pair
+                            (ProofReader.ArithmeticEnglish.Term.var ProofReader.ArithmeticEnglish.Variable.g)
+                            ((ProofReader.ArithmeticEnglish.Term.var ProofReader.ArithmeticEnglish.Variable.g).mul
+                              ProofReader.ArithmeticEnglish.Term.one))),
+                    bezoutCancel :=
+                      { factor := ProofReader.ArithmeticEnglish.Term.var ProofReader.ArithmeticEnglish.Variable.g,
+                        left :=
+                          ((ProofReader.ArithmeticEnglish.Term.var ProofReader.ArithmeticEnglish.Variable.a).mul
+                                (ProofReader.ArithmeticEnglish.Term.var ProofReader.ArithmeticEnglish.Variable.r)).add
+                            ((ProofReader.ArithmeticEnglish.Term.var ProofReader.ArithmeticEnglish.Variable.d).mul
+                              (ProofReader.ArithmeticEnglish.Term.var ProofReader.ArithmeticEnglish.Variable.s)),
+                        right := ProofReader.ArithmeticEnglish.Term.one },
+                    relationEq :=
+                      ProofReader.EquationEnglish.Chain.cons
+                        ((ProofReader.ArithmeticEnglish.Term.var ProofReader.ArithmeticEnglish.Variable.g).mul
+                          ((ProofReader.ArithmeticEnglish.Term.var ProofReader.ArithmeticEnglish.Variable.a).mul
+                            (ProofReader.ArithmeticEnglish.Term.var ProofReader.ArithmeticEnglish.Variable.y)))
+                        (ProofReader.EquationEnglish.Chain.cons
+                          ((ProofReader.ArithmeticEnglish.Term.var ProofReader.ArithmeticEnglish.Variable.x).mul
+                            (ProofReader.ArithmeticEnglish.Term.var ProofReader.ArithmeticEnglish.Variable.y))
+                          (ProofReader.EquationEnglish.Chain.pair
+                            ((ProofReader.ArithmeticEnglish.Term.var ProofReader.ArithmeticEnglish.Variable.z).mul
+                              ((ProofReader.ArithmeticEnglish.Term.var ProofReader.ArithmeticEnglish.Variable.z).add
+                                ProofReader.ArithmeticEnglish.Term.one))
+                            ((ProofReader.ArithmeticEnglish.Term.var ProofReader.ArithmeticEnglish.Variable.g).mul
+                              ((ProofReader.ArithmeticEnglish.Term.var ProofReader.ArithmeticEnglish.Variable.d).mul
+                                ((ProofReader.ArithmeticEnglish.Term.var ProofReader.ArithmeticEnglish.Variable.z).add
+                                  ProofReader.ArithmeticEnglish.Term.one))))),
+                    relationCancel :=
+                      { factor := ProofReader.ArithmeticEnglish.Term.var ProofReader.ArithmeticEnglish.Variable.g,
+                        left :=
+                          (ProofReader.ArithmeticEnglish.Term.var ProofReader.ArithmeticEnglish.Variable.a).mul
+                            (ProofReader.ArithmeticEnglish.Term.var ProofReader.ArithmeticEnglish.Variable.y),
+                        right :=
+                          (ProofReader.ArithmeticEnglish.Term.var ProofReader.ArithmeticEnglish.Variable.d).mul
+                            ((ProofReader.ArithmeticEnglish.Term.var ProofReader.ArithmeticEnglish.Variable.z).add
+                              ProofReader.ArithmeticEnglish.Term.one) },
+                    nonzeroAB :=
+                      ProofReader.EquationEnglish.Chain.pair
+                        ((ProofReader.ArithmeticEnglish.Term.var ProofReader.ArithmeticEnglish.Variable.a).mul
+                          (ProofReader.ArithmeticEnglish.Term.var ProofReader.ArithmeticEnglish.Variable.g))
+                        (ProofReader.ArithmeticEnglish.Term.var ProofReader.ArithmeticEnglish.Variable.x),
+                    nonzeroDC :=
+                      ProofReader.EquationEnglish.Chain.cons
+                        ((ProofReader.ArithmeticEnglish.Term.var ProofReader.ArithmeticEnglish.Variable.d).mul
+                          (((ProofReader.ArithmeticEnglish.Term.var ProofReader.ArithmeticEnglish.Variable.r).mul
+                                ((ProofReader.ArithmeticEnglish.Term.var ProofReader.ArithmeticEnglish.Variable.z).add
+                                  ProofReader.ArithmeticEnglish.Term.one)).add
+                            ((ProofReader.ArithmeticEnglish.Term.var ProofReader.ArithmeticEnglish.Variable.s).mul
+                              (ProofReader.ArithmeticEnglish.Term.var ProofReader.ArithmeticEnglish.Variable.y))))
+                        (ProofReader.EquationEnglish.Chain.cons
+                          (((ProofReader.ArithmeticEnglish.Term.var ProofReader.ArithmeticEnglish.Variable.r).mul
+                                ((ProofReader.ArithmeticEnglish.Term.var ProofReader.ArithmeticEnglish.Variable.d).mul
+                                  ((ProofReader.ArithmeticEnglish.Term.var ProofReader.ArithmeticEnglish.Variable.z).add
+                                    ProofReader.ArithmeticEnglish.Term.one))).add
+                            (((ProofReader.ArithmeticEnglish.Term.var ProofReader.ArithmeticEnglish.Variable.d).mul
+                                  (ProofReader.ArithmeticEnglish.Term.var ProofReader.ArithmeticEnglish.Variable.s)).mul
+                              (ProofReader.ArithmeticEnglish.Term.var ProofReader.ArithmeticEnglish.Variable.y)))
+                          (ProofReader.EquationEnglish.Chain.cons
+                            (((ProofReader.ArithmeticEnglish.Term.var ProofReader.ArithmeticEnglish.Variable.r).mul
+                                  ((ProofReader.ArithmeticEnglish.Term.var ProofReader.ArithmeticEnglish.Variable.a).mul
+                                    (ProofReader.ArithmeticEnglish.Term.var
+                                      ProofReader.ArithmeticEnglish.Variable.y))).add
+                              (((ProofReader.ArithmeticEnglish.Term.var ProofReader.ArithmeticEnglish.Variable.d).mul
+                                    (ProofReader.ArithmeticEnglish.Term.var
+                                      ProofReader.ArithmeticEnglish.Variable.s)).mul
+                                (ProofReader.ArithmeticEnglish.Term.var ProofReader.ArithmeticEnglish.Variable.y)))
+                            (ProofReader.EquationEnglish.Chain.pair
+                              ((((ProofReader.ArithmeticEnglish.Term.var ProofReader.ArithmeticEnglish.Variable.a).mul
+                                        (ProofReader.ArithmeticEnglish.Term.var
+                                          ProofReader.ArithmeticEnglish.Variable.r)).add
+                                    ((ProofReader.ArithmeticEnglish.Term.var
+                                          ProofReader.ArithmeticEnglish.Variable.d).mul
+                                      (ProofReader.ArithmeticEnglish.Term.var
+                                        ProofReader.ArithmeticEnglish.Variable.s))).mul
+                                (ProofReader.ArithmeticEnglish.Term.var ProofReader.ArithmeticEnglish.Variable.y))
+                              (ProofReader.ArithmeticEnglish.Term.var ProofReader.ArithmeticEnglish.Variable.y)))),
+                    nonzeroDB :=
+                      ProofReader.EquationEnglish.Chain.pair
+                        ((ProofReader.ArithmeticEnglish.Term.var ProofReader.ArithmeticEnglish.Variable.d).mul
+                          (ProofReader.ArithmeticEnglish.Term.var ProofReader.ArithmeticEnglish.Variable.g))
+                        (ProofReader.ArithmeticEnglish.Term.var ProofReader.ArithmeticEnglish.Variable.z),
+                    nonzeroDet :=
+                      ProofReader.EquationEnglish.Chain.cons
+                        (((ProofReader.ArithmeticEnglish.Term.var ProofReader.ArithmeticEnglish.Variable.a).mul
+                              (((ProofReader.ArithmeticEnglish.Term.var ProofReader.ArithmeticEnglish.Variable.r).mul
+                                    ((ProofReader.ArithmeticEnglish.Term.var
+                                          ProofReader.ArithmeticEnglish.Variable.z).add
+                                      ProofReader.ArithmeticEnglish.Term.one)).add
+                                ((ProofReader.ArithmeticEnglish.Term.var ProofReader.ArithmeticEnglish.Variable.s).mul
+                                  (ProofReader.ArithmeticEnglish.Term.var
+                                    ProofReader.ArithmeticEnglish.Variable.y)))).sub
+                          ((ProofReader.ArithmeticEnglish.Term.var ProofReader.ArithmeticEnglish.Variable.d).mul
+                            (ProofReader.ArithmeticEnglish.Term.var ProofReader.ArithmeticEnglish.Variable.g)))
+                        (ProofReader.EquationEnglish.Chain.cons
+                          (((((ProofReader.ArithmeticEnglish.Term.var ProofReader.ArithmeticEnglish.Variable.a).mul
+                                        (ProofReader.ArithmeticEnglish.Term.var
+                                          ProofReader.ArithmeticEnglish.Variable.r)).mul
+                                    ((ProofReader.ArithmeticEnglish.Term.var
+                                          ProofReader.ArithmeticEnglish.Variable.z).add
+                                      ProofReader.ArithmeticEnglish.Term.one)).add
+                                ((ProofReader.ArithmeticEnglish.Term.var ProofReader.ArithmeticEnglish.Variable.s).mul
+                                  ((ProofReader.ArithmeticEnglish.Term.var ProofReader.ArithmeticEnglish.Variable.a).mul
+                                    (ProofReader.ArithmeticEnglish.Term.var
+                                      ProofReader.ArithmeticEnglish.Variable.y)))).sub
+                            (ProofReader.ArithmeticEnglish.Term.var ProofReader.ArithmeticEnglish.Variable.z))
+                          (ProofReader.EquationEnglish.Chain.pair
+                            (((((ProofReader.ArithmeticEnglish.Term.var ProofReader.ArithmeticEnglish.Variable.a).mul
+                                          (ProofReader.ArithmeticEnglish.Term.var
+                                            ProofReader.ArithmeticEnglish.Variable.r)).add
+                                      ((ProofReader.ArithmeticEnglish.Term.var
+                                            ProofReader.ArithmeticEnglish.Variable.d).mul
+                                        (ProofReader.ArithmeticEnglish.Term.var
+                                          ProofReader.ArithmeticEnglish.Variable.s))).mul
+                                  ((ProofReader.ArithmeticEnglish.Term.var ProofReader.ArithmeticEnglish.Variable.z).add
+                                    ProofReader.ArithmeticEnglish.Term.one)).sub
+                              (ProofReader.ArithmeticEnglish.Term.var ProofReader.ArithmeticEnglish.Variable.z))
+                            ProofReader.ArithmeticEnglish.Term.one)),
+                    nonzeroFrame :=
+                      { x := ProofReader.ArithmeticEnglish.Term.var ProofReader.ArithmeticEnglish.Variable.x,
+                        y := ProofReader.ArithmeticEnglish.Term.var ProofReader.ArithmeticEnglish.Variable.y,
+                        z := ProofReader.ArithmeticEnglish.Term.var ProofReader.ArithmeticEnglish.Variable.z,
+                        a := ProofReader.ArithmeticEnglish.Term.var ProofReader.ArithmeticEnglish.Variable.a,
+                        d := ProofReader.ArithmeticEnglish.Term.var ProofReader.ArithmeticEnglish.Variable.d,
+                        b := ProofReader.ArithmeticEnglish.Term.var ProofReader.ArithmeticEnglish.Variable.g,
+                        c :=
+                          ((ProofReader.ArithmeticEnglish.Term.var ProofReader.ArithmeticEnglish.Variable.r).mul
+                                ((ProofReader.ArithmeticEnglish.Term.var ProofReader.ArithmeticEnglish.Variable.z).add
+                                  ProofReader.ArithmeticEnglish.Term.one)).add
+                            ((ProofReader.ArithmeticEnglish.Term.var ProofReader.ArithmeticEnglish.Variable.s).mul
+                              (ProofReader.ArithmeticEnglish.Term.var
+                                ProofReader.ArithmeticEnglish.Variable.y)) } }.Nonzero
+                x y z a d
+but is expected to have type
+  ∀ (x y z : R),
+    x * y = z * (z + 1) →
+      EuclideanDomain.gcd x z ≠ 0 →
+        ∀ (a : R),
+          x = EuclideanDomain.gcd x z * a →
+            ∀ (d : R),
+              z = EuclideanDomain.gcd x z * d →
+                {
+                      zeroAB :=
+                        ProofReader.EquationEnglish.Chain.pair
+                          (ProofReader.ArithmeticEnglish.Term.one.mul ProofReader.ArithmeticEnglish.Term.zero)
+                          (ProofReader.ArithmeticEnglish.Term.var ProofReader.ArithmeticEnglish.Variable.x),
+                      zeroDC :=
+                        ProofReader.EquationEnglish.Chain.pair
+                          ((ProofReader.ArithmeticEnglish.Term.var ProofReader.ArithmeticEnglish.Variable.y).mul
+                            ProofReader.ArithmeticEnglish.Term.one)
+                          (ProofReader.ArithmeticEnglish.Term.var ProofReader.ArithmeticEnglish.Variable.y),
+                      zeroDB :=
+                        ProofReader.EquationEnglish.Chain.pair
+                          ((ProofReader.ArithmeticEnglish.Term.var ProofReader.ArithmeticEnglish.Variable.y).mul
+                            ProofReader.ArithmeticEnglish.Term.zero)
+                          (ProofReader.ArithmeticEnglish.Term.var ProofReader.ArithmeticEnglish.Variable.z),
+                      zeroDet :=
+                        ProofReader.EquationEnglish.Chain.pair
+                          ((ProofReader.ArithmeticEnglish.Term.one.mul ProofReader.ArithmeticEnglish.Term.one).sub
+                            ((ProofReader.ArithmeticEnglish.Term.var ProofReader.ArithmeticEnglish.Variable.y).mul
+                              ProofReader.ArithmeticEnglish.Term.zero))
+                          ProofReader.ArithmeticEnglish.Term.one,
+                      zeroFrame :=
+                        { x := ProofReader.ArithmeticEnglish.Term.var ProofReader.ArithmeticEnglish.Variable.x,
+                          y := ProofReader.ArithmeticEnglish.Term.var ProofReader.ArithmeticEnglish.Variable.y,
+                          z := ProofReader.ArithmeticEnglish.Term.var ProofReader.ArithmeticEnglish.Variable.z,
+                          a := ProofReader.ArithmeticEnglish.Term.one,
+                          d := ProofReader.ArithmeticEnglish.Term.var ProofReader.ArithmeticEnglish.Variable.y,
+                          b := ProofReader.ArithmeticEnglish.Term.zero, c := ProofReader.ArithmeticEnglish.Term.one },
+                      bezoutEq :=
+                        ProofReader.EquationEnglish.Chain.cons
+                          ((ProofReader.ArithmeticEnglish.Term.var ProofReader.ArithmeticEnglish.Variable.g).mul
+                            (((ProofReader.ArithmeticEnglish.Term.var ProofReader.ArithmeticEnglish.Variable.a).mul
+                                  (ProofReader.ArithmeticEnglish.Term.var ProofReader.ArithmeticEnglish.Variable.r)).add
+                              ((ProofReader.ArithmeticEnglish.Term.var ProofReader.ArithmeticEnglish.Variable.d).mul
+                                (ProofReader.ArithmeticEnglish.Term.var ProofReader.ArithmeticEnglish.Variable.s))))
+                          (ProofReader.EquationEnglish.Chain.cons
+                            (((ProofReader.ArithmeticEnglish.Term.var ProofReader.ArithmeticEnglish.Variable.x).mul
+                                  (ProofReader.ArithmeticEnglish.Term.var ProofReader.ArithmeticEnglish.Variable.r)).add
+                              ((ProofReader.ArithmeticEnglish.Term.var ProofReader.ArithmeticEnglish.Variable.z).mul
+                                (ProofReader.ArithmeticEnglish.Term.var ProofReader.ArithmeticEnglish.Variable.s)))
+                            (ProofReader.EquationEnglish.Chain.pair
+                              (ProofReader.ArithmeticEnglish.Term.var ProofReader.ArithmeticEnglish.Variable.g)
+                              ((ProofReader.ArithmeticEnglish.Term.var ProofReader.ArithmeticEnglish.Variable.g).mul
+                                ProofReader.ArithmeticEnglish.Term.one))),
+                      bezoutCancel :=
+                        { factor := ProofReader.ArithmeticEnglish.Term.var ProofReader.ArithmeticEnglish.Variable.g,
+                          left :=
+                            ((ProofReader.ArithmeticEnglish.Term.var ProofReader.ArithmeticEnglish.Variable.a).mul
+                                  (ProofReader.ArithmeticEnglish.Term.var ProofReader.ArithmeticEnglish.Variable.r)).add
+                              ((ProofReader.ArithmeticEnglish.Term.var ProofReader.ArithmeticEnglish.Variable.d).mul
+                                (ProofReader.ArithmeticEnglish.Term.var ProofReader.ArithmeticEnglish.Variable.s)),
+                          right := ProofReader.ArithmeticEnglish.Term.one },
+                      relationEq :=
+                        ProofReader.EquationEnglish.Chain.cons
+                          ((ProofReader.ArithmeticEnglish.Term.var ProofReader.ArithmeticEnglish.Variable.g).mul
+                            ((ProofReader.ArithmeticEnglish.Term.var ProofReader.ArithmeticEnglish.Variable.a).mul
+                              (ProofReader.ArithmeticEnglish.Term.var ProofReader.ArithmeticEnglish.Variable.y)))
+                          (ProofReader.EquationEnglish.Chain.cons
+                            ((ProofReader.ArithmeticEnglish.Term.var ProofReader.ArithmeticEnglish.Variable.x).mul
+                              (ProofReader.ArithmeticEnglish.Term.var ProofReader.ArithmeticEnglish.Variable.y))
+                            (ProofReader.EquationEnglish.Chain.pair
+                              ((ProofReader.ArithmeticEnglish.Term.var ProofReader.ArithmeticEnglish.Variable.z).mul
+                                ((ProofReader.ArithmeticEnglish.Term.var ProofReader.ArithmeticEnglish.Variable.z).add
+                                  ProofReader.ArithmeticEnglish.Term.one))
+                              ((ProofReader.ArithmeticEnglish.Term.var ProofReader.ArithmeticEnglish.Variable.g).mul
+                                ((ProofReader.ArithmeticEnglish.Term.var ProofReader.ArithmeticEnglish.Variable.d).mul
+                                  ((ProofReader.ArithmeticEnglish.Term.var ProofReader.ArithmeticEnglish.Variable.z).add
+                                    ProofReader.ArithmeticEnglish.Term.one))))),
+                      relationCancel :=
+                        { factor := ProofReader.ArithmeticEnglish.Term.var ProofReader.ArithmeticEnglish.Variable.g,
+                          left :=
+                            (ProofReader.ArithmeticEnglish.Term.var ProofReader.ArithmeticEnglish.Variable.a).mul
+                              (ProofReader.ArithmeticEnglish.Term.var ProofReader.ArithmeticEnglish.Variable.y),
+                          right :=
+                            (ProofReader.ArithmeticEnglish.Term.var ProofReader.ArithmeticEnglish.Variable.d).mul
+                              ((ProofReader.ArithmeticEnglish.Term.var ProofReader.ArithmeticEnglish.Variable.z).add
+                                ProofReader.ArithmeticEnglish.Term.one) },
+                      nonzeroAB :=
+                        ProofReader.EquationEnglish.Chain.pair
+                          ((ProofReader.ArithmeticEnglish.Term.var ProofReader.ArithmeticEnglish.Variable.a).mul
+                            (ProofReader.ArithmeticEnglish.Term.var ProofReader.ArithmeticEnglish.Variable.g))
+                          (ProofReader.ArithmeticEnglish.Term.var ProofReader.ArithmeticEnglish.Variable.x),
+                      nonzeroDC :=
+                        ProofReader.EquationEnglish.Chain.cons
+                          ((ProofReader.ArithmeticEnglish.Term.var ProofReader.ArithmeticEnglish.Variable.d).mul
+                            (((ProofReader.ArithmeticEnglish.Term.var ProofReader.ArithmeticEnglish.Variable.r).mul
+                                  ((ProofReader.ArithmeticEnglish.Term.var ProofReader.ArithmeticEnglish.Variable.z).add
+                                    ProofReader.ArithmeticEnglish.Term.one)).add
+                              ((ProofReader.ArithmeticEnglish.Term.var ProofReader.ArithmeticEnglish.Variable.s).mul
+                                (ProofReader.ArithmeticEnglish.Term.var ProofReader.ArithmeticEnglish.Variable.y))))
+                          (ProofReader.EquationEnglish.Chain.cons
+                            (((ProofReader.ArithmeticEnglish.Term.var ProofReader.ArithmeticEnglish.Variable.r).mul
+                                  ((ProofReader.ArithmeticEnglish.Term.var ProofReader.ArithmeticEnglish.Variable.d).mul
+                                    ((ProofReader.ArithmeticEnglish.Term.var
+                                          ProofReader.ArithmeticEnglish.Variable.z).add
+                                      ProofReader.ArithmeticEnglish.Term.one))).add
+                              (((ProofReader.ArithmeticEnglish.Term.var ProofReader.ArithmeticEnglish.Variable.d).mul
+                                    (ProofReader.ArithmeticEnglish.Term.var
+                                      ProofReader.ArithmeticEnglish.Variable.s)).mul
+                                (ProofReader.ArithmeticEnglish.Term.var ProofReader.ArithmeticEnglish.Variable.y)))
+                            (ProofReader.EquationEnglish.Chain.cons
+                              (((ProofReader.ArithmeticEnglish.Term.var ProofReader.ArithmeticEnglish.Variable.r).mul
+                                    ((ProofReader.ArithmeticEnglish.Term.var
+                                          ProofReader.ArithmeticEnglish.Variable.a).mul
+                                      (ProofReader.ArithmeticEnglish.Term.var
+                                        ProofReader.ArithmeticEnglish.Variable.y))).add
+                                (((ProofReader.ArithmeticEnglish.Term.var ProofReader.ArithmeticEnglish.Variable.d).mul
+                                      (ProofReader.ArithmeticEnglish.Term.var
+                                        ProofReader.ArithmeticEnglish.Variable.s)).mul
+                                  (ProofReader.ArithmeticEnglish.Term.var ProofReader.ArithmeticEnglish.Variable.y)))
+                              (ProofReader.EquationEnglish.Chain.pair
+                                ((((ProofReader.ArithmeticEnglish.Term.var ProofReader.ArithmeticEnglish.Variable.a).mul
+                                          (ProofReader.ArithmeticEnglish.Term.var
+                                            ProofReader.ArithmeticEnglish.Variable.r)).add
+                                      ((ProofReader.ArithmeticEnglish.Term.var
+                                            ProofReader.ArithmeticEnglish.Variable.d).mul
+                                        (ProofReader.ArithmeticEnglish.Term.var
+                                          ProofReader.ArithmeticEnglish.Variable.s))).mul
+                                  (ProofReader.ArithmeticEnglish.Term.var ProofReader.ArithmeticEnglish.Variable.y))
+                                (ProofReader.ArithmeticEnglish.Term.var ProofReader.ArithmeticEnglish.Variable.y)))),
+                      nonzeroDB :=
+                        ProofReader.EquationEnglish.Chain.pair
+                          ((ProofReader.ArithmeticEnglish.Term.var ProofReader.ArithmeticEnglish.Variable.d).mul
+                            (ProofReader.ArithmeticEnglish.Term.var ProofReader.ArithmeticEnglish.Variable.g))
+                          (ProofReader.ArithmeticEnglish.Term.var ProofReader.ArithmeticEnglish.Variable.z),
+                      nonzeroDet :=
+                        ProofReader.EquationEnglish.Chain.cons
+                          (((ProofReader.ArithmeticEnglish.Term.var ProofReader.ArithmeticEnglish.Variable.a).mul
+                                (((ProofReader.ArithmeticEnglish.Term.var ProofReader.ArithmeticEnglish.Variable.r).mul
+                                      ((ProofReader.ArithmeticEnglish.Term.var
+                                            ProofReader.ArithmeticEnglish.Variable.z).add
+                                        ProofReader.ArithmeticEnglish.Term.one)).add
+                                  ((ProofReader.ArithmeticEnglish.Term.var ProofReader.ArithmeticEnglish.Variable.s).mul
+                                    (ProofReader.ArithmeticEnglish.Term.var
+                                      ProofReader.ArithmeticEnglish.Variable.y)))).sub
+                            ((ProofReader.ArithmeticEnglish.Term.var ProofReader.ArithmeticEnglish.Variable.d).mul
+                              (ProofReader.ArithmeticEnglish.Term.var ProofReader.ArithmeticEnglish.Variable.g)))
+                          (ProofReader.EquationEnglish.Chain.cons
+                            (((((ProofReader.ArithmeticEnglish.Term.var ProofReader.ArithmeticEnglish.Variable.a).mul
+                                          (ProofReader.ArithmeticEnglish.Term.var
+                                            ProofReader.ArithmeticEnglish.Variable.r)).mul
+                                      ((ProofReader.ArithmeticEnglish.Term.var
+                                            ProofReader.ArithmeticEnglish.Variable.z).add
+                                        ProofReader.ArithmeticEnglish.Term.one)).add
+                                  ((ProofReader.ArithmeticEnglish.Term.var ProofReader.ArithmeticEnglish.Variable.s).mul
+                                    ((ProofReader.ArithmeticEnglish.Term.var
+                                          ProofReader.ArithmeticEnglish.Variable.a).mul
+                                      (ProofReader.ArithmeticEnglish.Term.var
+                                        ProofReader.ArithmeticEnglish.Variable.y)))).sub
+                              (ProofReader.ArithmeticEnglish.Term.var ProofReader.ArithmeticEnglish.Variable.z))
+                            (ProofReader.EquationEnglish.Chain.pair
+                              (((((ProofReader.ArithmeticEnglish.Term.var ProofReader.ArithmeticEnglish.Variable.a).mul
+                                            (ProofReader.ArithmeticEnglish.Term.var
+                                              ProofReader.ArithmeticEnglish.Variable.r)).add
+                                        ((ProofReader.ArithmeticEnglish.Term.var
+                                              ProofReader.ArithmeticEnglish.Variable.d).mul
+                                          (ProofReader.ArithmeticEnglish.Term.var
+                                            ProofReader.ArithmeticEnglish.Variable.s))).mul
+                                    ((ProofReader.ArithmeticEnglish.Term.var
+                                          ProofReader.ArithmeticEnglish.Variable.z).add
+                                      ProofReader.ArithmeticEnglish.Term.one)).sub
+                                (ProofReader.ArithmeticEnglish.Term.var ProofReader.ArithmeticEnglish.Variable.z))
+                              ProofReader.ArithmeticEnglish.Term.one)),
+                      nonzeroFrame :=
+                        { x := ProofReader.ArithmeticEnglish.Term.var ProofReader.ArithmeticEnglish.Variable.x,
+                          y := ProofReader.ArithmeticEnglish.Term.var ProofReader.ArithmeticEnglish.Variable.y,
+                          z := ProofReader.ArithmeticEnglish.Term.var ProofReader.ArithmeticEnglish.Variable.z,
+                          a := ProofReader.ArithmeticEnglish.Term.var ProofReader.ArithmeticEnglish.Variable.a,
+                          d := ProofReader.ArithmeticEnglish.Term.var ProofReader.ArithmeticEnglish.Variable.d,
+                          b := ProofReader.ArithmeticEnglish.Term.var ProofReader.ArithmeticEnglish.Variable.g,
+                          c :=
+                            ((ProofReader.ArithmeticEnglish.Term.var ProofReader.ArithmeticEnglish.Variable.r).mul
+                                  ((ProofReader.ArithmeticEnglish.Term.var ProofReader.ArithmeticEnglish.Variable.z).add
+                                    ProofReader.ArithmeticEnglish.Term.one)).add
+                              ((ProofReader.ArithmeticEnglish.Term.var ProofReader.ArithmeticEnglish.Variable.s).mul
+                                (ProofReader.ArithmeticEnglish.Term.var
+                                  ProofReader.ArithmeticEnglish.Variable.y)) } }.Nonzero
+                  x y z a d
+in the application
+  ProofReader.BezoutDocument.packNonzero
+    {
+      zeroAB :=
+        ProofReader.EquationEnglish.Chain.pair
+          (ProofReader.ArithmeticEnglish.Term.one.mul ProofReader.ArithmeticEnglish.Term.zero)
+          (ProofReader.ArithmeticEnglish.Term.var ProofReader.ArithmeticEnglish.Variable.x),
+      zeroDC :=
+        ProofReader.EquationEnglish.Chain.pair
+          ((ProofReader.ArithmeticEnglish.Term.var ProofReader.ArithmeticEnglish.Variable.y).mul
+            ProofReader.ArithmeticEnglish.Term.one)
+          (ProofReader.ArithmeticEnglish.Term.var ProofReader.ArithmeticEnglish.Variable.y),
+      zeroDB :=
+        ProofReader.EquationEnglish.Chain.pair
+          ((ProofReader.ArithmeticEnglish.Term.var ProofReader.ArithmeticEnglish.Variable.y).mul
+            ProofReader.ArithmeticEnglish.Term.zero)
+          (ProofReader.ArithmeticEnglish.Term.var ProofReader.ArithmeticEnglish.Variable.z),
+      zeroDet :=
+        ProofReader.EquationEnglish.Chain.pair
+          ((ProofReader.ArithmeticEnglish.Term.one.mul ProofReader.ArithmeticEnglish.Term.one).sub
+            ((ProofReader.ArithmeticEnglish.Term.var ProofReader.ArithmeticEnglish.Variable.y).mul
+              ProofReader.ArithmeticEnglish.Term.zero))
+          ProofReader.ArithmeticEnglish.Term.one,
+      zeroFrame :=
+        { x := ProofReader.ArithmeticEnglish.Term.var ProofReader.ArithmeticEnglish.Variable.x,
+          y := ProofReader.ArithmeticEnglish.Term.var ProofReader.ArithmeticEnglish.Variable.y,
+          z := ProofReader.ArithmeticEnglish.Term.var ProofReader.ArithmeticEnglish.Variable.z,
+          a := ProofReader.ArithmeticEnglish.Term.one,
+          d := ProofReader.ArithmeticEnglish.Term.var ProofReader.ArithmeticEnglish.Variable.y,
+          b := ProofReader.ArithmeticEnglish.Term.zero, c := ProofReader.ArithmeticEnglish.Term.one },
+      bezoutEq :=
+        ProofReader.EquationEnglish.Chain.cons
+          ((ProofReader.ArithmeticEnglish.Term.var ProofReader.ArithmeticEnglish.Variable.g).mul
+            (((ProofReader.ArithmeticEnglish.Term.var ProofReader.ArithmeticEnglish.Variable.a).mul
+                  (ProofReader.ArithmeticEnglish.Term.var ProofReader.ArithmeticEnglish.Variable.r)).add
+              ((ProofReader.ArithmeticEnglish.Term.var ProofReader.ArithmeticEnglish.Variable.d).mul
+                (ProofReader.ArithmeticEnglish.Term.var ProofReader.ArithmeticEnglish.Variable.s))))
+          (ProofReader.EquationEnglish.Chain.cons
+            (((ProofReader.ArithmeticEnglish.Term.var ProofReader.ArithmeticEnglish.Variable.x).mul
+                  (ProofReader.ArithmeticEnglish.Term.var ProofReader.ArithmeticEnglish.Variable.r)).add
+              ((ProofReader.ArithmeticEnglish.Term.var ProofReader.ArithmeticEnglish.Variable.z).mul
+                (ProofReader.ArithmeticEnglish.Term.var ProofReader.ArithmeticEnglish.Variable.s)))
+            (ProofReader.EquationEnglish.Chain.pair
+              (ProofReader.ArithmeticEnglish.Term.var ProofReader.ArithmeticEnglish.Variable.g)
+              ((ProofReader.ArithmeticEnglish.Term.var ProofReader.ArithmeticEnglish.Variable.g).mul
+                ProofReader.ArithmeticEnglish.Term.one))),
+      bezoutCancel :=
+        { factor := ProofReader.ArithmeticEnglish.Term.var ProofReader.ArithmeticEnglish.Variable.g,
+          left :=
+            ((ProofReader.ArithmeticEnglish.Term.var ProofReader.ArithmeticEnglish.Variable.a).mul
+                  (ProofReader.ArithmeticEnglish.Term.var ProofReader.ArithmeticEnglish.Variable.r)).add
+              ((ProofReader.ArithmeticEnglish.Term.var ProofReader.ArithmeticEnglish.Variable.d).mul
+                (ProofReader.ArithmeticEnglish.Term.var ProofReader.ArithmeticEnglish.Variable.s)),
+          right := ProofReader.ArithmeticEnglish.Term.one },
+      relationEq :=
+        ProofReader.EquationEnglish.Chain.cons
+          ((ProofReader.ArithmeticEnglish.Term.var ProofReader.ArithmeticEnglish.Variable.g).mul
+            ((ProofReader.ArithmeticEnglish.Term.var ProofReader.ArithmeticEnglish.Variable.a).mul
+              (ProofReader.ArithmeticEnglish.Term.var ProofReader.ArithmeticEnglish.Variable.y)))
+          (ProofReader.EquationEnglish.Chain.cons
+            ((ProofReader.ArithmeticEnglish.Term.var ProofReader.ArithmeticEnglish.Variable.x).mul
+              (ProofReader.ArithmeticEnglish.Term.var ProofReader.ArithmeticEnglish.Variable.y))
+            (ProofReader.EquationEnglish.Chain.pair
+              ((ProofReader.ArithmeticEnglish.Term.var ProofReader.ArithmeticEnglish.Variable.z).mul
+                ((ProofReader.ArithmeticEnglish.Term.var ProofReader.ArithmeticEnglish.Variable.z).add
+                  ProofReader.ArithmeticEnglish.Term.one))
+              ((ProofReader.ArithmeticEnglish.Term.var ProofReader.ArithmeticEnglish.Variable.g).mul
+                ((ProofReader.ArithmeticEnglish.Term.var ProofReader.ArithmeticEnglish.Variable.d).mul
+                  ((ProofReader.ArithmeticEnglish.Term.var ProofReader.ArithmeticEnglish.Variable.z).add
+                    ProofReader.ArithmeticEnglish.Term.one))))),
+      relationCancel :=
+        { factor := ProofReader.ArithmeticEnglish.Term.var ProofReader.ArithmeticEnglish.Variable.g,
+          left :=
+            (ProofReader.ArithmeticEnglish.Term.var ProofReader.ArithmeticEnglish.Variable.a).mul
+              (ProofReader.ArithmeticEnglish.Term.var ProofReader.ArithmeticEnglish.Variable.y),
+          right :=
+            (ProofReader.ArithmeticEnglish.Term.var ProofReader.ArithmeticEnglish.Variable.d).mul
+              ((ProofReader.ArithmeticEnglish.Term.var ProofReader.ArithmeticEnglish.Variable.z).add
+                ProofReader.ArithmeticEnglish.Term.one) },
+      nonzeroAB :=
+        ProofReader.EquationEnglish.Chain.pair
+          ((ProofReader.ArithmeticEnglish.Term.var ProofReader.ArithmeticEnglish.Variable.a).mul
+            (ProofReader.ArithmeticEnglish.Term.var ProofReader.ArithmeticEnglish.Variable.g))
+          (ProofReader.ArithmeticEnglish.Term.var ProofReader.ArithmeticEnglish.Variable.x),
+      nonzeroDC :=
+        ProofReader.EquationEnglish.Chain.cons
+          ((ProofReader.ArithmeticEnglish.Term.var ProofReader.ArithmeticEnglish.Variable.d).mul
+            (((ProofReader.ArithmeticEnglish.Term.var ProofReader.ArithmeticEnglish.Variable.r).mul
+                  ((ProofReader.ArithmeticEnglish.Term.var ProofReader.ArithmeticEnglish.Variable.z).add
+                    ProofReader.ArithmeticEnglish.Term.one)).add
+              ((ProofReader.ArithmeticEnglish.Term.var ProofReader.ArithmeticEnglish.Variable.s).mul
+                (ProofReader.ArithmeticEnglish.Term.var ProofReader.ArithmeticEnglish.Variable.y))))
+          (ProofReader.EquationEnglish.Chain.cons
+            (((ProofReader.ArithmeticEnglish.Term.var ProofReader.ArithmeticEnglish.Variable.r).mul
+                  ((ProofReader.ArithmeticEnglish.Term.var ProofReader.ArithmeticEnglish.Variable.d).mul
+                    ((ProofReader.ArithmeticEnglish.Term.var ProofReader.ArithmeticEnglish.Variable.z).add
+                      ProofReader.ArithmeticEnglish.Term.one))).add
+              (((ProofReader.ArithmeticEnglish.Term.var ProofReader.ArithmeticEnglish.Variable.d).mul
+                    (ProofReader.ArithmeticEnglish.Term.var ProofReader.ArithmeticEnglish.Variable.s)).mul
+                (ProofReader.ArithmeticEnglish.Term.var ProofReader.ArithmeticEnglish.Variable.y)))
+            (ProofReader.EquationEnglish.Chain.cons
+              (((ProofReader.ArithmeticEnglish.Term.var ProofReader.ArithmeticEnglish.Variable.r).mul
+                    ((ProofReader.ArithmeticEnglish.Term.var ProofReader.ArithmeticEnglish.Variable.a).mul
+                      (ProofReader.ArithmeticEnglish.Term.var ProofReader.ArithmeticEnglish.Variable.y))).add
+                (((ProofReader.ArithmeticEnglish.Term.var ProofReader.ArithmeticEnglish.Variable.d).mul
+                      (ProofReader.ArithmeticEnglish.Term.var ProofReader.ArithmeticEnglish.Variable.s)).mul
+                  (ProofReader.ArithmeticEnglish.Term.var ProofReader.ArithmeticEnglish.Variable.y)))
+              (ProofReader.EquationEnglish.Chain.pair
+                ((((ProofReader.ArithmeticEnglish.Term.var ProofReader.ArithmeticEnglish.Variable.a).mul
+                          (ProofReader.ArithmeticEnglish.Term.var ProofReader.ArithmeticEnglish.Variable.r)).add
+                      ((ProofReader.ArithmeticEnglish.Term.var ProofReader.ArithmeticEnglish.Variable.d).mul
+                        (ProofReader.ArithmeticEnglish.Term.var ProofReader.ArithmeticEnglish.Variable.s))).mul
+                  (ProofReader.ArithmeticEnglish.Term.var ProofReader.ArithmeticEnglish.Variable.y))
+                (ProofReader.ArithmeticEnglish.Term.var ProofReader.ArithmeticEnglish.Variable.y)))),
+      nonzeroDB :=
+        ProofReader.EquationEnglish.Chain.pair
+          ((ProofReader.ArithmeticEnglish.Term.var ProofReader.ArithmeticEnglish.Variable.d).mul
+            (ProofReader.ArithmeticEnglish.Term.var ProofReader.ArithmeticEnglish.Variable.g))
+          (ProofReader.ArithmeticEnglish.Term.var ProofReader.ArithmeticEnglish.Variable.z),
+      nonzeroDet :=
+        ProofReader.EquationEnglish.Chain.cons
+          (((ProofReader.ArithmeticEnglish.Term.var ProofReader.ArithmeticEnglish.Variable.a).mul
+                (((ProofReader.ArithmeticEnglish.Term.var ProofReader.ArithmeticEnglish.Variable.r).mul
+                      ((ProofReader.ArithmeticEnglish.Term.var ProofReader.ArithmeticEnglish.Variable.z).add
+                        ProofReader.ArithmeticEnglish.Term.one)).add
+                  ((ProofReader.ArithmeticEnglish.Term.var ProofReader.ArithmeticEnglish.Variable.s).mul
+                    (ProofReader.ArithmeticEnglish.Term.var ProofReader.ArithmeticEnglish.Variable.y)))).sub
+            ((ProofReader.ArithmeticEnglish.Term.var ProofReader.ArithmeticEnglish.Variable.d).mul
+              (ProofReader.ArithmeticEnglish.Term.var ProofReader.ArithmeticEnglish.Variable.g)))
+          (ProofReader.EquationEnglish.Chain.cons
+            (((((ProofReader.ArithmeticEnglish.Term.var ProofReader.ArithmeticEnglish.Variable.a).mul
+                          (ProofReader.ArithmeticEnglish.Term.var ProofReader.ArithmeticEnglish.Variable.r)).mul
+                      ((ProofReader.ArithmeticEnglish.Term.var ProofReader.ArithmeticEnglish.Variable.z).add
+                        ProofReader.ArithmeticEnglish.Term.one)).add
+                  ((ProofReader.ArithmeticEnglish.Term.var ProofReader.ArithmeticEnglish.Variable.s).mul
+                    ((ProofReader.ArithmeticEnglish.Term.var ProofReader.ArithmeticEnglish.Variable.a).mul
+                      (ProofReader.ArithmeticEnglish.Term.var ProofReader.ArithmeticEnglish.Variable.y)))).sub
+              (ProofReader.ArithmeticEnglish.Term.var ProofReader.ArithmeticEnglish.Variable.z))
+            (ProofReader.EquationEnglish.Chain.pair
+              (((((ProofReader.ArithmeticEnglish.Term.var ProofReader.ArithmeticEnglish.Variable.a).mul
+                            (ProofReader.ArithmeticEnglish.Term.var ProofReader.ArithmeticEnglish.Variable.r)).add
+                        ((ProofReader.ArithmeticEnglish.Term.var ProofReader.ArithmeticEnglish.Variable.d).mul
+                          (ProofReader.ArithmeticEnglish.Term.var ProofReader.ArithmeticEnglish.Variable.s))).mul
+                    ((ProofReader.ArithmeticEnglish.Term.var ProofReader.ArithmeticEnglish.Variable.z).add
+                      ProofReader.ArithmeticEnglish.Term.one)).sub
+                (ProofReader.ArithmeticEnglish.Term.var ProofReader.ArithmeticEnglish.Variable.z))
+              ProofReader.ArithmeticEnglish.Term.one)),
+      nonzeroFrame :=
+        { x := ProofReader.ArithmeticEnglish.Term.var ProofReader.ArithmeticEnglish.Variable.x,
+          y := ProofReader.ArithmeticEnglish.Term.var ProofReader.ArithmeticEnglish.Variable.y,
+          z := ProofReader.ArithmeticEnglish.Term.var ProofReader.ArithmeticEnglish.Variable.z,
+          a := ProofReader.ArithmeticEnglish.Term.var ProofReader.ArithmeticEnglish.Variable.a,
+          d := ProofReader.ArithmeticEnglish.Term.var ProofReader.ArithmeticEnglish.Variable.d,
+          b := ProofReader.ArithmeticEnglish.Term.var ProofReader.ArithmeticEnglish.Variable.g,
+          c :=
+            ((ProofReader.ArithmeticEnglish.Term.var ProofReader.ArithmeticEnglish.Variable.r).mul
+                  ((ProofReader.ArithmeticEnglish.Term.var ProofReader.ArithmeticEnglish.Variable.z).add
+                    ProofReader.ArithmeticEnglish.Term.one)).add
+              ((ProofReader.ArithmeticEnglish.Term.var ProofReader.ArithmeticEnglish.Variable.s).mul
+                (ProofReader.ArithmeticEnglish.Term.var ProofReader.ArithmeticEnglish.Variable.y)) } }
+    OAI.ComplexCancellation.BezoutFrame.exists_frame.documentAvailable
+    OAI.ComplexCancellation.BezoutFrame.exists_frame.documentNonzero

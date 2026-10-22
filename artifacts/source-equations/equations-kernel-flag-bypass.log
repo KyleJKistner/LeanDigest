@@ -1,0 +1,10 @@
+equations-kernel-flag-bypass.lean:55:0: error: (kernel) declaration type mismatch, 'OAI.ComplexCancellation.BezoutFrame.exists_frame.equationText.0.links' has type
+  ∀ {R : Type u_1} [inst : EuclideanDomain R] (x y z : R),
+    x * y = z * (z + 1) →
+      let g := EuclideanDomain.gcd x z;
+      g = 0 → x = 0 ∧ z = 0 → 1 * 0 = x
+but it is expected to have type
+  ∀ {R : Type u_1} [inst : EuclideanDomain R] (x y z : R),
+    x * y = z * (z + 1) →
+      let g := EuclideanDomain.gcd x z;
+      g = 0 → x = 0 ∧ z = 0 → False

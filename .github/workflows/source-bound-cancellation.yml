@@ -1,0 +1,72 @@
+name: Source-bound cancellation
+on:
+  workflow_dispatch:
+  push:
+    branches: ['work/source-bound-cancellation-20261019']
+  pull_request:
+    paths:
+      - 'lean/ArithmeticEnglish*.lean'
+      - 'lean/SourceCancellation.lean'
+      - 'lean/ControlledEnglish*.lean'
+      - 'scripts/check_source_cancellation.py'
+      - 'proofreader/source_text.py'
+      - 'docs/companion/**'
+      - 'docs/SOURCE_BOUND_CANCELLATION.md'
+      - 'artifacts/source-cancellation/**'
+      - 'tests/test_source*.py'
+      - 'tests/reader/test_bezout_companion.py'
+      - '.github/workflows/source-bound-cancellation.yml'
+permissions:
+  contents: read
+jobs:
+  cancellation-native:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with: {persist-credentials: false}
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python -m pip install '.[dev]'
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+          repository: leanprover-community/mathlib4
+          ref: d13f23b723b8a846827a245b89c10fc7d3f11612
+          path: cancellation-mathlib
+      - uses: leanprover/lean-action@v1
+        with:
+          lake-package-directory: cancellation-mathlib
+          auto-config: false
+          build: false
+          test: false
+          lint: false
+          use-mathlib-cache: false
+          use-github-cache: false
+      - name: Retrieve the exact dependency closure
+        working-directory: cancellation-mathlib
+        run: lake exe cache get Mathlib/Algebra/EuclideanDomain/Basic.lean Mathlib/Tactic/Ring.lean
+      - name: Check the text contracts, actual source sentences, and negative controls
+        run: |
+          lean_binary="$(cd cancellation-mathlib && elan which lean)"
+          test -x "$lean_binary"
+          python scripts/check_source_cancellation.py --lean "$lean_binary" --project cancellation-mathlib --output artifacts/ci-source-cancellation --trust-project
+      - name: Require the fresh source-bound output to equal the retained record
+        run: |
+          cmp artifacts/source-cancellation/positive.json artifacts/ci-source-cancellation/positive.json
+          cmp artifacts/source-cancellation/cancellation-0.txt artifacts/ci-source-cancellation/cancellation-0.txt
+          cmp artifacts/source-cancellation/cancellation-1.txt artifacts/ci-source-cancellation/cancellation-1.txt
+          git rev-parse HEAD > artifacts/ci-source-cancellation/application-commit.txt
+      - name: Test static evidence rejection and regenerate the companion
+        run: |
+          python -m pytest tests/test_source_text.py tests/test_source_cancellation_gate.py tests/test_editorial_style.py -q --junitxml=artifacts/ci-source-cancellation/python-tests.xml
+          python docs/companion/build.py
+          git diff --exit-code
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: source-cancellation-evidence
+          path: artifacts/ci-source-cancellation/
+          retention-days: 30
+          if-no-files-found: error

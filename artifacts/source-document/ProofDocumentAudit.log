@@ -1,0 +1,6 @@
+'ProofReader.BezoutDocument.Audit.nonzero_alone_is_insufficient' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'ProofReader.BezoutDocument.Audit.grammatical_document_can_be_false' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]

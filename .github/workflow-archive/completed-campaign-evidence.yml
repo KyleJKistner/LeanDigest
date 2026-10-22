@@ -1,0 +1,69 @@
+name: Retain completed original campaigns
+on:
+  workflow_dispatch:
+  push:
+    branches: [work/completion-evidence-retries]
+    paths: ['.github/workflows/completed-campaign-evidence.yml']
+permissions: {contents: read, actions: read}
+jobs:
+  collect:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+        with: {persist-credentials: false}
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - name: Require finished campaigns and acquire new digest-bound observations
+        env: {GH_TOKEN: '${{ github.token }}'}
+        run: |
+          python - <<'PY'
+          from scripts.collect_original_evidence import api
+          for run in (39141760623,39144564607):
+            r=api('KyleJKistner/LeanDigest',f'actions/runs/{run}')
+            assert r['status']=='completed', 'Do not overlap the running campaign'
+            print('FINISHED_CAMPAIGN',run,r['conclusion'])
+          PY
+          python scripts/collect_original_evidence.py --output /tmp/final --allow-download
+      - name: Restore previously bound baseline and unchanged OpenAI source
+        env: {GH_TOKEN: '${{ github.token }}'}
+        run: |
+          gh api repos/$GITHUB_REPOSITORY/actions/artifacts/12162982446/zip > /tmp/prior.zip
+          echo 'f5694ae809d87e5785781973ce07c9e73846c77d6ed90adcf98e645668f59d47  /tmp/prior.zip' | sha256sum -c -
+          python - <<'PY'
+          from pathlib import Path
+          from scripts.collect_original_evidence import unpack
+          import shutil
+          unpack(Path('/tmp/prior.zip'),Path('/tmp/prior'))
+          for name in ('baseline','retries'):shutil.copytree(Path('/tmp/prior')/name,Path('/tmp/final')/name)
+          shutil.copy2('/tmp/prior/source-inventory.json','/tmp/final/source-inventory.json')
+          PY
+          mkdir -p /tmp/inputs/source
+          gh run download 38822475057 -R "$GITHUB_REPOSITORY" -n complete-openai-lean-source -D /tmp/inputs/source
+          python -c "from pathlib import Path;from scripts.assemble_finding_release import unpack_source;unpack_source(Path('/tmp/inputs'),Path('/tmp/original-project'))"
+      - name: Reconcile final build and reading outcomes without re-executing Lean
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          from proofreader.original_status import build_status
+          from proofreader.original_project import read,write
+          root=Path('/tmp/final')
+          status,_=build_status(Path('/tmp/original-project/lean'),root,recovery_output=Path('/tmp/recovered'))
+          write(root/'current-status.json',status)
+          for key in ('build_summary','proof_summary','diagnoses'):
+            print('FINAL_'+key.upper(),{k:v for k,v in status[key].items() if k not in ('missing_tasks','missing_workers','targets')},flush=True)
+          diagnostics=[]
+          for p in sorted((root/'original-build').rglob('worker.json')):
+            for row in read(p)['targets']:
+              if row['status']=='passed':continue
+              d={'task':row['id'],'status':row['status'],'worker':p.parent.name}
+              if row.get('log'):
+                r=read(p.parent/row['log']);d.update(exit_code=r.get('exit_code'),reason=r.get('reason'),stdout_tail=r.get('stdout','')[-4000:],stderr_tail=r.get('stderr','')[-4000:])
+              diagnostics.append(d)
+          write(root/'diagnostics.json',diagnostics)
+          PY
+          git rev-parse HEAD > /tmp/final/collector-commit.txt
+          git archive --format=zip --prefix=Leanglish/ -o /tmp/final/application.zip HEAD
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with: {name: completed-original-campaigns, path: /tmp/final/, retention-days: 90, if-no-files-found: error}

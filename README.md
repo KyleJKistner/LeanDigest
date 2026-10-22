@@ -1,117 +1,178 @@
 # Leanglish
 
-**Lean proofs, in mathematical English.**
+Leanglish shows the Lean proofs in the OpenAI mathematics release
+(`openai/math` at `1581d4cbdd69a0faf34b2089614fe2a814316a6a`) as mathematical
+English. Every displayed step is bound to a kernel-checked piece of the original
+proof. The renderer is deterministic and makes no language-model calls.
 
-Leanglish connects the OpenAI mathematics findings to their formalization scope,
-explicit statements, original Lean source, and the structured proof readings
-available so far. The renderer is deterministic and makes no language-model API
-calls. Reading does not execute Lean or send source to a service.
+## Example
 
-## All documented findings: version 0.4.0
+`OAI.CompleteCrouzeix.main`, as rendered by the current renderer
+(`source-math-en/0.7.0`) from its retained snapshot:
 
-The all-findings catalog indexes **all 242 findings with Lean scope documentation**
-in the pinned release. It retains the broader 372-finding table of contents,
-all 416 comparison configurations, and all **602 statement entries**. Those
-entries correspond to 601 distinct formal targets: 536 theorems and 65 definition
-references. It also includes the 413 directly referenced solution modules.
+```text
+Then UniversalBound 2 ∧ ∀ (C : ℝ), UniversalBound C → 2 ≤ C.
 
-**109 of the 536 theorem targets have structured proof readings** in this frozen
-release. Their retained native observations check 4,090 selected proof frames;
-the generated readings contain 1,357 explicitly unexpanded passages. All remaining
-targets stay visible, with recorded attempt status and original source access.
+Proof.
+Verify the 2 required conclusions.
+  Prove ∀ (n m d : ℕ),
+      0 < n →
+        0 < m →
+          ∀ (A : Matrix (Fin n) (Fin n) ℂ) (B : Fin (d + 1) → Matrix (Fin m) (Fin m) ℂ),
+            ‖polynomialAt A B‖ ≤ 2 · rangeMaximum A B.
+    Let n ∈ ℕ be arbitrary.
+    Let m ∈ ℕ be arbitrary.
+    Let d ∈ ℕ be arbitrary.
+    Assume 0 < n.
+    Assume 0 < m.
+    Let A ∈ Matrix (Fin n) (Fin n) ℂ be arbitrary.
+    Let B ∈ Fin (d + 1) → Matrix (Fin m) (Fin m) ℂ be arbitrary.
+    [Explanation gap] By the project lemma complete_crouzeix_bound:
+      ‖polynomialAt A B‖ ≤ 2 · rangeMaximum A B
+      Use the hypotheses hn: 0 < n; hm: 0 < m.
+  Prove ∀ (C : ℝ), UniversalBound C → 2 ≤ C.
+    Let C ∈ ℝ be arbitrary.
+    Assume UniversalBound C.
+    [Explanation gap] By the project lemma optimal_constant:
+      2 ≤ C
+      Use the hypothesis hC: UniversalBound C.
+```
 
-This is complete **finding and statement access**, not complete English-proof
-coverage. Comparison specifications intentionally contain placeholders; an
-elaborated specification is never counted as a checked solution proof. The native
-solution runs used unchanged modules, Lean 4.34.1, and exact shared dependency pins,
-not a complete replay of the original Lake project or its Comparator checks.
+Names are shown relative to the theorem's namespace (`OAI.CompleteCrouzeix`), and
+each reading states which prefixes it omits. Each conclusion is proved inside its
+own block, so a variable or assumption introduced for one conclusion never
+appears to govern the next. An explanation gap marks a step whose justification
+is not expanded in this reading; here, each gap cites a project lemma. The
+published release shows the same step as `Apply
+OAI.CompleteCrouzeix.complete_crouzeix_bound to the supplied arguments.`
 
-[Reading guide and exact limitations](docs/ALL_FINDINGS.md)
+Cited names become links in rebuilt catalogs: to the lemma's own reading where
+one exists, otherwise to its declaration line in the original source. How many
+resolve depends on what the catalog bundles. A full build from the upstream
+source tree links 1,557 of the 1,762 cited project names (local measurement).
+The catalog preview, which bundles only the solution modules and the pilot
+supporting-lemma readings, links 495 of them. The published release has no
+citation links. In the preview, `complete_crouzeix_bound` links to its
+declaration line; `optimal_constant` is declared in a module the preview does not
+bundle, so it links only in a full build.
 
-### Open the catalog
+## Coverage
 
-Use the `leanglish-all-findings.zip` asset from the
-[GitHub releases](https://github.com/KyleJKistner/LeanDigest/releases). Extract it
-and open `Leanglish/index.html`. No installation, account, API key, network
-connection, or Lean runtime is needed for the included material. External papers
-and upstream dependency-source links require a connection.
+| Measure | Value |
+| --- | --- |
+| Documented findings indexed | 242 of 242 |
+| Documented theorem targets with a reading (release `leanglish-original-project-317dc31`) | 492 of 536 |
+| Checked proof frames in those readings | 22,452 |
+| Explanation-gap steps in those readings, published renderer 0.4.1 → current 0.7.0 | 7,587 → 5,014 |
+| Words in those readings, 0.4.1 → 0.7.0 | 390,871 → 321,137 |
+| Readings without any explanation gap | 0 |
+| Supporting lemmas with a reading (dependency-cone pilot, not yet in a release) | 151 of 1,722 planned |
+| Cited project names linked to a reading or source line (local full build) | 1,557 of 1,762 |
+| Human comprehension study | Not yet performed |
 
-The initial view shows all documented findings. Search by topic, title, finding
-number, or Lean declaration; open a finding to inspect its scope, assumptions,
-formal targets and proof-reading availability. `coverage.html` and the JSON
-records separate indexing, statement elaboration, native checking, and explanation
-coverage. The older 14-proof gallery remains a historical preview, not the current
-coverage denominator.
+The numbers for renderer 0.7.0 come from re-rendering the 492 retained snapshots
+with `leanglish reading-kpis`; CI fails if
+`benchmarks/reading-kpis/current.json` disagrees with the committed renderer.
+Fewer gap steps does not mean fewer checked frames inside gaps: grouping
+instance facts and automation certificates, and marking unchecked definitional
+unfoldings as gaps, raised that count from 7,587 to 8,175. See
+[Reading quality](docs/READING_QUALITY.md).
 
-## Build from local observations
+Top-level theorems in this corpus mostly assemble project lemmas, so most of the
+mathematics is in the cited lemmas. The [dependency cone](docs/DEPENDENCY_CONE.md)
+reads those lemmas as a separate denominator. Its first native pilot produced
+readings for all 151 planned lemmas in 8 environment modules.
 
-Python 3.11 or newer:
+## Open the catalog
+
+Download `leanglish-all-findings.zip` from the latest
+[GitHub release](https://github.com/KyleJKistner/LeanDigest/releases), extract it
+and open `Leanglish/index.html`. No installation, account, network connection or
+Lean runtime is needed for the included material.
+
+The published release uses renderer 0.4.1. The `catalog-preview.yml` workflow
+re-renders that release with the current renderer, notation and citation links,
+adds the 151 pilot supporting-lemma readings as a separate section, audits the
+result, and uploads it as a workflow artifact. It does not publish a release.
+See [Catalog preview](docs/CATALOG_PREVIEW.md).
+
+## Verification
+
+For each reading, a Lean exporter submits the selected intermediate statements
+to the kernel and independently follows their recorded paths in the original
+proof term. Arithmetic passages can carry integer-polynomial certificates that
+are replayed without Lean. Re-extraction and `check_reading` bind the displayed
+reading to the snapshot by deterministic regeneration.
+
+The English renderer, display notation, Lean pretty-printer, extraction code and
+saved run records remain inside the trust boundary. Records are unsigned. See
+[Trust boundary](docs/TRUST.md), [Narrative format](docs/NARRATIVE.md) and
+[Acceptance gates](docs/ACCEPTANCE.md).
+
+## Limitations
+
+- No reading in the corpus is free of explanation gaps. Most remaining gaps cite
+  a project or library lemma.
+- No English proof in the catalog is formally certified. A fixed-grammar Bézout
+  document is a separate research result; see
+  [Research tracks](docs/RESEARCH_TRACKS.md).
+- No mathematician has evaluated the readings. Measured counts are not a
+  readability result.
+- 85 proposed one-line glosses for frequent library lemmas await human review and
+  do not affect default readings. See [Glossary](docs/GLOSSARY.md).
+- Comparison specifications contain placeholders and are never counted as checked
+  solution proofs. Upstream descriptions are reproduced as claims.
+- Several pinned CI inputs expire in November 2026. See
+  [Input preservation](docs/INPUT_PRESERVATION.md).
+
+## Measure readings
 
 ```sh
 python -m pip install .
-leanglish catalog --help
-leanglish audit-catalog /path/to/generated/site
+python scripts/fetch_reading_corpus.py /tmp/corpus
+leanglish reading-kpis /tmp/corpus --baseline benchmarks/reading-kpis/current.json
 ```
 
-The catalog builder reads the frozen upstream metadata, original source inventory,
-statement observations, and proof observations. It checks their identities and
-rejects missing inventory members, contradictory successful statements, changed
-source hashes, invalid proof paths, and mismatched receipts. It does not run Lean.
+The corpus is the 492 retained snapshots of the latest release, checked against
+a pinned SHA-256. `--per-reading FILE` writes one row per reading.
 
-`.github/workflows/all-findings-release.yml` retrieves the frozen input artifacts,
-rebuilds the catalog, audits every local link, and exercises real offline file
-navigation in Chromium before packaging. Packaging records the exact application
-commit and hashes. The separate release job publishes only after the build passes;
-it never overwrites an existing immutable version.
-
-## Read the bundled demonstration
-
-```sh
-python -m leanglish narrative-demo -o reader.html
-python -m leanglish serve
-```
-
-Open `http://127.0.0.1:8765`. The bundled demonstration starts with the Bézout-frame
-argument. The full finding catalog is distributed separately; starting this demo
-server does not imply all findings are bundled in the installed Python package.
-
-## Verification model
-
-The source-bound reading route records selected intermediate statements and their
-locations in the original proof. The Lean exporter kernel-checks the judgements
-and independently follows the recorded source-proof paths. The earlier exact-DAG
-route remains available. Arithmetic passages can include independently replayable
-integer-polynomial certificates.
-
-Neither route formally verifies the natural-language renderer. The compiler,
-source, pretty-printer, extraction implementation, transport, and terminology
-remain within the trust boundary. Saved execution observations are unsigned.
-There are **zero formally certified English proofs** and no completed controlled
-human-comprehension study. Upstream descriptions are presented as upstream claims,
-not independent assessments of the mathematical papers.
-
-Actual Lean extraction is explicit opt-in with `--trust-project`; remote checking
-requires `--allow-remote`. Elaborating a Lean project may execute arbitrary code:
-consent is not a sandbox. The browser has no source-execution endpoint.
-
-## Development
+## Build and develop
 
 ```sh
 python -m pip install '.[dev,webtest]'
-python -m playwright install chromium
 python -m pytest -q
+leanglish catalog --help
+leanglish audit-catalog /path/to/generated/site
+python -m leanglish narrative-demo -o reader.html
 ```
 
-Native integration requires the pinned Lean project in `lean/`. CI sets
-`PROOFREADER_REQUIRE_LEAN=1`, so the required export/replay/tamper tests cannot
-pass by silently skipping. A local run without Lean labels these tests as skipped.
+The catalog builder reads frozen upstream metadata, the original source
+inventory, statement observations and proof observations, and rejects missing
+inventory members, changed source hashes, invalid proof paths and mismatched
+receipts. It does not run Lean. Native extraction is explicit opt-in with
+`--trust-project`; elaborating a Lean project may execute arbitrary code.
 
-Further documentation: [architecture](docs/ARCHITECTURE.md),
-[narrative format](docs/NARRATIVE.md), [exact-DAG contract](docs/KERNEL_IR.md),
-[trust boundaries](docs/TRUST.md), [historical validation](docs/VALIDATION_V0_3.md),
-and [supervisor checkpoint](HANDOFF.md).
+CI sets `PROOFREADER_REQUIRE_LEAN=1` for the native tests. A local run without
+Lean reports those tests as skipped.
 
-Leanglish is the product name; the repository remains `KyleJKistner/LeanDigest`.
-The `proofreader` Python package, legacy CLI, distribution name `lean-proofreader`,
-and historical proof-format identifiers remain compatible. New catalog commands
-are exposed through the public `leanglish` entry point.
+## Documentation
+
+- Readings: [Reading quality](docs/READING_QUALITY.md),
+  [Notation](docs/NOTATION.md), [Citation links](docs/CITATION_LINKS.md),
+  [Glossary](docs/GLOSSARY.md)
+- Catalog: [All findings](docs/ALL_FINDINGS.md),
+  [Catalog preview](docs/CATALOG_PREVIEW.md)
+- Corpus runs: [Dependency cone](docs/DEPENDENCY_CONE.md),
+  [Input preservation](docs/INPUT_PRESERVATION.md),
+  [Repository state](docs/REPOSITORY_STATE.md)
+- Trust: [Trust boundary](docs/TRUST.md), [Acceptance](docs/ACCEPTANCE.md),
+  [Narrative format](docs/NARRATIVE.md), [Exact-DAG contract](docs/KERNEL_IR.md)
+- Research: [Research tracks](docs/RESEARCH_TRACKS.md),
+  [Proof document](docs/PROOF_DOCUMENT.md),
+  [Correct by construction](docs/CORRECT_BY_CONSTRUCTION.md)
+- Project: [Supervisor checkpoint](HANDOFF.md), [Agent contract](AGENTS.md),
+  [Editorial style](docs/STYLE.md)
+
+Leanglish is the product name; the repository is `KyleJKistner/LeanDigest`. The
+`proofreader` package, the `proofreader` command and the `lean-proofreader`
+distribution name remain compatible.
