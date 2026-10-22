@@ -529,5 +529,9 @@ class ReadingChecks:
             if p is not None and p > _PRECEDENCE[ops[m[1]]]:
                 argument = argument[1:-1]
         used = set(_IDENT.findall(value)) | {c['name'] for c in self.frames[i]['context']}
-        t = next(v for v in ('t', 's', 'u', 'v')+tuple('t'+chr(0x2080+k) for k in range(1, 10)) if v not in used)
+        subscripts = str.maketrans('0123456789', '₀₁₂₃₄₅₆₇₈₉')
+        candidates = itertools.chain(('t', 's', 'u', 'v'),
+                                     ('t'+str(k).translate(subscripts) for k in itertools.count(1)))
+        # A finite context cannot exhaust this sequence; retain the old choices first.
+        t = next(v for v in candidates if v not in used)
         return math_text(t+' ↦ '+argument+' '+ops[m[1]]+' '+t)
