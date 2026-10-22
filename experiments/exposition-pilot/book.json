@@ -1,0 +1,342 @@
+{
+  "schema": "leanglish.exposition-book/v1",
+  "title": "Proofs",
+  "english_certified": false,
+  "articles": [
+    {
+      "id": "bezout",
+      "title": "A Bézout frame",
+      "origin": "OpenAI supporting theorem",
+      "chosen": "bezout_explanatory_v3",
+      "variants": {
+        "Original": "bezout_original",
+        "Compact": "bezout_compact_v2",
+        "Explanatory": "bezout_explanatory_v3"
+      },
+      "statement": [
+        {
+          "kind": "paragraph",
+          "text": "Let \\(R\\) be a Euclidean domain and let \\(x,y,z\\in R\\) satisfy \\(xy=z(z+1)\\). Then there are \\(a,d,b,c\\in R\\) such that"
+        },
+        {
+          "kind": "math",
+          "tex": "\\begin{aligned}ab&=x,&dc&=y,\\\\db&=z,&ac-db&=1.\\end{aligned}"
+        }
+      ],
+      "sections": [
+        {
+          "title": "Construction",
+          "blocks": [
+            {
+              "kind": "paragraph",
+              "text": "For \\(g=\\gcd(x,z)\\ne0\\), write \\(x=ga\\) and \\(z=gd\\), and take \\(b=g\\). The remaining requirements are"
+            },
+            {
+              "kind": "math",
+              "tex": "ac=z+1,\\qquad dc=y."
+            },
+            {
+              "kind": "paragraph",
+              "text": "We will obtain coefficients \\(r,s\\) with \\(ar+ds=1\\). Any solution to the two equations above must then satisfy"
+            },
+            {
+              "kind": "math",
+              "tex": "\\begin{aligned}c&=(ar+ds)c\\\\&=r(ac)+s(dc)\\\\&=r(z+1)+sy.\\end{aligned}"
+            },
+            {
+              "kind": "paragraph",
+              "text": "Thus there is only one possible value of \\(c\\). The compatibility relation \\(ay=d(z+1)\\) will show that it satisfies both equations."
+            },
+            {
+              "kind": "note",
+              "title": "Why not divide by a?",
+              "blocks": [
+                {
+                  "kind": "paragraph",
+                  "text": "The domain need not be a field, and \\(a\\) can even be zero. For example, \\(x=0\\) and \\(z=-1\\) are permitted. The identity \\(ar+ds=1\\) lets us solve the two equations together without dividing by either \\(a\\) or \\(d\\)."
+                }
+              ],
+              "refs": [
+                "PilotCandidate.compatiblePair"
+              ]
+            },
+            {
+              "kind": "note",
+              "title": "The general lemma",
+              "blocks": [
+                {
+                  "kind": "paragraph",
+                  "text": "In any commutative ring, suppose \\(ar+ds=1\\) and \\(ay=dw\\). Then \\(c=rw+sy\\) satisfies \\(ac=w\\) and \\(dc=y\\). The calculation is"
+                },
+                {
+                  "kind": "math",
+                  "tex": "\\begin{aligned}a(rw+sy)&=arw+s(ay)\\\\&=arw+sdw=(ar+ds)w=w,\\\\d(rw+sy)&=r(dw)+dsy\\\\&=r(ay)+dsy=(ar+ds)y=y.\\end{aligned}"
+                },
+                {
+                  "kind": "paragraph",
+                  "text": "The main proof uses Euclidean-domain operations to establish these hypotheses; the lemma itself only needs a commutative ring."
+                }
+              ],
+              "refs": [
+                "PilotCandidate.compatiblePair",
+                "PilotCandidate.forcedSolution"
+              ]
+            }
+          ]
+        },
+        {
+          "title": "Proof",
+          "blocks": [
+            {
+              "kind": "paragraph",
+              "text": "Put \\(g=\\gcd(x,z)\\). If \\(g=0\\), then \\(x=z=0\\), and \\((a,d,b,c)=(1,y,0,1)\\) has all four required properties."
+            },
+            {
+              "kind": "paragraph",
+              "text": "Now suppose \\(g\\ne0\\). Choose \\(a,d\\) with \\(x=ga\\) and \\(z=gd\\). Choose Bézout coefficients \\(r,s\\) with \\(xr+zs=g\\). Cancelling \\(g\\) gives"
+            },
+            {
+              "kind": "math",
+              "tex": "ar+ds=1."
+            },
+            {
+              "kind": "paragraph",
+              "text": "The original product equation gives \\(gay=gd(z+1)\\). Cancelling \\(g\\) again gives"
+            },
+            {
+              "kind": "math",
+              "tex": "ay=d(z+1)."
+            },
+            {
+              "kind": "paragraph",
+              "text": "Apply the general lemma with \\(w=z+1\\). Thus \\(c=r(z+1)+sy\\) satisfies \\(ac=z+1\\) and \\(dc=y\\). Set \\(b=g\\). Then"
+            },
+            {
+              "kind": "math",
+              "tex": "\\begin{aligned}ab&=ag=x,\\\\dc&=y,\\\\db&=dg=z,\\\\ac-db&=(z+1)-z=1.\\end{aligned}"
+            },
+            {
+              "kind": "note",
+              "title": "Where is the nonzero assumption used?",
+              "blocks": [
+                {
+                  "kind": "paragraph",
+                  "text": "Only the two cancellations require \\(g\\ne0\\). Neither the compatible-pair lemma nor the final verification needs it. The case \\(g=0\\) is handled before any cancellation."
+                }
+              ],
+              "refs": [
+                "PilotCandidate.result"
+              ]
+            },
+            {
+              "kind": "note",
+              "title": "Is the product equation necessary?",
+              "blocks": [
+                {
+                  "kind": "paragraph",
+                  "text": "Yes. Any frame satisfying the four displayed equations must obey"
+                },
+                {
+                  "kind": "math",
+                  "tex": "xy=(ab)(dc)=(ac)(db)=(z+1)z=z(z+1)."
+                },
+                {
+                  "kind": "paragraph",
+                  "text": "So this hypothesis is not merely convenient for this proof."
+                }
+              ],
+              "refs": [
+                "PilotCandidate.frameNecessary"
+              ]
+            }
+          ]
+        }
+      ],
+      "example": "bezout",
+      "comparison": "The compact candidate keeps the gcd argument and the same witness but delegates the final algebra to grind. The explanatory candidate is longer because it also proves what forces the witness and why the product hypothesis is necessary. These additional claims are checked separately.",
+      "questions": [
+        "Where does the formula for c come from?",
+        "Why is division by a unnecessary?",
+        "Which hypothesis supplies the compatibility relation?"
+      ],
+      "limitations": "The original theorem body was compiled with the retained two-import Mathlib adapter; the complete OpenAI project was not rebuilt."
+    },
+    {
+      "id": "reverse",
+      "title": "Reversing a list twice",
+      "origin": "Lean library control",
+      "chosen": "reverse_indexed",
+      "variants": {
+        "Original": "reverse_original",
+        "Compact": "reverse_compact_v2",
+        "Explanatory": "reverse_indexed",
+        "Inductive": "reverse_explanatory_v2"
+      },
+      "statement": [
+        {
+          "kind": "paragraph",
+          "text": "For every finite list \\(X\\),"
+        },
+        {
+          "kind": "math",
+          "tex": "\\operatorname{rev}(\\operatorname{rev}(X))=X."
+        }
+      ],
+      "sections": [
+        {
+          "title": "Proof",
+          "blocks": [
+            {
+              "kind": "paragraph",
+              "text": "Reversal preserves the length \\(n\\) and moves the entry at position \\(i\\) to position \\(n-1-i\\), using positions \\(0,\\ldots,n-1\\). Reversing again moves it to"
+            },
+            {
+              "kind": "math",
+              "tex": "n-1-(n-1-i)=i."
+            },
+            {
+              "kind": "paragraph",
+              "text": "Thus the twice-reversed list has the same length and the same entry at every position as \\(X\\). The lists are equal."
+            },
+            {
+              "kind": "note",
+              "title": "What must the index calculation assume?",
+              "blocks": [
+                {
+                  "kind": "paragraph",
+                  "text": "The calculation uses \\(i<n\\). Lean uses natural-number subtraction, so unrestricted cancellation would be wrong: for \\(n=0,i=1\\), the left side is \\(0\\), not \\(1\\). For an empty list there are no valid positions to check."
+                }
+              ],
+              "refs": [
+                "PilotCandidate.reverseIndex"
+              ]
+            },
+            {
+              "kind": "note",
+              "title": "An inductive proof",
+              "blocks": [
+                {
+                  "kind": "paragraph",
+                  "text": "Write \\(a::X\\) for prepending an entry and \\(X\\mathbin{+\\!+}Y\\) for concatenation. Reversal sends a first entry to the end and a last entry to the front:"
+                },
+                {
+                  "kind": "math",
+                  "tex": "\\operatorname{rev}(a::X)=\\operatorname{rev}(X)\\mathbin{+\\!+}[a],"
+                },
+                {
+                  "kind": "math",
+                  "tex": "\\operatorname{rev}(X\\mathbin{+\\!+}[a])=a::\\operatorname{rev}(X)."
+                },
+                {
+                  "kind": "paragraph",
+                  "text": "The second identity follows by induction on \\(X\\). Using it, the main induction step becomes"
+                },
+                {
+                  "kind": "math",
+                  "tex": "\\begin{aligned}\\operatorname{rev}(\\operatorname{rev}(a::X))&=\\operatorname{rev}(\\operatorname{rev}(X)\\mathbin{+\\!+}[a])\\\\&=a::\\operatorname{rev}(\\operatorname{rev}(X))\\\\&=a::X.\\end{aligned}"
+                }
+              ],
+              "refs": [
+                "reverse_explanatory_v2:PilotCandidate.reverseSnoc",
+                "reverse_explanatory_v2:PilotCandidate.result"
+              ]
+            }
+          ]
+        }
+      ],
+      "example": "reverse",
+      "comparison": "The compact proof invokes an existing lemma about the accumulator used to implement reversal. It is shorter than the indexed proof, but does not state the positional reason reversal is an involution. An earlier “by simp” proposal was rejected because it invoked the very theorem being reproved.",
+      "questions": [
+        "What happens to one position under two reversals?",
+        "What goes wrong without the bound i < n?",
+        "How does the inductive proof move the last entry?"
+      ],
+      "limitations": "This is a library control, not another OpenAI research result."
+    },
+    {
+      "id": "cantor",
+      "title": "Cantor’s diagonal argument",
+      "origin": "Mathlib control",
+      "chosen": "cantor_explanatory",
+      "variants": {
+        "Original": "cantor_original",
+        "Compact": "cantor_original",
+        "Explanatory": "cantor_explanatory",
+        "Fixed-point": "cantor_fixpoint"
+      },
+      "statement": [
+        {
+          "kind": "paragraph",
+          "text": "For every set \\(A\\), no function \\(f:A\\to\\mathcal P(A)\\) is surjective."
+        }
+      ],
+      "sections": [
+        {
+          "title": "Diagonal set",
+          "blocks": [
+            {
+              "kind": "paragraph",
+              "text": "To disprove surjectivity, construct one subset \\(D\\subseteq A\\) that differs from every \\(f(a)\\). For the comparison with \\(f(a)\\), use \\(a\\) itself as the point of disagreement. Define"
+            },
+            {
+              "kind": "math",
+              "tex": "D=\\{a\\in A:a\\notin f(a)\\}."
+            },
+            {
+              "kind": "note",
+              "title": "Why compare at a?",
+              "blocks": [
+                {
+                  "kind": "paragraph",
+                  "text": "For each \\(a\\), the set \\(D\\) has the opposite membership condition to \\(f(a)\\) at that very element. Hence \\(a\\) witnesses \\(D\\ne f(a)\\). We do not need to compare the sets at every other element."
+                }
+              ],
+              "refs": [
+                "PilotCandidate.diagonalMisses"
+              ]
+            }
+          ]
+        },
+        {
+          "title": "Proof",
+          "blocks": [
+            {
+              "kind": "paragraph",
+              "text": "Fix any \\(a\\in A\\). By definition,"
+            },
+            {
+              "kind": "math",
+              "tex": "a\\in D\\quad\\Longleftrightarrow\\quad a\\notin f(a)."
+            },
+            {
+              "kind": "paragraph",
+              "text": "If \\(D=f(a)\\), this would say \\(a\\in D\\) exactly when \\(a\\notin D\\), a contradiction. Therefore \\(D\\ne f(a)\\) for every \\(a\\). The function \\(f\\) omits \\(D\\), so it is not surjective."
+            },
+            {
+              "kind": "note",
+              "title": "Does A have to be countable?",
+              "blocks": [
+                {
+                  "kind": "paragraph",
+                  "text": "No. The construction uses \\(f\\) itself to specify membership in \\(D\\). It does not enumerate \\(A\\) or make one choice for each element. The finite table below is an illustration, not a restriction of the theorem."
+                }
+              ],
+              "refs": [
+                "PilotCandidate.diagonalMisses",
+                "PilotCandidate.result"
+              ]
+            }
+          ]
+        }
+      ],
+      "example": "cantor",
+      "comparison": "The original proof is already very short. The refactoring names the omitted set and proves that it differs from every value of f before using surjectivity. The fixed-point candidate is a checked alternative connection, but it is not shorter than the original. No shorter independent candidate was found in this queue.",
+      "questions": [
+        "Which subset is missing from the image?",
+        "Where does a proposed value disagree with it?",
+        "Why is no enumeration of A required?"
+      ],
+      "limitations": "This is a Mathlib control. The finite illustration is not the proof of the general theorem."
+    }
+  ]
+}

@@ -1,0 +1,29 @@
+{
+  "schema": "leanglish.exposition-pilot-selection/v1",
+  "base": "84b4f399b245ff0cda8618b7860e26639838228b",
+  "lean_version": "4.34.1",
+  "mathlib_commit": "d13f23b723b8a846827a245b89c10fc7d3f11612",
+  "selection_status": "purposive pilot, selected before candidates; not a corpus benchmark",
+  "targets": [
+    {
+      "id": "bezout",
+      "name": "OAI.ComplexCancellation.BezoutFrame.exists_frame",
+      "kind": "OpenAI supporting theorem",
+      "reason": "A non-obvious algebraic witness and a necessary case split",
+      "source_sha256": "d108afa98f200bfce183b8afc0af586b70734f7ad2cce1bc5e49853a2f555c6f",
+      "adaptation": "Only Model import replaced by Mathlib Basic and Ring; theorem body unchanged"
+    },
+    {
+      "id": "reverse",
+      "name": "List.reverse_reverse",
+      "kind": "Lean library control",
+      "reason": "A short implementation-level proof versus a familiar inductive argument"
+    },
+    {
+      "id": "cantor",
+      "name": "Function.cantor_surjective",
+      "kind": "Mathlib control",
+      "reason": "A very short proof whose diagonal construction deserves explanation"
+    }
+  ]
+}

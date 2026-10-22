@@ -3,6 +3,7 @@ on:
   workflow_dispatch:
   pull_request:
     paths:
+      - 'experiments/exposition-pilot/**'
       - 'lean/SourceExpressions*.lean'
       - 'lean/KernelExport.lean'
       - 'lean/JsonReplay.lean'
@@ -55,7 +56,7 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-      - run: python -m pip install .
+      - run: python -m pip install '.[dev,webtest]'
       - uses: actions/checkout@v4
         with:
           persist-credentials: false
@@ -73,7 +74,7 @@ jobs:
           use-github-cache: false
       - name: Retrieve only the pinned imports and their dependencies
         working-directory: companion-mathlib
-        run: lake exe cache get Mathlib/Algebra/EuclideanDomain/Basic.lean Mathlib/Tactic/Ring.lean
+        run: lake exe cache get Mathlib/Algebra/EuclideanDomain/Basic.lean Mathlib/Tactic/Ring.lean Mathlib/Logic/Function/Basic.lean
       - name: Recheck unchanged theorem body, exact repeat, and hostile mutations
         run: python scripts/check_bezout_companion.py --project companion-mathlib --output artifacts/ci-bezout --trust-project
       - uses: actions/upload-artifact@v4
@@ -91,5 +92,47 @@ jobs:
         with:
           name: source-expressions-mathlib
           path: artifacts/ci-source-expressions-mathlib/
+          retention-days: 30
+          if-no-files-found: error
+      - name: Check the finite proof-refactoring pilot and repeat its native records
+        run: |
+          lean_binary="$(cd companion-mathlib && elan which lean)"
+          python experiments/exposition-pilot/run.py --lean "$lean_binary" --project companion-mathlib --output artifacts/ci-exposition/native --trust-project
+          python experiments/exposition-pilot/run.py --lean "$lean_binary" --project companion-mathlib --output artifacts/ci-exposition/repeat --trust-project
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          a=Path('artifacts/ci-exposition/native');b=Path('artifacts/ci-exposition/repeat')
+          for directory in (a,b):
+              record=json.loads((directory/'observation.json').read_text())
+              assert record['status']=='completed'
+              assert (record['accepted_candidates'],record['rejected_candidates'],record['controls_rejected'])==(11,4,6)
+              assert len(record['outcomes'])==21
+          first={str(p.relative_to(a)):p.read_bytes() for p in a.glob('*/accepted.json')}
+          second={str(p.relative_to(b)):p.read_bytes() for p in b.glob('*/accepted.json')}
+          assert len(first)==11 and first==second
+          Path('artifacts/ci-exposition/repeat.json').write_text(json.dumps({'accepted_records':11,'byte_identical':True})+'\n')
+          PY
+      - name: Build and check the prose-first reader
+        env:
+          EXPOSITION_PILOT_EVIDENCE: artifacts/ci-exposition/native
+        run: |
+          python experiments/exposition-pilot/build.py --evidence artifacts/ci-exposition/native --output artifacts/ci-exposition/reader.html
+          python -m pytest experiments/exposition-pilot/test_pilot.py -q --junitxml=artifacts/ci-exposition/tests.xml
+          python -m playwright install --with-deps chromium
+          python experiments/exposition-pilot/check_reader.py artifacts/ci-exposition/reader.html --output artifacts/ci-exposition/browser --mode file
+          git diff --exit-code
+      - name: Record the pilot source identity
+        if: always()
+        run: |
+          mkdir -p artifacts/ci-exposition
+          git rev-parse HEAD > artifacts/ci-exposition/commit.txt
+          git rev-parse HEAD^{tree} > artifacts/ci-exposition/tree.txt
+          git ls-tree -r HEAD experiments/exposition-pilot .github/workflows/checked-companion.yml > artifacts/ci-exposition/source-tree.txt
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: exposition-pilot
+          path: artifacts/ci-exposition/
           retention-days: 30
           if-no-files-found: error
