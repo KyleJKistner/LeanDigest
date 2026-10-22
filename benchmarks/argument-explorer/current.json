@@ -1,0 +1,23 @@
+{
+  "all_indices_repeat_identically": true,
+  "certified_english_proofs_added": 0,
+  "cohort_sha256": "e73557ed76c64121bbb366d1b2d74bdd8b596b3cff8771362e1dfddb925fc2c3",
+  "corpus_proofs": 492,
+  "corpus_sha256": "9b34751d9a1e97f31993ba290ae26b82710a6ac956e3d81f2643dffdfcfa55ae",
+  "html_repeat_identical": true,
+  "html_sha256": "95f28c29f2f24461ff3c2491b17d190846e8f2353eca499cf9a7c20d5cba5690",
+  "human_evaluation": "not performed",
+  "index_totals": {
+    "ambiguous_references": 1,
+    "binders": 6685,
+    "budget_cuts": 1,
+    "frames": 22452,
+    "resolved_references": 4799,
+    "unresolved_references": 0
+  },
+  "new_lean_runs": 0,
+  "schema": "leanglish.argument-explorer-observation/v1",
+  "selected_proofs": 20,
+  "selected_reverse_itineraries_checked": 20,
+  "source_identity_mutations_rejected": 20
+}

@@ -1,0 +1,64 @@
+name: Argument explorer
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - 'proofreader/argument_*.py'
+      - 'proofreader/narrative.py'
+      - 'proofreader/web/argument-explorer.*'
+      - 'scripts/*argument_explorer.py'
+      - 'tests/test_argument_index.py'
+      - 'tests/reader/test_argument_explorer.py'
+      - 'benchmarks/argument-explorer/**'
+      - 'docs/ARGUMENT_EXPLORER.md'
+      - '.github/workflows/argument-explorer.yml'
+permissions:
+  contents: read
+jobs:
+  explorer:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python -m pip install '.[dev,webtest]'
+      - run: python -m playwright install --with-deps chromium
+      - name: Fetch the pinned retained corpus
+        run: python scripts/fetch_reading_corpus.py "$RUNNER_TEMP/corpus"
+      - name: Build and check the whole corpus and fixed cohort
+        run: |
+          python scripts/build_argument_explorer.py --corpus "$RUNNER_TEMP/corpus" --output "$RUNNER_TEMP/explorer"
+          cmp benchmarks/argument-explorer/current.json "$RUNNER_TEMP/explorer/summary.json"
+      - name: Check index failures and actual offline navigation
+        env:
+          PROOFREADER_REQUIRE_BROWSER: '1'
+          LEANGLISH_TEST_BROWSER_MODE: file
+        run: |
+          python -m pytest tests/test_argument_index.py tests/reader/test_argument_explorer.py -q --junitxml="$RUNNER_TEMP/explorer/tests.xml"
+          python scripts/audit_argument_explorer.py "$RUNNER_TEMP/explorer/index.html" --output "$RUNNER_TEMP/explorer/browser" --mode file
+      - name: Retain exact source and require no source changes
+        if: always()
+        run: |
+          mkdir -p "$RUNNER_TEMP/explorer-source"
+          git rev-parse HEAD > "$RUNNER_TEMP/explorer-source/commit.txt"
+          git rev-parse HEAD^{tree} > "$RUNNER_TEMP/explorer-source/tree.txt"
+          git archive --format=zip HEAD -o "$RUNNER_TEMP/explorer-source/source.zip"
+          git diff --exit-code
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: argument-explorer-evidence
+          path: ${{ runner.temp }}/explorer/
+          retention-days: 30
+          if-no-files-found: error
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: argument-explorer-source
+          path: ${{ runner.temp }}/explorer-source/
+          retention-days: 30
+          if-no-files-found: error
