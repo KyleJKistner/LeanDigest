@@ -1,0 +1,106 @@
+[
+  {
+    "id": "bezout-short",
+    "target": "bezout",
+    "variant": "short",
+    "file": "bezout-short.lean",
+    "expected": "accept",
+    "reason": null
+  },
+  {
+    "id": "bezout-structured",
+    "target": "bezout",
+    "variant": "structured",
+    "file": "bezout-structured.lean",
+    "expected": "accept",
+    "reason": null
+  },
+  {
+    "id": "reverse-short",
+    "target": "reverse",
+    "variant": "short",
+    "file": "reverse-short.lean",
+    "expected": "accept",
+    "reason": null
+  },
+  {
+    "id": "reverse-structured",
+    "target": "reverse",
+    "variant": "structured",
+    "file": "reverse-structured.lean",
+    "expected": "accept",
+    "reason": null
+  },
+  {
+    "id": "cantor-short",
+    "target": "cantor",
+    "variant": "short",
+    "file": "cantor-short.lean",
+    "expected": "accept",
+    "reason": null
+  },
+  {
+    "id": "cantor-structured",
+    "target": "cantor",
+    "variant": "structured",
+    "file": "cantor-structured.lean",
+    "expected": "accept",
+    "reason": null
+  },
+  {
+    "id": "reject-original",
+    "target": "bezout",
+    "variant": "control",
+    "file": "reject-original.lean",
+    "expected": "reject",
+    "reason": "forbidden dependency"
+  },
+  {
+    "id": "reject-alias",
+    "target": "reverse",
+    "variant": "control",
+    "file": "reject-alias.lean",
+    "expected": "reject",
+    "reason": "forbidden dependency"
+  },
+  {
+    "id": "reject-admission",
+    "target": "cantor",
+    "variant": "control",
+    "file": "reject-admission.lean",
+    "expected": "reject",
+    "reason": "unpermitted axiom"
+  },
+  {
+    "id": "reject-wrong-statement",
+    "target": "cantor",
+    "variant": "control",
+    "file": "reject-wrong-statement.lean",
+    "expected": "reject",
+    "reason": "kernel"
+  },
+  {
+    "id": "reject-missing-compatibility",
+    "target": "bezout",
+    "variant": "control",
+    "file": "reject-missing-compatibility.lean",
+    "expected": "reject",
+    "reason": "elaboration"
+  },
+  {
+    "id": "reject-simp-shortcut",
+    "target": "reverse",
+    "variant": "control",
+    "file": "reject-simp-shortcut.lean",
+    "expected": "reject",
+    "reason": "forbidden dependency"
+  },
+  {
+    "id": "reject-extra-axiom",
+    "target": "reverse",
+    "variant": "control",
+    "file": "reject-extra-axiom.lean",
+    "expected": "reject",
+    "reason": "unpermitted axiom"
+  }
+]
