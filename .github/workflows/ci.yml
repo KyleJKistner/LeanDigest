@@ -74,6 +74,18 @@ jobs:
           lean_binary="$(cd lean && elan which lean)"
           python scripts/check_source_expressions.py --lean "$lean_binary" --output artifacts/ci-source-expressions-core --trust-project
           git diff --exit-code
+      - name: Check agent outline revision transactions
+        run: |
+          lean_binary="$(cd lean && elan which lean)"
+          python scripts/check_agent_outline.py --lean "$lean_binary" --output artifacts/ci-agent-outline --trust-project
+          git diff --exit-code
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: agent-outline-evidence
+          path: artifacts/ci-agent-outline/
+          retention-days: 30
+          if-no-files-found: error
       - name: Retain the source-expression checking inputs
         if: always()
         run: |
